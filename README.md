@@ -8,3 +8,4 @@
 | Ahyan Amin        | ahyan2   | [ahyan06](https://github.com/ahyan06) |
 | Fahad Al-salam    | alsalam  | [alsalam-collab](https://github.com/alsalam-collab) |
 | Faiz Malik        | mmalik6  | [faiz1357](https://github.com/faiz1357) |
+| Priyanshu Dave    | pndave   | [priyanshu](https://github.com/priyanshudave00) |
