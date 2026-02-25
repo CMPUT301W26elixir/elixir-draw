@@ -10,6 +10,7 @@
   <img src="https://img.shields.io/badge/Language-Java-orange.svg" alt="Language">
   <img src="https://img.shields.io/badge/Backend-Firebase-yellow.svg" alt="Backend">
   <img src="https://img.shields.io/badge/Course-CMPUT%20301-lightgrey.svg" alt="Course">
+  <img src="https://img.shields.io/badge/Team-Elixir-purple.svg" alt="Team Elixir">
 </p>
 
 Allot is an Android application that enables organizations to manage event registration using a fair lottery-based system.
