@@ -14,7 +14,7 @@
 </p>
 
 Allot is an Android application that enables organizations to manage event registration using a fair lottery-based system.
-
+-testing force
 
 ## Team Members
 | Name              | CCID     | GitHub |
