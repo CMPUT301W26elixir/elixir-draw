@@ -2,21 +2,13 @@
 <resources>
     <string name="app_name">allot</string>
     <string name="search_hint">Find events</string>
-
     <string name="chip_nearby">Nearby</string>
     <string name="chip_sports">Sports</string>
     <string name="chip_arts">Arts &amp; Crafts</string>
     <string name="chip_science">Science</string>
-
-    <string name="event_one_price">$60</string>
-    <string name="event_one_days">2 Days Left</string>
-    <string name="event_one_title">Beginner Pottery Workshop</string>
-    <string name="event_one_location">Location: 123 Street NW</string>
-    <string name="event_one_date">Date: February 29, 2026</string>
-
-    <string name="event_two_price">Free</string>
-    <string name="event_two_days">21 Days Left</string>
-    <string name="event_two_title">Friday Night Climb Social: Community Bouldering Session</string>
-    <string name="event_two_location">Location: 67 Street SW</string>
-    <string name="event_two_date">Date: March 20, 2026</string>
+    <string name="default_price">$20</string>
+    <string name="default_days_left">3 Days Left</string>
+    <string name="default_event_name">Event Name</string>
+    <string name="default_street_name">Street Name</string>
+    <string name="default_date">Date</string>
 </resources>

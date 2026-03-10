@@ -4,7 +4,6 @@ import android.os.Bundle;
 import android.util.Log;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.Arrays;
@@ -20,7 +19,6 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         RecyclerView recyclerView = findViewById(R.id.eventsRecyclerView);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         List<EventListItem> basicEvents = Arrays.asList(
                 new EventListItem("Event Name 1", "Street Name 1", "Date 1", "$20", "3 Days Left"),
@@ -33,7 +31,7 @@ public class MainActivity extends AppCompatActivity {
 
         recyclerView.setAdapter(new EventListAdapter(basicEvents));
 
-        // Keep existing entrant logic untouched.
+        // Keep the existing entrant setup while we build the search screen UI.
         entrantController = new EntrantController(this);
         entrantController.getOrCreateEntrant(new EntrantController.EntrantCallback() {
             @Override

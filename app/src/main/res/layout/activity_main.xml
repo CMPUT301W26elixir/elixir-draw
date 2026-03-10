@@ -31,7 +31,7 @@
             android:layout_marginStart="10dp"
             android:layout_weight="1"
             android:fontFamily="@font/varela_round_regular"
-            android:text="Find events"
+            android:text="@string/search_hint"
             android:textColor="#A9ABA8"
             android:textSize="16sp" />
 
@@ -70,7 +70,7 @@
                 android:paddingTop="10dp"
                 android:paddingEnd="16dp"
                 android:paddingBottom="10dp"
-                android:text="Nearby"
+                android:text="@string/chip_nearby"
                 android:textColor="@color/text_primary"
                 android:textSize="16sp" />
 
@@ -84,7 +84,7 @@
                 android:paddingTop="10dp"
                 android:paddingEnd="16dp"
                 android:paddingBottom="10dp"
-                android:text="Sports"
+                android:text="@string/chip_sports"
                 android:textColor="@color/text_primary"
                 android:textSize="16sp" />
 
@@ -98,7 +98,7 @@
                 android:paddingTop="10dp"
                 android:paddingEnd="16dp"
                 android:paddingBottom="10dp"
-                android:text="Arts &amp; Crafts"
+                android:text="@string/chip_arts"
                 android:textColor="@color/text_primary"
                 android:textSize="16sp" />
 
@@ -113,7 +113,7 @@
                 android:paddingTop="10dp"
                 android:paddingEnd="16dp"
                 android:paddingBottom="10dp"
-                android:text="Science"
+                android:text="@string/chip_science"
                 android:textColor="@color/text_primary"
                 android:textSize="16sp" />
         </LinearLayout>
