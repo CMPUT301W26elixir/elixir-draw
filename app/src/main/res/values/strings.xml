@@ -1,3 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">allot</string>
+    <string name="search_hint">Find events</string>
+    <string name="chip_nearby">Nearby</string>
+    <string name="chip_sports">Sports</string>
+    <string name="chip_arts">Arts &amp; Crafts</string>
+    <string name="chip_science">Science</string>
+    <string name="default_price">$20</string>
+    <string name="default_days_left">3 Days Left</string>
+    <string name="default_event_name">Event Name</string>
+    <string name="default_street_name">Street Name</string>
+    <string name="default_date">Date</string>
 </resources>
