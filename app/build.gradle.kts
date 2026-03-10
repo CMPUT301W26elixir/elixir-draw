@@ -31,8 +31,6 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
-
-
 }
 
 dependencies {
@@ -40,6 +38,7 @@ dependencies {
     implementation(libs.material)
     implementation(libs.activity)
     implementation(libs.constraintlayout)
+    implementation("androidx.recyclerview:recyclerview:1.3.2")
     implementation("com.google.firebase:firebase-storage")
 
     implementation(platform("com.google.firebase:firebase-bom:33.9.0"))
