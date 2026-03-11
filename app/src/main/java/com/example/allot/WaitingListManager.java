@@ -1,4 +1,4 @@
-package com.example.allot;
+/*package com.example.allot;
 
 import android.util.Log;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -48,3 +48,5 @@ public class WaitingListManager {
                 });
     }
 }
+
+ */
