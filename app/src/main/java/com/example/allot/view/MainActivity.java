@@ -1,4 +1,4 @@
-package com.example.allot;
+package com.example.allot.view;
 
 import android.os.Bundle;
 import android.text.Editable;
@@ -11,6 +11,13 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.example.allot.R;
+import com.example.allot.controller.EntrantController;
+import com.example.allot.controller.EventController;
+
+import com.example.allot.model.Entrant;
+import com.example.allot.model.Event;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,8 +1,10 @@
-package com.example.allot;
+package com.example.allot.controller;
 
 import android.content.Context;
 import android.provider.Settings;
 import android.util.Log;
+
+import com.example.allot.model.Entrant;
 
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;

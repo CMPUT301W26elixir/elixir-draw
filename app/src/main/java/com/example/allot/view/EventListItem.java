@@ -1,4 +1,6 @@
-package com.example.allot;
+package com.example.allot.view;
+
+import com.example.allot.model.Event;
 
 public class EventListItem {
     public String eventId;
