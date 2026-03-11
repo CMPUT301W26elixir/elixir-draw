@@ -1,4 +1,4 @@
-package com.example.allot;
+package com.example.allot.model;
 
 public class Entrant {
     private String deviceId;
