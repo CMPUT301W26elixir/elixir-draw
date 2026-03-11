@@ -9,6 +9,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class EventListAdapter extends RecyclerView.Adapter<EventListAdapter.EventViewHolder> {
@@ -16,7 +17,13 @@ public class EventListAdapter extends RecyclerView.Adapter<EventListAdapter.Even
     private final List<EventListItem> events;
 
     public EventListAdapter(List<EventListItem> events) {
-        this.events = events;
+        this.events = new ArrayList<>(events);
+    }
+
+    public void updateEvents(List<EventListItem> updatedEvents) {
+        events.clear();
+        events.addAll(updatedEvents);
+        notifyDataSetChanged();
     }
 
     @NonNull

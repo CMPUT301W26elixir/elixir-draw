@@ -11,4 +11,7 @@
     <string name="default_event_name">Event Name</string>
     <string name="default_street_name">Street Name</string>
     <string name="default_date">Date</string>
+    <string name="browse_state_loading">Loading events...</string>
+    <string name="browse_state_empty">No events match your search.</string>
+    <string name="browse_state_error">Could not load events. Please try again.</string>
 </resources>
