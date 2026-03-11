@@ -6,12 +6,14 @@ import android.util.Log;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
     private EntrantController entrantController;
+    private EventController eventController;
+    private EventListAdapter eventListAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -19,17 +21,11 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         RecyclerView recyclerView = findViewById(R.id.eventsRecyclerView);
+        eventListAdapter = new EventListAdapter(new ArrayList<>());
+        recyclerView.setAdapter(eventListAdapter);
 
-        List<EventListItem> basicEvents = Arrays.asList(
-                new EventListItem("Event Name 1", "Street Name 1", "Date 1", "$20", "3 Days Left"),
-                new EventListItem("Event Name 2", "Street Name 2", "Date 2", "Free", "7 Days Left"),
-                new EventListItem("Event Name 3", "Street Name 3", "Date 3", "$40", "10 Days Left"),
-                new EventListItem("Event Name 4", "Street Name 4", "Date 4", "$15", "14 Days Left"),
-                new EventListItem("Event Name 5", "Street Name 5", "Date 5", "$10", "18 Days Left"),
-                new EventListItem("Event Name 6", "Street Name 6", "Date 6", "Free", "22 Days Left")
-        );
-
-        recyclerView.setAdapter(new EventListAdapter(basicEvents));
+        eventController = new EventController();
+        loadBrowseEvents();
 
         // Keep the existing entrant setup while we build the search screen UI.
         entrantController = new EntrantController(this);
@@ -38,6 +34,27 @@ public class MainActivity extends AppCompatActivity {
             public void onCallback(Entrant entrant) {
                 Log.d("Allot_Logic", "Welcome, " + entrant.getName());
                 Log.d("Allot_Logic", "Role: " + entrant.getRole());
+            }
+        });
+    }
+
+    private void loadBrowseEvents() {
+        eventController.getAllOpenEvents(new EventController.EventListCallback() {
+            @Override
+            public void onCallback(List<Event> events) {
+                List<EventListItem> browseItems = new ArrayList<>();
+
+                for (Event event : events) {
+                    browseItems.add(EventListItem.fromEvent(event));
+                }
+
+                eventListAdapter.updateEvents(browseItems);
+                Log.d("Allot_Logic", "Loaded " + browseItems.size() + " browse events.");
+            }
+
+            @Override
+            public void onError(Exception exception) {
+                Log.e("Allot_Logic", "Failed to load browse events", exception);
             }
         });
     }
