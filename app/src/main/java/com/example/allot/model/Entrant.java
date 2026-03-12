@@ -14,7 +14,7 @@ public class Entrant {
     public ArrayList<Event> history;
 
     public Entrant(){}
-    public Entrant(String deviceId, String name, String email, String phone, String role) {
+    public Entrant(String deviceId, String firstname, String lastName, String email, String phone, String role) {
         this.deviceId = deviceId;
         this.firstName = firstName;
         this.lastName = lastName;
@@ -22,6 +22,7 @@ public class Entrant {
         this.phone = phone;
         this.notiEnabled = notiEnabled;
         this.role = role;
+        this.history = new ArrayList<Event>();
     }
 
     public String getDeviceId() {
