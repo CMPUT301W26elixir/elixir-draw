@@ -2,22 +2,24 @@ package com.example.allot.model;
 
 public class Entrant {
     private String deviceId;
-    private String name;
+    private String firstName;
+    private String lastName;
     private String email;
     private String phone;
+    private boolean notiEnabled;
     private String role;
 
     public Entrant() {}
 
-    public Entrant(String deviceId, String name, String email, String phone, String role) {
+    public Entrant(String deviceId, String firstName, String lastName, String email, String phone,
+                   boolean notiEnabled, String role) {
         this.deviceId = deviceId;
-        this.name = name;
+        this.firstName = firstName;
+        this.lastName = lastName;
         this.email = email;
         this.phone = phone;
+        this.notiEnabled = notiEnabled;
         this.role = role;
-    }
-
-    public Entrant(String deviceId, String newUser, String s, String s1, String entrant, String s2) {
     }
 
     public String getDeviceId() {
@@ -28,6 +30,37 @@ public class Entrant {
         this.deviceId = deviceId;
     }
 
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
+
+    public String getName() {
+        String safeFirstName = firstName == null ? "" : firstName.trim();
+        String safeLastName = lastName == null ? "" : lastName.trim();
+
+        if (safeFirstName.isEmpty()) {
+            return safeLastName;
+        }
+
+        if (safeLastName.isEmpty()) {
+            return safeFirstName;
+        }
+
+        return safeFirstName + " " + safeLastName;
+    }
+
     public String getEmail() {
         return email;
     }
@@ -36,20 +69,20 @@ public class Entrant {
         this.email = email;
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
     public String getPhone() {
         return phone;
     }
 
     public void setPhone(String phone) {
         this.phone = phone;
+    }
+
+    public boolean isNotiEnabled() {
+        return notiEnabled;
+    }
+
+    public void setNotiEnabled(boolean notiEnabled) {
+        this.notiEnabled = notiEnabled;
     }
 
     public String getRole() {

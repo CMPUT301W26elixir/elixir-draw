@@ -39,7 +39,8 @@ public class EntrantController {
                             // Create a brand new Entrant
                             Entrant newEntrant = new Entrant();
                             newEntrant.setDeviceId(deviceId);
-                            newEntrant.setName("New Entrant");
+                            newEntrant.setFirstName("First Name");
+                            newEntrant.setLastName("Last Name");
                             newEntrant.setRole("entrant");
 
                             // Save to the "users" collection
