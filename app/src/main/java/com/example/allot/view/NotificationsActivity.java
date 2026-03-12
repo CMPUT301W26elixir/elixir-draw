@@ -8,11 +8,11 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.allot.R;
-import com.example.allot.controller.EntrantController;
+import com.example.allot.controller.UserController;
 import com.google.android.material.button.MaterialButton;
 
 public class NotificationsActivity extends AppCompatActivity {
-    private EntrantController entrantController;
+    private UserController userController;
     private MaterialButton turnOnNotificationsButton;
     private TextView notificationsNotNow;
 
@@ -21,7 +21,7 @@ public class NotificationsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_notifications);
 
-        entrantController = new EntrantController(this);
+        userController = new UserController(this);
         turnOnNotificationsButton = findViewById(R.id.turnOnNotificationsButton);
         notificationsNotNow = findViewById(R.id.notificationsNotNow);
 
@@ -37,9 +37,9 @@ public class NotificationsActivity extends AppCompatActivity {
         String email = getIntent().getStringExtra(NameActivity.EXTRA_EMAIL);
         String phone = getIntent().getStringExtra(NameActivity.EXTRA_PHONE);
 
-        entrantController.updateEntrantProfile(firstName, lastName, email, phone, notificationsEnabled,
-                (entrant, success) -> {
-                    if (success && entrant != null) {
+        userController.updateUserProfile(firstName, lastName, email, phone, notificationsEnabled,
+                (user, success) -> {
+                    if (success && user != null) {
                         Intent intent = new Intent(NotificationsActivity.this, MainActivity.class);
                         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                         startActivity(intent);

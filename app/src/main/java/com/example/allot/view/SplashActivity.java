@@ -8,8 +8,8 @@ import android.os.Looper;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.allot.R;
-import com.example.allot.controller.EntrantController;
-import com.example.allot.model.Entrant;
+import com.example.allot.controller.UserController;
+import com.example.allot.model.User;
 
 public class SplashActivity extends AppCompatActivity {
     public static final String EXTRA_REQUIRES_PROFILE_SETUP = "com.example.allot.REQUIRES_PROFILE_SETUP";
@@ -26,14 +26,14 @@ public class SplashActivity extends AppCompatActivity {
 
         startedAtMs = System.currentTimeMillis();
 
-        EntrantController entrantController = new EntrantController(this);
-        if (entrantController.isNewDeviceId()) {
+        UserController userController = new UserController(this);
+        if (userController.isNewDeviceId()) {
             navigateAfterDelay(true);
             return;
         }
 
-        entrantController.loadOrCreateEntrant((entrant, success) -> {
-            boolean requiresProfileSetup = !success || requiresProfileSetup(entrant);
+        userController.loadOrCreateUser((user, success) -> {
+            boolean requiresProfileSetup = !success || requiresProfileSetup(user);
             navigateAfterDelay(requiresProfileSetup);
         });
     }
@@ -62,14 +62,14 @@ public class SplashActivity extends AppCompatActivity {
         finish();
     }
 
-    private boolean requiresProfileSetup(Entrant entrant) {
-        if (entrant == null) {
+    private boolean requiresProfileSetup(User user) {
+        if (user == null) {
             return true;
         }
 
-        return isBlank(entrant.getFirstName())
-                || isBlank(entrant.getLastName())
-                || isBlank(entrant.getEmail());
+        return isBlank(user.getFirstName())
+                || isBlank(user.getLastName())
+                || isBlank(user.getEmail());
     }
 
     private boolean isBlank(String value) {

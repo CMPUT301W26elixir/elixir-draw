@@ -51,7 +51,7 @@
 | Responsibility | Collaborators |
 | :--- | :--- |
 | - Hold a collection of interested Entrants | Entrant |
-| - Store geolocation data for each entrant entry | GPSManager |
+| - Store geolocation data for each user entry | GPSManager |
 | - Provide a pool of candidates for selection | LotteryEngine |
 | - Handle "declined" slots by providing replacement draws | LotteryEngine |
 

@@ -6,7 +6,7 @@ import android.util.Log;
 import android.util.Patterns;
 
 import com.example.allot.common.OnCompleteListener;
-import com.example.allot.model.Entrant;
+import com.example.allot.model.User;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -14,8 +14,8 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.UUID;
 
-public class EntrantController {
-    private static final String TAG = "EntrantController";
+public class UserController {
+    private static final String TAG = "UserController";
     private static final String PREFS_NAME = "allot_prefs";
     private static final String DEVICE_ID_KEY = "device_id";
 
@@ -24,11 +24,11 @@ public class EntrantController {
     private final boolean newDeviceId;
 
     /**
-     * Creates an EntrantController and sets up Firestore and the device ID.
+     * Creates an UserController and sets up Firestore and the device ID.
      *
      * @param context the context used to access shared preferences
      */
-    public EntrantController(Context context) {
+    public UserController(Context context) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         // Reference to the "users" collection in Firestore
         this.usersCollection = db.collection("users");
@@ -39,63 +39,63 @@ public class EntrantController {
     }
 
     /**
-     * Gets an entrant from Firestore using the given device ID.
+     * Gets an user from Firestore using the given device ID.
      *
-     * @param deviceId the device ID of the entrant
-     * @param listener the listener that receives the entrant and success result
+     * @param deviceId the device ID of the user
+     * @param listener the listener that receives the userand success result
      */
-    public void getEntrantByDeviceId(String deviceId, OnCompleteListener<Entrant> listener) {
+    public void getUserByDeviceId(String deviceId, OnCompleteListener<User> listener) {
         // Get the document in the users collection that matches the device ID
-        DocumentReference entrantRef = usersCollection.document(deviceId);
+        DocumentReference userRef = usersCollection.document(deviceId);
 
-        entrantRef.get().addOnCompleteListener(task -> {
+        userRef.get().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 DocumentSnapshot document = task.getResult();
 
-                // If the document exists, convert it into an Entrant object
+                // If the document exists, convert it into an userobject
                 if (document != null && document.exists()) {
-                    Entrant entrant = document.toObject(Entrant.class);
-                    listener.onComplete(entrant, entrant != null);
+                    User user = document.toObject(User.class);
+                    listener.onComplete(user, user != null);
                 } else {
-                    // No matching entrant was found
+                    // No matching userwas found
                     listener.onComplete(null, false);
                 }
             } else {
                 // Firestore request failed to work
-                Log.d(TAG, "Failed to get entrant", task.getException());
+                Log.d(TAG, "Failed to get user", task.getException());
                 listener.onComplete(null, false);
             }
         });
     }
 
     /**
-     * Loads the current entrant for this device, or creates one if none exists.
+     * Loads the current userfor this device, or creates one if none exists.
      *
-     * @param listener the listener that receives the entrant and success result
+     * @param listener the listener that receives the userand success result
      */
-    public void loadOrCreateEntrant(OnCompleteListener<Entrant> listener) {
-        // Look for the current device's entrant document
-        DocumentReference entrantRef = usersCollection.document(deviceId);
-        entrantRef.get().addOnCompleteListener(task -> {
+    public void loadOrCreateUser(OnCompleteListener<User> listener) {
+        // Look for the current device's userdocument
+        DocumentReference userRef = usersCollection.document(deviceId);
+        userRef.get().addOnCompleteListener(task -> {
             if (!task.isSuccessful()) {
                 // Stop if Firestore could not complete the request
-                Log.d(TAG, "Failed to get entrant", task.getException());
+                Log.d(TAG, "Failed to get user", task.getException());
                 listener.onComplete(null, false);
                 return;
             }
 
             DocumentSnapshot document = task.getResult();
 
-            // If no entrant exists yet, create a new one
+            // If no userexists yet, create a new one
             if (document == null || !document.exists()) {
-                createNewEntrant(listener);
+                createNewUser(deviceId);
                 return;
             }
 
-            // Convert the document into an Entrant object
-            Entrant entrant = document.toObject(Entrant.class);
-            if (entrant != null) {
-                listener.onComplete(entrant, true);
+            // Convert the document into an userobject
+            User user = document.toObject(User.class);
+            if (user != null) {
+                listener.onComplete(user, true);
             } else {
                 listener.onComplete(null, false);
             }
@@ -103,49 +103,44 @@ public class EntrantController {
     }
 
     /**
-     * Creates a new entrant with default values and saves it to Firestore.
+     * Creates a new userwith default values and saves it to Firestore.
      *
-     * @param listener the listener that receives the created entrant and success result
+     * @paramlistener the listener that receives the created userand success result
      */
-    public void createNewEntrant(OnCompleteListener<Entrant> listener) {
-        // Create a new entrant with empty profile fields and default settings
-        Entrant entrant = new Entrant();
-
-        // Save the new entrant under the current device ID
-        DocumentReference entrantRef = usersCollection.document(deviceId);
-        entrantRef.set(entrant).addOnCompleteListener(task -> {
+    public void createNewUser(String deviceId) {
+        User user = new User();
+        DocumentReference userRef = usersCollection.document(deviceId);
+        userRef.set(user).addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
-                listener.onComplete(entrant, true);
+                Log.d(TAG, "User created: " + deviceId);
             } else {
-                // Entrant could not be saved
-                Log.d(TAG, "Failed to create entrant", task.getException());
-                listener.onComplete(null, false);
+                Log.d(TAG, "Failed to create user", task.getException());
             }
         });
     }
 
 
     /**
-     * Updates the current entrant's profile information in Firestore.
+     * Updates the current user's profile information in Firestore.
      *
-     * @param firstName the entrant's first name
-     * @param lastName the entrant's last name
-     * @param email the entrant's email address
-     * @param phone the entrant's phone number
+     * @param firstName the user's first name
+     * @param lastName the user's last name
+     * @param email the user's email address
+     * @param phone the user's phone number
      * @param notiEnabled whether notifications are enabled
-     * @param listener the listener that receives the updated entrant and success result
+     * @param listener the listener that receives the updated userand success result
      */
-    public void updateEntrantProfile(String firstName, String lastName, String email,
-                                     String phone, boolean notiEnabled, OnCompleteListener<Entrant> listener) {
+    public void updateUserProfile(String firstName, String lastName, String email,
+                                     String phone, boolean notiEnabled, OnCompleteListener<User> listener) {
         // Make sure required fields are valid before updating
         if (!validateProfileFields(firstName, lastName, email)) {
             listener.onComplete(null, false);
             return;
         }
 
-        // Update the entrant document with the new profile values
-        DocumentReference entrantRef = usersCollection.document(deviceId);
-        entrantRef.update(
+        // Update the userdocument with the new profile values
+        DocumentReference userRef = usersCollection.document(deviceId);
+        userRef.update(
                 "firstName", firstName.trim(),
                 "lastName", lastName.trim(),
                 "email", email.trim(),
@@ -153,11 +148,11 @@ public class EntrantController {
                 "notiEnabled", notiEnabled
         ).addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
-                // Reload the entrant so the listener gets the updated object
-                getEntrantByDeviceId(deviceId, listener);
+                // Reload the userso the listener gets the updated object
+                getUserByDeviceId(deviceId, listener);
             } else {
                 // Update failed
-                Log.d(TAG, "Failed to update entrant", task.getException());
+                Log.d(TAG, "Failed to update user", task.getException());
                 listener.onComplete(null, false);
             }
         });
@@ -192,9 +187,9 @@ public class EntrantController {
     /**
      * Checks if the required profile fields are valid.
      *
-     * @param firstName the entrant's first name
-     * @param lastName the entrant's last name
-     * @param email the entrant's email address
+     * @param firstName the user's first name
+     * @param lastName the user's last name
+     * @param email the user's email address
      * @return true if the required fields are valid, otherwise false
      */
     private boolean validateProfileFields(String firstName, String lastName, String email) {
@@ -239,24 +234,22 @@ public class EntrantController {
     }
 
     /**
-     * Removes the current entrant from Firestore.
+     * Removes the current userfrom Firestore.
      *
-     * @param listener the listener that receives the result of the deletion
+     * @paramlistener the listener that receives the result of the deletion
      */
-    public void removeEntrant(OnCompleteListener<Boolean> listener) {
+    public void removeUser(String deviceId) {
 
-        DocumentReference entrantRef = usersCollection.document(deviceId);
-
-        entrantRef.delete().addOnCompleteListener(task -> {
-            if (task.isSuccessful()) {
-                listener.onComplete(true, true);
-            } else {
-                Log.d(TAG, "Failed to remove entrant", task.getException());
-                listener.onComplete(false, false);
-            }
-        });
+        DocumentReference userRef = usersCollection.document(deviceId);
+        this.usersCollection.document(deviceId)
+                .delete()
+                .addOnSuccessListener(aVoid -> {
+                    Log.d(TAG, "Event " + deviceId + " removed successfully.");
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Failed to remove event: " + e.getMessage());
+                });
     }
-
     private static class DeviceIdResult {
         private final String deviceId;
         private final boolean wasCreated;
@@ -266,5 +259,4 @@ public class EntrantController {
             this.wasCreated = wasCreated;
         }
     }
-
 }

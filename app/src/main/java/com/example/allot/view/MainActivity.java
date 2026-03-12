@@ -13,20 +13,21 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.allot.R;
-import com.example.allot.controller.EntrantController;
+import com.example.allot.controller.UserController;
 import com.example.allot.controller.EventController;
 
-import com.example.allot.model.Entrant;
 import com.example.allot.model.Event;
+import com.example.allot.model.User;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.UUID;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "Allot_Logic";
 
-    private EntrantController entrantController;
+    private UserController userController;
     private EventController eventController;
     private EventListAdapter eventListAdapter;
     private RecyclerView recyclerView;
@@ -51,16 +52,17 @@ public class MainActivity extends AppCompatActivity {
         setupSearchInput();
         loadBrowseEvents("");
 
-        // Keep the existing entrant setup while we build the search screen UI.
-        entrantController = new EntrantController(this);
-        entrantController.loadOrCreateEntrant((entrant, success) -> {
-            if (success && entrant != null) {
-                Log.d(TAG, "Welcome, " + entrant.getName());
-                Log.d(TAG, "Role: " + entrant.getRole());
+        // Keep the existing user setup while we build the search screen UI.
+        userController = new UserController(this);
+        userController.loadOrCreateUser((user, success) -> {
+            if (success && user != null) {
+                Log.d(TAG, "Welcome, " + user.getName());
+                Log.d(TAG, "Role: " + user.getRole());
             } else {
-                Log.e(TAG, "Failed to load entrant.");
+                Log.e(TAG, "Failed to load user.");
             }
         });
+
     }
 
     private void setupSearchInput() {
