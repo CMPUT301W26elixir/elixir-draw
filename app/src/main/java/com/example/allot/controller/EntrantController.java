@@ -3,6 +3,7 @@ package com.example.allot.controller;
 import android.content.Context;
 import android.provider.Settings;
 import android.util.Log;
+import android.util.Patterns;
 
 import com.example.allot.model.Entrant;
 
@@ -34,12 +35,22 @@ public class EntrantController {
                         if (document.exists()) {
                             // Turn the cloud data into our Entrant object
                             Entrant existingEntrant = document.toObject(Entrant.class);
-                            callback.onCallback(existingEntrant);
+                            if (existingEntrant == null) {
+                                IllegalStateException exception = new IllegalStateException(
+                                        "Entrant document could not be parsed."
+                                );
+                                Log.e("EntrantController", "Error loading entrant", exception);
+                                callback.onError(exception);
+                            } else {
+                                callback.onCallback(existingEntrant);
+                            }
                         } else {
                             createEntrant(deviceId, "First Name", "Last Name", "", "", true, callback);
                         }
                     } else {
-                        Log.e("EntrantController", "Error: " + task.getException());
+                        Exception exception = task.getException();
+                        Log.e("EntrantController", "Error: " + exception);
+                        callback.onError(exception);
                     }
                 });
     }
@@ -57,12 +68,18 @@ public class EntrantController {
      */
     public void createEntrant(String deviceId, String firstName, String lastName, String email,
                               String phone, boolean notiEnabled, EntrantCallback callback) {
+        Exception validationError = validateProfileFields(deviceId, firstName, lastName, email);
+        if (validationError != null) {
+            callback.onError(validationError);
+            return;
+        }
+
         Entrant newEntrant = new Entrant(
                 deviceId,
-                firstName,
-                lastName,
-                email,
-                phone,
+                firstName.trim(),
+                lastName.trim(),
+                email.trim(),
+                normalizePhone(phone),
                 notiEnabled,
                 "entrant"
         );
@@ -70,9 +87,10 @@ public class EntrantController {
         database.collection("users").document(deviceId)
                 .set(newEntrant)
                 .addOnSuccessListener(unused -> callback.onCallback(newEntrant))
-                .addOnFailureListener(e ->
-                        Log.e("EntrantController", "Failed to create entrant", e)
-                );
+                .addOnFailureListener(e -> {
+                    Log.e("EntrantController", "Failed to create entrant", e);
+                    callback.onError(e);
+                });
     }
 
     /**
@@ -88,21 +106,63 @@ public class EntrantController {
     // If only updating specific fields, pass all existing fields in!!!!!!!!
     public void updateEntrantProfile(String firstName, String lastName, String email,
                                      String phone, boolean notiEnabled, EntrantCallback callback) {
+        Exception validationError = validateProfileFields(deviceId, firstName, lastName, email);
+        if (validationError != null) {
+            callback.onError(validationError);
+            return;
+        }
+
         database.collection("users").document(deviceId)
                 .update(
-                        "firstName", firstName,
-                        "lastName", lastName,
-                        "email", email,
-                        "phone", phone,
+                        "firstName", firstName.trim(),
+                        "lastName", lastName.trim(),
+                        "email", email.trim(),
+                        "phone", normalizePhone(phone),
                         "notiEnabled", notiEnabled
                 )
                 .addOnSuccessListener(unused -> getOrCreateEntrant(callback))
-                .addOnFailureListener(e ->
-                        Log.e("EntrantController", "Failed to update entrant profile", e)
-                );
+                .addOnFailureListener(e -> {
+                    Log.e("EntrantController", "Failed to update entrant profile", e);
+                    callback.onError(e);
+                });
+    }
+
+    private Exception validateProfileFields(String deviceId, String firstName, String lastName, String email) {
+        if (isBlank(deviceId)) {
+            return new IllegalArgumentException("Must have a Device ID");
+        }
+
+        if (isBlank(firstName)) {
+            return new IllegalArgumentException("First name is required.");
+        }
+
+        if (isBlank(lastName)) {
+            return new IllegalArgumentException("Last name is required.");
+        }
+
+        if (isBlank(email)) {
+            return new IllegalArgumentException("Email is required.");
+        }
+
+        if (!Patterns.EMAIL_ADDRESS.matcher(email.trim()).matches()) {
+            return new IllegalArgumentException("Email format is invalid.");
+        }
+
+        return null;
+    }
+
+    private String normalizePhone(String phone) {
+        return phone == null ? "" : phone.trim();
+    }
+
+    private boolean isBlank(String value) {
+        return value == null || value.trim().isEmpty();
     }
 
     public interface EntrantCallback {
         void onCallback(Entrant entrant);
+
+        default void onError(Exception exception) {
+        }
     }
 }
