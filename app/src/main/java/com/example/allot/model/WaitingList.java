@@ -14,6 +14,13 @@ public class WaitingList {
 
     public int limit = -1;               // max waiting list size
 
+    // Required for Firestore document deserialization.
+    public WaitingList(){
+        this.list = new ArrayList<>();
+        this.chosen = new ArrayList<>();
+        this.status = new HashMap<>();
+    }
+
     // Constructor
     public WaitingList(int limit, int choosingLimit){
         this.limit = limit;
@@ -89,3 +96,4 @@ public class WaitingList {
         return notSigned;
     }
 }
+

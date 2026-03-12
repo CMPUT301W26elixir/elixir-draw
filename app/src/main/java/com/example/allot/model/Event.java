@@ -21,12 +21,16 @@ public class Event {
     public String posterUrl;  // This is the main image for the event
 
     public int limit = -1;
-
     public int choosingLimit = 0;
     public WaitingList waitingList;
     public ArrayList<String> galleryUrls; // This is for the Gallery
 
     public Boolean geoloc;
+
+    // Required for Firestore document deserialization.
+    public Event() {
+        this.galleryUrls = new ArrayList<>();
+    }
 
     // Organizer Creation
     public Event(String eventId, String organizerId, String title, int limit, int choosingLimit) {
@@ -39,7 +43,6 @@ public class Event {
         this.choosingLimit = choosingLimit;
         this.waitingList = new WaitingList(limit, choosingLimit);
     }
-
 
     //Helper to add a photo to the gallery
     public void addPhotoToGallery(String newPhotoUrl) {
@@ -109,3 +112,4 @@ public class Event {
         return this.waitingList;
     }
 }
+
