@@ -13,12 +13,10 @@ public class WaitingList {
     public HashMap<Entrant, Boolean> status;  // enrolled status
 
     public int limit = -1;               // max waiting list size
-    public int choosingLimit;            // number of people to choose
 
     // Constructor
     public WaitingList(int limit, int choosingLimit){
         this.limit = limit;
-        this.choosingLimit = choosingLimit;
         this.list = new ArrayList<>();
         this.chosen = new ArrayList<>();
         this.status = new HashMap<>();
@@ -36,7 +34,7 @@ public class WaitingList {
         ArrayList<Integer> chosenIndex = new ArrayList<>();
         Random rand = new Random();
 
-        for (int i = 0; i < this.choosingLimit; i++){
+        for (int i = 0; i < this.list.size(); i++){
             if (list.size() == 0) break;
 
             int index = rand.nextInt(this.list.size());
