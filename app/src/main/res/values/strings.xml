@@ -10,6 +10,9 @@
     <string name="first_name_hint">First Name</string>
     <string name="last_name_hint">Last Name</string>
     <string name="name_next">Next</string>
+    <string name="email_title">Whats your email?</string>
+    <string name="email_hint">example@mail.com</string>
+    <string name="email_next">Next</string>
     <string name="search_hint">Find events</string>
     <string name="chip_nearby">Nearby</string>
     <string name="chip_sports">Sports</string>

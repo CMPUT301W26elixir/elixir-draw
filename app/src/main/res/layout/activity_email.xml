@@ -6,13 +6,13 @@
     android:background="@color/screen_bg">
 
     <TextView
-        android:id="@+id/nameTitle"
+        android:id="@+id/emailTitle"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="41dp"
         android:layout_marginEnd="41dp"
         android:fontFamily="@font/varela_round_regular"
-        android:text="@string/name_title"
+        android:text="@string/email_title"
         android:textAlignment="center"
         android:textColor="@color/white"
         android:textSize="34sp"
@@ -21,24 +21,8 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <TextView
-        android:id="@+id/nameSubtitle"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="41dp"
-        android:layout_marginEnd="41dp"
-        android:fontFamily="@font/varela_round_regular"
-        android:text="@string/name_subtitle"
-        android:textAlignment="center"
-        android:textColor="@color/text_secondary"
-        android:textSize="16sp"
-        android:translationY="227dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
     <EditText
-        android:id="@+id/firstNameInput"
+        android:id="@+id/emailInput"
         android:layout_width="0dp"
         android:layout_height="60dp"
         android:layout_marginStart="29dp"
@@ -46,41 +30,20 @@
         android:autofillHints=""
         android:background="@drawable/bg_onboarding_input"
         android:fontFamily="@font/varela_round_regular"
-        android:hint="@string/first_name_hint"
-        android:inputType="textPersonName"
+        android:hint="@string/email_hint"
+        android:inputType="textEmailAddress"
         android:paddingStart="28dp"
         android:paddingEnd="28dp"
         android:textColor="@color/white"
         android:textColorHint="@color/text_secondary"
         android:textSize="16sp"
-        android:translationY="275dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <EditText
-        android:id="@+id/lastNameInput"
-        android:layout_width="0dp"
-        android:layout_height="60dp"
-        android:layout_marginStart="29dp"
-        android:layout_marginEnd="29dp"
-        android:autofillHints=""
-        android:background="@drawable/bg_onboarding_input"
-        android:fontFamily="@font/varela_round_regular"
-        android:hint="@string/last_name_hint"
-        android:inputType="textPersonName"
-        android:paddingStart="28dp"
-        android:paddingEnd="28dp"
-        android:textColor="@color/white"
-        android:textColorHint="@color/text_secondary"
-        android:textSize="16sp"
-        android:translationY="349dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        android:translationY="275dp" />
 
     <com.google.android.material.button.MaterialButton
-        android:id="@+id/nameNextButton"
+        android:id="@+id/emailNextButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:fontFamily="@font/varela_round_regular"
@@ -92,7 +55,7 @@
         android:paddingTop="12dp"
         android:paddingEnd="24dp"
         android:paddingBottom="12dp"
-        android:text="@string/name_next"
+        android:text="@string/email_next"
         android:textAllCaps="false"
         android:textColor="@color/black"
         android:textSize="20sp"
