@@ -5,6 +5,11 @@
     <string name="welcome_title">Welcome to allot!</string>
     <string name="welcome_body">Join the waitlist, wait for the draw, and receive clear results. Allot makes event registration simple, transparent, and equitable.</string>
     <string name="welcome_cta">Get Started!</string>
+    <string name="name_title">Whats your name?</string>
+    <string name="name_subtitle">Your first name will be visible to others</string>
+    <string name="first_name_hint">First Name</string>
+    <string name="last_name_hint">Last Name</string>
+    <string name="name_next">Next</string>
     <string name="search_hint">Find events</string>
     <string name="chip_nearby">Nearby</string>
     <string name="chip_sports">Sports</string>
