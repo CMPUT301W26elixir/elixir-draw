@@ -53,6 +53,7 @@ public class WaitingList {
                 this.chosen.add(user);
                 this.status.put(user, false);
             } else {
+                if (chosenIndex.size() >= list.size()) break; // can't pick more than available
                 i--; // try again
             }
         }
@@ -61,6 +62,8 @@ public class WaitingList {
 
     // Replace a random entrant not already chosen
     public void replace(){
+        if (chosen.size() >= list.size()) return;
+
         Random rand = new Random();
         boolean keepGoing = true;
 

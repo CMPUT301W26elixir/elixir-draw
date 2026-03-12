@@ -50,12 +50,20 @@ public class EventController {
      * Removes an event from Firestore.
      * Used by organizers to delete their event.
      */
-    public void removeEvent(String eventId) {
-
+    public void removeEvent(String eventId, String organizerId) {
         database.collection("events").document(eventId)
                 .delete()
                 .addOnSuccessListener(aVoid -> {
                     Log.d(TAG, "Event " + eventId + " removed successfully.");
+                    // Remove event ID from user's myEvents
+                    database.collection("users").document(organizerId)
+                            .update("myEvents", FieldValue.arrayRemove(eventId))
+                            .addOnSuccessListener(aVoid2 -> {
+                                Log.d(TAG, "Event removed from user's myEvents.");
+                            })
+                            .addOnFailureListener(e -> {
+                                Log.e(TAG, "Failed to remove event from user: " + e.getMessage());
+                            });
                 })
                 .addOnFailureListener(e -> {
                     Log.e(TAG, "Failed to remove event: " + e.getMessage());
