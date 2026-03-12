@@ -55,4 +55,17 @@ public class EntrantController {
     public interface EntrantCallback {
         void onCallback(Entrant entrant);
     }
+
+    public void removeEntrant(EntrantCallback callback) {
+
+        database.collection("users").document(deviceId)
+                .delete()
+                .addOnSuccessListener(aVoid -> {
+                    callback.onCallback(null);
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("EntrantController", "Failed to delete: " + e.getMessage());
+                });
+    }
+
 }
