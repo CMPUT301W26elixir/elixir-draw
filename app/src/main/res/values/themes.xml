@@ -6,4 +6,8 @@
     </style>
 
     <style name="Theme.Allot" parent="Base.Theme.Allot" />
+
+    <style name="Theme.Allot.Splash" parent="Theme.Allot">
+        <item name="android:windowBackground">@color/splash_bg</item>
+    </style>
 </resources>

@@ -3,11 +3,13 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
 
-    <color name="screen_bg">#05080F</color>
+    <color name="splash_bg">#182D42</color>
+    <color name="screen_bg">#0E0F11</color>
     <color name="text_primary">#F6F7F9</color>
     <color name="text_secondary">#B8BCC4</color>
     <color name="search_bg">#10151E</color>
     <color name="chip_border">#2A313D</color>
+    <color name="onboarding_input_stroke">#99A0A8</color>
     <color name="pill_bg">#8A51545C</color>
     <color name="favorite_bg">#7A4A5058</color>
     <color name="event_image_one">#B88B69</color>
