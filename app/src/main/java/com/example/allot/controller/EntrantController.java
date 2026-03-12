@@ -36,21 +36,43 @@ public class EntrantController {
                             Entrant existingEntrant = document.toObject(Entrant.class);
                             callback.onCallback(existingEntrant);
                         } else {
-                            // Create a brand new Entrant
-                            Entrant newEntrant = new Entrant();
-                            newEntrant.setDeviceId(deviceId);
-                            newEntrant.setFirstName("First Name");
-                            newEntrant.setLastName("Last Name");
-                            newEntrant.setRole("entrant");
-
-                            // Save to the "users" collection
-                            database.collection("users").document(deviceId).set(newEntrant);
-                            callback.onCallback(newEntrant);
+                            createEntrant(deviceId, "First Name", "Last Name", "", "", true, callback);
                         }
                     } else {
                         Log.e("EntrantController", "Error: " + task.getException());
                     }
                 });
+    }
+
+    /**
+     * Creates a new entrant and stores it in the database.
+     *
+     * @param deviceId Unique identifier for the entrant's device.
+     * @param firstName The entrant's first name.
+     * @param lastName The entrant's last name.
+     * @param email The entrant's email address.
+     * @param phone The entrant's phone number.
+     * @param notiEnabled Indicates whether notifications are enabled for the entrant.
+     * @param callback Callback used to handle the result of the database operation.
+     */
+    public void createEntrant(String deviceId, String firstName, String lastName, String email,
+                              String phone, boolean notiEnabled, EntrantCallback callback) {
+        Entrant newEntrant = new Entrant(
+                deviceId,
+                firstName,
+                lastName,
+                email,
+                phone,
+                notiEnabled,
+                "entrant"
+        );
+
+        database.collection("users").document(deviceId)
+                .set(newEntrant)
+                .addOnSuccessListener(unused -> callback.onCallback(newEntrant))
+                .addOnFailureListener(e ->
+                        Log.e("EntrantController", "Failed to create entrant", e)
+                );
     }
 
     public interface EntrantCallback {
