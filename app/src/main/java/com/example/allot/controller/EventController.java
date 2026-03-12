@@ -39,7 +39,21 @@ public class EventController {
                     Log.e(TAG, "Darn, it failed: " + e.getMessage());
                 });
     }
+    /**
+     * Removes an event from Firestore.
+     * Used by organizers to delete their event.
+     */
+    public void removeEvent(String eventId) {
 
+        database.collection("events").document(eventId)
+                .delete()
+                .addOnSuccessListener(aVoid -> {
+                    Log.d(TAG, "Event " + eventId + " removed successfully.");
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Failed to remove event: " + e.getMessage());
+                });
+    }
     /**
      * US 01.01.03: Get a list of events that are open for joining for entrant
      * Search is filtered client-side because Firestore does not support
