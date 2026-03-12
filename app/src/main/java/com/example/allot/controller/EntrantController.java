@@ -75,6 +75,33 @@ public class EntrantController {
                 );
     }
 
+    /**
+     * Updates the profile information of the current entrant in the database.
+     *
+     * @param firstName The updated first name of the entrant.
+     * @param lastName The updated last name of the entrant.
+     * @param email The updated email address of the entrant.
+     * @param phone The updated phone number of the entrant.
+     * @param notiEnabled Indicates whether notifications are enabled for the entrant.
+     * @param callback Callback used to return the updated entrant after the operation completes.
+     */
+    // If only updating specific fields, pass all existing fields in!!!!!!!!
+    public void updateEntrantProfile(String firstName, String lastName, String email,
+                                     String phone, boolean notiEnabled, EntrantCallback callback) {
+        database.collection("users").document(deviceId)
+                .update(
+                        "firstName", firstName,
+                        "lastName", lastName,
+                        "email", email,
+                        "phone", phone,
+                        "notiEnabled", notiEnabled
+                )
+                .addOnSuccessListener(unused -> getOrCreateEntrant(callback))
+                .addOnFailureListener(e ->
+                        Log.e("EntrantController", "Failed to update entrant profile", e)
+                );
+    }
+
     public interface EntrantCallback {
         void onCallback(Entrant entrant);
     }
