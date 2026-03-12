@@ -2,7 +2,7 @@ package com.example.allot.model;
 
 import java.util.ArrayList;
 
-public class Entrant {
+public class User {
     private String deviceId;
     private String firstName;
     private String lastName;
@@ -13,8 +13,8 @@ public class Entrant {
 
     public ArrayList<Event> history;
 
-    public Entrant(){}
-    public Entrant(String deviceId, String firstname, String lastName, String email, String phone, String role) {
+    public User(){}
+    public User(String deviceId, String firstname, String lastName, String email, String phone, String role) {
         this.deviceId = deviceId;
         this.firstName = firstName;
         this.lastName = lastName;

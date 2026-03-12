@@ -105,7 +105,7 @@ public class Event {
     private boolean isBlank(String value) {
         return value == null || value.trim().isEmpty();
     }
-    public ArrayList<Entrant> lottery(){
+    public ArrayList<User> lottery(){
         return this.waitingList.selectedList();
     }
     public WaitingList getWaitingList(){
