@@ -1,6 +1,8 @@
-package com.example.allot;
+package com.example.allot.controller;
 
 import android.util.Log;
+
+import com.example.allot.model.Event;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;

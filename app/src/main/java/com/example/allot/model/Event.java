@@ -1,4 +1,4 @@
-package com.example.allot;
+package com.example.allot.model;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
