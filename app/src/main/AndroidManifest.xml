@@ -33,6 +33,9 @@
         <activity
             android:name=".view.EmailActivity"
             android:exported="false" />
+        <activity
+            android:name=".view.PhoneActivity"
+            android:exported="false" />
     </application>
 
 </manifest>
