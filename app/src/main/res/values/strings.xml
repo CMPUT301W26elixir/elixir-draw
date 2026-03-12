@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">allot</string>
+    <string name="splash_wordmark">allot</string>
     <string name="search_hint">Find events</string>
     <string name="chip_nearby">Nearby</string>
     <string name="chip_sports">Sports</string>

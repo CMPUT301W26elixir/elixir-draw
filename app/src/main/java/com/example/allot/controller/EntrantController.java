@@ -21,6 +21,7 @@ public class EntrantController {
 
     private final CollectionReference usersCollection;
     private final String deviceId;
+    private final boolean newDeviceId;
 
     /**
      * Creates an EntrantController and sets up Firestore and the device ID.
@@ -32,7 +33,9 @@ public class EntrantController {
         // Reference to the "users" collection in Firestore
         this.usersCollection = db.collection("users");
         // Get the saved device ID, or create one if it does not exist yet
-        this.deviceId = getOrCreateDeviceId(context);
+        DeviceIdResult deviceIdResult = getOrCreateDeviceId(context);
+        this.deviceId = deviceIdResult.deviceId;
+        this.newDeviceId = deviceIdResult.wasCreated;
     }
 
     /**
@@ -166,19 +169,23 @@ public class EntrantController {
      * @param context the context used to access shared preferences
      * @return the existing or newly created device ID
      */
-    private String getOrCreateDeviceId(Context context) {
+    private DeviceIdResult getOrCreateDeviceId(Context context) {
         // Get the Device ID
         SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
         String savedDeviceId = prefs.getString(DEVICE_ID_KEY, null);
 
         // Return the saved device ID if it already exists
         if (savedDeviceId != null && !savedDeviceId.trim().isEmpty()) {
-            return savedDeviceId;
+            return new DeviceIdResult(savedDeviceId, false);
         }
 
         // Otherwise create a new unique device ID and save it
         String newDeviceId = UUID.randomUUID().toString();
         prefs.edit().putString(DEVICE_ID_KEY, newDeviceId).apply();
+        return new DeviceIdResult(newDeviceId, true);
+    }
+
+    public boolean isNewDeviceId() {
         return newDeviceId;
     }
 
@@ -248,6 +255,16 @@ public class EntrantController {
                 listener.onComplete(false, false);
             }
         });
+    }
+
+    private static class DeviceIdResult {
+        private final String deviceId;
+        private final boolean wasCreated;
+
+        private DeviceIdResult(String deviceId, boolean wasCreated) {
+            this.deviceId = deviceId;
+            this.wasCreated = wasCreated;
+        }
     }
 
 }
