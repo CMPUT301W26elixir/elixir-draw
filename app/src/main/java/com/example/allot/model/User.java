@@ -3,7 +3,7 @@ package com.example.allot.model;
 import java.util.ArrayList;
 
 public class User {
-    private String deviceId;
+    public String deviceId;
     private String firstName;
     private String lastName;
     private String email;
@@ -11,18 +11,23 @@ public class User {
     private boolean notiEnabled;
     private String role;
 
-    public ArrayList<Event> history;
+    public ArrayList<String> history;
 
-    public User(){}
+    public ArrayList<String> myEvents;
+    public User(){
+        this.history = new ArrayList<String>();
+        this.myEvents = new ArrayList<String>();
+    }
     public User(String deviceId, String firstname, String lastName, String email, String phone, String role) {
         this.deviceId = deviceId;
-        this.firstName = firstName;
+        this.firstName = firstname;
         this.lastName = lastName;
         this.email = email;
         this.phone = phone;
-        this.notiEnabled = notiEnabled;
+        this.notiEnabled = true;
         this.role = role;
-        this.history = new ArrayList<Event>();
+        this.history = new ArrayList<String>();
+        this.myEvents = new ArrayList<String>();
     }
 
     public String getDeviceId() {
@@ -96,10 +101,10 @@ public class User {
         this.role = role;
     }
 
-    public void addHistory(Event event){
-        this.history.add(event);
+    public void addHistory(String eventID){
+        this.history.add(eventID);
     }
-    public ArrayList<Event> getHistory(){
+    public ArrayList<String> getHistory(){
         return this.history;
     }
 }

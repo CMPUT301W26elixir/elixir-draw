@@ -105,11 +105,15 @@ public class Event {
     private boolean isBlank(String value) {
         return value == null || value.trim().isEmpty();
     }
-    public ArrayList<User> lottery(){
-        return this.waitingList.selectedList();
+    public ArrayList<String> lottery(){
+        this.waitingList.selectedList();
+
+        return waitingList.chosen;
     }
-    public WaitingList getWaitingList(){
-        return this.waitingList;
+    public WaitingList getWaitingList() {
+        if (waitingList == null) waitingList = new WaitingList(limit, choosingLimit);
+        return waitingList;
     }
+
 }
 

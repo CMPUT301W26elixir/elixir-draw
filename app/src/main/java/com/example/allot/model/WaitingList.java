@@ -8,9 +8,9 @@ import java.util.Random;
  * CRC Card: WaitingList for the event
  */
 public class WaitingList {
-    public ArrayList<User> list;      // all entrants
-    public ArrayList<User> chosen;    // selected entrants
-    public HashMap<User, Boolean> status;  // enrolled status
+    public ArrayList<String> list;      // all entrants
+    public ArrayList<String> chosen;    // selected entrants
+    public HashMap<String, Boolean> status;  // enrolled status
 
     public int limit = -1;               // max waiting list size
 
@@ -32,14 +32,14 @@ public class WaitingList {
     }
 
     // Add entrant to waiting list
-    public void joinWaitingList(User user){
+    public void joinWaitingList(String user){
         if ((this.limit > 0 && this.list.size() < this.limit) || this.limit == -1){
             this.list.add(user);
         }
     }
 
     // Randomly select entrants
-    public ArrayList<User> selectedList(){
+    public void selectedList(){
         ArrayList<Integer> chosenIndex = new ArrayList<>();
         Random rand = new Random();
 
@@ -49,7 +49,7 @@ public class WaitingList {
             int index = rand.nextInt(this.list.size());
             if (!chosenIndex.contains(index)){
                 chosenIndex.add(index);
-                User user = this.list.get(index);
+                String user = this.list.get(index);
                 this.chosen.add(user);
                 this.status.put(user, false);
             } else {
@@ -57,7 +57,6 @@ public class WaitingList {
             }
         }
 
-        return this.chosen;
     }
 
     // Replace a random entrant not already chosen
@@ -67,7 +66,7 @@ public class WaitingList {
 
         while(keepGoing){
             int index = rand.nextInt(this.list.size());
-            User user = this.list.get(index);
+            String user = this.list.get(index);
             if(!this.chosen.contains(user)){
                 this.chosen.add(user);
                 this.status.put(user, false);
@@ -77,9 +76,9 @@ public class WaitingList {
     }
 
     // Entrants who have enrolled (status = true)
-    public ArrayList<User> enrolled(){
-        ArrayList<User> signed = new ArrayList<>();
-        for (User user : this.chosen){
+    public ArrayList<String> enrolled(){
+        ArrayList<String> signed = new ArrayList<>();
+        for (String user : this.chosen){
             if(Boolean.TRUE.equals(this.status.get(user))){
                 signed.add(user);
             }
@@ -88,9 +87,9 @@ public class WaitingList {
     }
 
     // Entrants who have not enrolled (status = false)
-    public ArrayList<User> notEnrolled(){
-        ArrayList<User> notSigned = new ArrayList<>();
-        for (User user : this.chosen){
+    public ArrayList<String> notEnrolled(){
+        ArrayList<String> notSigned = new ArrayList<>();
+        for (String user : this.chosen){
             if(Boolean.FALSE.equals(this.status.get(user))){
                 notSigned.add(user);
             }

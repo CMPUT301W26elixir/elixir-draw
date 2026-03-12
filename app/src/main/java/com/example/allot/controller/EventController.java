@@ -2,7 +2,9 @@ package com.example.allot.controller;
 
 import android.util.Log;
 
+import com.example.allot.common.OnCompleteListener;
 import com.example.allot.model.Event;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
@@ -28,15 +30,20 @@ public class EventController {
      * This takes an Event and saves it in the "events" folder in the cloud.
      * Use this for Organizer tasks! US 02.01.01
      */
-    public void createNewEvent(Event event) {
-        // Go to the "events" collection -> Make a document named after the eventId -> Put the event data inside it
+    public void createNewEventForUser(Event event, String organizerId, OnCompleteListener<Boolean> listener) {
         database.collection("events").document(event.eventId)
                 .set(event)
-                .addOnSuccessListener(aVoid -> {
-                    Log.d(TAG, "Sweet! Event " + event.title + " is now live.");
-                })
-                .addOnFailureListener(e -> {
-                    Log.e(TAG, "Darn, it failed: " + e.getMessage());
+                .addOnCompleteListener(task -> {
+                    if (!task.isSuccessful()) {
+                        listener.onComplete(false, false);
+                        return;
+                    }
+                    // Event saved, now update the user
+                    database.collection("users").document(organizerId)
+                            .update("myEvents", FieldValue.arrayUnion(event.eventId))
+                            .addOnCompleteListener(userTask -> {
+                                listener.onComplete(userTask.isSuccessful(), userTask.isSuccessful());
+                            });
                 });
     }
     /**

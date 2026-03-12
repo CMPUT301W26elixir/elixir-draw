@@ -17,10 +17,12 @@ import com.example.allot.controller.UserController;
 import com.example.allot.controller.EventController;
 
 import com.example.allot.model.Event;
+import com.example.allot.model.User;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.UUID;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "Allot_Logic";
@@ -60,6 +62,7 @@ public class MainActivity extends AppCompatActivity {
                 Log.e(TAG, "Failed to load user.");
             }
         });
+
     }
 
     private void setupSearchInput() {
