@@ -106,15 +106,7 @@ public class EntrantController {
      */
     public void createNewEntrant(OnCompleteListener<Entrant> listener) {
         // Create a new entrant with empty profile fields and default settings
-        Entrant entrant = new Entrant(
-                deviceId,
-                "",
-                "",
-                "",
-                "",
-                true,
-                "entrant"
-        );
+        Entrant entrant = new Entrant();
 
         // Save the new entrant under the current device ID
         DocumentReference entrantRef = usersCollection.document(deviceId);
@@ -238,4 +230,24 @@ public class EntrantController {
     private boolean isBlank(String value) {
         return value == null || value.trim().isEmpty();
     }
+
+    /**
+     * Removes the current entrant from Firestore.
+     *
+     * @param listener the listener that receives the result of the deletion
+     */
+    public void removeEntrant(OnCompleteListener<Boolean> listener) {
+
+        DocumentReference entrantRef = usersCollection.document(deviceId);
+
+        entrantRef.delete().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                listener.onComplete(true, true);
+            } else {
+                Log.d(TAG, "Failed to remove entrant", task.getException());
+                listener.onComplete(false, false);
+            }
+        });
+    }
+
 }

@@ -1,5 +1,7 @@
 package com.example.allot.model;
 
+import java.util.ArrayList;
+
 public class Entrant {
     private String deviceId;
     private String firstName;
@@ -9,10 +11,10 @@ public class Entrant {
     private boolean notiEnabled;
     private String role;
 
-    public Entrant() {}
+    public ArrayList<Event> history;
 
-    public Entrant(String deviceId, String firstName, String lastName, String email, String phone,
-                   boolean notiEnabled, String role) {
+    public Entrant(){}
+    public Entrant(String deviceId, String name, String email, String phone, String role) {
         this.deviceId = deviceId;
         this.firstName = firstName;
         this.lastName = lastName;
@@ -91,5 +93,12 @@ public class Entrant {
 
     public void setRole(String role) {
         this.role = role;
+    }
+
+    public void addHistory(Event event){
+        this.history.add(event);
+    }
+    public ArrayList<Event> getHistory(){
+        return this.history;
     }
 }
