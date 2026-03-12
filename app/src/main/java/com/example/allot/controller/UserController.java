@@ -85,7 +85,7 @@ public class UserController {
 
             // If no userexists yet, create a new one
             if (document == null || !document.exists()) {
-                createNewUser(listener);
+                createNewUser(deviceId);
                 return;
             }
 
@@ -102,21 +102,16 @@ public class UserController {
     /**
      * Creates a new userwith default values and saves it to Firestore.
      *
-     * @param listener the listener that receives the created userand success result
+     * @paramlistener the listener that receives the created userand success result
      */
-    public void createNewUser(OnCompleteListener<User> listener) {
-        // Create a new userwith empty profile fields and default settings
+    public void createNewUser(String deviceId) {
         User user = new User();
-
-        // Save the new user under the current device ID
         DocumentReference userRef = usersCollection.document(deviceId);
         userRef.set(user).addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
-                listener.onComplete(user, true);
+                Log.d(TAG, "User created: " + deviceId);
             } else {
-                // usercould not be saved
                 Log.d(TAG, "Failed to create user", task.getException());
-                listener.onComplete(null, false);
             }
         });
     }
@@ -234,20 +229,21 @@ public class UserController {
     /**
      * Removes the current userfrom Firestore.
      *
-     * @param listener the listener that receives the result of the deletion
+     * @paramlistener the listener that receives the result of the deletion
      */
-    public void removeUser(OnCompleteListener<Boolean> listener) {
+    public void removeUser(String deviceId) {
 
         DocumentReference userRef = usersCollection.document(deviceId);
-
-        userRef.delete().addOnCompleteListener(task -> {
-            if (task.isSuccessful()) {
-                listener.onComplete(true, true);
-            } else {
-                Log.d(TAG, "Failed to remove user", task.getException());
-                listener.onComplete(false, false);
-            }
-        });
+        this.usersCollection.document(deviceId)
+                .delete()
+                .addOnSuccessListener(aVoid -> {
+                    Log.d(TAG, "Event " + deviceId + " removed successfully.");
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Failed to remove event: " + e.getMessage());
+                });
     }
+
+
 
 }
