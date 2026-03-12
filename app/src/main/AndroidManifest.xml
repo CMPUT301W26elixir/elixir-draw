@@ -24,6 +24,9 @@
         <activity
             android:name=".view.MainActivity"
             android:exported="true" />
+        <activity
+            android:name=".view.WelcomeActivity"
+            android:exported="false" />
     </application>
 
 </manifest>

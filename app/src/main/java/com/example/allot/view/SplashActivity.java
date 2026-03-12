@@ -45,17 +45,19 @@ public class SplashActivity extends AppCompatActivity {
 
         long elapsedMs = System.currentTimeMillis() - startedAtMs;
         long remainingMs = Math.max(0L, MIN_SPLASH_DURATION_MS - elapsedMs);
-        handler.postDelayed(() -> openMainScreen(requiresProfileSetup), remainingMs);
+        handler.postDelayed(() -> openNextScreen(requiresProfileSetup), remainingMs);
     }
 
-    private void openMainScreen(boolean requiresProfileSetup) {
+    private void openNextScreen(boolean requiresProfileSetup) {
         if (navigated || isFinishing()) {
             return;
         }
 
         navigated = true;
-        Intent intent = new Intent(this, MainActivity.class);
-        intent.putExtra(EXTRA_REQUIRES_PROFILE_SETUP, requiresProfileSetup);
+        Intent intent = new Intent(
+                this,
+                requiresProfileSetup ? WelcomeActivity.class : MainActivity.class
+        );
         startActivity(intent);
         finish();
     }
