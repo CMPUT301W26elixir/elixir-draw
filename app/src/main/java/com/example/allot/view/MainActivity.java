@@ -53,11 +53,12 @@ public class MainActivity extends AppCompatActivity {
 
         // Keep the existing entrant setup while we build the search screen UI.
         entrantController = new EntrantController(this);
-        entrantController.getOrCreateEntrant(new EntrantController.EntrantCallback() {
-            @Override
-            public void onCallback(Entrant entrant) {
+        entrantController.loadOrCreateEntrant((entrant, success) -> {
+            if (success && entrant != null) {
                 Log.d(TAG, "Welcome, " + entrant.getName());
                 Log.d(TAG, "Role: " + entrant.getRole());
+            } else {
+                Log.e(TAG, "Failed to load entrant.");
             }
         });
     }
