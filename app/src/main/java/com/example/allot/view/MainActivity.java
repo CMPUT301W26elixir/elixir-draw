@@ -21,7 +21,7 @@ import com.example.allot.model.Event;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-
+/// /
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "Allot_Logic";
 
@@ -149,3 +149,4 @@ public class MainActivity extends AppCompatActivity {
         stateText.setText(R.string.browse_state_error);
     }
 }
+////
