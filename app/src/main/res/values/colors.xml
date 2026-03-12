@@ -5,7 +5,7 @@
 
     <color name="splash_bg">#182D42</color>
     <color name="welcome_bg">#0E0F11</color>
-    <color name="screen_bg">#05080F</color>
+    <color name="screen_bg">#0E0F11</color>
     <color name="text_primary">#F6F7F9</color>
     <color name="text_secondary">#B8BCC4</color>
     <color name="search_bg">#10151E</color>
