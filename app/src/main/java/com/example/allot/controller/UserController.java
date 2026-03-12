@@ -240,7 +240,6 @@ public class UserController {
      */
     public void removeUser(String deviceId) {
 
-        DocumentReference userRef = usersCollection.document(deviceId);
         this.usersCollection.document(deviceId)
                 .delete()
                 .addOnSuccessListener(aVoid -> {

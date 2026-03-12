@@ -3,6 +3,7 @@ package com.example.allot.model;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
@@ -23,6 +24,10 @@ public class Event {
     public int limit = -1;
     public int choosingLimit = 0;
     public WaitingList waitingList;
+    public ArrayList<String> chosen;
+    public ArrayList<String> enrolled;
+    public ArrayList<String> notEnrolled;
+
     public ArrayList<String> galleryUrls; // This is for the Gallery
 
     public Boolean geoloc;
@@ -105,15 +110,25 @@ public class Event {
     private boolean isBlank(String value) {
         return value == null || value.trim().isEmpty();
     }
-    public ArrayList<String> lottery(){
+    public void lottery(){
         this.waitingList.selectedList();
+        this.chosen = this.waitingList.chosen;
+    }
 
-        return waitingList.chosen;
+    public void enrolled(){
+        this.enrolled = this.waitingList.enrolled();
+    }
+
+    public void notenrolled(){
+        this.notEnrolled = this.waitingList.notEnrolled();
     }
     public WaitingList getWaitingList() {
         if (waitingList == null) waitingList = new WaitingList(limit, choosingLimit);
         return waitingList;
     }
 
+    public HashMap<String, Boolean> status(){
+        return this.waitingList.status;
+    }
 }
 
