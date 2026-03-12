@@ -17,6 +17,11 @@
     <string name="phone_hint">(123) 456-7890</string>
     <string name="phone_not_now">Not now</string>
     <string name="phone_next">Next</string>
+    <string name="notifications_title">Get notifications</string>
+    <string name="notifications_body">Get updates on your events, deadlines, lottery results and more.</string>
+    <string name="notifications_enable">Turn on notifications</string>
+    <string name="notifications_not_now">Not now</string>
+    <string name="notifications_footer">Manage your notifications in Settings at any time</string>
     <string name="search_hint">Find events</string>
     <string name="chip_nearby">Nearby</string>
     <string name="chip_sports">Sports</string>

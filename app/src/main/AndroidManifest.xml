@@ -36,6 +36,9 @@
         <activity
             android:name=".view.PhoneActivity"
             android:exported="false" />
+        <activity
+            android:name=".view.NotificationsActivity"
+            android:exported="false" />
     </application>
 
 </manifest>
