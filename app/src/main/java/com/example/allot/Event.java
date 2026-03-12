@@ -20,28 +20,24 @@ public class Event {
     public String status;
     public String posterUrl;  // This is the main image for the event
 
+    public int limit = -1;
+
+    public int choosingLimit = 0;
+    public WaitingList waitingList;
     public ArrayList<String> galleryUrls; // This is for the Gallery
 
-    public Event() {
-        this.status = "open";
-        this.galleryUrls = new ArrayList<>(); // Initialize the list
-    }
-
-    // Testing events
-    public Event(String eventId, String title) {
-        this.eventId = eventId;
-        this.title = title;
-        this.status = "open";
-        this.galleryUrls = new ArrayList<>();
-    }
+    public Boolean geoloc;
 
     // Organizer Creation
-    public Event(String eventId, String organizerId, String title) {
+    public Event(String eventId, String organizerId, String title, int limit, int choosingLimit) {
         this.eventId = eventId;
         this.organizerId = organizerId;
         this.title = title;
         this.status = "open";
         this.galleryUrls = new ArrayList<>();
+        this.limit = limit;
+        this.choosingLimit = choosingLimit;
+        this.waitingList = new WaitingList(limit, choosingLimit);
     }
 
 
@@ -105,5 +101,11 @@ public class Event {
 
     private boolean isBlank(String value) {
         return value == null || value.trim().isEmpty();
+    }
+    public ArrayList<Entrant> lottery(){
+        return this.waitingList.selectedList();
+    }
+    public WaitingList getWaitingList(){
+        return this.waitingList;
     }
 }
