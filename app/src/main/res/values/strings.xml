@@ -93,6 +93,19 @@ This action cannot be undone.</string>
     <string name="lottery_criteria_after_body">- Selected entrants will be notified in-app
 - Invitations must be accepted within 48 hours
 - Unclaimed or declined spots will be reassigned</string>
+    <string name="my_events_registered">Registered</string>
+    <string name="my_events_hosting">Hosting</string>
+    <string name="my_events_section_selected">Selected:</string>
+    <string name="my_events_section_waiting">Waiting:</string>
+    <string name="my_events_section_not_selected">Not selected:</string>
+    <string name="my_events_section_past">Past events:</string>
+    <string name="my_events_state_loading">Loading your events...</string>
+    <string name="my_events_state_empty">You have not registered for any events yet.</string>
+    <string name="my_events_state_error">Could not load your events. Please try again.</string>
+    <string name="my_events_empty_selected">Nothing selected yet.</string>
+    <string name="my_events_empty_waiting">No events are waiting for results.</string>
+    <string name="my_events_empty_not_selected">No finished results yet.</string>
+    <string name="my_events_empty_past">No past events yet.</string>
 
     <plurals name="event_detail_entrant_count">
         <item quantity="one">%d Entrant</item>

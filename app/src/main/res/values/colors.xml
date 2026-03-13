@@ -17,4 +17,6 @@
     <color name="bottom_nav_bg">#FF020408</color>
     <color name="bottom_nav_selected">#FF8D93A1</color>
     <color name="bottom_nav_unselected">#FFF6F7F9</color>
+    <color name="my_events_tab_inactive">#FF8D93A1</color>
+    <color name="my_events_section_empty">#FF8D93A1</color>
 </resources>

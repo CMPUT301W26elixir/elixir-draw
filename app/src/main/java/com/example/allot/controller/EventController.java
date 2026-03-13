@@ -155,6 +155,64 @@ public class EventController {
                 });
     }
 
+    public void getRegisteredEventsForUser(String deviceId, EventListCallback callback) {
+        database.collection("events")
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        List<Event> registeredEvents = buildRegisteredEventList(task.getResult(), deviceId);
+                        callback.onCallback(registeredEvents);
+                    } else {
+                        Exception exception = task.getException();
+                        Log.e(TAG, "Error getting registered events", exception);
+                        callback.onError(exception);
+                    }
+                });
+    }
+
+    private List<Event> buildRegisteredEventList(QuerySnapshot querySnapshot, String deviceId) {
+        List<Event> registeredEvents = new ArrayList<>();
+
+        if (querySnapshot == null || isBlank(deviceId)) {
+            return registeredEvents;
+        }
+
+        for (QueryDocumentSnapshot document : querySnapshot) {
+            Event event = document.toObject(Event.class);
+            hydrateMissingFields(event, document);
+
+            if (!isUserRegistered(event, deviceId)) {
+                continue;
+            }
+
+            registeredEvents.add(event);
+        }
+
+        Collections.sort(registeredEvents, Comparator
+                .comparingLong(this::getEventDateSortValue)
+                .thenComparing(event -> safeString(event.title), String.CASE_INSENSITIVE_ORDER));
+        return registeredEvents;
+    }
+
+    private boolean isUserRegistered(Event event, String deviceId) {
+        if (event == null || isBlank(deviceId)) {
+            return false;
+        }
+
+        if (event.waitingList != null) {
+            if (containsUser(event.waitingList.list, deviceId) || containsUser(event.waitingList.chosen, deviceId)) {
+                return true;
+            }
+        }
+
+        return containsUser(event.chosen, deviceId)
+                || containsUser(event.enrolled, deviceId)
+                || containsUser(event.notEnrolled, deviceId);
+    }
+
+    private boolean containsUser(List<String> users, String deviceId) {
+        return users != null && users.contains(deviceId);
+    }
     // Waits for internet to finish
     public interface EventListCallback {
         void onCallback(List<Event> events);
@@ -287,3 +345,4 @@ public class EventController {
         return safeString(value).trim().isEmpty();
     }
 }
+
