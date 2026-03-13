@@ -90,20 +90,57 @@
                 android:textColor="@color/white"
                 android:textSize="16sp" />
 
-            <EditText
-                android:id="@+id/startDateInput"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="44dp"
                 android:layout_marginTop="8dp"
-                android:background="@drawable/bg_profile_input"
-                android:fontFamily="@font/varela_round_regular"
-                android:hint="@string/create_event_start_date_hint"
-                android:inputType="date"
-                android:paddingStart="12dp"
-                android:paddingEnd="12dp"
-                android:textColor="@color/white"
-                android:textColorHint="@color/text_secondary"
-                android:textSize="16sp" />
+                android:orientation="horizontal">
+
+                <Spinner
+                    android:id="@+id/startMonthSpinner"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1.3"
+                    android:background="@drawable/bg_profile_input"
+                    android:entries="@array/create_event_months"
+                    android:paddingStart="12dp"
+                    android:paddingEnd="12dp"
+                    android:spinnerMode="dropdown" />
+
+                <EditText
+                    android:id="@+id/startDayInput"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_marginStart="8dp"
+                    android:layout_weight="0.7"
+                    android:background="@drawable/bg_profile_input"
+                    android:fontFamily="@font/varela_round_regular"
+                    android:hint="@string/create_event_day_hint"
+                    android:inputType="number"
+                    android:maxLength="2"
+                    android:paddingStart="12dp"
+                    android:paddingEnd="12dp"
+                    android:textColor="@color/white"
+                    android:textColorHint="@color/text_secondary"
+                    android:textSize="16sp" />
+
+                <EditText
+                    android:id="@+id/startYearInput"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_marginStart="8dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/bg_profile_input"
+                    android:fontFamily="@font/varela_round_regular"
+                    android:hint="@string/create_event_year_hint"
+                    android:inputType="number"
+                    android:maxLength="4"
+                    android:paddingStart="12dp"
+                    android:paddingEnd="12dp"
+                    android:textColor="@color/white"
+                    android:textColorHint="@color/text_secondary"
+                    android:textSize="16sp" />
+            </LinearLayout>
 
             <TextView
                 android:layout_width="wrap_content"
@@ -189,20 +226,57 @@
                 android:textColor="@color/white"
                 android:textSize="16sp" />
 
-            <EditText
-                android:id="@+id/registrationStartInput"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="44dp"
                 android:layout_marginTop="8dp"
-                android:background="@drawable/bg_profile_input"
-                android:fontFamily="@font/varela_round_regular"
-                android:hint="@string/create_event_registration_start_hint"
-                android:inputType="date"
-                android:paddingStart="12dp"
-                android:paddingEnd="12dp"
-                android:textColor="@color/white"
-                android:textColorHint="@color/text_secondary"
-                android:textSize="16sp" />
+                android:orientation="horizontal">
+
+                <Spinner
+                    android:id="@+id/registrationStartMonthSpinner"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1.3"
+                    android:background="@drawable/bg_profile_input"
+                    android:entries="@array/create_event_months"
+                    android:paddingStart="12dp"
+                    android:paddingEnd="12dp"
+                    android:spinnerMode="dropdown" />
+
+                <EditText
+                    android:id="@+id/registrationStartDayInput"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_marginStart="8dp"
+                    android:layout_weight="0.7"
+                    android:background="@drawable/bg_profile_input"
+                    android:fontFamily="@font/varela_round_regular"
+                    android:hint="@string/create_event_day_hint"
+                    android:inputType="number"
+                    android:maxLength="2"
+                    android:paddingStart="12dp"
+                    android:paddingEnd="12dp"
+                    android:textColor="@color/white"
+                    android:textColorHint="@color/text_secondary"
+                    android:textSize="16sp" />
+
+                <EditText
+                    android:id="@+id/registrationStartYearInput"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_marginStart="8dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/bg_profile_input"
+                    android:fontFamily="@font/varela_round_regular"
+                    android:hint="@string/create_event_year_hint"
+                    android:inputType="number"
+                    android:maxLength="4"
+                    android:paddingStart="12dp"
+                    android:paddingEnd="12dp"
+                    android:textColor="@color/white"
+                    android:textColorHint="@color/text_secondary"
+                    android:textSize="16sp" />
+            </LinearLayout>
 
             <TextView
                 android:layout_width="wrap_content"
@@ -213,20 +287,57 @@
                 android:textColor="@color/white"
                 android:textSize="16sp" />
 
-            <EditText
-                android:id="@+id/registrationEndInput"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="44dp"
                 android:layout_marginTop="8dp"
-                android:background="@drawable/bg_profile_input"
-                android:fontFamily="@font/varela_round_regular"
-                android:hint="@string/create_event_registration_end_hint"
-                android:inputType="date"
-                android:paddingStart="12dp"
-                android:paddingEnd="12dp"
-                android:textColor="@color/white"
-                android:textColorHint="@color/text_secondary"
-                android:textSize="16sp" />
+                android:orientation="horizontal">
+
+                <Spinner
+                    android:id="@+id/registrationEndMonthSpinner"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1.3"
+                    android:background="@drawable/bg_profile_input"
+                    android:entries="@array/create_event_months"
+                    android:paddingStart="12dp"
+                    android:paddingEnd="12dp"
+                    android:spinnerMode="dropdown" />
+
+                <EditText
+                    android:id="@+id/registrationEndDayInput"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_marginStart="8dp"
+                    android:layout_weight="0.7"
+                    android:background="@drawable/bg_profile_input"
+                    android:fontFamily="@font/varela_round_regular"
+                    android:hint="@string/create_event_day_hint"
+                    android:inputType="number"
+                    android:maxLength="2"
+                    android:paddingStart="12dp"
+                    android:paddingEnd="12dp"
+                    android:textColor="@color/white"
+                    android:textColorHint="@color/text_secondary"
+                    android:textSize="16sp" />
+
+                <EditText
+                    android:id="@+id/registrationEndYearInput"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_marginStart="8dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/bg_profile_input"
+                    android:fontFamily="@font/varela_round_regular"
+                    android:hint="@string/create_event_year_hint"
+                    android:inputType="number"
+                    android:maxLength="4"
+                    android:paddingStart="12dp"
+                    android:paddingEnd="12dp"
+                    android:textColor="@color/white"
+                    android:textColorHint="@color/text_secondary"
+                    android:textSize="16sp" />
+            </LinearLayout>
         </LinearLayout>
     </ScrollView>
 

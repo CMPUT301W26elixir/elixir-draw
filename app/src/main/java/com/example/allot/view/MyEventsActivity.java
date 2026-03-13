@@ -23,6 +23,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MyEventsActivity extends AppCompatActivity {
+    public static final String EXTRA_INITIAL_TAB = "initial_tab";
+    public static final String INITIAL_TAB_HOSTING = "hosting";
     private BottomNavBarView bottomNavBar;
     private TextView registeredTabText;
     private TextView hostingTabText;
@@ -55,7 +57,11 @@ public class MyEventsActivity extends AppCompatActivity {
         bindViews();
         setupTopTabs();
         setupBottomNav();
-        showRegisteredTab();
+        if (INITIAL_TAB_HOSTING.equals(getIntent().getStringExtra(EXTRA_INITIAL_TAB))) {
+            showHostingTab();
+        } else {
+            showRegisteredTab();
+        }
     }
 
     @Override
@@ -402,6 +408,10 @@ public class MyEventsActivity extends AppCompatActivity {
         HOSTING
     }
 }
+
+
+
+
 
 
 
