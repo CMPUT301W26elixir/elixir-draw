@@ -4,6 +4,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -18,6 +19,7 @@ public class EventListAdapter extends RecyclerView.Adapter<EventListAdapter.Even
 
     public interface OnEventClickListener {
         void onEventClick(EventListItem event);
+        void onHeartClick(EventListItem event, int position); // ADDED for the save feature
     }
 
     private final List<EventListItem> events;
@@ -51,6 +53,25 @@ public class EventListAdapter extends RecyclerView.Adapter<EventListAdapter.Even
         holder.priceText.setText(event.price);
         holder.daysLeftText.setText(event.daysLeft);
 
+        // --- ADDED: Heart UI Toggle Logic ---
+        if (event.isSaved) {
+            holder.heartIcon.setImageResource(R.drawable.ic_heart_filled);
+            holder.heartIcon.setColorFilter(holder.itemView.getContext().getResources().getColor(R.color.bottom_nav_selected));
+        } else {
+            // Uses your ic_heart_outline.xml
+            holder.heartIcon.setImageResource(R.drawable.ic_heart_outline);
+            holder.heartIcon.setColorFilter(holder.itemView.getContext().getResources().getColor(R.color.white));
+        }
+
+        holder.heartIcon.setOnClickListener(v -> {
+            if (onEventClickListener != null) {
+                event.isSaved = !event.isSaved; // Visually toggle immediately
+                notifyItemChanged(position);
+                onEventClickListener.onHeartClick(event, position);
+            }
+        });
+        // -------------------------------------
+
         int imageBackground = (position % 2 == 0) ? R.drawable.bg_event_image_one : R.drawable.bg_event_image_two;
         holder.imageFrame.setBackgroundResource(imageBackground);
         holder.itemView.setOnClickListener(view -> {
@@ -67,6 +88,7 @@ public class EventListAdapter extends RecyclerView.Adapter<EventListAdapter.Even
 
     static class EventViewHolder extends RecyclerView.ViewHolder {
         FrameLayout imageFrame;
+        ImageView heartIcon;
         TextView titleText;
         TextView streetText;
         TextView dateText;
@@ -76,6 +98,7 @@ public class EventListAdapter extends RecyclerView.Adapter<EventListAdapter.Even
         EventViewHolder(@NonNull View itemView) {
             super(itemView);
             imageFrame = itemView.findViewById(R.id.imageFrame);
+            heartIcon = itemView.findViewById(R.id.heartIcon);
             titleText = itemView.findViewById(R.id.titleText);
             streetText = itemView.findViewById(R.id.streetText);
             dateText = itemView.findViewById(R.id.dateText);

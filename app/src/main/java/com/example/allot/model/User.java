@@ -14,9 +14,11 @@ public class User {
     public ArrayList<String> history;
 
     public ArrayList<String> myEvents;
+    public ArrayList<String> savedEvents;
     public User(){
         this.history = new ArrayList<String>();
         this.myEvents = new ArrayList<String>();
+        this.savedEvents = new ArrayList<String>();
     }
     public User(String deviceId, String firstname, String lastName, String email, String phone, String role) {
         this.deviceId = deviceId;
@@ -28,6 +30,7 @@ public class User {
         this.role = role;
         this.history = new ArrayList<String>();
         this.myEvents = new ArrayList<String>();
+        this.savedEvents = new ArrayList<String>();
     }
 
     public String getDeviceId() {
@@ -115,6 +118,19 @@ public class User {
     }
     public ArrayList<String> getEvents(){
         return this.myEvents;
+    }
+    public void addSavedEvent(String eventID) {
+        if (!this.savedEvents.contains(eventID)) {
+            this.savedEvents.add(eventID);
+        }
+    }
+
+    public void removeSavedEvent(String eventID) {
+        this.savedEvents.remove(eventID);
+    }
+
+    public ArrayList<String> getSavedEvents() {
+        return this.savedEvents;
     }
 
 

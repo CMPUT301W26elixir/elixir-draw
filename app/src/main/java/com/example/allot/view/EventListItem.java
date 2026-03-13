@@ -11,6 +11,7 @@ public class EventListItem {
     public String daysLeft;
     public String category;
     public String posterUrl;
+    public boolean isSaved;
 
     public EventListItem(String title, String street, String date, String price, String daysLeft) {
         this(null, title, street, date, price, daysLeft, null, null);
