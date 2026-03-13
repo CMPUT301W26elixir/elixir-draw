@@ -207,9 +207,14 @@ public class CreateEventActivity extends AppCompatActivity {
             }
 
             Toast.makeText(this, R.string.create_event_save_success, Toast.LENGTH_SHORT).show();
-            Intent intent = new Intent(this, MyEventsActivity.class);
-            intent.putExtra(MyEventsActivity.EXTRA_INITIAL_TAB, MyEventsActivity.INITIAL_TAB_HOSTING);
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            Intent intent = new Intent(this, CreateEventSuccessActivity.class);
+            intent.putExtra(CreateEventSuccessActivity.EXTRA_EVENT_ID, event.eventId);
+            intent.putExtra(CreateEventSuccessActivity.EXTRA_EVENT_TITLE, event.title);
+            intent.putExtra(CreateEventSuccessActivity.EXTRA_EVENT_LOCATION, event.location);
+            intent.putExtra(CreateEventSuccessActivity.EXTRA_EVENT_DATE, EventDisplayFormatter.date(event));
+            intent.putExtra(CreateEventSuccessActivity.EXTRA_EVENT_PRICE, EventDisplayFormatter.price(event));
+            intent.putExtra(CreateEventSuccessActivity.EXTRA_EVENT_DEADLINE, EventDisplayFormatter.deadline(event));
+            intent.putExtra(CreateEventSuccessActivity.EXTRA_EVENT_CATEGORY, event.category);
             startActivity(intent);
             overridePendingTransition(0, 0);
             finish();
@@ -261,3 +266,5 @@ public class CreateEventActivity extends AppCompatActivity {
         }
     }
 }
+
+

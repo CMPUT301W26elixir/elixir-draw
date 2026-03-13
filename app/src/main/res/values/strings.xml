@@ -232,4 +232,11 @@ This action cannot be undone.</string>
         <item quantity="one">%d Entrant</item>
         <item quantity="other">%d Entrants</item>
     </plurals>
+    <string name="create_event_success_title">Your event has been created!</string>
+    <string name="create_event_success_generate_qr">Generate QR code</string>
+    <string name="create_event_success_view_event">View Event Page</string>
+    <string name="create_event_success_qr_placeholder">QR code generation coming soon.</string>
 </resources>
+
+
+
