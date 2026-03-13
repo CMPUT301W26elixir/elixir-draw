@@ -1,4 +1,4 @@
-package com.example.allot.controller;
+package com.example.allot.common.core.firebase;
 
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;

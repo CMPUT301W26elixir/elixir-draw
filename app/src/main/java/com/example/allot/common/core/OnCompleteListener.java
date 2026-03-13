@@ -1,4 +1,4 @@
-package com.example.allot.common;
+package com.example.allot.common.core;
 
 /**
  * A simple listener for async operations.
