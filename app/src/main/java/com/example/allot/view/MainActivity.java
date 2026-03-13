@@ -1,5 +1,6 @@
 package com.example.allot.view;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -47,6 +48,8 @@ public class MainActivity extends AppCompatActivity {
         eventListAdapter = new EventListAdapter(new ArrayList<>());
         recyclerView.setAdapter(eventListAdapter);
         bottomNavBar.setSelectedTab(BottomNavBarView.Tab.EXPLORE);
+        bottomNavBar.setOnTabClickListener(BottomNavBarView.Tab.PROFILE,
+                view -> openProfileScreen());
 
         eventController = new EventController();
         setupSearchInput();
@@ -63,6 +66,11 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+    }
+
+    private void openProfileScreen() {
+        startActivity(new Intent(MainActivity.this, ProfileActivity.class));
+        overridePendingTransition(0, 0);
     }
 
     private void setupSearchInput() {
