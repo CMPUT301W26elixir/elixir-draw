@@ -458,8 +458,8 @@ public class EventDetailActivity extends AppCompatActivity {
     private String buildSelectionCriteriaText() {
         int selectedCount = 0;
         if (currentEvent != null) {
-            if (currentEvent.choosingLimit > 0) {
-                selectedCount = currentEvent.choosingLimit;
+            if (currentEvent.capacity > 0) {
+                selectedCount = currentEvent.capacity;
             } else if (currentEvent.capacity > 0) {
                 selectedCount = currentEvent.capacity;
             }

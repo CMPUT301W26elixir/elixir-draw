@@ -30,15 +30,13 @@ public class EventListItem {
     }
 
     public static EventListItem fromEvent(Event event) {
-        return new EventListItem(
-                event.eventId,
-                event.title,
-                EventDisplayFormatter.location(event),
-                EventDisplayFormatter.date(event),
-                EventDisplayFormatter.price(event),
-                EventDisplayFormatter.deadline(event),
-                event.category,
-                event.posterUrl
-        );
+        String title    = event.title    != null && !event.title.trim().isEmpty()
+                ? event.title.trim() : "Untitled Event";
+        String location = event.location != null && !event.location.trim().isEmpty()
+                ? event.location.trim() : "Location TBA";
+        String eventId  = event.eventId  != null ? event.eventId : "";
+        String category = event.category != null ? event.category : "";
+        String posterUrl = event.posterUrl;
+        return new EventListItem(eventId, title, location, "", "", "", category, posterUrl);
     }
 }

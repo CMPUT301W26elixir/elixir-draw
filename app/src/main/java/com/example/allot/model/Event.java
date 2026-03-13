@@ -3,6 +3,9 @@ package com.example.allot.model;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.text.SimpleDateFormat;
+import java.util.Locale;
+import java.util.concurrent.TimeUnit;
 
 public class Event {
     public String eventId;
@@ -54,6 +57,36 @@ public class Event {
             this.galleryUrls = new ArrayList<>();
         }
         this.galleryUrls.add(newPhotoUrl);
+    }
+
+    public String getBrowseTitleText() {
+        return (title == null || title.trim().isEmpty()) ? "Untitled Event" : title;
+    }
+
+    public String getBrowseLocationText() {
+        return (location == null || location.trim().isEmpty()) ? "Location TBA" : location;
+    }
+
+    public String getBrowseDateText() {
+        if (eventDate == null) return "Date TBA";
+        return new SimpleDateFormat("MMM d, yyyy", Locale.getDefault()).format(eventDate);
+    }
+
+    public String getBrowsePriceText() {
+        if (price == null || price <= 0) return "Free";
+        if (Math.rint(price) == price)
+            return String.format(Locale.getDefault(), "$%.0f", price);
+        return String.format(Locale.getDefault(), "$%.2f", price);
+    }
+
+    public String getBrowseDeadlineText() {
+        if (registrationDeadline == null) return "Deadline TBA";
+        long ms = registrationDeadline.getTime() - System.currentTimeMillis();
+        if (ms <= 0) return "Closed";
+        long days = TimeUnit.MILLISECONDS.toDays(ms);
+        if (days == 0) return "Ends Today";
+        if (days == 1) return "1 Day Left";
+        return days + " Days Left";
     }
 
     public void lottery(){

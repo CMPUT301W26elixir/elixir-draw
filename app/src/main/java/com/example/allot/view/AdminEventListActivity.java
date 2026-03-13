@@ -90,7 +90,17 @@ public class AdminEventListActivity extends AppCompatActivity {
     }
 
     private void setupSearch() {
-        eventListAdapter = new EventListAdapter(new ArrayList<>(), this::onEventClicked);
+        eventListAdapter = new EventListAdapter(new ArrayList<>(),
+                new EventListAdapter.OnEventClickListener() {
+                    @Override
+                    public void onEventClick(EventListItem event) {
+                        onEventClicked(event);
+                    }
+                    @Override
+                    public void onHeartClick(EventListItem event, int position) {
+                        // No-op: heart/save is not relevant on the admin screen
+                    }
+                });
         recyclerView.setAdapter(eventListAdapter);
 
         searchInput.addTextChangedListener(new TextWatcher() {
@@ -167,7 +177,7 @@ public class AdminEventListActivity extends AppCompatActivity {
 
         for (Event event : allEvents) {
             if (matchesSearch(event, term)) {
-                filtered.add(EventListItem.fromEvent(event));
+                filtered.add(toListItem(event));
             }
         }
 
@@ -302,6 +312,15 @@ public class AdminEventListActivity extends AppCompatActivity {
         stateText.setVisibility(View.VISIBLE);
         stateText.setText(R.string.browse_state_error);
     }
+
+    private EventListItem toListItem(Event event) {
+        String title    = event.title    != null ? event.title    : "Untitled Event";
+        String location = event.location != null ? event.location : "Location TBA";
+        String category = event.category != null ? event.category : "";
+        String eventId  = event.eventId  != null ? event.eventId  : "";
+        return new EventListItem(eventId, title, location, "", "", "", category, null);
+    }
+
     private int dpToPx(int dp) {
         return Math.round(dp * getResources().getDisplayMetrics().density);
     }
