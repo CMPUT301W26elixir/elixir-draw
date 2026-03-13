@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.HashMap;
 
 public class Event {
+
     public String eventId;
     public String organizerId;
     public String title;
@@ -17,26 +18,33 @@ public class Event {
     public Date registrationOpen;
     public Date registrationDeadline;
     public String status;
-    public String posterUrl;  // This is the main image for the event
+    public String posterUrl;
 
     public int limit = -1;
     public WaitingList waitingList;
+
     public ArrayList<String> chosen;
     public ArrayList<String> enrolled;
     public ArrayList<String> cancelled;
     public ArrayList<String> notEnrolled;
 
-    public ArrayList<String> galleryUrls; // This is for the Gallery
+    public ArrayList<String> galleryUrls;
 
     public Boolean geoloc;
 
-    // Required for Firestore document deserialization.
+    /**
+     * Default constructor required for Firestore document deserialization.
+     * Initializes list fields to avoid null references.
+     */
     public Event() {
         this.galleryUrls = new ArrayList<>();
         this.cancelled = new ArrayList<>();
     }
 
-    // Organizer Creation
+    /**
+     * Creates a new Event object when an organizer creates an event.
+     * Initializes the waiting list and default event state.
+     */
     public Event(String eventId, String organizerId, String title, int limit) {
         this.eventId = eventId;
         this.organizerId = organizerId;
@@ -48,7 +56,9 @@ public class Event {
         this.waitingList = new WaitingList(limit);
     }
 
-    //Helper to add a photo to the gallery
+    /**
+     * Adds a new photo URL to the event gallery.
+     */
     public void addPhotoToGallery(String newPhotoUrl) {
         if (this.galleryUrls == null) {
             this.galleryUrls = new ArrayList<>();
@@ -56,24 +66,48 @@ public class Event {
         this.galleryUrls.add(newPhotoUrl);
     }
 
-    public void lottery(){
+    /**
+     * Runs the event lottery selection process using the waiting list.
+     * Selected participants are stored in the chosen list.
+     *
+     * AI assistance used for structuring the waiting list lottery selection logic.
+     * Tool: ChatGPT (OpenAI), 2026.
+     */
+    public void lottery() {
         this.waitingList.selectedList();
         this.chosen = this.waitingList.chosen;
     }
 
-    public void enrolled(){
+    /**
+     * Retrieves the list of users who successfully enrolled after the lottery.
+     */
+    public void enrolled() {
         this.enrolled = this.waitingList.enrolled();
     }
 
-    public void notenrolled(){
+    /**
+     * Retrieves the list of users who were not enrolled after the lottery.
+     */
+    public void notenrolled() {
         this.notEnrolled = this.waitingList.notEnrolled();
     }
+
+    /**
+     * Returns the event's waiting list object.
+     * If it does not exist yet, it is initialized using the event limit.
+     */
     public WaitingList getWaitingList() {
-        if (waitingList == null) waitingList = new WaitingList(limit);
+        if (waitingList == null) {
+            waitingList = new WaitingList(limit);
+        }
         return waitingList;
     }
 
-    public HashMap<String, Boolean> status(){
+    /**
+     * Returns the status map of users in the waiting list.
+     * The map tracks each user's selection or enrollment state.
+     */
+    public HashMap<String, Boolean> status() {
         return this.waitingList.status;
     }
 }
