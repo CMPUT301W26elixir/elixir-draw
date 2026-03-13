@@ -13,8 +13,6 @@ public class WaitingList {
     public HashMap<String, Boolean> status;  // enrolled status
 
     public int limit = -1;               // max waiting list size
-
-    public int choosinglimit;
     // Required for Firestore document deserialization.
     public WaitingList(){
         this.list = new ArrayList<>();
@@ -23,12 +21,11 @@ public class WaitingList {
     }
 
     // Constructor
-    public WaitingList(int limit, int choosingLimit){
+    public WaitingList(int limit){
         this.limit = limit;
         this.list = new ArrayList<>();
         this.chosen = new ArrayList<>();
         this.status = new HashMap<>();
-        this.choosinglimit = choosingLimit;
     }
 
     // Add entrant to waiting list
@@ -43,7 +40,7 @@ public class WaitingList {
         ArrayList<Integer> chosenIndex = new ArrayList<>();
         Random rand = new Random();
 
-        for (int i = 0; i < this.choosinglimit; i++){
+        for (int i = 0; i < this.limit; i++){
             if (list.size() == 0) break;
 
             int index = rand.nextInt(this.list.size());
@@ -100,4 +97,3 @@ public class WaitingList {
         return notSigned;
     }
 }
-

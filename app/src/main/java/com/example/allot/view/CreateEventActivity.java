@@ -171,7 +171,7 @@ public class CreateEventActivity extends AppCompatActivity {
             return;
         }
 
-        Event event = new Event(UUID.randomUUID().toString(), userController.getCurrentDeviceId(), title, participants, participants);
+        Event event = new Event(UUID.randomUUID().toString(), userController.getCurrentDeviceId(), title, participants);
         event.title = title;
         event.location = location;
         event.eventDate = eventDate;
@@ -179,7 +179,6 @@ public class CreateEventActivity extends AppCompatActivity {
         event.description = description;
         event.capacity = participants;
         event.limit = participants;
-        event.choosingLimit = participants;
         event.registrationOpen = registrationStart;
         event.registrationDeadline = registrationEnd;
         event.status = "open";

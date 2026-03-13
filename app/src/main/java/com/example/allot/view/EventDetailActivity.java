@@ -44,6 +44,7 @@ public class EventDetailActivity extends AppCompatActivity {
     private boolean isLeavingWaitlist;
     private Event currentEvent;
     private boolean isCurrentUserOrganizer;
+    private boolean shouldRefreshOnResume;
 
     private FrameLayout heroImageFrame;
     private TextView heroDeadlineText;
@@ -154,13 +155,13 @@ public class EventDetailActivity extends AppCompatActivity {
     }
 
     private void bindEvent(Event event) {
-        titleText.setText(event.getBrowseTitleText());
-        priceText.setText(event.getBrowsePriceText());
+        titleText.setText(event.title);
+        priceText.setText(EventDisplayFormatter.price(event));
         locationText.setVisibility(View.VISIBLE);
         locationText.setText(buildLocationText(event.location));
         dateText.setVisibility(View.VISIBLE);
         dateText.setText(buildEventDateText(formatDate(event.eventDate)));
-        bindOptionalText(heroDeadlineText, event.getBrowseDeadlineText());
+        bindOptionalText(heroDeadlineText, EventDisplayFormatter.deadline(event));
         bindOptionalText(descriptionText, cleanText(event.description));
 
         registrationOpenText.setVisibility(View.VISIBLE);
@@ -257,16 +258,17 @@ public class EventDetailActivity extends AppCompatActivity {
             return;
         }
 
+        shouldRefreshOnResume = true;
         Intent intent = new Intent(this, ManageEventActivity.class);
         intent.putExtra(ManageEventActivity.EXTRA_EVENT_ID, currentEventId);
         intent.putExtra(ManageEventActivity.EXTRA_EVENT_TITLE,
-                currentEvent == null ? getIntent().getStringExtra(EXTRA_EVENT_TITLE) : currentEvent.getBrowseTitleText());
+                currentEvent == null ? getIntent().getStringExtra(EXTRA_EVENT_TITLE) : currentEvent.title);
         intent.putExtra(ManageEventActivity.EXTRA_EVENT_LOCATION,
                 currentEvent == null ? getIntent().getStringExtra(EXTRA_EVENT_LOCATION) : buildLocationText(currentEvent.location));
         intent.putExtra(ManageEventActivity.EXTRA_EVENT_DATE,
                 currentEvent == null ? getIntent().getStringExtra(EXTRA_EVENT_DATE) : formatLongDate(currentEvent.eventDate));
         intent.putExtra(ManageEventActivity.EXTRA_EVENT_PRICE,
-                currentEvent == null ? getIntent().getStringExtra(EXTRA_EVENT_PRICE) : currentEvent.getBrowsePriceText());
+                currentEvent == null ? getIntent().getStringExtra(EXTRA_EVENT_PRICE) : EventDisplayFormatter.price(currentEvent));
         intent.putExtra(ManageEventActivity.EXTRA_EVENT_DESCRIPTION,
                 currentEvent == null ? null : cleanText(currentEvent.description));
         intent.putExtra(ManageEventActivity.EXTRA_EVENT_PARTICIPANTS,
@@ -279,6 +281,15 @@ public class EventDetailActivity extends AppCompatActivity {
                 currentEvent == null ? getIntent().getStringExtra(EXTRA_EVENT_CATEGORY) : currentEvent.category);
         startActivity(intent);
         overridePendingTransition(0, 0);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (shouldRefreshOnResume && !TextUtils.isEmpty(currentEventId)) {
+            shouldRefreshOnResume = false;
+            loadEventDetails();
+        }
     }
 
     private void showLotteryCriteriaDialog() {
@@ -411,10 +422,10 @@ public class EventDetailActivity extends AppCompatActivity {
     private String buildSelectionCriteriaText() {
         int selectedCount = 0;
         if (currentEvent != null) {
-            if (currentEvent.choosingLimit > 0) {
-                selectedCount = currentEvent.choosingLimit;
-            } else if (currentEvent.capacity > 0) {
+            if (currentEvent.capacity > 0) {
                 selectedCount = currentEvent.capacity;
+            } else if (currentEvent.limit > 0) {
+                selectedCount = currentEvent.limit;
             }
         }
         return getString(R.string.lottery_criteria_selection_body, selectedCount);

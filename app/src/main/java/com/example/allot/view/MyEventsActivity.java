@@ -275,9 +275,9 @@ public class MyEventsActivity extends AppCompatActivity {
         TextView locationText = cardView.findViewById(R.id.locationText);
         TextView dateText = cardView.findViewById(R.id.dateText);
 
-        titleText.setText(event.getBrowseTitleText());
-        locationText.setText(event.getBrowseLocationText());
-        dateText.setText(event.getBrowseDateText());
+        titleText.setText(event == null ? null : event.title);
+        locationText.setText(EventDisplayFormatter.location(event));
+        dateText.setText(EventDisplayFormatter.date(event));
 
         imageBackground.setBackgroundResource(shouldUsePrimaryImage(event)
                 ? R.drawable.bg_event_image_one
@@ -372,11 +372,11 @@ public class MyEventsActivity extends AppCompatActivity {
 
         Intent intent = new Intent(this, EventDetailActivity.class);
         intent.putExtra(EventDetailActivity.EXTRA_EVENT_ID, event.eventId);
-        intent.putExtra(EventDetailActivity.EXTRA_EVENT_TITLE, event.getBrowseTitleText());
-        intent.putExtra(EventDetailActivity.EXTRA_EVENT_LOCATION, event.getBrowseLocationText());
-        intent.putExtra(EventDetailActivity.EXTRA_EVENT_DATE, event.getBrowseDateText());
-        intent.putExtra(EventDetailActivity.EXTRA_EVENT_PRICE, event.getBrowsePriceText());
-        intent.putExtra(EventDetailActivity.EXTRA_EVENT_DEADLINE, event.getBrowseDeadlineText());
+        intent.putExtra(EventDetailActivity.EXTRA_EVENT_TITLE, event.title);
+        intent.putExtra(EventDetailActivity.EXTRA_EVENT_LOCATION, EventDisplayFormatter.location(event));
+        intent.putExtra(EventDetailActivity.EXTRA_EVENT_DATE, EventDisplayFormatter.date(event));
+        intent.putExtra(EventDetailActivity.EXTRA_EVENT_PRICE, EventDisplayFormatter.price(event));
+        intent.putExtra(EventDetailActivity.EXTRA_EVENT_DEADLINE, EventDisplayFormatter.deadline(event));
         intent.putExtra(EventDetailActivity.EXTRA_EVENT_CATEGORY, event.category);
         startActivity(intent);
     }
@@ -427,8 +427,6 @@ public class MyEventsActivity extends AppCompatActivity {
         // You CAN call finish() here if pasting into MyEventsActivity or ProfileActivity.
     }
 }
-
-
 
 
 
