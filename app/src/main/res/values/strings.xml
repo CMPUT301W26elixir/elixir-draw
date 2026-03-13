@@ -236,7 +236,13 @@ This action cannot be undone.</string>
     <string name="create_event_success_generate_qr">Generate QR code</string>
     <string name="create_event_success_view_event">View Event Page</string>
     <string name="create_event_success_qr_placeholder">QR code generation coming soon.</string>
+    <string name="event_qr_title">Share your event through this QR code!</string>
+    <string name="event_qr_generation_failure">Could not generate this QR code right now.</string>
+    <string name="event_qr_image_description">QR code for this event</string>
 </resources>
+
+
+
 
 
 
