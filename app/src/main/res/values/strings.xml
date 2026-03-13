@@ -70,6 +70,12 @@ This action cannot be undone.</string>
     <string name="event_detail_manage_event_coming_soon">Manage Event coming soon.</string>
     <string name="manage_event_title">Manage Event</string>
     <string name="manage_event_placeholder">Manage event screen coming soon.</string>
+    <string name="manage_event_qr">QR</string>
+    <string name="manage_event_lottery_section">Entrants &amp; Lottery</string>
+    <string name="manage_event_banner_label">Upload Banner *</string>
+    <string name="manage_event_banner_placeholder">Banner upload coming soon</string>
+    <string name="manage_event_save_changes">Save Changes</string>
+    <string name="manage_event_save_stub">Save changes is UI-only for now.</string>
     <string name="event_detail_waitlist_joined_message">You are on the waiting list for this event.</string>
     <string name="event_detail_registration_opens">Registration opens: %1$s</string>
     <string name="event_detail_registration_closes">Registration closes: %1$s</string>
@@ -166,7 +172,6 @@ This action cannot be undone.</string>
         <item quantity="other">%d Entrants</item>
     </plurals>
 </resources>
-
 
 
 

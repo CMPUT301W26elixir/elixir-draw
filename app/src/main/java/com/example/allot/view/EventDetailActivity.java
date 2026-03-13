@@ -259,6 +259,24 @@ public class EventDetailActivity extends AppCompatActivity {
 
         Intent intent = new Intent(this, ManageEventActivity.class);
         intent.putExtra(ManageEventActivity.EXTRA_EVENT_ID, currentEventId);
+        intent.putExtra(ManageEventActivity.EXTRA_EVENT_TITLE,
+                currentEvent == null ? getIntent().getStringExtra(EXTRA_EVENT_TITLE) : currentEvent.getBrowseTitleText());
+        intent.putExtra(ManageEventActivity.EXTRA_EVENT_LOCATION,
+                currentEvent == null ? getIntent().getStringExtra(EXTRA_EVENT_LOCATION) : buildLocationText(currentEvent.location));
+        intent.putExtra(ManageEventActivity.EXTRA_EVENT_DATE,
+                currentEvent == null ? getIntent().getStringExtra(EXTRA_EVENT_DATE) : formatLongDate(currentEvent.eventDate));
+        intent.putExtra(ManageEventActivity.EXTRA_EVENT_PRICE,
+                currentEvent == null ? getIntent().getStringExtra(EXTRA_EVENT_PRICE) : currentEvent.getBrowsePriceText());
+        intent.putExtra(ManageEventActivity.EXTRA_EVENT_DESCRIPTION,
+                currentEvent == null ? null : cleanText(currentEvent.description));
+        intent.putExtra(ManageEventActivity.EXTRA_EVENT_PARTICIPANTS,
+                currentEvent == null ? null : String.valueOf(currentEvent.capacity));
+        intent.putExtra(ManageEventActivity.EXTRA_REGISTRATION_START,
+                currentEvent == null ? null : formatLongDate(currentEvent.registrationOpen));
+        intent.putExtra(ManageEventActivity.EXTRA_REGISTRATION_END,
+                currentEvent == null ? null : formatLongDate(currentEvent.registrationDeadline));
+        intent.putExtra(ManageEventActivity.EXTRA_EVENT_CATEGORY,
+                currentEvent == null ? getIntent().getStringExtra(EXTRA_EVENT_CATEGORY) : currentEvent.category);
         startActivity(intent);
         overridePendingTransition(0, 0);
     }
