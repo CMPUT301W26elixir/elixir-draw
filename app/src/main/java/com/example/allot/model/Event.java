@@ -23,6 +23,7 @@ public class Event {
     public WaitingList waitingList;
     public ArrayList<String> chosen;
     public ArrayList<String> enrolled;
+    public ArrayList<String> cancelled;
     public ArrayList<String> notEnrolled;
 
     public ArrayList<String> galleryUrls; // This is for the Gallery
@@ -32,6 +33,7 @@ public class Event {
     // Required for Firestore document deserialization.
     public Event() {
         this.galleryUrls = new ArrayList<>();
+        this.cancelled = new ArrayList<>();
     }
 
     // Organizer Creation
@@ -41,6 +43,7 @@ public class Event {
         this.title = title;
         this.status = "open";
         this.galleryUrls = new ArrayList<>();
+        this.cancelled = new ArrayList<>();
         this.limit = limit;
         this.waitingList = new WaitingList(limit);
     }

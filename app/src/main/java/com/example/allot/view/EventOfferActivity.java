@@ -102,6 +102,7 @@ public class EventOfferActivity extends AppCompatActivity {
                 .document(currentEventId)
                 .update(
                         "enrolled", FieldValue.arrayUnion(deviceId),
+                        "cancelled", FieldValue.arrayRemove(deviceId),
                         "notEnrolled", FieldValue.arrayRemove(deviceId),
                         "waitingList.status." + deviceId, true
                 )
@@ -167,6 +168,9 @@ public class EventOfferActivity extends AppCompatActivity {
         if (event.enrolled == null) {
             event.enrolled = new ArrayList<>();
         }
+        if (event.cancelled == null) {
+            event.cancelled = new ArrayList<>();
+        }
         if (event.notEnrolled == null) {
             event.notEnrolled = new ArrayList<>();
         }
@@ -175,8 +179,8 @@ public class EventOfferActivity extends AppCompatActivity {
         event.waitingList.status.remove(deviceId);
         event.chosen.remove(deviceId);
         event.enrolled.remove(deviceId);
-        if (!event.notEnrolled.contains(deviceId)) {
-            event.notEnrolled.add(deviceId);
+        if (!event.cancelled.contains(deviceId)) {
+            event.cancelled.add(deviceId);
         }
 
         if ("open".equalsIgnoreCase(cleanText(event.status))) {
@@ -191,6 +195,7 @@ public class EventOfferActivity extends AppCompatActivity {
                 .update(
                         "chosen", event.chosen,
                         "enrolled", event.enrolled,
+                        "cancelled", event.cancelled,
                         "notEnrolled", event.notEnrolled,
                         "waitingList.chosen", event.waitingList.chosen,
                         "waitingList.status", event.waitingList.status
@@ -239,7 +244,7 @@ public class EventOfferActivity extends AppCompatActivity {
             if (event.waitingList.chosen.contains(entrantId)) {
                 continue;
             }
-            if (event.notEnrolled.contains(entrantId)) {
+            if (event.cancelled.contains(entrantId)) {
                 continue;
             }
             eligibleEntrants.add(entrantId);

@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Spinner;
@@ -30,6 +31,7 @@ public class CreateEventActivity extends AppCompatActivity {
 
     private EditText eventNameInput;
     private EditText locationInput;
+    private CheckBox geolocationCheckbox;
     private Spinner startMonthSpinner;
     private EditText startDayInput;
     private EditText startYearInput;
@@ -74,6 +76,7 @@ public class CreateEventActivity extends AppCompatActivity {
     private void bindViews() {
         eventNameInput = findViewById(R.id.eventNameInput);
         locationInput = findViewById(R.id.locationInput);
+        geolocationCheckbox = findViewById(R.id.geolocationCheckbox);
         startMonthSpinner = findViewById(R.id.startMonthSpinner);
         startDayInput = findViewById(R.id.startDayInput);
         startYearInput = findViewById(R.id.startYearInput);
@@ -181,6 +184,7 @@ public class CreateEventActivity extends AppCompatActivity {
         Event event = new Event(UUID.randomUUID().toString(), userController.getCurrentDeviceId(), title, participants);
         event.title = title;
         event.location = location;
+        event.geoloc = geolocationCheckbox.isChecked();
         event.eventDate = eventDate;
         event.price = price;
         event.description = description;

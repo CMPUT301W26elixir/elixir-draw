@@ -9,6 +9,7 @@ import android.text.TextWatcher;
 import android.widget.AdapterView;
 import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Spinner;
@@ -54,6 +55,7 @@ public class ManageEventActivity extends AppCompatActivity {
     private TextView summaryDateText;
     private EditText eventNameInput;
     private EditText locationInput;
+    private CheckBox geolocationCheckbox;
     private Spinner startMonthSpinner;
     private EditText startDayInput;
     private EditText startYearInput;
@@ -78,6 +80,7 @@ public class ManageEventActivity extends AppCompatActivity {
     private String originalEventDate = "";
     private String originalRegistrationStart = "";
     private String originalRegistrationEnd = "";
+    private boolean originalGeolocationEnabled;
     private boolean isBindingEvent;
     private boolean isLoadingEvent;
     private boolean isSaving;
@@ -118,6 +121,7 @@ public class ManageEventActivity extends AppCompatActivity {
         summaryDateText = findViewById(R.id.summaryDateText);
         eventNameInput = findViewById(R.id.eventNameInput);
         locationInput = findViewById(R.id.locationInput);
+        geolocationCheckbox = findViewById(R.id.geolocationCheckbox);
         startMonthSpinner = findViewById(R.id.startMonthSpinner);
         startDayInput = findViewById(R.id.startDayInput);
         startYearInput = findViewById(R.id.startYearInput);
@@ -159,6 +163,11 @@ public class ManageEventActivity extends AppCompatActivity {
         registrationStartYearInput.addTextChangedListener(dirtyStateWatcher);
         registrationEndDayInput.addTextChangedListener(dirtyStateWatcher);
         registrationEndYearInput.addTextChangedListener(dirtyStateWatcher);
+        geolocationCheckbox.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (!isBindingEvent) {
+                updateSaveButtonState();
+            }
+        });
 
         AdapterView.OnItemSelectedListener dateSelectionListener = new AdapterView.OnItemSelectedListener() {
             @Override
@@ -234,6 +243,7 @@ public class ManageEventActivity extends AppCompatActivity {
         priceInput.setText(price);
         descriptionInput.setText(description);
         participantsInput.setText(participants);
+        geolocationCheckbox.setChecked(false);
         applySummaryImage(currentCategory);
         populateDateFields(eventDate, startMonthSpinner, startDayInput, startYearInput);
         populateDateFields(registrationStart, registrationStartMonthSpinner, registrationStartDayInput, registrationStartYearInput);
@@ -296,6 +306,7 @@ public class ManageEventActivity extends AppCompatActivity {
         locationInput.setText(cleanText(event.location));
         priceInput.setText(event.price == null ? "" : formatPriceValue(event.price));
         descriptionInput.setText(cleanText(event.description));
+        geolocationCheckbox.setChecked(Boolean.TRUE.equals(event.geoloc));
 
         int participantCount = event.capacity > 0 ? event.capacity : event.limit;
         participantsInput.setText(participantCount > 0 ? String.valueOf(participantCount) : "");
@@ -330,6 +341,9 @@ public class ManageEventActivity extends AppCompatActivity {
 
     private boolean hasDrawResults(Event event) {
         return (event.chosen != null && !event.chosen.isEmpty())
+                || (event.enrolled != null && !event.enrolled.isEmpty())
+                || (event.cancelled != null && !event.cancelled.isEmpty())
+                || (event.notEnrolled != null && !event.notEnrolled.isEmpty())
                 || (event.waitingList != null && event.waitingList.chosen != null && !event.waitingList.chosen.isEmpty());
     }
 
@@ -409,6 +423,7 @@ public class ManageEventActivity extends AppCompatActivity {
         updates.put("description", description);
         updates.put("capacity", participants);
         updates.put("limit", participants);
+        updates.put("geoloc", geolocationCheckbox.isChecked());
         updates.put("registrationOpen", registrationStart);
         updates.put("registrationDeadline", registrationEnd);
 
@@ -455,6 +470,7 @@ public class ManageEventActivity extends AppCompatActivity {
         originalEventDate = currentDateValue(startMonthSpinner, startDayInput, startYearInput);
         originalRegistrationStart = currentDateValue(registrationStartMonthSpinner, registrationStartDayInput, registrationStartYearInput);
         originalRegistrationEnd = currentDateValue(registrationEndMonthSpinner, registrationEndDayInput, registrationEndYearInput);
+        originalGeolocationEnabled = geolocationCheckbox.isChecked();
     }
 
     private boolean hasUnsavedChanges() {
@@ -463,6 +479,7 @@ public class ManageEventActivity extends AppCompatActivity {
                 || !readText(priceInput).equals(originalPrice)
                 || !readText(descriptionInput).equals(originalDescription)
                 || !readText(participantsInput).equals(originalParticipants)
+                || geolocationCheckbox.isChecked() != originalGeolocationEnabled
                 || !currentDateValue(startMonthSpinner, startDayInput, startYearInput).equals(originalEventDate)
                 || !currentDateValue(registrationStartMonthSpinner, registrationStartDayInput, registrationStartYearInput).equals(originalRegistrationStart)
                 || !currentDateValue(registrationEndMonthSpinner, registrationEndDayInput, registrationEndYearInput).equals(originalRegistrationEnd);

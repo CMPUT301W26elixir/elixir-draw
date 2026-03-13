@@ -1,6 +1,9 @@
 package com.example.allot.view;
 
+import android.Manifest;
 import android.content.ContentValues;
+import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
@@ -16,6 +19,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.core.content.FileProvider;
 
 import com.example.allot.R;
 import com.example.allot.controller.UserController;
@@ -40,10 +46,12 @@ import java.nio.charset.StandardCharsets;
 
 public class ManageEntrantsActivity extends AppCompatActivity {
     public static final String EXTRA_EVENT_ID = "event_id";
+    private static final int EXPORT_STORAGE_PERMISSION_REQUEST = 1001;
 
     private enum Tab {
         SELECTED,
         CANCELLED,
+        NOT_ENROLLED,
         ENROLLED,
         ALL
     }
@@ -57,6 +65,7 @@ public class ManageEntrantsActivity extends AppCompatActivity {
     private TextView attendeesValueText;
     private TextView selectedTabText;
     private TextView cancelledTabText;
+    private TextView notEnrolledTabText;
     private TextView enrolledTabText;
     private TextView allEntrantsTabText;
     private TextView stateText;
@@ -68,6 +77,8 @@ public class ManageEntrantsActivity extends AppCompatActivity {
     private Date currentDrawDate;
     private Tab selectedTab = Tab.SELECTED;
     private boolean isExporting;
+    private String pendingExportFileName;
+    private String pendingExportContent;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -95,6 +106,7 @@ public class ManageEntrantsActivity extends AppCompatActivity {
         attendeesValueText = findViewById(R.id.attendeesValueText);
         selectedTabText = findViewById(R.id.selectedTabText);
         cancelledTabText = findViewById(R.id.cancelledTabText);
+        notEnrolledTabText = findViewById(R.id.notEnrolledTabText);
         enrolledTabText = findViewById(R.id.enrolledTabText);
         allEntrantsTabText = findViewById(R.id.allEntrantsTabText);
         stateText = findViewById(R.id.stateText);
@@ -110,6 +122,7 @@ public class ManageEntrantsActivity extends AppCompatActivity {
     private void setupTabs() {
         selectedTabText.setOnClickListener(view -> showTab(Tab.SELECTED));
         cancelledTabText.setOnClickListener(view -> showTab(Tab.CANCELLED));
+        notEnrolledTabText.setOnClickListener(view -> showTab(Tab.NOT_ENROLLED));
         enrolledTabText.setOnClickListener(view -> showTab(Tab.ENROLLED));
         allEntrantsTabText.setOnClickListener(view -> showTab(Tab.ALL));
         exportFinalListButton.setOnClickListener(view -> exportFinalList());
@@ -185,6 +198,7 @@ public class ManageEntrantsActivity extends AppCompatActivity {
     private void updateTabState() {
         applyTabStyle(selectedTabText, selectedTab == Tab.SELECTED);
         applyTabStyle(cancelledTabText, selectedTab == Tab.CANCELLED);
+        applyTabStyle(notEnrolledTabText, selectedTab == Tab.NOT_ENROLLED);
         applyTabStyle(enrolledTabText, selectedTab == Tab.ENROLLED);
         applyTabStyle(allEntrantsTabText, selectedTab == Tab.ALL);
         updateExportButtonState();
@@ -210,6 +224,11 @@ public class ManageEntrantsActivity extends AppCompatActivity {
                 entrantIds = getCancelledEntrants(currentEvent);
                 emptyMessageRes = R.string.manage_entrants_empty_cancelled;
                 subtitleRes = R.string.manage_entrants_cancelled_subtitle;
+                break;
+            case NOT_ENROLLED:
+                entrantIds = getNotEnrolledEntrants(currentEvent);
+                emptyMessageRes = R.string.manage_entrants_empty_not_enrolled;
+                subtitleRes = R.string.manage_entrants_not_enrolled_subtitle;
                 break;
             case ENROLLED:
                 entrantIds = getEnrolledEntrants(currentEvent);
@@ -287,6 +306,13 @@ public class ManageEntrantsActivity extends AppCompatActivity {
     }
 
     private List<String> getCancelledEntrants(Event event) {
+        if (event.cancelled != null) {
+            return new ArrayList<>(event.cancelled);
+        }
+        return new ArrayList<>();
+    }
+
+    private List<String> getNotEnrolledEntrants(Event event) {
         if (event.notEnrolled != null) {
             return new ArrayList<>(event.notEnrolled);
         }
@@ -344,43 +370,47 @@ public class ManageEntrantsActivity extends AppCompatActivity {
         updateExportButtonState();
         exportFinalListButton.setText(R.string.manage_entrants_exporting);
 
-        List<UserCsvRow> rows = new ArrayList<>();
-        loadExportRows(enrolledEntrantIds, 0, rows);
+        List<String> exportedNames = new ArrayList<>();
+        loadExportNames(enrolledEntrantIds, 0, exportedNames);
     }
 
-    private void loadExportRows(List<String> entrantIds, int index, List<UserCsvRow> rows) {
+    private void loadExportNames(List<String> entrantIds, int index, List<String> exportedNames) {
         if (index >= entrantIds.size()) {
-            writeCsvFile(rows);
+            writeCsvFile(exportedNames);
             return;
         }
 
         String entrantId = entrantIds.get(index);
         userController.getUserByDeviceId(entrantId, (User user, boolean success) -> {
-            rows.add(buildCsvRow(entrantId, success ? user : null));
-            loadExportRows(entrantIds, index + 1, rows);
+            exportedNames.add(buildExportName(entrantId, success ? user : null));
+            loadExportNames(entrantIds, index + 1, exportedNames);
         });
     }
 
-    private UserCsvRow buildCsvRow(String entrantId, User user) {
+    private String buildExportName(String entrantId, User user) {
         if (user == null) {
-            return new UserCsvRow(entrantId, entrantId, "", "", "", "");
+            return safeCsvValue(entrantId, entrantId);
         }
-
-        return new UserCsvRow(
-                safeCsvValue(user.getName(), entrantId),
-                safeCsvValue(user.getDeviceId(), entrantId),
-                safeCsvValue(user.getFirstName(), ""),
-                safeCsvValue(user.getLastName(), ""),
-                safeCsvValue(user.getEmail(), ""),
-                safeCsvValue(user.getPhone(), "")
-        );
+        return safeCsvValue(user.getName(), entrantId);
     }
 
-    private void writeCsvFile(List<UserCsvRow> rows) {
+    private void writeCsvFile(List<String> exportedNames) {
         String fileName = buildExportFileName();
-        String csvContent = buildCsvContent(rows);
+        String csvContent = buildCsvContent(exportedNames);
 
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                    != PackageManager.PERMISSION_GRANTED) {
+                pendingExportFileName = fileName;
+                pendingExportContent = csvContent;
+                ActivityCompat.requestPermissions(
+                        this,
+                        new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                        EXPORT_STORAGE_PERMISSION_REQUEST
+                );
+                return;
+            }
+
             writeCsvFileLegacy(fileName, csvContent);
             return;
         }
@@ -392,28 +422,32 @@ public class ManageEntrantsActivity extends AppCompatActivity {
 
         Uri fileUri = getContentResolver().insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, values);
         if (fileUri == null) {
-            finishExport(false, null);
+            finishExport(false, null, null);
             return;
         }
 
         try (OutputStream outputStream = getContentResolver().openOutputStream(fileUri)) {
             if (outputStream == null) {
-                finishExport(false, null);
+                finishExport(false, null, null);
                 return;
             }
 
             outputStream.write(csvContent.getBytes(StandardCharsets.UTF_8));
             outputStream.flush();
-            finishExport(true, fileName);
+            finishExport(true, fileName, fileUri);
         } catch (IOException exception) {
-            finishExport(false, null);
+            finishExport(false, null, null);
         }
     }
 
     private void writeCsvFileLegacy(String fileName, String csvContent) {
-        File downloadsDir = getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
+        File downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
         if (downloadsDir == null) {
-            finishExport(false, null);
+            finishExport(false, null, null);
+            return;
+        }
+        if (!downloadsDir.exists() && !downloadsDir.mkdirs()) {
+            finishExport(false, null, null);
             return;
         }
 
@@ -421,22 +455,22 @@ public class ManageEntrantsActivity extends AppCompatActivity {
         try (FileOutputStream outputStream = new FileOutputStream(exportFile)) {
             outputStream.write(csvContent.getBytes(StandardCharsets.UTF_8));
             outputStream.flush();
-            finishExport(true, fileName);
+            Uri fileUri = FileProvider.getUriForFile(
+                    this,
+                    getPackageName() + ".fileprovider",
+                    exportFile
+            );
+            finishExport(true, fileName, fileUri);
         } catch (IOException exception) {
-            finishExport(false, null);
+            finishExport(false, null, null);
         }
     }
 
-    private String buildCsvContent(List<UserCsvRow> rows) {
+    private String buildCsvContent(List<String> exportedNames) {
         StringBuilder csvBuilder = new StringBuilder();
-        csvBuilder.append("Name,Device ID,First Name,Last Name,Email,Phone\n");
-        for (UserCsvRow row : rows) {
-            csvBuilder.append(escapeCsv(row.name)).append(',')
-                    .append(escapeCsv(row.deviceId)).append(',')
-                    .append(escapeCsv(row.firstName)).append(',')
-                    .append(escapeCsv(row.lastName)).append(',')
-                    .append(escapeCsv(row.email)).append(',')
-                    .append(escapeCsv(row.phone)).append('\n');
+        csvBuilder.append("Name\n");
+        for (String exportedName : exportedNames) {
+            csvBuilder.append(escapeCsv(exportedName)).append('\n');
         }
         return csvBuilder.toString();
     }
@@ -471,8 +505,10 @@ public class ManageEntrantsActivity extends AppCompatActivity {
         return fallback == null ? "" : fallback;
     }
 
-    private void finishExport(boolean success, String fileName) {
+    private void finishExport(boolean success, String fileName, Uri fileUri) {
         isExporting = false;
+        pendingExportFileName = null;
+        pendingExportContent = null;
         exportFinalListButton.setText(R.string.manage_entrants_export_final_list);
         updateExportButtonState();
 
@@ -481,23 +517,44 @@ public class ManageEntrantsActivity extends AppCompatActivity {
                 ? getString(messageRes, fileName)
                 : getString(messageRes);
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+
+        if (success && fileUri != null) {
+            openExportedCsv(fileUri);
+        }
     }
 
-    private static class UserCsvRow {
-        private final String name;
-        private final String deviceId;
-        private final String firstName;
-        private final String lastName;
-        private final String email;
-        private final String phone;
+    private void openExportedCsv(Uri fileUri) {
+        Intent viewIntent = new Intent(Intent.ACTION_VIEW)
+                .setDataAndType(fileUri, "text/csv")
+                .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
 
-        private UserCsvRow(String name, String deviceId, String firstName, String lastName, String email, String phone) {
-            this.name = name;
-            this.deviceId = deviceId;
-            this.firstName = firstName;
-            this.lastName = lastName;
-            this.email = email;
-            this.phone = phone;
+        Intent shareIntent = new Intent(Intent.ACTION_SEND)
+                .setType("text/csv")
+                .putExtra(Intent.EXTRA_STREAM, fileUri)
+                .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+        if (viewIntent.resolveActivity(getPackageManager()) != null) {
+            startActivity(Intent.createChooser(viewIntent, getString(R.string.manage_entrants_open_csv)));
+            return;
         }
+
+        startActivity(Intent.createChooser(shareIntent, getString(R.string.manage_entrants_open_csv)));
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode != EXPORT_STORAGE_PERMISSION_REQUEST) {
+            return;
+        }
+
+        if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED
+                && !TextUtils.isEmpty(pendingExportFileName)
+                && pendingExportContent != null) {
+            writeCsvFileLegacy(pendingExportFileName, pendingExportContent);
+            return;
+        }
+
+        finishExport(false, null, null);
     }
 }

@@ -97,6 +97,27 @@
                 android:textSize="16sp" />
 
             <TextView
+                android:id="@+id/geolocationPreferencesLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:fontFamily="@font/varela_round_regular"
+                android:text="@string/create_event_geolocation_preferences"
+                android:textColor="@color/white"
+                android:textSize="18sp" />
+
+            <CheckBox
+                android:id="@+id/geolocationCheckbox"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:buttonTint="@color/white"
+                android:fontFamily="@font/varela_round_regular"
+                android:text="@string/create_event_enable_geolocation"
+                android:textColor="@color/white"
+                android:textSize="16sp" />
+
+            <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"

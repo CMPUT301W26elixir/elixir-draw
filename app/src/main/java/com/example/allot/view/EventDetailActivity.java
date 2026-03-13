@@ -347,6 +347,7 @@ public class EventDetailActivity extends AppCompatActivity {
     private boolean hasPublishedSelectionResults(Event event) {
         return (event != null && event.chosen != null && !event.chosen.isEmpty())
                 || (event != null && event.enrolled != null && !event.enrolled.isEmpty())
+                || (event != null && event.cancelled != null && !event.cancelled.isEmpty())
                 || (event != null && event.notEnrolled != null && !event.notEnrolled.isEmpty())
                 || (event != null && event.waitingList != null && event.waitingList.chosen != null && !event.waitingList.chosen.isEmpty());
     }

@@ -240,6 +240,7 @@ public class ManageLotteryActivity extends AppCompatActivity {
         currentEvent.waitingList.status = new HashMap<>();
         currentEvent.chosen = new ArrayList<>();
         currentEvent.enrolled = new ArrayList<>();
+        currentEvent.cancelled = new ArrayList<>();
         currentEvent.notEnrolled = new ArrayList<>();
 
         currentEvent.lottery();
@@ -250,6 +251,7 @@ public class ManageLotteryActivity extends AppCompatActivity {
         updates.put("limit", attendees);
         updates.put("chosen", currentEvent.chosen);
         updates.put("enrolled", currentEvent.enrolled);
+        updates.put("cancelled", currentEvent.cancelled);
         updates.put("notEnrolled", currentEvent.notEnrolled);
         updates.put("waitingList.limit", currentEvent.waitingList.limit);
         updates.put("waitingList.chosen", currentEvent.waitingList.chosen);
@@ -282,6 +284,9 @@ public class ManageLotteryActivity extends AppCompatActivity {
 
     private boolean hasDrawResults(Event event) {
         return (event.chosen != null && !event.chosen.isEmpty())
+                || (event.enrolled != null && !event.enrolled.isEmpty())
+                || (event.cancelled != null && !event.cancelled.isEmpty())
+                || (event.notEnrolled != null && !event.notEnrolled.isEmpty())
                 || (event.waitingList != null && event.waitingList.chosen != null && !event.waitingList.chosen.isEmpty());
     }
 

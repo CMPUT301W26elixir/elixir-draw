@@ -139,6 +139,23 @@
                         android:textSize="15sp" />
 
                     <TextView
+                        android:id="@+id/notEnrolledTabText"
+                        android:layout_width="wrap_content"
+                        android:layout_height="36dp"
+                        android:layout_marginStart="10dp"
+                        android:background="@drawable/bg_manage_entrant_tab_unselected"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:fontFamily="@font/varela_round_regular"
+                        android:gravity="center"
+                        android:minWidth="110dp"
+                        android:paddingStart="16dp"
+                        android:paddingEnd="16dp"
+                        android:text="@string/manage_entrants_tab_not_enrolled"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="15sp" />
+
+                    <TextView
                         android:id="@+id/enrolledTabText"
                         android:layout_width="wrap_content"
                         android:layout_height="36dp"
