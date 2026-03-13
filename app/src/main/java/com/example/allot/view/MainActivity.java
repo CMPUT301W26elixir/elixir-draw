@@ -12,6 +12,14 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
+import android.os.Build;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.core.content.ContextCompat;
+import com.example.allot.controller.NotificationHelper;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
@@ -39,8 +47,9 @@ public class MainActivity extends AppCompatActivity {
 
     private FrameLayout fragmentContainer;
     private LinearLayout exploreContainer;
-
-    // Added Variables for the Filters
+    private NotificationHelper notificationHelper;
+    private ActivityResultLauncher<String> requestPermissionLauncher;
+    private String currentDeviceId;
     private TextView chipFortnite, chipSports, chipArts, chipScience;
     private String selectedChipFilter = "";
 
@@ -50,7 +59,13 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        notificationHelper = new NotificationHelper(this);
 
+        requestPermissionLauncher = registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
+            if (isGranted && currentDeviceId != null) {
+                notificationHelper.startListening(currentDeviceId);
+            }
+        });
         recyclerView = findViewById(R.id.eventsRecyclerView);
         searchInput = findViewById(R.id.searchInput);
         loadingIndicator = findViewById(R.id.loadingIndicator);
@@ -59,7 +74,6 @@ public class MainActivity extends AppCompatActivity {
         fragmentContainer = findViewById(R.id.fragment_container);
         exploreContainer = findViewById(R.id.exploreContainer);
 
-        // Bind the chips
         chipFortnite = findViewById(R.id.chipFortnite);
         chipSports = findViewById(R.id.chipSports);
         chipArts = findViewById(R.id.chipArts);
@@ -82,15 +96,22 @@ public class MainActivity extends AppCompatActivity {
                     userSavedEvents.remove(event.eventId);
                 }
 
-                userController.toggleSavedEvent(event.eventId, isSaving, (success, result) -> {
-                    if (!success) {
-                        event.isSaved = !isSaving;
-                        eventListAdapter.notifyItemChanged(position);
-                        if (isSaving) {
-                            userSavedEvents.remove(event.eventId);
-                        } else if (!userSavedEvents.contains(event.eventId)) {
-                            userSavedEvents.add(event.eventId);
+                userController.loadOrCreateUser((user, success) -> {
+                    if (success && user != null) {
+                        userSavedEvents = user.getSavedEvents() != null ? user.getSavedEvents() : new ArrayList<>();
+                        currentDeviceId = user.deviceId;
+
+                        if (user.isNotiEnabled()) {
+                            checkNotificationPermissionAndStart(user.deviceId);
                         }
+
+                        if ("saved".equals(getIntent().getStringExtra("navigate_to"))) {
+                            openSavedTab();
+                        } else {
+                            loadBrowseEvents(searchInput.getText().toString());
+                        }
+                    } else {
+                        Log.e(TAG, "Failed to load user.");
                     }
                 });
             }
@@ -118,7 +139,6 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    // --- FILTER CHIP LOGIC ---
     private void setupFilterChips() {
         View.OnClickListener chipClickListener = view -> {
             TextView clickedChip = (TextView) view;
@@ -317,5 +337,23 @@ public class MainActivity extends AppCompatActivity {
         loadingIndicator.setVisibility(View.GONE);
         stateText.setVisibility(View.VISIBLE);
         stateText.setText(R.string.browse_state_error);
+    }
+    private void checkNotificationPermissionAndStart(String deviceId) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) {
+                notificationHelper.startListening(deviceId);
+            } else {
+                requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS);
+            }
+        } else {
+            notificationHelper.startListening(deviceId);
+        }
+    }
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (notificationHelper != null) {
+            notificationHelper.stopListening();
+        }
     }
 }

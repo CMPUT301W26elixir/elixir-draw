@@ -368,4 +368,23 @@ public class UserController {
             this.wasCreated = wasCreated;
         }
     }
+    /**
+     * Sends a real-time local notification to a specific user.
+     * Use this when running the lottery! (US 01.04.01 and US 01.04.02)
+     */
+    public void sendNotification(String targetDeviceId, String title, String message) {
+        java.util.Map<String, Object> notification = new java.util.HashMap<>();
+        notification.put("title", title);
+        notification.put("message", message);
+        notification.put("read", false);
+        notification.put("timestamp", FieldValue.serverTimestamp());
+
+        // This writes to the exact folder NotificationHelper is listening to!
+        FirebaseFirestore.getInstance()
+                .collection("users").document(targetDeviceId)
+                .collection("notifications")
+                .add(notification)
+                .addOnSuccessListener(documentReference -> Log.d(TAG, "Notification sent to " + targetDeviceId))
+                .addOnFailureListener(e -> Log.e(TAG, "Failed to send notification", e));
+    }
 }

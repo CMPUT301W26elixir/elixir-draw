@@ -499,6 +499,14 @@ public class EventDetailActivity extends AppCompatActivity {
             dialog.dismiss();
             Toast.makeText(this, R.string.event_detail_join_success, Toast.LENGTH_SHORT).show();
             loadEventDetails();
+
+            // --- SIMULATE AN INSTANT LOTTERY WIN ---
+            // Triggering the local device notification we set up in NotificationHelper
+            String eventTitle = currentEvent != null ? currentEvent.title : getIntent().getStringExtra(EXTRA_EVENT_TITLE);
+            String title = "🎉 You Won the Lottery!";
+            String message = "You have been selected to participate in " + (eventTitle != null ? eventTitle : "the event") + "!";
+            userController.sendNotification(userController.getCurrentDeviceId(), title, message);
+            // ----------------------------------------
         });
     }
 
