@@ -47,6 +47,17 @@ public class EventController {
                             });
                 });
     }
+    public void joinWaitingList(String eventId, String deviceId, OnCompleteListener<Boolean> listener) {
+        database.collection("events")
+                .document(eventId)
+                .update("waitingList.list", FieldValue.arrayUnion(deviceId))
+                .addOnSuccessListener(unused -> listener.onComplete(true, true))
+                .addOnFailureListener(exception -> {
+                    Log.e(TAG, "Failed to join waiting list for event " + eventId, exception);
+                    listener.onComplete(false, false);
+                });
+    }
+
     /**
      * Removes an event from Firestore.
      * Used by organizers to delete their event.

@@ -118,7 +118,8 @@
             <TextView
                 android:id="@+id/eventLocationText"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"                android:fontFamily="@font/varela_round_regular"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/varela_round_regular"
                 android:textColor="#A6A8A5"
                 android:textSize="14sp" />
 
@@ -126,7 +127,8 @@
                 android:id="@+id/eventDateText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"                android:fontFamily="@font/varela_round_regular"
+                android:layout_marginTop="6dp"
+                android:fontFamily="@font/varela_round_regular"
                 android:textColor="#A6A8A5"
                 android:textSize="14sp" />
 
@@ -134,10 +136,10 @@
                 android:id="@+id/eventOrganizerText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"                android:fontFamily="@font/varela_round_regular"
+                android:layout_marginTop="6dp"
+                android:fontFamily="@font/varela_round_regular"
                 android:textColor="#A6A8A5"
-                android:textSize="14sp"
-                android:visibility="gone" />
+                android:textSize="14sp" />
         </LinearLayout>
 
         <View
@@ -193,7 +195,6 @@
                     android:textSize="14sp"
                     android:visibility="gone" />
 
-
                 <TextView
                     android:id="@+id/registrationOpenText"
                     android:layout_width="match_parent"
@@ -234,8 +235,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="45dp"
                 android:background="@drawable/bg_waitlist_button"
-                android:clickable="false"
-                android:focusable="false"
+                android:clickable="true"
+                android:focusable="true"
                 android:fontFamily="@font/varela_round_regular"
                 android:gravity="center"
                 android:text="@string/event_detail_join_waiting_list"
@@ -255,11 +256,3 @@
     </LinearLayout>
 
 </LinearLayout>
-
-
-
-
-
-
-
-

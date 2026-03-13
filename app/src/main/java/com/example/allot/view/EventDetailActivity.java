@@ -1,12 +1,17 @@
 package com.example.allot.view;
 
+import android.app.Dialog;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.Window;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -15,6 +20,7 @@ import com.example.allot.controller.EventController;
 import com.example.allot.controller.UserController;
 import com.example.allot.model.Event;
 import com.example.allot.model.User;
+import com.google.android.material.button.MaterialButton;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -32,6 +38,10 @@ public class EventDetailActivity extends AppCompatActivity {
     private EventController eventController;
     private UserController userController;
 
+    private String currentEventId;
+    private boolean isJoiningWaitlist;
+    private Event currentEvent;
+
     private FrameLayout heroImageFrame;
     private TextView heroDeadlineText;
     private TextView titleText;
@@ -42,6 +52,7 @@ public class EventDetailActivity extends AppCompatActivity {
     private TextView descriptionText;
     private TextView registrationOpenText;
     private TextView registrationDeadlineText;
+    private TextView joinWaitingListButton;
     private TextView entrantCountText;
     private TextView errorText;
     private ProgressBar loadingIndicator;
@@ -53,7 +64,15 @@ public class EventDetailActivity extends AppCompatActivity {
 
         eventController = new EventController();
         userController = new UserController(this);
+        currentEventId = getIntent().getStringExtra(EXTRA_EVENT_ID);
 
+        bindViews();
+        bindFallbackContent();
+        setupListeners();
+        loadEventDetails();
+    }
+
+    private void bindViews() {
         heroImageFrame = findViewById(R.id.heroImageFrame);
         heroDeadlineText = findViewById(R.id.heroDeadlineText);
         titleText = findViewById(R.id.eventTitleText);
@@ -64,15 +83,16 @@ public class EventDetailActivity extends AppCompatActivity {
         descriptionText = findViewById(R.id.eventDescriptionText);
         registrationOpenText = findViewById(R.id.registrationOpenText);
         registrationDeadlineText = findViewById(R.id.registrationDeadlineText);
+        joinWaitingListButton = findViewById(R.id.joinWaitingListButton);
         entrantCountText = findViewById(R.id.entrantCountText);
         errorText = findViewById(R.id.eventErrorText);
         loadingIndicator = findViewById(R.id.eventLoadingIndicator);
+    }
+
+    private void setupListeners() {
         ImageButton backButton = findViewById(R.id.backButton);
-
         backButton.setOnClickListener(view -> getOnBackPressedDispatcher().onBackPressed());
-
-        bindFallbackContent();
-        loadEventDetails();
+        joinWaitingListButton.setOnClickListener(view -> showLotteryCriteriaDialog());
     }
 
     private void bindFallbackContent() {
@@ -90,18 +110,18 @@ public class EventDetailActivity extends AppCompatActivity {
         descriptionText.setVisibility(View.GONE);
         registrationOpenText.setVisibility(View.GONE);
         registrationDeadlineText.setVisibility(View.GONE);
-        entrantCountText.setVisibility(View.GONE);
+        entrantCountText.setVisibility(View.VISIBLE);
+        entrantCountText.setText(getResources().getQuantityString(R.plurals.event_detail_entrant_count, 0, 0));
     }
 
     private void loadEventDetails() {
-        String eventId = getIntent().getStringExtra(EXTRA_EVENT_ID);
-        if (TextUtils.isEmpty(eventId)) {
+        if (TextUtils.isEmpty(currentEventId)) {
             showErrorState(getString(R.string.event_detail_error));
             return;
         }
 
         setLoading(true);
-        eventController.getEventById(eventId, new EventController.EventCallback() {
+        eventController.getEventById(currentEventId, new EventController.EventCallback() {
             @Override
             public void onCallback(Event event) {
                 setLoading(false);
@@ -110,6 +130,7 @@ public class EventDetailActivity extends AppCompatActivity {
                     return;
                 }
 
+                currentEvent = event;
                 errorText.setVisibility(View.GONE);
                 bindEvent(event);
             }
@@ -174,6 +195,62 @@ public class EventDetailActivity extends AppCompatActivity {
         ));
     }
 
+    private void showLotteryCriteriaDialog() {
+        if (TextUtils.isEmpty(currentEventId) || isJoiningWaitlist) {
+            return;
+        }
+
+        Dialog dialog = new Dialog(this);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        View dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_join_waitlist, null);
+        dialog.setContentView(dialogView);
+        dialog.setCancelable(true);
+
+        ImageView closeButton = dialogView.findViewById(R.id.closeLotteryCriteriaDialogButton);
+        TextView eligibilityBodyText = dialogView.findViewById(R.id.eligibilityBodyText);
+        TextView selectionBodyText = dialogView.findViewById(R.id.selectionBodyText);
+        MaterialButton confirmButton = dialogView.findViewById(R.id.confirmJoinWaitlistButton);
+
+        eligibilityBodyText.setText(buildEligibilityCriteriaText());
+        selectionBodyText.setText(buildSelectionCriteriaText());
+
+        closeButton.setOnClickListener(view -> dialog.dismiss());
+        confirmButton.setOnClickListener(view -> joinWaitingList(dialog, confirmButton));
+
+        dialog.show();
+
+        Window window = dialog.getWindow();
+        if (window != null) {
+            window.setLayout(dpToPx(342), android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
+            window.setBackgroundDrawableResource(android.R.color.transparent);
+        }
+    }
+
+    private void joinWaitingList(Dialog dialog, MaterialButton confirmButton) {
+        if (isJoiningWaitlist || TextUtils.isEmpty(currentEventId)) {
+            return;
+        }
+
+        isJoiningWaitlist = true;
+        confirmButton.setEnabled(false);
+        joinWaitingListButton.setEnabled(false);
+
+        eventController.joinWaitingList(currentEventId, userController.getCurrentDeviceId(), (result, success) -> {
+            isJoiningWaitlist = false;
+            confirmButton.setEnabled(true);
+            joinWaitingListButton.setEnabled(true);
+
+            if (!success || result == null || !result) {
+                Toast.makeText(this, R.string.event_detail_join_failure, Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            dialog.dismiss();
+            Toast.makeText(this, R.string.event_detail_join_success, Toast.LENGTH_SHORT).show();
+            loadEventDetails();
+        });
+    }
+
     private void bindOptionalText(TextView view, String value) {
         if (TextUtils.isEmpty(cleanText(value))) {
             view.setVisibility(View.GONE);
@@ -215,6 +292,26 @@ public class EventDetailActivity extends AppCompatActivity {
         return value;
     }
 
+    private String buildEligibilityCriteriaText() {
+        String closeDate = getString(R.string.event_detail_registration_tba);
+        if (currentEvent != null && currentEvent.registrationDeadline != null) {
+            closeDate = formatLongDate(currentEvent.registrationDeadline);
+        }
+        return getString(R.string.lottery_criteria_eligibility_body, closeDate);
+    }
+
+    private String buildSelectionCriteriaText() {
+        int selectedCount = 0;
+        if (currentEvent != null) {
+            if (currentEvent.choosingLimit > 0) {
+                selectedCount = currentEvent.choosingLimit;
+            } else if (currentEvent.capacity > 0) {
+                selectedCount = currentEvent.capacity;
+            }
+        }
+        return getString(R.string.lottery_criteria_selection_body, selectedCount);
+    }
+
     private String buildRegistrationOpenText(Date registrationOpen) {
         String value = registrationOpen == null
                 ? getString(R.string.event_detail_registration_tba)
@@ -240,7 +337,7 @@ public class EventDetailActivity extends AppCompatActivity {
         if (date == null) {
             return null;
         }
-        return new SimpleDateFormat("MMMM d, yyyy", Locale.getDefault()).format(date);
+        return new SimpleDateFormat("MMM d, yyyy", Locale.getDefault()).format(date);
     }
 
     private String cleanText(String value) {
@@ -254,5 +351,10 @@ public class EventDetailActivity extends AppCompatActivity {
     private void showErrorState(String message) {
         errorText.setVisibility(View.VISIBLE);
         errorText.setText(message);
+    }
+
+    private int dpToPx(int dp) {
+        float density = getResources().getDisplayMetrics().density;
+        return Math.round(dp * density);
     }
 }
