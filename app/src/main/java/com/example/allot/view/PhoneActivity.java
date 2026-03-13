@@ -9,7 +9,21 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.allot.R;
 
+/**
+ * Activity that collects the user's phone number during the profile setup flow.
+ *
+ * <p>The user may either enter a phone number and continue, or skip this step
+ * by selecting the "Not now" option. In both cases, the collected profile data
+ * is passed to {@link NotificationsActivity}.
+ */
 public class PhoneActivity extends AppCompatActivity {
+
+    /**
+     * Initializes the activity, binds the phone input and action buttons,
+     * and sets click listeners for continuing or skipping phone entry.
+     *
+     * @param savedInstanceState the previously saved activity state, if one exists
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -24,6 +38,12 @@ public class PhoneActivity extends AppCompatActivity {
                 openNotificationsScreen(phoneInput.getText().toString().trim()));
     }
 
+    /**
+     * Opens the notifications setup screen and passes along the profile data
+     * collected from previous steps, including the provided phone number.
+     *
+     * @param phone the phone number entered by the user, or an empty string if skipped
+     */
     private void openNotificationsScreen(String phone) {
         Intent intent = new Intent(PhoneActivity.this, NotificationsActivity.class);
         intent.putExtra(NameActivity.EXTRA_FIRST_NAME, getIntent().getStringExtra(NameActivity.EXTRA_FIRST_NAME));

@@ -31,6 +31,11 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+/**
+ * Activity for managing an event lottery before draw results are finalized.
+ * Loads entrants, allows the organizer to set draw details,
+ * and starts the draw process.
+ */
 public class ManageLotteryActivity extends AppCompatActivity {
     public static final String EXTRA_EVENT_ID = "event_id";
 
@@ -49,6 +54,12 @@ public class ManageLotteryActivity extends AppCompatActivity {
     private boolean isLoading;
     private boolean isStartingDraw;
 
+    /**
+     * Initializes the activity, binds views, sets listeners,
+     * and loads the lottery data for the selected event.
+     *
+     * @param savedInstanceState the saved activity state
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -65,12 +76,18 @@ public class ManageLotteryActivity extends AppCompatActivity {
         loadLotteryData();
     }
 
+    /**
+     * Finishes the activity without transition animation.
+     */
     @Override
     public void finish() {
         super.finish();
         overridePendingTransition(0, 0);
     }
 
+    /**
+     * Binds all view references used by the activity.
+     */
     private void bindViews() {
         drawDateInput = findViewById(R.id.drawDateInput);
         attendeesToSelectInput = findViewById(R.id.attendeesToSelectInput);
@@ -79,11 +96,17 @@ public class ManageLotteryActivity extends AppCompatActivity {
         forceStartDrawButton = findViewById(R.id.forceStartDrawButton);
     }
 
+    /**
+     * Sets up the header back button behavior.
+     */
     private void setupHeader() {
         ImageButton backButton = findViewById(R.id.backButton);
         backButton.setOnClickListener(view -> getOnBackPressedDispatcher().onBackPressed());
     }
 
+    /**
+     * Sets up text watchers and button listeners for the lottery form.
+     */
     private void setupListeners() {
         TextWatcher dirtyWatcher = new SimpleTextWatcher() {
             @Override
@@ -97,6 +120,9 @@ public class ManageLotteryActivity extends AppCompatActivity {
         forceStartDrawButton.setOnClickListener(view -> forceStartDraw());
     }
 
+    /**
+     * Loads the lottery data for the current event from Firestore.
+     */
     private void loadLotteryData() {
         if (TextUtils.isEmpty(currentEventId)) {
             Toast.makeText(this, R.string.manage_lottery_load_failure, Toast.LENGTH_SHORT).show();
@@ -122,6 +148,11 @@ public class ManageLotteryActivity extends AppCompatActivity {
                 });
     }
 
+    /**
+     * Binds the retrieved event snapshot to the UI.
+     *
+     * @param documentSnapshot the Firestore document snapshot for the event
+     */
     private void bindEventSnapshot(DocumentSnapshot documentSnapshot) {
         isLoading = false;
         if (documentSnapshot == null || !documentSnapshot.exists()) {
@@ -160,6 +191,12 @@ public class ManageLotteryActivity extends AppCompatActivity {
         updateActionState();
     }
 
+    /**
+     * Binds the event draw form values to the UI.
+     *
+     * @param event the event being displayed
+     * @param storedDrawDate the saved draw date from Firestore
+     */
     private void bindForm(Event event, Date storedDrawDate) {
         Date effectiveDrawDate = storedDrawDate != null
                 ? storedDrawDate
@@ -170,6 +207,11 @@ public class ManageLotteryActivity extends AppCompatActivity {
         attendeesToSelectInput.setText(attendeesToSelect > 0 ? String.valueOf(attendeesToSelect) : "");
     }
 
+    /**
+     * Binds the current entrant list to the screen.
+     *
+     * @param entrantIds the list of entrant IDs to display
+     */
     private void bindEntrants(List<String> entrantIds) {
         entrantsContainer.removeAllViews();
         LayoutInflater inflater = LayoutInflater.from(this);
@@ -201,6 +243,9 @@ public class ManageLotteryActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Validates the form, runs the draw, and saves the results to Firestore.
+     */
     private void forceStartDraw() {
         if (isLoading || isStartingDraw || currentEvent == null) {
             return;
@@ -276,12 +321,21 @@ public class ManageLotteryActivity extends AppCompatActivity {
                 });
     }
 
+    /**
+     * Updates the enabled state of the main action button.
+     */
     private void updateActionState() {
         boolean enabled = !isLoading && !isStartingDraw;
         forceStartDrawButton.setEnabled(enabled);
         forceStartDrawButton.setAlpha(enabled ? 1f : 0.6f);
     }
 
+    /**
+     * Checks whether the event already has draw results.
+     *
+     * @param event the event to check
+     * @return true if the event already has selected or processed entrants, false otherwise
+     */
     private boolean hasDrawResults(Event event) {
         return (event.chosen != null && !event.chosen.isEmpty())
                 || (event.enrolled != null && !event.enrolled.isEmpty())
@@ -290,6 +344,12 @@ public class ManageLotteryActivity extends AppCompatActivity {
                 || (event.waitingList != null && event.waitingList.chosen != null && !event.waitingList.chosen.isEmpty());
     }
 
+    /**
+     * Parses the draw date entered by the user.
+     *
+     * @param value the date text to parse
+     * @return the parsed Date, or null if parsing fails
+     */
     private Date parseDrawDate(String value) {
         try {
             return drawDateFormat.parse(value);
@@ -298,6 +358,12 @@ public class ManageLotteryActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Parses the attendee count entered by the organizer.
+     *
+     * @param value the text value to parse
+     * @return the parsed integer, or null if the value is invalid
+     */
     private Integer parsePositiveInt(String value) {
         try {
             return Integer.parseInt(value.trim());
@@ -306,10 +372,19 @@ public class ManageLotteryActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Returns the trimmed text currently entered in the given EditText.
+     *
+     * @param editText the input field to read from
+     * @return the trimmed text, or an empty string if no text exists
+     */
     private String currentText(EditText editText) {
         return editText.getText() == null ? "" : editText.getText().toString().trim();
     }
 
+    /**
+     * Simple abstract TextWatcher with empty beforeTextChanged and onTextChanged methods.
+     */
     private abstract static class SimpleTextWatcher implements TextWatcher {
         @Override
         public void beforeTextChanged(CharSequence s, int start, int count, int after) {

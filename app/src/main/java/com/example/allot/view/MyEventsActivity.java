@@ -22,9 +22,31 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Activity that displays the current user's events.
+ *
+ * <p>This screen is divided into two top-level tabs:
+ * <ul>
+ *     <li><b>Registered</b> - events the user has registered for, grouped by status</li>
+ *     <li><b>Hosting</b> - events the user is organizing, grouped by progress</li>
+ * </ul>
+ *
+ * <p>The activity loads event data, classifies events into sections, and updates the UI
+ * accordingly. It also provides navigation to other app screens such as explore, saved,
+ * profile, scan, event details, and event creation.
+ */
 public class MyEventsActivity extends AppCompatActivity {
+
+    /**
+     * Intent extra key used to specify which top tab should be shown first.
+     */
     public static final String EXTRA_INITIAL_TAB = "initial_tab";
+
+    /**
+     * Intent extra value indicating that the hosting tab should be selected initially.
+     */
     public static final String INITIAL_TAB_HOSTING = "hosting";
+
     private BottomNavBarView bottomNavBar;
     private TextView registeredTabText;
     private TextView hostingTabText;
@@ -45,6 +67,12 @@ public class MyEventsActivity extends AppCompatActivity {
     private LayoutInflater layoutInflater;
     private TopTab currentTab = TopTab.REGISTERED;
 
+    /**
+     * Initializes the activity, controllers, layout inflater, views, and tab navigation.
+     * Displays either the registered tab or hosting tab depending on the provided intent extra.
+     *
+     * @param savedInstanceState the previously saved instance state, if one exists
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -64,12 +92,18 @@ public class MyEventsActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Finishes the activity without applying a transition animation.
+     */
     @Override
     public void finish() {
         super.finish();
         overridePendingTransition(0, 0);
     }
 
+    /**
+     * Binds all required layout views to their corresponding fields.
+     */
     private void bindViews() {
         bottomNavBar = findViewById(R.id.bottomNavBar);
         registeredTabText = findViewById(R.id.registeredTabText);
@@ -87,12 +121,18 @@ public class MyEventsActivity extends AppCompatActivity {
         createEventButton = findViewById(R.id.createEventButton);
     }
 
+    /**
+     * Sets up click listeners for the top tab controls and the create event button.
+     */
     private void setupTopTabs() {
         registeredTabText.setOnClickListener(view -> showRegisteredTab());
         hostingTabText.setOnClickListener(view -> showHostingTab());
         createEventButton.setOnClickListener(view -> openCreateEventScreen());
     }
 
+    /**
+     * Configures the bottom navigation bar and assigns screen navigation handlers.
+     */
     private void setupBottomNav() {
         bottomNavBar.setSelectedTab(BottomNavBarView.Tab.MY_EVENTS);
         bottomNavBar.setOnTabClickListener(BottomNavBarView.Tab.EXPLORE, view -> openExploreScreen());
@@ -101,6 +141,10 @@ public class MyEventsActivity extends AppCompatActivity {
         bottomNavBar.setOnTabClickListener(BottomNavBarView.Tab.SCAN, view -> openScanScreen());
     }
 
+    /**
+     * Opens the saved screen by launching {@link MainActivity} and requesting navigation
+     * to the saved tab.
+     */
     private void openSavedScreen() {
         Intent intent = new Intent(MyEventsActivity.this, MainActivity.class);
         intent.putExtra("navigate_to", "saved");
@@ -110,6 +154,10 @@ public class MyEventsActivity extends AppCompatActivity {
         finish();
     }
 
+    /**
+     * Displays the registered events tab, updates tab styling, hides the create event button,
+     * and loads the user's registered events.
+     */
     private void showRegisteredTab() {
         currentTab = TopTab.REGISTERED;
         updateTopTabStyles();
@@ -117,6 +165,10 @@ public class MyEventsActivity extends AppCompatActivity {
         loadRegisteredEvents();
     }
 
+    /**
+     * Displays the hosting events tab, updates tab styling, shows the create event button,
+     * and loads the events hosted by the user.
+     */
     private void showHostingTab() {
         currentTab = TopTab.HOSTING;
         updateTopTabStyles();
@@ -124,6 +176,9 @@ public class MyEventsActivity extends AppCompatActivity {
         loadHostedEvents();
     }
 
+    /**
+     * Updates the visual styling of the top tabs so the active tab appears highlighted.
+     */
     private void updateTopTabStyles() {
         registeredTabText.setTextColor(ContextCompat.getColor(this,
                 currentTab == TopTab.REGISTERED ? R.color.text_primary : R.color.my_events_tab_inactive));
@@ -131,6 +186,12 @@ public class MyEventsActivity extends AppCompatActivity {
                 currentTab == TopTab.HOSTING ? R.color.text_primary : R.color.my_events_tab_inactive));
     }
 
+    /**
+     * Loads all events the current user has registered for.
+     *
+     * <p>If the request succeeds, the events are bound to the registered sections.
+     * If it fails, an error state is shown as long as the registered tab is still active.
+     */
     private void loadRegisteredEvents() {
         setLoadingState();
         eventController.getRegisteredEventsForUser(userController.getCurrentDeviceId(), new EventController.EventListCallback() {
@@ -151,6 +212,12 @@ public class MyEventsActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Loads all events hosted by the current user from Firestore.
+     *
+     * <p>If an event is missing its event ID, the Firestore document ID is assigned to it.
+     * Results are only displayed if the hosting tab is still active.
+     */
     private void loadHostedEvents() {
         setLoadingState();
         FirebaseFirestore.getInstance()
@@ -182,6 +249,12 @@ public class MyEventsActivity extends AppCompatActivity {
                 });
     }
 
+    /**
+     * Classifies and binds registered events into their corresponding status sections:
+     * selected, waiting, not selected, and past.
+     *
+     * @param events the list of registered events to categorize and display
+     */
     private void bindRegisteredSections(List<Event> events) {
         List<Event> selectedEvents = new ArrayList<>();
         List<Event> waitingEvents = new ArrayList<>();
@@ -221,6 +294,11 @@ public class MyEventsActivity extends AppCompatActivity {
         hostingSectionsContainer.setVisibility(View.GONE);
     }
 
+    /**
+     * Splits hosted events into ongoing and completed sections and displays them.
+     *
+     * @param events the list of hosted events to bind
+     */
     private void bindHostedSections(List<Event> events) {
         List<Event> ongoingEvents = new ArrayList<>();
         List<Event> completedEvents = new ArrayList<>();
@@ -245,6 +323,15 @@ public class MyEventsActivity extends AppCompatActivity {
         hostingSectionsContainer.setVisibility(View.VISIBLE);
     }
 
+    /**
+     * Binds a list of events to a section container.
+     *
+     * <p>If the list is empty, an empty-state message is shown instead.
+     *
+     * @param container the layout container that will hold the event cards
+     * @param events the events to display in the section
+     * @param emptyMessageRes the string resource to show when the section is empty
+     */
     private void bindSection(LinearLayout container, List<Event> events, int emptyMessageRes) {
         container.removeAllViews();
 
@@ -260,6 +347,12 @@ public class MyEventsActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Creates a styled text view used for section empty states.
+     *
+     * @param textRes the string resource to display
+     * @return a configured empty-state text view
+     */
     private View createEmptyTextView(int textRes) {
         TextView emptyView = new TextView(this);
         emptyView.setText(textRes);
@@ -269,6 +362,13 @@ public class MyEventsActivity extends AppCompatActivity {
         return emptyView;
     }
 
+    /**
+     * Populates an event card view with event information and assigns a click listener
+     * to open the event detail screen.
+     *
+     * @param cardView the card view to populate
+     * @param event the event whose information should be displayed
+     */
     private void bindCard(View cardView, Event event) {
         View imageBackground = cardView.findViewById(R.id.imageBackground);
         TextView titleText = cardView.findViewById(R.id.titleText);
@@ -286,6 +386,12 @@ public class MyEventsActivity extends AppCompatActivity {
         cardView.setOnClickListener(view -> openEventDetailScreen(event));
     }
 
+    /**
+     * Determines which registered section an event belongs to.
+     *
+     * @param event the event to classify
+     * @return the matching section for the event
+     */
     private Section classifyRegisteredEvent(Event event) {
         if (isPastEvent(event)) {
             return Section.PAST;
@@ -302,12 +408,27 @@ public class MyEventsActivity extends AppCompatActivity {
         return Section.NOT_SELECTED;
     }
 
+    /**
+     * Determines whether an event has already occurred.
+     *
+     * @param event the event to evaluate
+     * @return true if the event date is in the past; false otherwise
+     */
     private boolean isPastEvent(Event event) {
         return event != null
                 && event.eventDate != null
                 && event.eventDate.getTime() < System.currentTimeMillis();
     }
 
+    /**
+     * Determines whether the current user has been selected or enrolled in an event.
+     *
+     * <p>A user is considered selected if their device ID appears in the enrolled list,
+     * chosen list, or waiting list chosen list.
+     *
+     * @param event the event to check
+     * @return true if the current user is selected; false otherwise
+     */
     private boolean isSelected(Event event) {
         String deviceId = userController.getCurrentDeviceId();
         return containsUser(event == null ? null : event.enrolled, deviceId)
@@ -315,6 +436,15 @@ public class MyEventsActivity extends AppCompatActivity {
                 || containsUser(event != null && event.waitingList != null ? event.waitingList.chosen : null, deviceId);
     }
 
+    /**
+     * Determines whether the event should be shown in the waiting section.
+     *
+     * <p>An event is considered waiting if the registration deadline has not passed yet,
+     * or if the deadline has passed but selection results have not yet been published.
+     *
+     * @param event the event to evaluate
+     * @return true if the event is still waiting for selection results; false otherwise
+     */
     private boolean isWaiting(Event event) {
         if (event == null) {
             return false;
@@ -327,12 +457,24 @@ public class MyEventsActivity extends AppCompatActivity {
         return !hasPublishedSelectionResults(event);
     }
 
+    /**
+     * Determines whether an event's registration deadline has passed.
+     *
+     * @param event the event to check
+     * @return true if the registration deadline is in the past or exactly now; false otherwise
+     */
     private boolean isDeadlinePassed(Event event) {
         return event != null
                 && event.registrationDeadline != null
                 && event.registrationDeadline.getTime() <= System.currentTimeMillis();
     }
 
+    /**
+     * Determines whether any selection-related result lists have been published for the event.
+     *
+     * @param event the event to inspect
+     * @return true if at least one result list contains data; false otherwise
+     */
     private boolean hasPublishedSelectionResults(Event event) {
         return (event != null && event.chosen != null && !event.chosen.isEmpty())
                 || (event != null && event.enrolled != null && !event.enrolled.isEmpty())
@@ -341,15 +483,34 @@ public class MyEventsActivity extends AppCompatActivity {
                 || (event != null && event.waitingList != null && event.waitingList.chosen != null && !event.waitingList.chosen.isEmpty());
     }
 
+    /**
+     * Checks whether a given device ID appears in a list of users.
+     *
+     * @param users the list of user device IDs
+     * @param deviceId the device ID to search for
+     * @return true if the device ID is in the list; false otherwise
+     */
     private boolean containsUser(List<String> users, String deviceId) {
         return users != null && users.contains(deviceId);
     }
 
+    /**
+     * Chooses which placeholder image background to use for an event card.
+     *
+     * <p>The selection is based on the hash of the event category to provide a consistent
+     * but varied appearance across cards.
+     *
+     * @param event the event whose category is used for image selection
+     * @return true if the primary image should be used; false if the secondary image should be used
+     */
     private boolean shouldUsePrimaryImage(Event event) {
         String category = event == null || event.category == null ? "" : event.category.trim();
         return Math.abs(category.hashCode()) % 2 == 0;
     }
 
+    /**
+     * Updates the UI to a loading state while event data is being fetched.
+     */
     private void setLoadingState() {
         loadingIndicator.setVisibility(View.VISIBLE);
         stateText.setVisibility(View.VISIBLE);
@@ -358,6 +519,9 @@ public class MyEventsActivity extends AppCompatActivity {
         hostingSectionsContainer.setVisibility(View.GONE);
     }
 
+    /**
+     * Updates the UI to show an error state when event data cannot be loaded.
+     */
     private void setErrorState() {
         loadingIndicator.setVisibility(View.GONE);
         stateText.setVisibility(View.VISIBLE);
@@ -366,6 +530,14 @@ public class MyEventsActivity extends AppCompatActivity {
         hostingSectionsContainer.setVisibility(View.GONE);
     }
 
+    /**
+     * Opens the event detail screen for a given event.
+     *
+     * <p>If the event is null or does not contain a valid event ID, the method returns
+     * without doing anything.
+     *
+     * @param event the event to display in detail
+     */
     private void openEventDetailScreen(Event event) {
         if (event == null || TextUtils.isEmpty(event.eventId)) {
             return;
@@ -382,6 +554,9 @@ public class MyEventsActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
+    /**
+     * Opens the explore screen by launching {@link MainActivity}.
+     */
     private void openExploreScreen() {
         Intent intent = new Intent(MyEventsActivity.this, MainActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
@@ -390,6 +565,9 @@ public class MyEventsActivity extends AppCompatActivity {
         finish();
     }
 
+    /**
+     * Opens the profile screen.
+     */
     private void openProfileScreen() {
         Intent intent = new Intent(MyEventsActivity.this, ProfileActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
@@ -398,16 +576,28 @@ public class MyEventsActivity extends AppCompatActivity {
         finish();
     }
 
+    /**
+     * Opens the screen used to create a new event.
+     */
     private void openCreateEventScreen() {
         startActivity(new Intent(this, CreateEventActivity.class));
         overridePendingTransition(0, 0);
     }
 
+    /**
+     * Converts a density-independent pixel (dp) value to pixels (px).
+     *
+     * @param dp the dp value to convert
+     * @return the equivalent pixel value
+     */
     private int dpToPx(int dp) {
         float density = getResources().getDisplayMetrics().density;
         return Math.round(dp * density);
     }
 
+    /**
+     * Represents the different event status sections shown in the registered tab.
+     */
     private enum Section {
         SELECTED,
         WAITING,
@@ -415,10 +605,22 @@ public class MyEventsActivity extends AppCompatActivity {
         PAST
     }
 
+    /**
+     * Represents the two top tabs available in the activity.
+     */
     private enum TopTab {
         REGISTERED,
         HOSTING
     }
+
+    /**
+     * Opens the scan screen.
+     *
+     * <p>Existing note preserved:
+     * Do not call {@code finish()} here if this code is pasted into {@code MainActivity.java}.
+     * You can call {@code finish()} here if it is used inside {@code MyEventsActivity} or
+     * {@code ProfileActivity}.
+     */
     private void openScanScreen() {
         Intent intent = new Intent(this, ScanActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
@@ -428,13 +630,3 @@ public class MyEventsActivity extends AppCompatActivity {
         // You CAN call finish() here if pasting into MyEventsActivity or ProfileActivity.
     }
 }
-
-
-
-
-
-
-
-
-
-

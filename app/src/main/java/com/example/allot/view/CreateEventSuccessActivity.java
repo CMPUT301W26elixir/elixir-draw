@@ -12,6 +12,11 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.allot.R;
 
+/**
+ * Activity shown after an event is successfully created.
+ * Displays a summary card for the event and provides navigation
+ * to related screens such as QR code generation and the event page.
+ */
 public class CreateEventSuccessActivity extends AppCompatActivity {
     public static final String EXTRA_EVENT_ID = "event_id";
     public static final String EXTRA_EVENT_TITLE = "event_title";
@@ -33,6 +38,12 @@ public class CreateEventSuccessActivity extends AppCompatActivity {
     private String currentEventDate;
     private String currentEventCategory;
 
+    /**
+     * Initializes the activity, reads event data from the intent,
+     * binds views, displays the event card, and configures the bottom navigation bar.
+     *
+     * @param savedInstanceState the saved activity state
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -44,12 +55,18 @@ public class CreateEventSuccessActivity extends AppCompatActivity {
         setupBottomNav();
     }
 
+    /**
+     * Finishes the activity without transition animation.
+     */
     @Override
     public void finish() {
         super.finish();
         overridePendingTransition(0, 0);
     }
 
+    /**
+     * Reads the event details passed into the activity through intent extras.
+     */
     private void readExtras() {
         Intent intent = getIntent();
         currentEventId = intent.getStringExtra(EXTRA_EVENT_ID);
@@ -59,6 +76,9 @@ public class CreateEventSuccessActivity extends AppCompatActivity {
         currentEventCategory = intent.getStringExtra(EXTRA_EVENT_CATEGORY);
     }
 
+    /**
+     * Binds all view references used by the activity and sets button listeners.
+     */
     private void bindViews() {
         bottomNavBar = findViewById(R.id.bottomNavBar);
         imageBackground = findViewById(R.id.imageBackground);
@@ -76,6 +96,9 @@ public class CreateEventSuccessActivity extends AppCompatActivity {
         viewEventPageButton.setOnClickListener(view -> openEventPage());
     }
 
+    /**
+     * Displays the event information on the summary card and selects the background image.
+     */
     private void bindEventCard() {
         titleText.setText(defaultText(currentEventTitle, getString(R.string.default_event_name)));
         locationText.setText(defaultText(currentEventLocation, getString(R.string.default_street_name)));
@@ -85,6 +108,9 @@ public class CreateEventSuccessActivity extends AppCompatActivity {
                 : R.drawable.bg_event_image_two);
     }
 
+    /**
+     * Configures the bottom navigation bar and assigns click actions for each tab.
+     */
     private void setupBottomNav() {
         bottomNavBar.setSelectedTab(BottomNavBarView.Tab.MY_EVENTS);
         bottomNavBar.setOnTabClickListener(BottomNavBarView.Tab.EXPLORE, view -> openExploreScreen());
@@ -94,6 +120,10 @@ public class CreateEventSuccessActivity extends AppCompatActivity {
         bottomNavBar.setOnTabClickListener(BottomNavBarView.Tab.PROFILE, view -> openProfileScreen());
     }
 
+    /**
+     * Opens the QR code screen for the created event.
+     * Shows an error message if the event ID is missing.
+     */
     private void openQrCodeScreen() {
         if (TextUtils.isEmpty(currentEventId)) {
             Toast.makeText(this, R.string.event_qr_generation_failure, Toast.LENGTH_SHORT).show();
@@ -112,6 +142,10 @@ public class CreateEventSuccessActivity extends AppCompatActivity {
         overridePendingTransition(0, 0);
     }
 
+    /**
+     * Opens the event detail page for the created event.
+     * Shows an error message if the event ID is missing.
+     */
     private void openEventPage() {
         if (TextUtils.isEmpty(currentEventId)) {
             Toast.makeText(this, R.string.event_detail_error, Toast.LENGTH_SHORT).show();
@@ -130,6 +164,9 @@ public class CreateEventSuccessActivity extends AppCompatActivity {
         overridePendingTransition(0, 0);
     }
 
+    /**
+     * Opens the explore screen and clears intermediate activities.
+     */
     private void openExploreScreen() {
         Intent intent = new Intent(this, MainActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
@@ -138,6 +175,9 @@ public class CreateEventSuccessActivity extends AppCompatActivity {
         finish();
     }
 
+    /**
+     * Opens the saved events screen and clears intermediate activities.
+     */
     private void openSavedScreen() {
         Intent intent = new Intent(this, MainActivity.class);
         intent.putExtra("navigate_to", "saved");
@@ -147,6 +187,9 @@ public class CreateEventSuccessActivity extends AppCompatActivity {
         finish();
     }
 
+    /**
+     * Opens the hosting tab of the My Events screen and clears intermediate activities.
+     */
     private void openHostingScreen() {
         Intent intent = new Intent(this, MyEventsActivity.class);
         intent.putExtra(MyEventsActivity.EXTRA_INITIAL_TAB, MyEventsActivity.INITIAL_TAB_HOSTING);
@@ -156,6 +199,9 @@ public class CreateEventSuccessActivity extends AppCompatActivity {
         finish();
     }
 
+    /**
+     * Opens the scan screen and clears intermediate activities.
+     */
     private void openScanScreen() {
         Intent intent = new Intent(this, ScanActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
@@ -164,6 +210,9 @@ public class CreateEventSuccessActivity extends AppCompatActivity {
         finish();
     }
 
+    /**
+     * Opens the profile screen and clears intermediate activities.
+     */
     private void openProfileScreen() {
         Intent intent = new Intent(this, ProfileActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
@@ -172,6 +221,12 @@ public class CreateEventSuccessActivity extends AppCompatActivity {
         finish();
     }
 
+    /**
+     * Determines which event card image should be used for the given category.
+     *
+     * @param category the event category
+     * @return true if the primary image should be used, otherwise false
+     */
     private boolean shouldUsePrimaryImage(String category) {
         if (TextUtils.isEmpty(category)) {
             return true;
@@ -179,6 +234,13 @@ public class CreateEventSuccessActivity extends AppCompatActivity {
         return Math.abs(category.hashCode()) % 2 == 0;
     }
 
+    /**
+     * Returns the given value if it is not empty, otherwise returns the fallback text.
+     *
+     * @param value the text value to check
+     * @param fallback the fallback text to use if the value is empty
+     * @return the value or the fallback text
+     */
     private String defaultText(String value, String fallback) {
         return TextUtils.isEmpty(value) ? fallback : value;
     }

@@ -27,6 +27,11 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
+/**
+ * Activity that displays detailed information about a selected event.
+ * Supports joining and leaving the waiting list, viewing offer states,
+ * and navigating to organizer management screens when applicable.
+ */
 public class EventDetailActivity extends AppCompatActivity {
     public static final String EXTRA_EVENT_ID = "event_id";
     public static final String EXTRA_EVENT_TITLE = "event_title";
@@ -63,6 +68,12 @@ public class EventDetailActivity extends AppCompatActivity {
     private TextView errorText;
     private ProgressBar loadingIndicator;
 
+    /**
+     * Initializes the activity, binds views, shows fallback content,
+     * registers listeners, and loads the full event details.
+     *
+     * @param savedInstanceState the saved activity state
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -78,6 +89,9 @@ public class EventDetailActivity extends AppCompatActivity {
         loadEventDetails();
     }
 
+    /**
+     * Binds all view references used by this activity.
+     */
     private void bindViews() {
         heroImageFrame = findViewById(R.id.heroImageFrame);
         heroDeadlineText = findViewById(R.id.heroDeadlineText);
@@ -97,12 +111,19 @@ public class EventDetailActivity extends AppCompatActivity {
         loadingIndicator = findViewById(R.id.eventLoadingIndicator);
     }
 
+    /**
+     * Sets up button listeners for navigation and waitlist actions.
+     */
     private void setupListeners() {
         ImageButton backButton = findViewById(R.id.backButton);
         backButton.setOnClickListener(view -> getOnBackPressedDispatcher().onBackPressed());
         joinWaitingListButton.setOnClickListener(view -> onWaitlistButtonPressed());
     }
 
+    /**
+     * Binds fallback event content from the intent extras before
+     * the full event details are loaded from Firestore.
+     */
     private void bindFallbackContent() {
         isCurrentUserOrganizer = false;
         titleText.setText(getIntent().getStringExtra(EXTRA_EVENT_TITLE));
@@ -130,6 +151,10 @@ public class EventDetailActivity extends AppCompatActivity {
         entrantCountText.setText(getResources().getQuantityString(R.plurals.event_detail_entrant_count, 0, 0));
     }
 
+    /**
+     * Loads the full event details for the current event ID.
+     * Shows an error state if the event cannot be loaded.
+     */
     private void loadEventDetails() {
         if (TextUtils.isEmpty(currentEventId)) {
             showErrorState(getString(R.string.event_detail_error));
@@ -160,6 +185,11 @@ public class EventDetailActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Binds the loaded event data to the UI.
+     *
+     * @param event the event to display
+     */
     private void bindEvent(Event event) {
         titleText.setText(event.title);
         priceText.setText(EventDisplayFormatter.price(event));
@@ -181,6 +211,11 @@ public class EventDetailActivity extends AppCompatActivity {
         bindWaitlistState(event);
     }
 
+    /**
+     * Loads and displays the organizer name for the given organizer ID.
+     *
+     * @param organizerId the device ID of the organizer
+     */
     private void bindOrganizer(String organizerId) {
         organizerText.setVisibility(View.VISIBLE);
         organizerText.setText(getString(R.string.event_detail_organizer_tba));
@@ -199,6 +234,11 @@ public class EventDetailActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Displays the current number of entrants on the waiting list.
+     *
+     * @param event the event whose entrant count should be shown
+     */
     private void bindEntrantCount(Event event) {
         int entrantCount = 0;
         if (event.waitingList != null && event.waitingList.list != null) {
@@ -213,6 +253,12 @@ public class EventDetailActivity extends AppCompatActivity {
         ));
     }
 
+    /**
+     * Updates the footer and action button based on the current user's
+     * relationship to the event.
+     *
+     * @param event the event whose waitlist and offer state should be shown
+     */
     private void bindWaitlistState(Event event) {
         if (isCurrentUserOrganizer(event)) {
             waitlistStatusText.setVisibility(View.GONE);
@@ -290,6 +336,17 @@ public class EventDetailActivity extends AppCompatActivity {
         );
     }
 
+    /**
+     * Displays the footer action state for the event detail screen.
+     *
+     * @param showWaitlistMessage true to show the waitlist status message
+     * @param buttonEnabled true to enable the action button
+     * @param buttonTextRes the string resource for the action button text
+     * @param buttonBackgroundRes the drawable resource for the button background
+     * @param buttonTextColor the text color for the button
+     * @param subtext optional subtext shown below the button
+     * @param showEntrantCount true to show the entrant count text
+     */
     private void showFooterState(boolean showWaitlistMessage,
                                  boolean buttonEnabled,
                                  int buttonTextRes,
@@ -314,20 +371,45 @@ public class EventDetailActivity extends AppCompatActivity {
         entrantCountText.setVisibility(showEntrantCount ? View.VISIBLE : View.GONE);
     }
 
+    /**
+     * Checks whether the current user is enrolled in the event.
+     *
+     * @param event the event to check
+     * @return true if the current user is enrolled, otherwise false
+     */
     private boolean isCurrentUserEnrolled(Event event) {
         return containsUser(event == null ? null : event.enrolled, userController.getCurrentDeviceId());
     }
 
+    /**
+     * Checks whether the current user has an active offer for the event.
+     *
+     * @param event the event to check
+     * @return true if the current user is selected but not yet enrolled
+     */
     private boolean hasActiveOffer(Event event) {
         return isCurrentUserSelected(event) && !isCurrentUserEnrolled(event);
     }
 
+    /**
+     * Checks whether the current user has been selected in the event draw.
+     *
+     * @param event the event to check
+     * @return true if the current user has been selected, otherwise false
+     */
     private boolean isCurrentUserSelected(Event event) {
         String deviceId = userController.getCurrentDeviceId();
         return containsUser(event == null ? null : event.chosen, deviceId)
                 || containsUser(event != null && event.waitingList != null ? event.waitingList.chosen : null, deviceId);
     }
 
+    /**
+     * Checks whether the UI should show the replacement-state message
+     * for a user who was not selected in the main draw.
+     *
+     * @param event the event to check
+     * @return true if the replacement-state message should be shown
+     */
     private boolean shouldShowReplacementState(Event event) {
         return hasPublishedSelectionResults(event)
                 && isCurrentUserOnWaitingList(event)
@@ -336,6 +418,12 @@ public class EventDetailActivity extends AppCompatActivity {
                 && !"finalized".equalsIgnoreCase(cleanText(event == null ? null : event.status));
     }
 
+    /**
+     * Checks whether the UI should show the finalized not-selected state.
+     *
+     * @param event the event to check
+     * @return true if the finalized not-selected state should be shown
+     */
     private boolean shouldShowFinalizedNotSelectedState(Event event) {
         return hasPublishedSelectionResults(event)
                 && isCurrentUserOnWaitingList(event)
@@ -344,6 +432,12 @@ public class EventDetailActivity extends AppCompatActivity {
                 && "finalized".equalsIgnoreCase(cleanText(event == null ? null : event.status));
     }
 
+    /**
+     * Checks whether any selection results have been published for the event.
+     *
+     * @param event the event to check
+     * @return true if selection results exist, otherwise false
+     */
     private boolean hasPublishedSelectionResults(Event event) {
         return (event != null && event.chosen != null && !event.chosen.isEmpty())
                 || (event != null && event.enrolled != null && !event.enrolled.isEmpty())
@@ -352,10 +446,23 @@ public class EventDetailActivity extends AppCompatActivity {
                 || (event != null && event.waitingList != null && event.waitingList.chosen != null && !event.waitingList.chosen.isEmpty());
     }
 
+    /**
+     * Checks whether a user ID appears in a list of user IDs.
+     *
+     * @param users the list of user IDs to search
+     * @param deviceId the user device ID to look for
+     * @return true if the user exists in the list, otherwise false
+     */
     private boolean containsUser(java.util.List<String> users, String deviceId) {
         return users != null && !TextUtils.isEmpty(deviceId) && users.contains(deviceId);
     }
 
+    /**
+     * Checks whether the current user is on the event waiting list.
+     *
+     * @param event the event to check
+     * @return true if the current user is on the waiting list, otherwise false
+     */
     private boolean isCurrentUserOnWaitingList(Event event) {
         if (event == null || event.waitingList == null || event.waitingList.list == null) {
             return false;
@@ -363,6 +470,12 @@ public class EventDetailActivity extends AppCompatActivity {
         return event.waitingList.list.contains(userController.getCurrentDeviceId());
     }
 
+    /**
+     * Checks whether the current user is the organizer of the event.
+     *
+     * @param event the event to check
+     * @return true if the current user is the organizer, otherwise false
+     */
     private boolean isCurrentUserOrganizer(Event event) {
         if (event == null) {
             return false;
@@ -371,6 +484,10 @@ public class EventDetailActivity extends AppCompatActivity {
         return !TextUtils.isEmpty(currentDeviceId) && currentDeviceId.equals(event.organizerId);
     }
 
+    /**
+     * Handles presses on the main action button based on the current
+     * user and event state.
+     */
     private void onWaitlistButtonPressed() {
         if (isCurrentUserOrganizer) {
             openManageEventScreen();
@@ -393,6 +510,9 @@ public class EventDetailActivity extends AppCompatActivity {
         showLotteryCriteriaDialog();
     }
 
+    /**
+     * Opens the organizer event management screen for the current event.
+     */
     private void openManageEventScreen() {
         if (TextUtils.isEmpty(currentEventId)) {
             return;
@@ -423,6 +543,9 @@ public class EventDetailActivity extends AppCompatActivity {
         overridePendingTransition(0, 0);
     }
 
+    /**
+     * Opens the event offer screen for the current event.
+     */
     private void openOfferScreen() {
         if (TextUtils.isEmpty(currentEventId)) {
             return;
@@ -437,6 +560,10 @@ public class EventDetailActivity extends AppCompatActivity {
         overridePendingTransition(0, 0);
     }
 
+    /**
+     * Refreshes the event details when returning from related screens
+     * that may have changed the event state.
+     */
     @Override
     protected void onResume() {
         super.onResume();
@@ -446,6 +573,9 @@ public class EventDetailActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Shows the lottery criteria dialog before joining the waiting list.
+     */
     private void showLotteryCriteriaDialog() {
         if (TextUtils.isEmpty(currentEventId) || isJoiningWaitlist || isLeavingWaitlist) {
             return;
@@ -477,6 +607,12 @@ public class EventDetailActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Attempts to join the current event's waiting list.
+     *
+     * @param dialog the dialog that initiated the join action
+     * @param confirmButton the confirmation button shown in the dialog
+     */
     private void joinWaitingList(Dialog dialog, MaterialButton confirmButton) {
         if (isJoiningWaitlist || TextUtils.isEmpty(currentEventId)) {
             return;
@@ -502,6 +638,9 @@ public class EventDetailActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Attempts to remove the current user from the waiting list.
+     */
     private void leaveWaitingList() {
         if (isLeavingWaitlist || TextUtils.isEmpty(currentEventId)) {
             return;
@@ -524,6 +663,12 @@ public class EventDetailActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Sets a TextView to the provided value or hides it if the value is empty.
+     *
+     * @param view the TextView to update
+     * @param value the value to display
+     */
     private void bindOptionalText(TextView view, String value) {
         if (TextUtils.isEmpty(cleanText(value))) {
             view.setVisibility(View.GONE);
@@ -534,6 +679,11 @@ public class EventDetailActivity extends AppCompatActivity {
         view.setText(value);
     }
 
+    /**
+     * Applies the hero background image based on the event category.
+     *
+     * @param category the event category
+     */
     private void applyHeroBackground(String category) {
         int backgroundRes = shouldUsePrimaryBackground(category)
                 ? R.drawable.bg_event_image_one
@@ -541,6 +691,12 @@ public class EventDetailActivity extends AppCompatActivity {
         heroImageFrame.setBackgroundResource(backgroundRes);
     }
 
+    /**
+     * Determines which hero background image should be used.
+     *
+     * @param category the event category
+     * @return true if the primary background should be used, otherwise false
+     */
     private boolean shouldUsePrimaryBackground(String category) {
         String normalizedCategory = cleanText(category);
         if (TextUtils.isEmpty(normalizedCategory)) {
@@ -549,6 +705,12 @@ public class EventDetailActivity extends AppCompatActivity {
         return Math.abs(normalizedCategory.hashCode()) % 2 == 0;
     }
 
+    /**
+     * Builds the location text shown in the UI.
+     *
+     * @param location the event location
+     * @return the formatted location text or a fallback value
+     */
     private String buildLocationText(String location) {
         String value = cleanText(location);
         if (TextUtils.isEmpty(value)) {
@@ -557,6 +719,12 @@ public class EventDetailActivity extends AppCompatActivity {
         return value;
     }
 
+    /**
+     * Builds the event date text shown in the UI.
+     *
+     * @param eventDate the event date text
+     * @return the formatted event date text or a fallback value
+     */
     private String buildEventDateText(String eventDate) {
         String value = cleanText(eventDate);
         if (TextUtils.isEmpty(value)) {
@@ -565,6 +733,11 @@ public class EventDetailActivity extends AppCompatActivity {
         return value;
     }
 
+    /**
+     * Builds the eligibility criteria text shown in the waiting list dialog.
+     *
+     * @return the formatted eligibility criteria text
+     */
     private String buildEligibilityCriteriaText() {
         String closeDate = getString(R.string.event_detail_registration_tba);
         if (currentEvent != null && currentEvent.registrationDeadline != null) {
@@ -573,6 +746,11 @@ public class EventDetailActivity extends AppCompatActivity {
         return getString(R.string.lottery_criteria_eligibility_body, closeDate);
     }
 
+    /**
+     * Builds the selection criteria text shown in the waiting list dialog.
+     *
+     * @return the formatted selection criteria text
+     */
     private String buildSelectionCriteriaText() {
         int selectedCount = 0;
         if (currentEvent != null) {
@@ -585,6 +763,12 @@ public class EventDetailActivity extends AppCompatActivity {
         return getString(R.string.lottery_criteria_selection_body, selectedCount);
     }
 
+    /**
+     * Builds the registration open text shown in the UI.
+     *
+     * @param registrationOpen the event registration open date
+     * @return the formatted registration open text
+     */
     private String buildRegistrationOpenText(Date registrationOpen) {
         String value = registrationOpen == null
                 ? getString(R.string.event_detail_registration_tba)
@@ -592,6 +776,12 @@ public class EventDetailActivity extends AppCompatActivity {
         return getString(R.string.event_detail_registration_opens, value);
     }
 
+    /**
+     * Builds the registration deadline text shown in the UI.
+     *
+     * @param registrationDeadline the event registration deadline
+     * @return the formatted registration deadline text
+     */
     private String buildRegistrationDeadlineText(Date registrationDeadline) {
         String value = registrationDeadline == null
                 ? getString(R.string.event_detail_registration_tba)
@@ -599,6 +789,12 @@ public class EventDetailActivity extends AppCompatActivity {
         return getString(R.string.event_detail_registration_closes, value);
     }
 
+    /**
+     * Formats a date using the long month pattern.
+     *
+     * @param date the date to format
+     * @return the formatted date string, or null if the date is null
+     */
     private String formatDate(Date date) {
         if (date == null) {
             return null;
@@ -606,6 +802,12 @@ public class EventDetailActivity extends AppCompatActivity {
         return new SimpleDateFormat("MMMM d, yyyy", Locale.getDefault()).format(date);
     }
 
+    /**
+     * Formats a date using the abbreviated month pattern.
+     *
+     * @param date the date to format
+     * @return the formatted date string, or null if the date is null
+     */
     private String formatLongDate(Date date) {
         if (date == null) {
             return null;
@@ -613,19 +815,41 @@ public class EventDetailActivity extends AppCompatActivity {
         return new SimpleDateFormat("MMM d, yyyy", Locale.getDefault()).format(date);
     }
 
+    /**
+     * Trims a string value if it is not null.
+     *
+     * @param value the text to clean
+     * @return the trimmed text, or null if the value is null
+     */
     private String cleanText(String value) {
         return value == null ? null : value.trim();
     }
 
+    /**
+     * Shows or hides the loading indicator.
+     *
+     * @param isLoading true to show the loading indicator, false to hide it
+     */
     private void setLoading(boolean isLoading) {
         loadingIndicator.setVisibility(isLoading ? View.VISIBLE : View.GONE);
     }
 
+    /**
+     * Shows an error message in the error text view.
+     *
+     * @param message the error message to display
+     */
     private void showErrorState(String message) {
         errorText.setVisibility(View.VISIBLE);
         errorText.setText(message);
     }
 
+    /**
+     * Converts density-independent pixels to physical pixels.
+     *
+     * @param dp the value in density-independent pixels
+     * @return the converted value in physical pixels
+     */
     private int dpToPx(int dp) {
         float density = getResources().getDisplayMetrics().density;
         return Math.round(dp * density);

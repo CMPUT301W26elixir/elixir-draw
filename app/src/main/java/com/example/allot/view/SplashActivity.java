@@ -11,14 +11,40 @@ import com.example.allot.R;
 import com.example.allot.controller.UserController;
 import com.example.allot.model.User;
 
+/**
+ * Activity that displays the app splash screen and decides which screen
+ * to open next.
+ *
+ * <p>This activity ensures the splash screen remains visible for a minimum
+ * amount of time, checks whether the current device is new, loads the user
+ * profile when needed, and then routes the user either to profile setup
+ * or to the main screen.
+ */
 public class SplashActivity extends AppCompatActivity {
+
+    /**
+     * Intent extra key indicating whether the user still needs to complete
+     * profile setup.
+     */
     public static final String EXTRA_REQUIRES_PROFILE_SETUP = "com.example.allot.REQUIRES_PROFILE_SETUP";
+
+    /**
+     * The minimum amount of time, in milliseconds, that the splash screen
+     * should remain visible.
+     */
     private static final long MIN_SPLASH_DURATION_MS = 900L;
 
     private final Handler handler = new Handler(Looper.getMainLooper());
     private long startedAtMs;
     private boolean navigated;
 
+    /**
+     * Initializes the splash screen, records the start time, checks whether
+     * the device is new, and determines whether the user should be sent to
+     * profile setup or the main app screen.
+     *
+     * @param savedInstanceState the previously saved activity state, if one exists
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -38,6 +64,15 @@ public class SplashActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Delays navigation until the minimum splash duration has elapsed.
+     *
+     * <p>If navigation has already occurred, this method returns immediately.
+     *
+     * @param requiresProfileSetup true if the next screen should be the
+     *                             profile setup flow; false if the main screen
+     *                             should be opened instead
+     */
     private void navigateAfterDelay(boolean requiresProfileSetup) {
         if (navigated) {
             return;
@@ -48,6 +83,16 @@ public class SplashActivity extends AppCompatActivity {
         handler.postDelayed(() -> openNextScreen(requiresProfileSetup), remainingMs);
     }
 
+    /**
+     * Opens the next screen after the splash screen.
+     *
+     * <p>If profile setup is required, this method opens {@link WelcomeActivity}.
+     * Otherwise, it opens {@link MainActivity}. Navigation only occurs once,
+     * and it is skipped if the activity is already finishing.
+     *
+     * @param requiresProfileSetup true if the user should be sent to the
+     *                             welcome/profile setup screen; false otherwise
+     */
     private void openNextScreen(boolean requiresProfileSetup) {
         if (navigated || isFinishing()) {
             return;
@@ -62,6 +107,15 @@ public class SplashActivity extends AppCompatActivity {
         finish();
     }
 
+    /**
+     * Determines whether the given user still needs to complete profile setup.
+     *
+     * <p>A profile is considered incomplete if the user is null or is missing
+     * a first name, last name, or email address.
+     *
+     * @param user the user to evaluate
+     * @return true if profile setup is still required; false otherwise
+     */
     private boolean requiresProfileSetup(User user) {
         if (user == null) {
             return true;
@@ -72,6 +126,12 @@ public class SplashActivity extends AppCompatActivity {
                 || isBlank(user.getEmail());
     }
 
+    /**
+     * Determines whether a string is null, empty, or only contains whitespace.
+     *
+     * @param value the string to check
+     * @return true if the string is blank; false otherwise
+     */
     private boolean isBlank(String value) {
         return value == null || value.trim().isEmpty();
     }

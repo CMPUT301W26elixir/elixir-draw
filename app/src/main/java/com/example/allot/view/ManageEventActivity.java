@@ -30,6 +30,11 @@ import java.util.Map;
 import java.util.Date;
 import java.util.Locale;
 
+/**
+ * Activity for managing and editing an existing event.
+ * Loads event details, allows the organizer to modify them,
+ * and saves updates back to Firestore.
+ */
 public class ManageEventActivity extends AppCompatActivity {
     private static final int SAVE_INACTIVE_COLOR = Color.parseColor("#A6A8A5");
     private static final int SAVE_ACTIVE_COLOR = Color.parseColor("#FFFFFF");
@@ -86,6 +91,12 @@ public class ManageEventActivity extends AppCompatActivity {
     private boolean isSaving;
     private boolean shouldRefreshOnResume;
 
+    /**
+     * Initializes the activity, binds views, configures inputs,
+     * populates intent data, and loads the latest event from Firestore.
+     *
+     * @param savedInstanceState the saved activity state
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -107,12 +118,18 @@ public class ManageEventActivity extends AppCompatActivity {
         loadEventFromFirestore();
     }
 
+    /**
+     * Finishes the activity without transition animation.
+     */
     @Override
     public void finish() {
         super.finish();
         overridePendingTransition(0, 0);
     }
 
+    /**
+     * Binds all view references used by the activity.
+     */
     private void bindViews() {
         eventImageBackground = findViewById(R.id.eventImageBackground);
         entrantsLotteryButton = findViewById(R.id.entrantsLotteryButton);
@@ -137,11 +154,17 @@ public class ManageEventActivity extends AppCompatActivity {
         saveChangesButton = findViewById(R.id.saveChangesButton);
     }
 
+    /**
+     * Sets up the header back button behavior.
+     */
     private void setupHeader() {
         ImageButton backButton = findViewById(R.id.backButton);
         backButton.setOnClickListener(view -> getOnBackPressedDispatcher().onBackPressed());
     }
 
+    /**
+     * Sets up text, checkbox, spinner, and button listeners used by the activity.
+     */
     private void setupListeners() {
         TextWatcher dirtyStateWatcher = new SimpleTextWatcher() {
             @Override
@@ -190,6 +213,11 @@ public class ManageEventActivity extends AppCompatActivity {
         saveChangesButton.setOnClickListener(view -> saveChanges());
     }
 
+    /**
+     * Configures a month spinner with the available month values and custom styling.
+     *
+     * @param spinner the spinner to configure
+     */
     private void setupMonthSpinner(Spinner spinner) {
         ArrayAdapter<CharSequence> adapter = new ArrayAdapter<CharSequence>(
                 this,
@@ -222,6 +250,9 @@ public class ManageEventActivity extends AppCompatActivity {
         spinner.setAdapter(adapter);
     }
 
+    /**
+     * Populates the UI using values passed through the launching intent.
+     */
     private void populateUiFromIntent() {
         isBindingEvent = true;
 
@@ -252,6 +283,9 @@ public class ManageEventActivity extends AppCompatActivity {
         isBindingEvent = false;
     }
 
+    /**
+     * Loads the latest event data from Firestore.
+     */
     private void loadEventFromFirestore() {
         if (TextUtils.isEmpty(currentEventId)) {
             Toast.makeText(this, R.string.manage_event_load_failure, Toast.LENGTH_SHORT).show();
@@ -271,6 +305,11 @@ public class ManageEventActivity extends AppCompatActivity {
                 });
     }
 
+    /**
+     * Binds the loaded Firestore event snapshot to the UI.
+     *
+     * @param documentSnapshot the loaded Firestore document snapshot
+     */
     private void bindEventSnapshot(DocumentSnapshot documentSnapshot) {
         isLoadingEvent = false;
         if (documentSnapshot == null || !documentSnapshot.exists()) {
@@ -293,6 +332,11 @@ public class ManageEventActivity extends AppCompatActivity {
         bindEvent(event);
     }
 
+    /**
+     * Binds an event model to the form and summary UI.
+     *
+     * @param event the event to display
+     */
     private void bindEvent(Event event) {
         isBindingEvent = true;
         currentEvent = event;
@@ -324,6 +368,9 @@ public class ManageEventActivity extends AppCompatActivity {
         updateSaveButtonState();
     }
 
+    /**
+     * Opens the appropriate lottery-related screen for the current event.
+     */
     private void openLotteryScreen() {
         if (TextUtils.isEmpty(currentEventId)) {
             Toast.makeText(this, R.string.manage_lottery_load_failure, Toast.LENGTH_SHORT).show();
@@ -339,6 +386,12 @@ public class ManageEventActivity extends AppCompatActivity {
         overridePendingTransition(0, 0);
     }
 
+    /**
+     * Checks whether the event already has draw results.
+     *
+     * @param event the event to check
+     * @return true if draw results exist, otherwise false
+     */
     private boolean hasDrawResults(Event event) {
         return (event.chosen != null && !event.chosen.isEmpty())
                 || (event.enrolled != null && !event.enrolled.isEmpty())
@@ -347,6 +400,9 @@ public class ManageEventActivity extends AppCompatActivity {
                 || (event.waitingList != null && event.waitingList.chosen != null && !event.waitingList.chosen.isEmpty());
     }
 
+    /**
+     * Reloads the event when returning from a related screen that may have changed it.
+     */
     @Override
     protected void onResume() {
         super.onResume();
@@ -356,12 +412,22 @@ public class ManageEventActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Clears the date fields for the provided month, day, and year inputs.
+     *
+     * @param monthSpinner the month spinner
+     * @param dayInput the day input
+     * @param yearInput the year input
+     */
     private void clearDateFields(Spinner monthSpinner, EditText dayInput, EditText yearInput) {
         monthSpinner.setSelection(0);
         dayInput.setText("");
         yearInput.setText("");
     }
 
+    /**
+     * Validates the current form and saves event changes to Firestore.
+     */
     private void saveChanges() {
         if (isSaving || isLoadingEvent || !hasUnsavedChanges()) {
             return;
@@ -444,6 +510,9 @@ public class ManageEventActivity extends AppCompatActivity {
                 });
     }
 
+    /**
+     * Reloads the event after a successful save so the UI reflects the latest values.
+     */
     private void reloadEventAfterSave() {
         database.collection("events")
                 .document(currentEventId)
@@ -461,6 +530,9 @@ public class ManageEventActivity extends AppCompatActivity {
                 });
     }
 
+    /**
+     * Captures the current form state so unsaved changes can be detected.
+     */
     private void captureOriginalState() {
         originalTitle = readText(eventNameInput);
         originalLocation = readText(locationInput);
@@ -473,6 +545,11 @@ public class ManageEventActivity extends AppCompatActivity {
         originalGeolocationEnabled = geolocationCheckbox.isChecked();
     }
 
+    /**
+     * Checks whether the current form differs from the original loaded state.
+     *
+     * @return true if unsaved changes exist, otherwise false
+     */
     private boolean hasUnsavedChanges() {
         return !readText(eventNameInput).equals(originalTitle)
                 || !readText(locationInput).equals(originalLocation)
@@ -485,6 +562,9 @@ public class ManageEventActivity extends AppCompatActivity {
                 || !currentDateValue(registrationEndMonthSpinner, registrationEndDayInput, registrationEndYearInput).equals(originalRegistrationEnd);
     }
 
+    /**
+     * Updates the save button color and enabled state based on form and loading state.
+     */
     private void updateSaveButtonState() {
         int color = hasUnsavedChanges() && !isSaving && !isLoadingEvent
                 ? SAVE_ACTIVE_COLOR
@@ -493,20 +573,48 @@ public class ManageEventActivity extends AppCompatActivity {
         saveChangesButton.setEnabled(!isSaving && !isLoadingEvent);
     }
 
+    /**
+     * Checks whether all parts of a date input have been filled in.
+     *
+     * @param monthSpinner the month spinner
+     * @param dayInput the day input
+     * @param yearInput the year input
+     * @return true if the date input is complete, otherwise false
+     */
     private boolean isDateInputComplete(Spinner monthSpinner, EditText dayInput, EditText yearInput) {
         return monthSpinner.getSelectedItemPosition() > 0
                 && !isBlank(readText(dayInput))
                 && !isBlank(readText(yearInput));
     }
 
+    /**
+     * Returns the trimmed text value from an EditText.
+     *
+     * @param editText the input field to read
+     * @return the trimmed text or an empty string
+     */
     private String readText(EditText editText) {
         return editText.getText() == null ? "" : editText.getText().toString().trim();
     }
 
+    /**
+     * Checks whether a string is blank.
+     *
+     * @param value the string to check
+     * @return true if blank, otherwise false
+     */
     private boolean isBlank(String value) {
         return TextUtils.isEmpty(value);
     }
 
+    /**
+     * Parses a date from the provided month, day, and year fields.
+     *
+     * @param monthSpinner the month spinner
+     * @param dayInput the day input
+     * @param yearInput the year input
+     * @return the parsed date, or null if parsing fails
+     */
     private Date parseDate(Spinner monthSpinner, EditText dayInput, EditText yearInput) {
         String month = monthSpinner.getSelectedItemPosition() <= 0 ? "" : monthSpinner.getSelectedItem().toString();
         String day = readText(dayInput);
@@ -522,6 +630,12 @@ public class ManageEventActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Parses a price value from text.
+     *
+     * @param value the price text to parse
+     * @return the parsed price, or null if invalid
+     */
     private Double parsePrice(String value) {
         try {
             return Double.parseDouble(value.replace("$", "").trim());
@@ -530,11 +644,25 @@ public class ManageEventActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Returns the current date field values as a formatted date string.
+     *
+     * @param monthSpinner the month spinner
+     * @param dayInput the day input
+     * @param yearInput the year input
+     * @return the formatted date string, or an empty string if invalid
+     */
     private String currentDateValue(Spinner monthSpinner, EditText dayInput, EditText yearInput) {
         Date date = parseDate(monthSpinner, dayInput, yearInput);
         return date == null ? "" : formatDate(date);
     }
 
+    /**
+     * Parses a positive integer from text.
+     *
+     * @param value the text to parse
+     * @return the parsed integer, or null if invalid
+     */
     private Integer parsePositiveInt(String value) {
         try {
             return Integer.parseInt(value.trim());
@@ -543,6 +671,14 @@ public class ManageEventActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Populates month, day, and year inputs from a formatted date string.
+     *
+     * @param value the formatted date string
+     * @param monthSpinner the month spinner
+     * @param dayInput the day input
+     * @param yearInput the year input
+     */
     private void populateDateFields(String value, Spinner monthSpinner, EditText dayInput, EditText yearInput) {
         if (TextUtils.isEmpty(value)) {
             return;
@@ -569,6 +705,12 @@ public class ManageEventActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Sets a spinner to the entry that matches the provided month text.
+     *
+     * @param spinner the spinner to update
+     * @param month the month text to match
+     */
     private void setSpinnerToMonth(Spinner spinner, String month) {
         if (spinner == null || TextUtils.isEmpty(month)) {
             return;
@@ -583,6 +725,11 @@ public class ManageEventActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Applies the summary card image based on the event category.
+     *
+     * @param category the event category
+     */
     private void applySummaryImage(String category) {
         int backgroundRes = shouldUsePrimaryImage(category)
                 ? R.drawable.bg_event_image_one
@@ -590,6 +737,12 @@ public class ManageEventActivity extends AppCompatActivity {
         eventImageBackground.setBackgroundResource(backgroundRes);
     }
 
+    /**
+     * Determines which summary image should be used for the given category.
+     *
+     * @param category the event category
+     * @return true if the primary image should be used, otherwise false
+     */
     private boolean shouldUsePrimaryImage(String category) {
         if (TextUtils.isEmpty(category)) {
             return true;
@@ -597,6 +750,12 @@ public class ManageEventActivity extends AppCompatActivity {
         return Math.abs(category.hashCode()) % 2 == 0;
     }
 
+    /**
+     * Formats a date using the activity's date format.
+     *
+     * @param date the date to format
+     * @return the formatted date string, or null if the date is null
+     */
     private String formatDate(Date date) {
         if (date == null) {
             return null;
@@ -604,6 +763,12 @@ public class ManageEventActivity extends AppCompatActivity {
         return dateFormat.format(date);
     }
 
+    /**
+     * Formats a price value for display in the form.
+     *
+     * @param price the price to format
+     * @return the formatted price string
+     */
     private String formatPriceValue(Double price) {
         if (price == null) {
             return "";
@@ -614,14 +779,30 @@ public class ManageEventActivity extends AppCompatActivity {
         return String.format(Locale.getDefault(), "%.2f", price);
     }
 
+    /**
+     * Trims a string value if it is not null.
+     *
+     * @param value the text to clean
+     * @return the trimmed text, or null if the value is null
+     */
     private String cleanText(String value) {
         return value == null ? null : value.trim();
     }
 
+    /**
+     * Returns the value if non-empty, otherwise returns the fallback text.
+     *
+     * @param value the primary text value
+     * @param fallback the fallback text
+     * @return the value or the fallback
+     */
     private String defaultText(String value, String fallback) {
         return TextUtils.isEmpty(value) ? fallback : value;
     }
 
+    /**
+     * Simple abstract TextWatcher with empty beforeTextChanged and onTextChanged methods.
+     */
     private abstract static class SimpleTextWatcher implements TextWatcher {
         @Override
         public void beforeTextChanged(CharSequence s, int start, int count, int after) {
