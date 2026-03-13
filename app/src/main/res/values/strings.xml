@@ -40,4 +40,14 @@
     <string name="nav_my_events">My Events</string>
     <string name="nav_scan">Scan</string>
     <string name="nav_profile">Profile</string>
+    <string name="profile_title">Profile</string>
+    <string name="profile_first_name_label">First name *</string>
+    <string name="profile_last_name_label">Last name *</string>
+    <string name="profile_contact_information">Contact Information:</string>
+    <string name="profile_email_label">Email *</string>
+    <string name="profile_phone_label">Phone number</string>
+    <string name="profile_notification_preferences">Notification Preferences</string>
+    <string name="profile_receive_event_updates">Receive event updates</string>
+    <string name="profile_delete">Delete profile</string>
+    <string name="profile_save_changes">Save Changes</string>
 </resources>
