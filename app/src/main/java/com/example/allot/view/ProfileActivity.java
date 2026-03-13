@@ -79,6 +79,7 @@ public class ProfileActivity extends AppCompatActivity {
     private void setupBottomNav() {
         bottomNavBar.setSelectedTab(BottomNavBarView.Tab.PROFILE);
         bottomNavBar.setOnTabClickListener(BottomNavBarView.Tab.EXPLORE, view -> openExploreScreen());
+        bottomNavBar.setOnTabClickListener(BottomNavBarView.Tab.MY_EVENTS, view -> openMyEventsScreen());
     }
 
     private void setupFormListeners() {
@@ -273,6 +274,14 @@ public class ProfileActivity extends AppCompatActivity {
         finish();
     }
 
+    private void openMyEventsScreen() {
+        Intent intent = new Intent(ProfileActivity.this, MyEventsActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        startActivity(intent);
+        overridePendingTransition(0, 0);
+        finish();
+    }
+
     private abstract static class SimpleTextWatcher implements TextWatcher {
         @Override
         public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -283,3 +292,6 @@ public class ProfileActivity extends AppCompatActivity {
         }
     }
 }
+
+
+
