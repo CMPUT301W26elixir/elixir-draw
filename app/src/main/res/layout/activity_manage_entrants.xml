@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/screen_bg"
@@ -7,7 +8,8 @@
 
     <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
         android:clipToPadding="false"
         android:fillViewport="true"
         android:overScrollMode="never"
@@ -190,5 +192,24 @@
                 android:orientation="vertical" />
         </LinearLayout>
     </ScrollView>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/exportFinalListButton"
+        android:layout_width="match_parent"
+        android:layout_height="45dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"
+        android:layout_marginBottom="18dp"
+        android:fontFamily="@font/varela_round_regular"
+        android:insetTop="0dp"
+        android:insetBottom="0dp"
+        android:minHeight="0dp"
+        android:text="@string/manage_entrants_export_final_list"
+        android:textAllCaps="false"
+        android:textColor="#1D1D1D"
+        android:textSize="18sp"
+        android:visibility="gone"
+        app:backgroundTint="#F1F1F1"
+        app:cornerRadius="22dp" />
 
 </LinearLayout>

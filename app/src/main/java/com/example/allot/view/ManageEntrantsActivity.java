@@ -1,7 +1,12 @@
 package com.example.allot.view;
 
+import android.content.ContentValues;
 import android.graphics.Color;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
+import android.provider.MediaStore;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,9 +21,14 @@ import com.example.allot.R;
 import com.example.allot.controller.UserController;
 import com.example.allot.model.Event;
 import com.example.allot.model.User;
+import com.google.android.material.button.MaterialButton;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -26,6 +36,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.nio.charset.StandardCharsets;
 
 public class ManageEntrantsActivity extends AppCompatActivity {
     public static final String EXTRA_EVENT_ID = "event_id";
@@ -50,11 +61,13 @@ public class ManageEntrantsActivity extends AppCompatActivity {
     private TextView allEntrantsTabText;
     private TextView stateText;
     private LinearLayout entrantsContainer;
+    private MaterialButton exportFinalListButton;
 
     private String currentEventId;
     private Event currentEvent;
     private Date currentDrawDate;
     private Tab selectedTab = Tab.SELECTED;
+    private boolean isExporting;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,6 +99,7 @@ public class ManageEntrantsActivity extends AppCompatActivity {
         allEntrantsTabText = findViewById(R.id.allEntrantsTabText);
         stateText = findViewById(R.id.stateText);
         entrantsContainer = findViewById(R.id.entrantsContainer);
+        exportFinalListButton = findViewById(R.id.exportFinalListButton);
     }
 
     private void setupHeader() {
@@ -98,6 +112,7 @@ public class ManageEntrantsActivity extends AppCompatActivity {
         cancelledTabText.setOnClickListener(view -> showTab(Tab.CANCELLED));
         enrolledTabText.setOnClickListener(view -> showTab(Tab.ENROLLED));
         allEntrantsTabText.setOnClickListener(view -> showTab(Tab.ALL));
+        exportFinalListButton.setOnClickListener(view -> exportFinalList());
         updateTabState();
     }
 
@@ -172,6 +187,7 @@ public class ManageEntrantsActivity extends AppCompatActivity {
         applyTabStyle(cancelledTabText, selectedTab == Tab.CANCELLED);
         applyTabStyle(enrolledTabText, selectedTab == Tab.ENROLLED);
         applyTabStyle(allEntrantsTabText, selectedTab == Tab.ALL);
+        updateExportButtonState();
     }
 
     private void applyTabStyle(TextView tabView, boolean isSelected) {
@@ -181,6 +197,7 @@ public class ManageEntrantsActivity extends AppCompatActivity {
 
     private void bindCurrentTab() {
         if (currentEvent == null) {
+            updateExportButtonState();
             return;
         }
 
@@ -213,6 +230,7 @@ public class ManageEntrantsActivity extends AppCompatActivity {
         }
 
         bindEntrants(entrantIds, emptyMessageRes, subtitleRes);
+        updateExportButtonState();
     }
 
     private void bindEntrants(List<String> entrantIds, int emptyMessageRes, int subtitleRes) {
@@ -296,5 +314,190 @@ public class ManageEntrantsActivity extends AppCompatActivity {
             return new ArrayList<>(event.waitingList.list);
         }
         return new ArrayList<>();
+    }
+
+    private void updateExportButtonState() {
+        boolean shouldShow = selectedTab == Tab.ENROLLED;
+        exportFinalListButton.setVisibility(shouldShow ? View.VISIBLE : View.GONE);
+
+        if (!shouldShow) {
+            return;
+        }
+
+        boolean hasEnrolledEntrants = currentEvent != null && !getEnrolledEntrants(currentEvent).isEmpty();
+        exportFinalListButton.setEnabled(hasEnrolledEntrants && !isExporting);
+        exportFinalListButton.setAlpha(hasEnrolledEntrants && !isExporting ? 1f : 0.6f);
+    }
+
+    private void exportFinalList() {
+        if (currentEvent == null || isExporting) {
+            return;
+        }
+
+        List<String> enrolledEntrantIds = getEnrolledEntrants(currentEvent);
+        if (enrolledEntrantIds.isEmpty()) {
+            Toast.makeText(this, R.string.manage_entrants_export_empty, Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        isExporting = true;
+        updateExportButtonState();
+        exportFinalListButton.setText(R.string.manage_entrants_exporting);
+
+        List<UserCsvRow> rows = new ArrayList<>();
+        loadExportRows(enrolledEntrantIds, 0, rows);
+    }
+
+    private void loadExportRows(List<String> entrantIds, int index, List<UserCsvRow> rows) {
+        if (index >= entrantIds.size()) {
+            writeCsvFile(rows);
+            return;
+        }
+
+        String entrantId = entrantIds.get(index);
+        userController.getUserByDeviceId(entrantId, (User user, boolean success) -> {
+            rows.add(buildCsvRow(entrantId, success ? user : null));
+            loadExportRows(entrantIds, index + 1, rows);
+        });
+    }
+
+    private UserCsvRow buildCsvRow(String entrantId, User user) {
+        if (user == null) {
+            return new UserCsvRow(entrantId, entrantId, "", "", "", "");
+        }
+
+        return new UserCsvRow(
+                safeCsvValue(user.getName(), entrantId),
+                safeCsvValue(user.getDeviceId(), entrantId),
+                safeCsvValue(user.getFirstName(), ""),
+                safeCsvValue(user.getLastName(), ""),
+                safeCsvValue(user.getEmail(), ""),
+                safeCsvValue(user.getPhone(), "")
+        );
+    }
+
+    private void writeCsvFile(List<UserCsvRow> rows) {
+        String fileName = buildExportFileName();
+        String csvContent = buildCsvContent(rows);
+
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+            writeCsvFileLegacy(fileName, csvContent);
+            return;
+        }
+
+        ContentValues values = new ContentValues();
+        values.put(MediaStore.Downloads.DISPLAY_NAME, fileName);
+        values.put(MediaStore.Downloads.MIME_TYPE, "text/csv");
+        values.put(MediaStore.Downloads.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS);
+
+        Uri fileUri = getContentResolver().insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, values);
+        if (fileUri == null) {
+            finishExport(false, null);
+            return;
+        }
+
+        try (OutputStream outputStream = getContentResolver().openOutputStream(fileUri)) {
+            if (outputStream == null) {
+                finishExport(false, null);
+                return;
+            }
+
+            outputStream.write(csvContent.getBytes(StandardCharsets.UTF_8));
+            outputStream.flush();
+            finishExport(true, fileName);
+        } catch (IOException exception) {
+            finishExport(false, null);
+        }
+    }
+
+    private void writeCsvFileLegacy(String fileName, String csvContent) {
+        File downloadsDir = getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
+        if (downloadsDir == null) {
+            finishExport(false, null);
+            return;
+        }
+
+        File exportFile = new File(downloadsDir, fileName);
+        try (FileOutputStream outputStream = new FileOutputStream(exportFile)) {
+            outputStream.write(csvContent.getBytes(StandardCharsets.UTF_8));
+            outputStream.flush();
+            finishExport(true, fileName);
+        } catch (IOException exception) {
+            finishExport(false, null);
+        }
+    }
+
+    private String buildCsvContent(List<UserCsvRow> rows) {
+        StringBuilder csvBuilder = new StringBuilder();
+        csvBuilder.append("Name,Device ID,First Name,Last Name,Email,Phone\n");
+        for (UserCsvRow row : rows) {
+            csvBuilder.append(escapeCsv(row.name)).append(',')
+                    .append(escapeCsv(row.deviceId)).append(',')
+                    .append(escapeCsv(row.firstName)).append(',')
+                    .append(escapeCsv(row.lastName)).append(',')
+                    .append(escapeCsv(row.email)).append(',')
+                    .append(escapeCsv(row.phone)).append('\n');
+        }
+        return csvBuilder.toString();
+    }
+
+    private String buildExportFileName() {
+        String eventTitle = currentEvent == null || TextUtils.isEmpty(currentEvent.title)
+                ? "event"
+                : currentEvent.title;
+        String safeTitle = eventTitle.replaceAll("[^a-zA-Z0-9_-]+", "_").replaceAll("_+", "_");
+        if (safeTitle.startsWith("_")) {
+            safeTitle = safeTitle.substring(1);
+        }
+        if (safeTitle.endsWith("_")) {
+            safeTitle = safeTitle.substring(0, safeTitle.length() - 1);
+        }
+        if (TextUtils.isEmpty(safeTitle)) {
+            safeTitle = "event";
+        }
+        return safeTitle + "_enrolled_entrants.csv";
+    }
+
+    private String escapeCsv(String value) {
+        String safeValue = value == null ? "" : value;
+        String escapedValue = safeValue.replace("\"", "\"\"");
+        return "\"" + escapedValue + "\"";
+    }
+
+    private String safeCsvValue(String value, String fallback) {
+        if (!TextUtils.isEmpty(value)) {
+            return value.trim();
+        }
+        return fallback == null ? "" : fallback;
+    }
+
+    private void finishExport(boolean success, String fileName) {
+        isExporting = false;
+        exportFinalListButton.setText(R.string.manage_entrants_export_final_list);
+        updateExportButtonState();
+
+        int messageRes = success ? R.string.manage_entrants_export_success : R.string.manage_entrants_export_failure;
+        String message = success
+                ? getString(messageRes, fileName)
+                : getString(messageRes);
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+    }
+
+    private static class UserCsvRow {
+        private final String name;
+        private final String deviceId;
+        private final String firstName;
+        private final String lastName;
+        private final String email;
+        private final String phone;
+
+        private UserCsvRow(String name, String deviceId, String firstName, String lastName, String email, String phone) {
+            this.name = name;
+            this.deviceId = deviceId;
+            this.firstName = firstName;
+            this.lastName = lastName;
+            this.email = email;
+            this.phone = phone;
+        }
     }
 }

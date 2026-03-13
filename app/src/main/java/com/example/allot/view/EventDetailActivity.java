@@ -58,6 +58,7 @@ public class EventDetailActivity extends AppCompatActivity {
     private TextView registrationDeadlineText;
     private TextView waitlistStatusText;
     private TextView joinWaitingListButton;
+    private TextView actionSubtextText;
     private TextView entrantCountText;
     private TextView errorText;
     private ProgressBar loadingIndicator;
@@ -90,6 +91,7 @@ public class EventDetailActivity extends AppCompatActivity {
         registrationDeadlineText = findViewById(R.id.registrationDeadlineText);
         waitlistStatusText = findViewById(R.id.waitlistStatusText);
         joinWaitingListButton = findViewById(R.id.joinWaitingListButton);
+        actionSubtextText = findViewById(R.id.actionSubtextText);
         entrantCountText = findViewById(R.id.entrantCountText);
         errorText = findViewById(R.id.eventErrorText);
         loadingIndicator = findViewById(R.id.eventLoadingIndicator);
@@ -118,8 +120,12 @@ public class EventDetailActivity extends AppCompatActivity {
         registrationOpenText.setVisibility(View.GONE);
         registrationDeadlineText.setVisibility(View.GONE);
         waitlistStatusText.setVisibility(View.GONE);
+        actionSubtextText.setVisibility(View.GONE);
         joinWaitingListButton.setText(R.string.event_detail_join_waiting_list);
         joinWaitingListButton.setBackgroundResource(R.drawable.bg_waitlist_button);
+        joinWaitingListButton.setEnabled(true);
+        joinWaitingListButton.setClickable(true);
+        joinWaitingListButton.setTextColor(getResources().getColor(R.color.black));
         entrantCountText.setVisibility(View.VISIBLE);
         entrantCountText.setText(getResources().getQuantityString(R.plurals.event_detail_entrant_count, 0, 0));
     }
@@ -210,19 +216,140 @@ public class EventDetailActivity extends AppCompatActivity {
     private void bindWaitlistState(Event event) {
         if (isCurrentUserOrganizer(event)) {
             waitlistStatusText.setVisibility(View.GONE);
+            actionSubtextText.setVisibility(View.GONE);
             joinWaitingListButton.setText(R.string.event_detail_manage_event);
             joinWaitingListButton.setBackgroundResource(R.drawable.bg_waitlist_button);
+            joinWaitingListButton.setEnabled(true);
+            joinWaitingListButton.setClickable(true);
+            joinWaitingListButton.setTextColor(getResources().getColor(R.color.black));
+            entrantCountText.setVisibility(View.VISIBLE);
+            return;
+        }
+
+        if (isCurrentUserEnrolled(event)) {
+            showFooterState(
+                    false,
+                    false,
+                    R.string.event_detail_enrolled,
+                    R.drawable.bg_event_detail_offer_green,
+                    getResources().getColor(R.color.white),
+                    null,
+                    true
+            );
+            return;
+        }
+
+        if (hasActiveOffer(event)) {
+            showFooterState(
+                    false,
+                    true,
+                    R.string.event_detail_offer,
+                    R.drawable.bg_event_detail_offer_green,
+                    getResources().getColor(R.color.white),
+                    null,
+                    true
+            );
+            return;
+        }
+
+        if (shouldShowReplacementState(event)) {
+            showFooterState(
+                    false,
+                    false,
+                    R.string.event_detail_not_selected_main_draw,
+                    R.drawable.bg_event_detail_offer_yellow,
+                    getResources().getColor(R.color.black),
+                    getString(R.string.event_detail_not_selected_main_draw_body),
+                    false
+            );
+            return;
+        }
+
+        if (shouldShowFinalizedNotSelectedState(event)) {
+            showFooterState(
+                    false,
+                    false,
+                    R.string.event_detail_not_selected_final,
+                    R.drawable.bg_event_detail_offer_grey,
+                    getResources().getColor(R.color.black),
+                    getString(R.string.event_detail_not_selected_final_body),
+                    false
+            );
             return;
         }
 
         boolean isOnWaitingList = isCurrentUserOnWaitingList(event);
-        waitlistStatusText.setVisibility(isOnWaitingList ? View.VISIBLE : View.GONE);
-        joinWaitingListButton.setText(isOnWaitingList
-                ? R.string.event_detail_leave_waiting_list
-                : R.string.event_detail_join_waiting_list);
-        joinWaitingListButton.setBackgroundResource(isOnWaitingList
-                ? R.drawable.bg_waitlist_button_inactive
-                : R.drawable.bg_waitlist_button);
+        showFooterState(
+                isOnWaitingList,
+                true,
+                isOnWaitingList ? R.string.event_detail_leave_waiting_list : R.string.event_detail_join_waiting_list,
+                isOnWaitingList ? R.drawable.bg_waitlist_button_inactive : R.drawable.bg_waitlist_button,
+                getResources().getColor(R.color.black),
+                null,
+                true
+        );
+    }
+
+    private void showFooterState(boolean showWaitlistMessage,
+                                 boolean buttonEnabled,
+                                 int buttonTextRes,
+                                 int buttonBackgroundRes,
+                                 int buttonTextColor,
+                                 String subtext,
+                                 boolean showEntrantCount) {
+        waitlistStatusText.setVisibility(showWaitlistMessage ? View.VISIBLE : View.GONE);
+        joinWaitingListButton.setText(buttonTextRes);
+        joinWaitingListButton.setBackgroundResource(buttonBackgroundRes);
+        joinWaitingListButton.setTextColor(buttonTextColor);
+        joinWaitingListButton.setEnabled(buttonEnabled);
+        joinWaitingListButton.setClickable(buttonEnabled);
+
+        if (TextUtils.isEmpty(subtext)) {
+            actionSubtextText.setVisibility(View.GONE);
+        } else {
+            actionSubtextText.setVisibility(View.VISIBLE);
+            actionSubtextText.setText(subtext);
+        }
+
+        entrantCountText.setVisibility(showEntrantCount ? View.VISIBLE : View.GONE);
+    }
+
+    private boolean isCurrentUserEnrolled(Event event) {
+        return containsUser(event == null ? null : event.enrolled, userController.getCurrentDeviceId());
+    }
+
+    private boolean hasActiveOffer(Event event) {
+        String deviceId = userController.getCurrentDeviceId();
+        return !containsUser(event == null ? null : event.notEnrolled, deviceId)
+                && (containsUser(event == null ? null : event.chosen, deviceId)
+                || containsUser(event != null && event.waitingList != null ? event.waitingList.chosen : null, deviceId));
+    }
+
+    private boolean shouldShowReplacementState(Event event) {
+        return hasPublishedSelectionResults(event)
+                && isCurrentUserOnWaitingList(event)
+                && !hasActiveOffer(event)
+                && !isCurrentUserEnrolled(event)
+                && !"finalized".equalsIgnoreCase(cleanText(event == null ? null : event.status));
+    }
+
+    private boolean shouldShowFinalizedNotSelectedState(Event event) {
+        return hasPublishedSelectionResults(event)
+                && isCurrentUserOnWaitingList(event)
+                && !hasActiveOffer(event)
+                && !isCurrentUserEnrolled(event)
+                && "finalized".equalsIgnoreCase(cleanText(event == null ? null : event.status));
+    }
+
+    private boolean hasPublishedSelectionResults(Event event) {
+        return (event != null && event.chosen != null && !event.chosen.isEmpty())
+                || (event != null && event.enrolled != null && !event.enrolled.isEmpty())
+                || (event != null && event.notEnrolled != null && !event.notEnrolled.isEmpty())
+                || (event != null && event.waitingList != null && event.waitingList.chosen != null && !event.waitingList.chosen.isEmpty());
+    }
+
+    private boolean containsUser(java.util.List<String> users, String deviceId) {
+        return users != null && !TextUtils.isEmpty(deviceId) && users.contains(deviceId);
     }
 
     private boolean isCurrentUserOnWaitingList(Event event) {
@@ -243,6 +370,15 @@ public class EventDetailActivity extends AppCompatActivity {
     private void onWaitlistButtonPressed() {
         if (isCurrentUserOrganizer) {
             openManageEventScreen();
+            return;
+        }
+
+        if (hasActiveOffer(currentEvent)) {
+            openOfferScreen();
+            return;
+        }
+
+        if (!joinWaitingListButton.isEnabled()) {
             return;
         }
 
@@ -279,6 +415,20 @@ public class EventDetailActivity extends AppCompatActivity {
                 currentEvent == null ? null : formatLongDate(currentEvent.registrationDeadline));
         intent.putExtra(ManageEventActivity.EXTRA_EVENT_CATEGORY,
                 currentEvent == null ? getIntent().getStringExtra(EXTRA_EVENT_CATEGORY) : currentEvent.category);
+        startActivity(intent);
+        overridePendingTransition(0, 0);
+    }
+
+    private void openOfferScreen() {
+        if (TextUtils.isEmpty(currentEventId)) {
+            return;
+        }
+
+        shouldRefreshOnResume = true;
+        Intent intent = new Intent(this, EventOfferActivity.class);
+        intent.putExtra(EventOfferActivity.EXTRA_EVENT_ID, currentEventId);
+        intent.putExtra(EventOfferActivity.EXTRA_EVENT_TITLE,
+                currentEvent == null ? getIntent().getStringExtra(EXTRA_EVENT_TITLE) : currentEvent.title);
         startActivity(intent);
         overridePendingTransition(0, 0);
     }

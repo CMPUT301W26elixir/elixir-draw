@@ -239,16 +239,17 @@ public class ManageLotteryActivity extends AppCompatActivity {
         currentEvent.waitingList.chosen = new ArrayList<>();
         currentEvent.waitingList.status = new HashMap<>();
         currentEvent.chosen = new ArrayList<>();
+        currentEvent.enrolled = new ArrayList<>();
         currentEvent.notEnrolled = new ArrayList<>();
 
         currentEvent.lottery();
-        currentEvent.notenrolled();
 
         Map<String, Object> updates = new HashMap<>();
         updates.put("drawDate", drawDate);
         updates.put("capacity", attendees);
         updates.put("limit", attendees);
         updates.put("chosen", currentEvent.chosen);
+        updates.put("enrolled", currentEvent.enrolled);
         updates.put("notEnrolled", currentEvent.notEnrolled);
         updates.put("waitingList.limit", currentEvent.waitingList.limit);
         updates.put("waitingList.chosen", currentEvent.waitingList.chosen);

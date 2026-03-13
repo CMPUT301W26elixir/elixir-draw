@@ -41,6 +41,9 @@
             android:name=".view.ManageLotteryActivity"
             android:exported="false" />
         <activity
+            android:name=".view.EventOfferActivity"
+            android:exported="false" />
+        <activity
             android:name=".view.ManageEntrantsActivity"
             android:exported="false" />
         <activity
