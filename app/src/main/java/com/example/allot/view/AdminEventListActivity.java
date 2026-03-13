@@ -302,7 +302,6 @@ public class AdminEventListActivity extends AppCompatActivity {
         stateText.setVisibility(View.VISIBLE);
         stateText.setText(R.string.browse_state_error);
     }
-
     private int dpToPx(int dp) {
         return Math.round(dp * getResources().getDisplayMetrics().density);
     }
