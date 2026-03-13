@@ -106,9 +106,17 @@ This action cannot be undone.</string>
     <string name="my_events_empty_waiting">No events are waiting for results.</string>
     <string name="my_events_empty_not_selected">No finished results yet.</string>
     <string name="my_events_empty_past">No past events yet.</string>
+    <string name="my_events_section_ongoing">Ongoing:</string>
+    <string name="my_events_section_completed">Completed:</string>
+    <string name="my_events_hosting_empty">You have not created any events yet.</string>
+    <string name="my_events_empty_ongoing">No ongoing events right now.</string>
+    <string name="my_events_empty_completed">No completed events yet.</string>
+    <string name="my_events_create_event">Create Event</string>
 
     <plurals name="event_detail_entrant_count">
         <item quantity="one">%d Entrant</item>
         <item quantity="other">%d Entrants</item>
     </plurals>
 </resources>
+
+

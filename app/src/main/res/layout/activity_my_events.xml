@@ -32,6 +32,8 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
+                    android:clickable="true"
+                    android:focusable="true"
                     android:fontFamily="@font/varela_round_regular"
                     android:text="@string/my_events_registered"
                     android:textColor="@color/text_primary"
@@ -41,6 +43,8 @@
                     android:id="@+id/hostingTabText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:clickable="true"
+                    android:focusable="true"
                     android:fontFamily="@font/varela_round_regular"
                     android:text="@string/my_events_hosting"
                     android:textColor="@color/my_events_tab_inactive"
@@ -69,7 +73,7 @@
                 android:visibility="gone" />
 
             <LinearLayout
-                android:id="@+id/sectionsContainer"
+                android:id="@+id/registeredSectionsContainer"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="22dp"
@@ -139,8 +143,65 @@
                     android:layout_marginTop="10dp"
                     android:orientation="vertical" />
             </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/hostingSectionsContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="22dp"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/varela_round_regular"
+                    android:text="@string/my_events_section_ongoing"
+                    android:textColor="@color/text_primary"
+                    android:textSize="16sp" />
+
+                <LinearLayout
+                    android:id="@+id/ongoingContainer"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:orientation="vertical" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:fontFamily="@font/varela_round_regular"
+                    android:text="@string/my_events_section_completed"
+                    android:textColor="@color/text_primary"
+                    android:textSize="16sp" />
+
+                <LinearLayout
+                    android:id="@+id/completedContainer"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:orientation="vertical" />
+            </LinearLayout>
         </LinearLayout>
     </ScrollView>
+
+    <TextView
+        android:id="@+id/createEventButton"
+        android:layout_width="match_parent"
+        android:layout_height="45dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"
+        android:layout_marginBottom="18dp"
+        android:background="@drawable/bg_waitlist_button"
+        android:clickable="true"
+        android:focusable="true"
+        android:fontFamily="@font/varela_round_regular"
+        android:gravity="center"
+        android:text="@string/my_events_create_event"
+        android:textColor="#1D1D1D"
+        android:textSize="20sp"
+        android:visibility="gone" />
 
     <com.example.allot.view.BottomNavBarView
         android:id="@+id/bottomNavBar"
@@ -151,3 +212,4 @@
         android:layout_marginBottom="8dp" />
 
 </LinearLayout>
+

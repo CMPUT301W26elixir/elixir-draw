@@ -5,7 +5,6 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -17,6 +16,8 @@ import com.example.allot.R;
 import com.example.allot.controller.EventController;
 import com.example.allot.controller.UserController;
 import com.example.allot.model.Event;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,15 +28,20 @@ public class MyEventsActivity extends AppCompatActivity {
     private TextView hostingTabText;
     private ProgressBar loadingIndicator;
     private TextView stateText;
-    private LinearLayout sectionsContainer;
+    private LinearLayout registeredSectionsContainer;
     private LinearLayout selectedContainer;
     private LinearLayout waitingContainer;
     private LinearLayout notSelectedContainer;
     private LinearLayout pastContainer;
+    private LinearLayout hostingSectionsContainer;
+    private LinearLayout ongoingContainer;
+    private LinearLayout completedContainer;
+    private TextView createEventButton;
 
     private UserController userController;
     private EventController eventController;
     private LayoutInflater layoutInflater;
+    private TopTab currentTab = TopTab.REGISTERED;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,7 +55,7 @@ public class MyEventsActivity extends AppCompatActivity {
         bindViews();
         setupTopTabs();
         setupBottomNav();
-        loadRegisteredEvents();
+        showRegisteredTab();
     }
 
     @Override
@@ -64,16 +70,21 @@ public class MyEventsActivity extends AppCompatActivity {
         hostingTabText = findViewById(R.id.hostingTabText);
         loadingIndicator = findViewById(R.id.loadingIndicator);
         stateText = findViewById(R.id.stateText);
-        sectionsContainer = findViewById(R.id.sectionsContainer);
+        registeredSectionsContainer = findViewById(R.id.registeredSectionsContainer);
         selectedContainer = findViewById(R.id.selectedContainer);
         waitingContainer = findViewById(R.id.waitingContainer);
         notSelectedContainer = findViewById(R.id.notSelectedContainer);
         pastContainer = findViewById(R.id.pastContainer);
+        hostingSectionsContainer = findViewById(R.id.hostingSectionsContainer);
+        ongoingContainer = findViewById(R.id.ongoingContainer);
+        completedContainer = findViewById(R.id.completedContainer);
+        createEventButton = findViewById(R.id.createEventButton);
     }
 
     private void setupTopTabs() {
-        registeredTabText.setTextColor(ContextCompat.getColor(this, R.color.text_primary));
-        hostingTabText.setTextColor(ContextCompat.getColor(this, R.color.my_events_tab_inactive));
+        registeredTabText.setOnClickListener(view -> showRegisteredTab());
+        hostingTabText.setOnClickListener(view -> showHostingTab());
+        createEventButton.setOnClickListener(view -> { });
     }
 
     private void setupBottomNav() {
@@ -82,19 +93,76 @@ public class MyEventsActivity extends AppCompatActivity {
         bottomNavBar.setOnTabClickListener(BottomNavBarView.Tab.PROFILE, view -> openProfileScreen());
     }
 
+    private void showRegisteredTab() {
+        currentTab = TopTab.REGISTERED;
+        updateTopTabStyles();
+        createEventButton.setVisibility(View.GONE);
+        loadRegisteredEvents();
+    }
+
+    private void showHostingTab() {
+        currentTab = TopTab.HOSTING;
+        updateTopTabStyles();
+        createEventButton.setVisibility(View.VISIBLE);
+        loadHostedEvents();
+    }
+
+    private void updateTopTabStyles() {
+        registeredTabText.setTextColor(ContextCompat.getColor(this,
+                currentTab == TopTab.REGISTERED ? R.color.text_primary : R.color.my_events_tab_inactive));
+        hostingTabText.setTextColor(ContextCompat.getColor(this,
+                currentTab == TopTab.HOSTING ? R.color.text_primary : R.color.my_events_tab_inactive));
+    }
+
     private void loadRegisteredEvents() {
         setLoadingState();
         eventController.getRegisteredEventsForUser(userController.getCurrentDeviceId(), new EventController.EventListCallback() {
             @Override
             public void onCallback(List<Event> events) {
+                if (currentTab != TopTab.REGISTERED) {
+                    return;
+                }
                 bindRegisteredSections(events == null ? new ArrayList<>() : events);
             }
 
             @Override
             public void onError(Exception exception) {
-                setErrorState();
+                if (currentTab == TopTab.REGISTERED) {
+                    setErrorState();
+                }
             }
         });
+    }
+
+    private void loadHostedEvents() {
+        setLoadingState();
+        FirebaseFirestore.getInstance()
+                .collection("events")
+                .whereEqualTo("organizerId", userController.getCurrentDeviceId())
+                .get()
+                .addOnSuccessListener(querySnapshot -> {
+                    if (currentTab != TopTab.HOSTING) {
+                        return;
+                    }
+
+                    List<Event> events = new ArrayList<>();
+                    for (QueryDocumentSnapshot document : querySnapshot) {
+                        Event event = document.toObject(Event.class);
+                        if (event != null && (event.eventId == null || event.eventId.trim().isEmpty())) {
+                            event.eventId = document.getId();
+                        }
+                        if (event != null) {
+                            events.add(event);
+                        }
+                    }
+
+                    bindHostedSections(events);
+                })
+                .addOnFailureListener(exception -> {
+                    if (currentTab == TopTab.HOSTING) {
+                        setErrorState();
+                    }
+                });
     }
 
     private void bindRegisteredSections(List<Event> events) {
@@ -104,7 +172,7 @@ public class MyEventsActivity extends AppCompatActivity {
         List<Event> pastEvents = new ArrayList<>();
 
         for (Event event : events) {
-            Section section = classifyEvent(event);
+            Section section = classifyRegisteredEvent(event);
             switch (section) {
                 case SELECTED:
                     selectedEvents.add(event);
@@ -122,20 +190,45 @@ public class MyEventsActivity extends AppCompatActivity {
             }
         }
 
-        bindSection(selectedContainer, selectedEvents, Section.SELECTED, R.string.my_events_empty_selected);
-        bindSection(waitingContainer, waitingEvents, Section.WAITING, R.string.my_events_empty_waiting);
-        bindSection(notSelectedContainer, notSelectedEvents, Section.NOT_SELECTED, R.string.my_events_empty_not_selected);
-        bindSection(pastContainer, pastEvents, Section.PAST, R.string.my_events_empty_past);
+        bindSection(selectedContainer, selectedEvents, R.string.my_events_empty_selected);
+        bindSection(waitingContainer, waitingEvents, R.string.my_events_empty_waiting);
+        bindSection(notSelectedContainer, notSelectedEvents, R.string.my_events_empty_not_selected);
+        bindSection(pastContainer, pastEvents, R.string.my_events_empty_past);
 
         loadingIndicator.setVisibility(View.GONE);
         stateText.setVisibility(events.isEmpty() ? View.VISIBLE : View.GONE);
         if (events.isEmpty()) {
             stateText.setText(R.string.my_events_state_empty);
         }
-        sectionsContainer.setVisibility(View.VISIBLE);
+        registeredSectionsContainer.setVisibility(View.VISIBLE);
+        hostingSectionsContainer.setVisibility(View.GONE);
     }
 
-    private void bindSection(LinearLayout container, List<Event> events, Section section, int emptyMessageRes) {
+    private void bindHostedSections(List<Event> events) {
+        List<Event> ongoingEvents = new ArrayList<>();
+        List<Event> completedEvents = new ArrayList<>();
+
+        for (Event event : events) {
+            if (isPastEvent(event)) {
+                completedEvents.add(event);
+            } else {
+                ongoingEvents.add(event);
+            }
+        }
+
+        bindSection(ongoingContainer, ongoingEvents, R.string.my_events_empty_ongoing);
+        bindSection(completedContainer, completedEvents, R.string.my_events_empty_completed);
+
+        loadingIndicator.setVisibility(View.GONE);
+        stateText.setVisibility(events.isEmpty() ? View.VISIBLE : View.GONE);
+        if (events.isEmpty()) {
+            stateText.setText(R.string.my_events_hosting_empty);
+        }
+        registeredSectionsContainer.setVisibility(View.GONE);
+        hostingSectionsContainer.setVisibility(View.VISIBLE);
+    }
+
+    private void bindSection(LinearLayout container, List<Event> events, int emptyMessageRes) {
         container.removeAllViews();
 
         if (events.isEmpty()) {
@@ -145,7 +238,7 @@ public class MyEventsActivity extends AppCompatActivity {
 
         for (Event event : events) {
             View cardView = layoutInflater.inflate(R.layout.item_my_event_status_card, container, false);
-            bindCard(cardView, event, section);
+            bindCard(cardView, event);
             container.addView(cardView);
         }
     }
@@ -159,9 +252,8 @@ public class MyEventsActivity extends AppCompatActivity {
         return emptyView;
     }
 
-    private void bindCard(View cardView, Event event, Section section) {
+    private void bindCard(View cardView, Event event) {
         View imageBackground = cardView.findViewById(R.id.imageBackground);
-        ImageView previewIcon = cardView.findViewById(R.id.previewIcon);
         TextView titleText = cardView.findViewById(R.id.titleText);
         TextView locationText = cardView.findViewById(R.id.locationText);
         TextView dateText = cardView.findViewById(R.id.dateText);
@@ -173,12 +265,11 @@ public class MyEventsActivity extends AppCompatActivity {
         imageBackground.setBackgroundResource(shouldUsePrimaryImage(event)
                 ? R.drawable.bg_event_image_one
                 : R.drawable.bg_event_image_two);
-        previewIcon.setImageResource(section == Section.PAST ? R.drawable.article : R.drawable.event);
 
         cardView.setOnClickListener(view -> openEventDetailScreen(event));
     }
 
-    private Section classifyEvent(Event event) {
+    private Section classifyRegisteredEvent(Event event) {
         if (isPastEvent(event)) {
             return Section.PAST;
         }
@@ -245,14 +336,16 @@ public class MyEventsActivity extends AppCompatActivity {
         loadingIndicator.setVisibility(View.VISIBLE);
         stateText.setVisibility(View.VISIBLE);
         stateText.setText(R.string.my_events_state_loading);
-        sectionsContainer.setVisibility(View.GONE);
+        registeredSectionsContainer.setVisibility(View.GONE);
+        hostingSectionsContainer.setVisibility(View.GONE);
     }
 
     private void setErrorState() {
         loadingIndicator.setVisibility(View.GONE);
         stateText.setVisibility(View.VISIBLE);
         stateText.setText(R.string.my_events_state_error);
-        sectionsContainer.setVisibility(View.GONE);
+        registeredSectionsContainer.setVisibility(View.GONE);
+        hostingSectionsContainer.setVisibility(View.GONE);
     }
 
     private void openEventDetailScreen(Event event) {
@@ -298,4 +391,16 @@ public class MyEventsActivity extends AppCompatActivity {
         NOT_SELECTED,
         PAST
     }
+
+    private enum TopTab {
+        REGISTERED,
+        HOSTING
+    }
 }
+
+
+
+
+
+
+
