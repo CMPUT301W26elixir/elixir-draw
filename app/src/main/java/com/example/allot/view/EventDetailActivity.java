@@ -40,6 +40,7 @@ public class EventDetailActivity extends AppCompatActivity {
 
     private String currentEventId;
     private boolean isJoiningWaitlist;
+    private boolean isLeavingWaitlist;
     private Event currentEvent;
 
     private FrameLayout heroImageFrame;
@@ -52,6 +53,7 @@ public class EventDetailActivity extends AppCompatActivity {
     private TextView descriptionText;
     private TextView registrationOpenText;
     private TextView registrationDeadlineText;
+    private TextView waitlistStatusText;
     private TextView joinWaitingListButton;
     private TextView entrantCountText;
     private TextView errorText;
@@ -83,6 +85,7 @@ public class EventDetailActivity extends AppCompatActivity {
         descriptionText = findViewById(R.id.eventDescriptionText);
         registrationOpenText = findViewById(R.id.registrationOpenText);
         registrationDeadlineText = findViewById(R.id.registrationDeadlineText);
+        waitlistStatusText = findViewById(R.id.waitlistStatusText);
         joinWaitingListButton = findViewById(R.id.joinWaitingListButton);
         entrantCountText = findViewById(R.id.entrantCountText);
         errorText = findViewById(R.id.eventErrorText);
@@ -92,7 +95,7 @@ public class EventDetailActivity extends AppCompatActivity {
     private void setupListeners() {
         ImageButton backButton = findViewById(R.id.backButton);
         backButton.setOnClickListener(view -> getOnBackPressedDispatcher().onBackPressed());
-        joinWaitingListButton.setOnClickListener(view -> showLotteryCriteriaDialog());
+        joinWaitingListButton.setOnClickListener(view -> onWaitlistButtonPressed());
     }
 
     private void bindFallbackContent() {
@@ -110,6 +113,9 @@ public class EventDetailActivity extends AppCompatActivity {
         descriptionText.setVisibility(View.GONE);
         registrationOpenText.setVisibility(View.GONE);
         registrationDeadlineText.setVisibility(View.GONE);
+        waitlistStatusText.setVisibility(View.GONE);
+        joinWaitingListButton.setText(R.string.event_detail_join_waiting_list);
+        joinWaitingListButton.setBackgroundResource(R.drawable.bg_waitlist_button);
         entrantCountText.setVisibility(View.VISIBLE);
         entrantCountText.setText(getResources().getQuantityString(R.plurals.event_detail_entrant_count, 0, 0));
     }
@@ -161,6 +167,7 @@ public class EventDetailActivity extends AppCompatActivity {
         applyHeroBackground(event.category);
         bindEntrantCount(event);
         bindOrganizer(event.organizerId);
+        bindWaitlistState(event);
     }
 
     private void bindOrganizer(String organizerId) {
@@ -195,8 +202,34 @@ public class EventDetailActivity extends AppCompatActivity {
         ));
     }
 
+    private void bindWaitlistState(Event event) {
+        boolean isOnWaitingList = isCurrentUserOnWaitingList(event);
+        waitlistStatusText.setVisibility(isOnWaitingList ? View.VISIBLE : View.GONE);
+        joinWaitingListButton.setText(isOnWaitingList
+                ? R.string.event_detail_leave_waiting_list
+                : R.string.event_detail_join_waiting_list);
+        joinWaitingListButton.setBackgroundResource(isOnWaitingList
+                ? R.drawable.bg_waitlist_button_inactive
+                : R.drawable.bg_waitlist_button);
+    }
+
+    private boolean isCurrentUserOnWaitingList(Event event) {
+        if (event == null || event.waitingList == null || event.waitingList.list == null) {
+            return false;
+        }
+        return event.waitingList.list.contains(userController.getCurrentDeviceId());
+    }
+
+    private void onWaitlistButtonPressed() {
+        if (isCurrentUserOnWaitingList(currentEvent)) {
+            leaveWaitingList();
+            return;
+        }
+        showLotteryCriteriaDialog();
+    }
+
     private void showLotteryCriteriaDialog() {
-        if (TextUtils.isEmpty(currentEventId) || isJoiningWaitlist) {
+        if (TextUtils.isEmpty(currentEventId) || isJoiningWaitlist || isLeavingWaitlist) {
             return;
         }
 
@@ -247,6 +280,28 @@ public class EventDetailActivity extends AppCompatActivity {
 
             dialog.dismiss();
             Toast.makeText(this, R.string.event_detail_join_success, Toast.LENGTH_SHORT).show();
+            loadEventDetails();
+        });
+    }
+
+    private void leaveWaitingList() {
+        if (isLeavingWaitlist || TextUtils.isEmpty(currentEventId)) {
+            return;
+        }
+
+        isLeavingWaitlist = true;
+        joinWaitingListButton.setEnabled(false);
+
+        eventController.leaveWaitingList(currentEventId, userController.getCurrentDeviceId(), (result, success) -> {
+            isLeavingWaitlist = false;
+            joinWaitingListButton.setEnabled(true);
+
+            if (!success || result == null || !result) {
+                Toast.makeText(this, R.string.event_detail_leave_failure, Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            Toast.makeText(this, R.string.event_detail_leave_success, Toast.LENGTH_SHORT).show();
             loadEventDetails();
         });
     }

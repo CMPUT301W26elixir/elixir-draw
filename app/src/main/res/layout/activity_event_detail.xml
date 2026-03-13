@@ -231,6 +231,17 @@
             android:paddingBottom="20dp">
 
             <TextView
+                android:id="@+id/waitlistStatusText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:fontFamily="@font/varela_round_regular"
+                android:text="@string/event_detail_waitlist_joined_message"
+                android:textColor="#A6A8A5"
+                android:textSize="12sp"
+                android:visibility="gone" />
+
+            <TextView
                 android:id="@+id/joinWaitingListButton"
                 android:layout_width="match_parent"
                 android:layout_height="45dp"

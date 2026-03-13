@@ -65,6 +65,8 @@
 This action cannot be undone.</string>
     <string name="event_detail_back">Go back</string>
     <string name="event_detail_join_waiting_list">Join waiting list</string>
+    <string name="event_detail_leave_waiting_list">Leave waiting list</string>
+    <string name="event_detail_waitlist_joined_message">You are on the waiting list for this event.</string>
     <string name="event_detail_registration_opens">Registration opens: %1$s</string>
     <string name="event_detail_registration_closes">Registration closes: %1$s</string>
     <string name="event_detail_registration_tba">TBA</string>
@@ -75,6 +77,8 @@ This action cannot be undone.</string>
     <string name="event_detail_not_found">This event is no longer available.</string>
     <string name="event_detail_join_success">You joined the waiting list.</string>
     <string name="event_detail_join_failure">Could not join the waiting list. Please try again.</string>
+    <string name="event_detail_leave_success">You left the waiting list.</string>
+    <string name="event_detail_leave_failure">Could not leave the waiting list. Please try again.</string>
     <string name="lottery_criteria_title">Lottery Criteria</string>
     <string name="lottery_criteria_close">Close lottery criteria dialog</string>
     <string name="lottery_criteria_confirm">Confirm</string>
