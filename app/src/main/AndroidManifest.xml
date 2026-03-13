@@ -25,6 +25,12 @@
             android:name=".view.MainActivity"
             android:exported="true" />
         <activity
+            android:name=".view.MyEventsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".view.CreateEventActivity"
+            android:exported="false" />
+        <activity
             android:name=".view.EventDetailActivity"
             android:exported="false" />
         <activity

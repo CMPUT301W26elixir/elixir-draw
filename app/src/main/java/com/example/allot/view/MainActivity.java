@@ -48,6 +48,8 @@ public class MainActivity extends AppCompatActivity {
         eventListAdapter = new EventListAdapter(new ArrayList<>(), this::openEventDetailScreen);
         recyclerView.setAdapter(eventListAdapter);
         bottomNavBar.setSelectedTab(BottomNavBarView.Tab.EXPLORE);
+        bottomNavBar.setOnTabClickListener(BottomNavBarView.Tab.MY_EVENTS,
+                view -> openMyEventsScreen());
         bottomNavBar.setOnTabClickListener(BottomNavBarView.Tab.PROFILE,
                 view -> openProfileScreen());
 
@@ -70,6 +72,11 @@ public class MainActivity extends AppCompatActivity {
 
     private void openProfileScreen() {
         startActivity(new Intent(MainActivity.this, ProfileActivity.class));
+        overridePendingTransition(0, 0);
+    }
+
+    private void openMyEventsScreen() {
+        startActivity(new Intent(MainActivity.this, MyEventsActivity.class));
         overridePendingTransition(0, 0);
     }
 
@@ -176,3 +183,6 @@ public class MainActivity extends AppCompatActivity {
         stateText.setText(R.string.browse_state_error);
     }
 }
+
+
+

@@ -66,6 +66,8 @@ This action cannot be undone.</string>
     <string name="event_detail_back">Go back</string>
     <string name="event_detail_join_waiting_list">Join waiting list</string>
     <string name="event_detail_leave_waiting_list">Leave waiting list</string>
+    <string name="event_detail_manage_event">Manage Event</string>
+    <string name="event_detail_manage_event_coming_soon">Manage Event coming soon.</string>
     <string name="event_detail_waitlist_joined_message">You are on the waiting list for this event.</string>
     <string name="event_detail_registration_opens">Registration opens: %1$s</string>
     <string name="event_detail_registration_closes">Registration closes: %1$s</string>
@@ -93,9 +95,80 @@ This action cannot be undone.</string>
     <string name="lottery_criteria_after_body">- Selected entrants will be notified in-app
 - Invitations must be accepted within 48 hours
 - Unclaimed or declined spots will be reassigned</string>
+    <string name="my_events_registered">Registered</string>
+    <string name="my_events_hosting">Hosting</string>
+    <string name="my_events_section_selected">Selected:</string>
+    <string name="my_events_section_waiting">Waiting:</string>
+    <string name="my_events_section_not_selected">Not selected:</string>
+    <string name="my_events_section_past">Past events:</string>
+    <string name="my_events_state_loading">Loading your events...</string>
+    <string name="my_events_state_empty">You have not registered for any events yet.</string>
+    <string name="my_events_state_error">Could not load your events. Please try again.</string>
+    <string name="my_events_empty_selected">Nothing selected yet.</string>
+    <string name="my_events_empty_waiting">No events are waiting for results.</string>
+    <string name="my_events_empty_not_selected">No finished results yet.</string>
+    <string name="my_events_empty_past">No past events yet.</string>
+    <string name="my_events_section_ongoing">Ongoing:</string>
+    <string name="my_events_section_completed">Completed:</string>
+    <string name="my_events_hosting_empty">You have not created any events yet.</string>
+    <string name="my_events_empty_ongoing">No ongoing events right now.</string>
+    <string name="my_events_empty_completed">No completed events yet.</string>
+    <string name="my_events_create_event">Create Event</string>
+
+    <string name="create_event_title">Create Event</string>
+    <string name="create_event_name_label">Event Name *</string>
+    <string name="create_event_name_hint"></string>
+    <string name="create_event_location_label">Location *</string>
+    <string name="create_event_location_hint"></string>
+    <string name="create_event_start_date_label">Start Date *</string>
+    <string name="create_event_start_date_hint"></string>
+    <string name="create_event_price_label">Price *</string>
+    <string name="create_event_price_hint"></string>
+    <string name="create_event_description_label">Description *</string>
+    <string name="create_event_description_hint"></string>
+    <string name="create_event_participants_label">Number of Participants *</string>
+    <string name="create_event_participants_hint"></string>
+    <string name="create_event_registration_start_label">Registration start *</string>
+    <string name="create_event_registration_start_hint"></string>
+    <string name="create_event_registration_end_label">Registration end *</string>
+    <string name="create_event_registration_end_hint"></string>
+    <string name="create_event_day_hint">Day</string>
+    <string name="create_event_year_hint">Year</string>
+    <string name="create_event_month_prompt">Month</string>
+    <string-array name="create_event_months">
+        <item>@string/create_event_month_prompt</item>
+        <item>Jan</item>
+        <item>Feb</item>
+        <item>Mar</item>
+        <item>Apr</item>
+        <item>May</item>
+        <item>Jun</item>
+        <item>Jul</item>
+        <item>Aug</item>
+        <item>Sep</item>
+        <item>Oct</item>
+        <item>Nov</item>
+        <item>Dec</item>
+    </string-array>
+    <string name="create_event_next">Next</string>
+    <string name="create_event_validation_required">Please fill out all fields.</string>
+    <string name="create_event_validation_date">Use dates like Feb 29, 2026.</string>
+    <string name="create_event_validation_price">Enter a valid price.</string>
+    <string name="create_event_validation_participants">Enter a valid participant count.</string>
+    <string name="create_event_validation_order">Registration must end before the event starts.</string>
+    <string name="create_event_save_success">Event created.</string>
+    <string name="create_event_save_failure">Could not create event. Please try again.</string>
 
     <plurals name="event_detail_entrant_count">
         <item quantity="one">%d Entrant</item>
         <item quantity="other">%d Entrants</item>
     </plurals>
 </resources>
+
+
+
+
+
+
+
+
