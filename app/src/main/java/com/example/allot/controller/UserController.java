@@ -181,7 +181,31 @@ public class UserController {
             }
         });
     }
+    /**
+     * Adds or removes an event ID from the user's savedEvents array.
+     *
+     * @param eventId The ID of the event to save/unsave
+     * @param isSaving True to save, false to remove
+     * @param listener Callback with success result
+     */
+    public void toggleSavedEvent(String eventId, boolean isSaving, OnCompleteListener<Boolean> listener) {
+        DocumentReference userRef = usersCollection.document(deviceId);
 
+        // FieldValue allows us to atomically add or remove from an array in Firestore
+        FieldValue updateAction = isSaving ?
+                FieldValue.arrayUnion(eventId) :
+                FieldValue.arrayRemove(eventId);
+
+        userRef.update("savedEvents", updateAction)
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        listener.onComplete(true, true);
+                    } else {
+                        Log.e(TAG, "Failed to toggle saved event", task.getException());
+                        listener.onComplete(false, false);
+                    }
+                });
+    }
     /**
      * Deletes the current user's profile and removes related event references.
      *
