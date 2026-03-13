@@ -44,7 +44,6 @@ public class EventDetailActivity extends AppCompatActivity {
     private Event currentEvent;
     private User currentUser;
     private boolean isCurrentUserOrganizer;
-
     private MaterialButton adminDeleteEventButton;
 
     private FrameLayout heroImageFrame;
@@ -459,8 +458,6 @@ public class EventDetailActivity extends AppCompatActivity {
         int selectedCount = 0;
         if (currentEvent != null) {
             if (currentEvent.capacity > 0) {
-                selectedCount = currentEvent.capacity;
-            } else if (currentEvent.capacity > 0) {
                 selectedCount = currentEvent.capacity;
             }
         }

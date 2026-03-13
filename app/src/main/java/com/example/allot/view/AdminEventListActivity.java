@@ -32,7 +32,6 @@ import java.util.Locale;
 /**
  * Admin-only screen that lists all events (any status) and allows deletion.
  * US 03.01.01 — Administrator can remove events and all associated lists.
- *
  * Access is granted automatically when the device's user document in Firestore
  * has role == "admin". That field is set manually in the Firebase Console.
  * There is no in-app flow to grant or revoke admin access.
@@ -231,10 +230,10 @@ public class AdminEventListActivity extends AppCompatActivity {
         dialog.setContentView(dialogView);
         dialog.setCancelable(true);
 
-        TextView  titleText     = dialogView.findViewById(R.id.deleteEventTitleText);
-        ImageView closeButton   = dialogView.findViewById(R.id.closeDeleteEventDialogButton);
-        Button    cancelButton  = dialogView.findViewById(R.id.cancelDeleteEventButton);
-        Button    confirmButton = dialogView.findViewById(R.id.confirmDeleteEventButton);
+        TextView  titleText = dialogView.findViewById(R.id.deleteEventTitleText);
+        ImageView closeButton = dialogView.findViewById(R.id.closeDeleteEventDialogButton);
+        Button cancelButton = dialogView.findViewById(R.id.cancelDeleteEventButton);
+        Button confirmButton = dialogView.findViewById(R.id.confirmDeleteEventButton);
 
         titleText.setText(eventTitle != null
                 ? eventTitle
