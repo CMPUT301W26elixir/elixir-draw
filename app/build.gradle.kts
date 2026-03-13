@@ -39,6 +39,7 @@ dependencies {
     implementation(libs.activity)
     implementation(libs.constraintlayout)
     implementation("androidx.recyclerview:recyclerview:1.3.2")
+    implementation("com.google.zxing:core:3.5.3")
     implementation("com.google.firebase:firebase-storage")
 
     implementation(platform("com.google.firebase:firebase-bom:33.9.0"))
