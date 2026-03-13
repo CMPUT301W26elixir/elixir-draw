@@ -12,10 +12,26 @@ import com.google.zxing.common.BitMatrix;
 import java.util.EnumMap;
 import java.util.Map;
 
+/**
+ * Utility class for generating QR code bitmaps from text payloads.
+ */
 public final class QrCodeGenerator {
+
+    /**
+     * Private constructor to prevent instantiation of this utility class.
+     */
     private QrCodeGenerator() {
     }
 
+    /**
+     * Generates a QR code bitmap for the given payload.
+     *
+     * @param payload the text content to encode in the QR code
+     * @param sizePx the width and height of the QR code in pixels
+     * @return a bitmap containing the generated QR code
+     * @throws IllegalArgumentException if the payload is blank or the size is not positive
+     * @throws IllegalStateException if the QR code cannot be generated
+     */
     public static Bitmap generate(String payload, int sizePx) {
         if (payload == null || payload.trim().isEmpty()) {
             throw new IllegalArgumentException("payload must not be blank");
@@ -40,6 +56,12 @@ public final class QrCodeGenerator {
         }
     }
 
+    /**
+     * Converts a BitMatrix QR code representation into a bitmap image.
+     *
+     * @param bitMatrix the QR code matrix to convert
+     * @return a bitmap version of the QR code
+     */
     private static Bitmap toBitmap(BitMatrix bitMatrix) {
         int width = bitMatrix.getWidth();
         int height = bitMatrix.getHeight();

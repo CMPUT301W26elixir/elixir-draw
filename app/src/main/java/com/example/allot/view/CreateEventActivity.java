@@ -26,6 +26,11 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.UUID;
 
+/**
+ * Activity for creating a new event.
+ * Collects event details from the user, validates the input,
+ * and saves the event to Firestore.
+ */
 public class CreateEventActivity extends AppCompatActivity {
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("MMM d, yyyy", Locale.getDefault());
 
@@ -50,6 +55,12 @@ public class CreateEventActivity extends AppCompatActivity {
     private UserController userController;
     private boolean isSaving;
 
+    /**
+     * Initializes the activity, binds views, sets up month spinners,
+     * configures the header, and registers event listeners.
+     *
+     * @param savedInstanceState the saved activity state
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -67,12 +78,18 @@ public class CreateEventActivity extends AppCompatActivity {
         setupListeners();
     }
 
+    /**
+     * Finishes the activity without transition animation.
+     */
     @Override
     public void finish() {
         super.finish();
         overridePendingTransition(0, 0);
     }
 
+    /**
+     * Binds all view references used by the activity.
+     */
     private void bindViews() {
         eventNameInput = findViewById(R.id.eventNameInput);
         locationInput = findViewById(R.id.locationInput);
@@ -92,11 +109,19 @@ public class CreateEventActivity extends AppCompatActivity {
         nextButton = findViewById(R.id.createEventNextButton);
     }
 
+    /**
+     * Sets up the header back button behavior.
+     */
     private void setupHeader() {
         ImageButton backButton = findViewById(R.id.backButton);
         backButton.setOnClickListener(view -> getOnBackPressedDispatcher().onBackPressed());
     }
 
+    /**
+     * Configures a month spinner with the available month values and custom display styling.
+     *
+     * @param spinner the spinner to configure
+     */
     private void setupMonthSpinner(Spinner spinner) {
         ArrayAdapter<CharSequence> adapter = new ArrayAdapter<CharSequence>(
                 this,
@@ -129,10 +154,17 @@ public class CreateEventActivity extends AppCompatActivity {
         spinner.setAdapter(adapter);
     }
 
+    /**
+     * Registers click listeners used by the activity.
+     */
     private void setupListeners() {
         nextButton.setOnClickListener(view -> submitEvent());
     }
 
+    /**
+     * Validates the entered event data, creates a new event,
+     * saves it, and opens the success screen if the save succeeds.
+     */
     private void submitEvent() {
         if (isSaving) {
             return;
@@ -221,20 +253,48 @@ public class CreateEventActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Checks whether all parts of a date input have been filled in.
+     *
+     * @param monthSpinner the spinner containing the selected month
+     * @param dayInput the input field containing the day
+     * @param yearInput the input field containing the year
+     * @return true if the date input is complete, otherwise false
+     */
     private boolean isDateInputComplete(Spinner monthSpinner, EditText dayInput, EditText yearInput) {
         return monthSpinner.getSelectedItemPosition() > 0
                 && !isBlank(readText(dayInput))
                 && !isBlank(readText(yearInput));
     }
 
+    /**
+     * Returns the trimmed text content of an EditText field.
+     *
+     * @param editText the input field to read from
+     * @return the trimmed text value, or an empty string if no text exists
+     */
     private String readText(EditText editText) {
         return editText.getText() == null ? "" : editText.getText().toString().trim();
     }
 
+    /**
+     * Checks whether a string is blank.
+     *
+     * @param value the string to check
+     * @return true if the value is blank, otherwise false
+     */
     private boolean isBlank(String value) {
         return TextUtils.isEmpty(value);
     }
 
+    /**
+     * Parses a date from the given month, day, and year input fields.
+     *
+     * @param monthSpinner the spinner containing the selected month
+     * @param dayInput the input field containing the day
+     * @param yearInput the input field containing the year
+     * @return the parsed date, or null if parsing fails
+     */
     private Date parseDate(Spinner monthSpinner, EditText dayInput, EditText yearInput) {
         String month = monthSpinner.getSelectedItemPosition() <= 0 ? "" : monthSpinner.getSelectedItem().toString();
         String day = readText(dayInput);
@@ -250,6 +310,12 @@ public class CreateEventActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Parses a price value from text.
+     *
+     * @param value the price text to parse
+     * @return the parsed price, or null if parsing fails
+     */
     private Double parsePrice(String value) {
         try {
             return Double.parseDouble(value.replace("$", "").trim());
@@ -258,6 +324,12 @@ public class CreateEventActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Parses a positive integer value from text.
+     *
+     * @param value the text to parse
+     * @return the parsed integer, or null if parsing fails
+     */
     private Integer parsePositiveInt(String value) {
         try {
             return Integer.parseInt(value.trim());
@@ -266,5 +338,3 @@ public class CreateEventActivity extends AppCompatActivity {
         }
     }
 }
-
-

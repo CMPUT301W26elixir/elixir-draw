@@ -25,6 +25,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+/**
+ * Main landing activity for browsing events.
+ * Supports searching, category chip filtering, saving events,
+ * and navigation to other primary areas of the application.
+ */
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "Allot_Logic";
 
@@ -46,6 +51,12 @@ public class MainActivity extends AppCompatActivity {
 
     private List<String> userSavedEvents = new ArrayList<>();
 
+    /**
+     * Initializes the activity, binds views, configures filters and navigation,
+     * loads the current user, and displays either the explore or saved tab.
+     *
+     * @param savedInstanceState the saved activity state
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -118,7 +129,10 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    // --- FILTER CHIP LOGIC ---
+    /**
+     * Sets up click listeners for all filter chips and updates the chip UI.
+     * Clicking an already-selected chip removes the filter.
+     */
     private void setupFilterChips() {
         View.OnClickListener chipClickListener = view -> {
             TextView clickedChip = (TextView) view;
@@ -143,14 +157,22 @@ public class MainActivity extends AppCompatActivity {
         updateChipUI(); // Set initial backgrounds
     }
 
+    /**
+     * Updates the visual state of each filter chip based on the selected filter.
+     */
     private void updateChipUI() {
         chipFortnite.setBackgroundResource(selectedChipFilter.equals(chipFortnite.getText().toString()) ? R.drawable.bg_chip_selected : R.drawable.bg_chip_unselected);
         chipSports.setBackgroundResource(selectedChipFilter.equals(chipSports.getText().toString()) ? R.drawable.bg_chip_selected : R.drawable.bg_chip_unselected);
         chipArts.setBackgroundResource(selectedChipFilter.equals(chipArts.getText().toString()) ? R.drawable.bg_chip_selected : R.drawable.bg_chip_unselected);
         chipScience.setBackgroundResource(selectedChipFilter.equals(chipScience.getText().toString()) ? R.drawable.bg_chip_selected : R.drawable.bg_chip_unselected);
     }
-    // -------------------------
 
+    /**
+     * Handles new intents delivered to the activity and switches to the saved tab
+     * when requested.
+     *
+     * @param intent the new intent delivered to the activity
+     */
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
@@ -162,6 +184,9 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Configures the bottom navigation bar and assigns tab actions.
+     */
     private void setupBottomNavigation() {
         bottomNavBar.setSelectedTab(BottomNavBarView.Tab.EXPLORE);
         bottomNavBar.setOnTabClickListener(BottomNavBarView.Tab.EXPLORE, v -> showExploreTab());
@@ -171,6 +196,9 @@ public class MainActivity extends AppCompatActivity {
         bottomNavBar.setOnTabClickListener(BottomNavBarView.Tab.SCAN, view -> openScanScreen());
     }
 
+    /**
+     * Shows the explore tab and reloads the browse event list.
+     */
     private void showExploreTab() {
         bottomNavBar.setSelectedTab(BottomNavBarView.Tab.EXPLORE);
         if (fragmentContainer != null) fragmentContainer.setVisibility(View.GONE);
@@ -178,6 +206,9 @@ public class MainActivity extends AppCompatActivity {
         loadBrowseEvents(searchInput.getText().toString());
     }
 
+    /**
+     * Opens the saved events tab by displaying the SavedEventsFragment.
+     */
     private void openSavedTab() {
         bottomNavBar.setSelectedTab(BottomNavBarView.Tab.SAVED);
         SavedEventsFragment fragment = new SavedEventsFragment();
@@ -194,6 +225,9 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Opens the My Events screen.
+     */
     private void openMyEventsScreen() {
         Intent intent = new Intent(this, MyEventsActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
@@ -201,6 +235,9 @@ public class MainActivity extends AppCompatActivity {
         overridePendingTransition(0, 0);
     }
 
+    /**
+     * Opens the Profile screen.
+     */
     private void openProfileScreen() {
         Intent intent = new Intent(this, ProfileActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
@@ -208,6 +245,9 @@ public class MainActivity extends AppCompatActivity {
         overridePendingTransition(0, 0);
     }
 
+    /**
+     * Opens the Scan screen.
+     */
     private void openScanScreen() {
         Intent intent = new Intent(this, ScanActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
@@ -215,6 +255,11 @@ public class MainActivity extends AppCompatActivity {
         overridePendingTransition(0, 0);
     }
 
+    /**
+     * Opens the event detail screen for the selected event list item.
+     *
+     * @param eventItem the selected event item
+     */
     private void openEventDetailScreen(EventListItem eventItem) {
         if (eventItem == null || eventItem.eventId == null || eventItem.eventId.trim().isEmpty()) return;
         Intent intent = new Intent(this, EventDetailActivity.class);
@@ -228,6 +273,10 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
+    /**
+     * Adds a text watcher to the search input so the event list updates
+     * whenever the search text changes.
+     */
     private void setupSearchInput() {
         searchInput.addTextChangedListener(new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
@@ -236,6 +285,12 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Loads browseable events using the provided search term and currently
+     * selected chip filter.
+     *
+     * @param searchTerm the text used to search events
+     */
     private void loadBrowseEvents(String searchTerm) {
         setLoadingState();
         eventController.searchOpenEvents(searchTerm, new EventController.EventListCallback() {
@@ -279,6 +334,9 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Updates the UI to show the loading state while events are being fetched.
+     */
     private void setLoadingState() {
         recyclerView.setVisibility(View.GONE);
         loadingIndicator.setVisibility(View.VISIBLE);
@@ -286,12 +344,21 @@ public class MainActivity extends AppCompatActivity {
         stateText.setText(R.string.browse_state_loading);
     }
 
+    /**
+     * Updates the UI to show the loaded event list content.
+     */
     private void setContentState() {
         recyclerView.setVisibility(View.VISIBLE);
         loadingIndicator.setVisibility(View.GONE);
         stateText.setVisibility(View.GONE);
     }
 
+    /**
+     * Updates the UI to show an empty-state message based on the
+     * current search term and selected chip filter.
+     *
+     * @param searchTerm the current search term
+     */
     private void setEmptyState(String searchTerm) {
         recyclerView.setVisibility(View.GONE);
         loadingIndicator.setVisibility(View.GONE);
@@ -312,6 +379,9 @@ public class MainActivity extends AppCompatActivity {
         stateText.setText(displayMsg);
     }
 
+    /**
+     * Updates the UI to show an error state when events fail to load.
+     */
     private void setErrorState() {
         recyclerView.setVisibility(View.GONE);
         loadingIndicator.setVisibility(View.GONE);

@@ -15,27 +15,65 @@ import com.example.allot.R;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * RecyclerView adapter used to display a list of event cards.
+ * Supports both event selection and heart-icon save actions.
+ */
 public class EventListAdapter extends RecyclerView.Adapter<EventListAdapter.EventViewHolder> {
 
+    /**
+     * Listener interface for handling event card clicks and heart icon clicks.
+     */
     public interface OnEventClickListener {
+
+        /**
+         * Called when an event card is clicked.
+         *
+         * @param event the clicked event item
+         */
         void onEventClick(EventListItem event);
+
+        /**
+         * Called when the heart icon for an event is clicked.
+         *
+         * @param event the event whose heart icon was clicked
+         * @param position the position of the event in the adapter
+         */
         void onHeartClick(EventListItem event, int position); // ADDED for the save feature
     }
 
     private final List<EventListItem> events;
     private final OnEventClickListener onEventClickListener;
 
+    /**
+     * Creates an adapter for displaying event list items.
+     *
+     * @param events the initial list of event items
+     * @param onEventClickListener the listener used for click callbacks
+     */
     public EventListAdapter(List<EventListItem> events, OnEventClickListener onEventClickListener) {
         this.events = new ArrayList<>(events);
         this.onEventClickListener = onEventClickListener;
     }
 
+    /**
+     * Replaces the current list of events and refreshes the displayed items.
+     *
+     * @param updatedEvents the new list of event items to display
+     */
     public void updateEvents(List<EventListItem> updatedEvents) {
         events.clear();
         events.addAll(updatedEvents);
         notifyDataSetChanged();
     }
 
+    /**
+     * Creates a new view holder for an event card.
+     *
+     * @param parent the parent view group
+     * @param viewType the view type of the new view
+     * @return a new EventViewHolder
+     */
     @NonNull
     @Override
     public EventViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -43,6 +81,13 @@ public class EventListAdapter extends RecyclerView.Adapter<EventListAdapter.Even
         return new EventViewHolder(view);
     }
 
+    /**
+     * Binds event data to a view holder at the given position.
+     * Also updates the save-heart state and click listeners.
+     *
+     * @param holder the view holder to bind
+     * @param position the position of the item in the list
+     */
     @Override
     public void onBindViewHolder(@NonNull EventViewHolder holder, int position) {
         EventListItem event = events.get(position);
@@ -81,11 +126,19 @@ public class EventListAdapter extends RecyclerView.Adapter<EventListAdapter.Even
         });
     }
 
+    /**
+     * Returns the number of event items in the adapter.
+     *
+     * @return the number of items in the list
+     */
     @Override
     public int getItemCount() {
         return events.size();
     }
 
+    /**
+     * View holder for an event card displayed in the RecyclerView.
+     */
     static class EventViewHolder extends RecyclerView.ViewHolder {
         FrameLayout imageFrame;
         ImageView heartIcon;
@@ -95,6 +148,11 @@ public class EventListAdapter extends RecyclerView.Adapter<EventListAdapter.Even
         TextView priceText;
         TextView daysLeftText;
 
+        /**
+         * Creates a view holder and binds its child views.
+         *
+         * @param itemView the root view for the event card
+         */
         EventViewHolder(@NonNull View itemView) {
             super(itemView);
             imageFrame = itemView.findViewById(R.id.imageFrame);

@@ -44,10 +44,17 @@ import java.util.Locale;
 import java.util.Map;
 import java.nio.charset.StandardCharsets;
 
+/**
+ * Activity for managing entrants after a lottery draw.
+ * Displays entrant groups by tab and supports exporting the final enrolled list as a CSV file.
+ */
 public class ManageEntrantsActivity extends AppCompatActivity {
     public static final String EXTRA_EVENT_ID = "event_id";
     private static final int EXPORT_STORAGE_PERMISSION_REQUEST = 1001;
 
+    /**
+     * Represents the available entrant tabs in the manage entrants screen.
+     */
     private enum Tab {
         SELECTED,
         CANCELLED,
@@ -80,6 +87,12 @@ public class ManageEntrantsActivity extends AppCompatActivity {
     private String pendingExportFileName;
     private String pendingExportContent;
 
+    /**
+     * Initializes the activity, binds views, sets up the header and tabs,
+     * and loads the event data.
+     *
+     * @param savedInstanceState the saved activity state
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -95,12 +108,18 @@ public class ManageEntrantsActivity extends AppCompatActivity {
         loadEvent();
     }
 
+    /**
+     * Finishes the activity without transition animation.
+     */
     @Override
     public void finish() {
         super.finish();
         overridePendingTransition(0, 0);
     }
 
+    /**
+     * Binds all view references used by the activity.
+     */
     private void bindViews() {
         drawDateValueText = findViewById(R.id.drawDateValueText);
         attendeesValueText = findViewById(R.id.attendeesValueText);
@@ -114,11 +133,17 @@ public class ManageEntrantsActivity extends AppCompatActivity {
         exportFinalListButton = findViewById(R.id.exportFinalListButton);
     }
 
+    /**
+     * Sets up the header back button behavior.
+     */
     private void setupHeader() {
         ImageButton backButton = findViewById(R.id.backButton);
         backButton.setOnClickListener(view -> getOnBackPressedDispatcher().onBackPressed());
     }
 
+    /**
+     * Sets up tab click behavior and export button behavior.
+     */
     private void setupTabs() {
         selectedTabText.setOnClickListener(view -> showTab(Tab.SELECTED));
         cancelledTabText.setOnClickListener(view -> showTab(Tab.CANCELLED));
@@ -129,6 +154,10 @@ public class ManageEntrantsActivity extends AppCompatActivity {
         updateTabState();
     }
 
+    /**
+     * Loads the current event from Firestore.
+     * Shows an error and finishes if the event ID is missing.
+     */
     private void loadEvent() {
         if (TextUtils.isEmpty(currentEventId)) {
             Toast.makeText(this, R.string.manage_entrants_load_failure, Toast.LENGTH_SHORT).show();
@@ -151,6 +180,11 @@ public class ManageEntrantsActivity extends AppCompatActivity {
                 });
     }
 
+    /**
+     * Binds the loaded event snapshot to the screen.
+     *
+     * @param documentSnapshot the Firestore snapshot of the event
+     */
     private void bindEventSnapshot(DocumentSnapshot documentSnapshot) {
         if (documentSnapshot == null || !documentSnapshot.exists()) {
             stateText.setVisibility(View.VISIBLE);
@@ -177,6 +211,12 @@ public class ManageEntrantsActivity extends AppCompatActivity {
         bindCurrentTab();
     }
 
+    /**
+     * Binds the draw summary information shown at the top of the screen.
+     *
+     * @param event the current event
+     * @param drawDate the stored draw date, if available
+     */
     private void bindSummary(Event event, Date drawDate) {
         Date effectiveDrawDate = drawDate != null
                 ? drawDate
@@ -189,12 +229,20 @@ public class ManageEntrantsActivity extends AppCompatActivity {
                 : getString(R.string.manage_lottery_attendees_hint));
     }
 
+    /**
+     * Switches the currently selected entrant tab and refreshes the displayed content.
+     *
+     * @param tab the tab to show
+     */
     private void showTab(Tab tab) {
         selectedTab = tab;
         updateTabState();
         bindCurrentTab();
     }
 
+    /**
+     * Updates the visual selected state of the tabs and export button.
+     */
     private void updateTabState() {
         applyTabStyle(selectedTabText, selectedTab == Tab.SELECTED);
         applyTabStyle(cancelledTabText, selectedTab == Tab.CANCELLED);
@@ -204,11 +252,20 @@ public class ManageEntrantsActivity extends AppCompatActivity {
         updateExportButtonState();
     }
 
+    /**
+     * Applies the selected or unselected style to a tab view.
+     *
+     * @param tabView the tab text view to style
+     * @param isSelected true if the tab is selected
+     */
     private void applyTabStyle(TextView tabView, boolean isSelected) {
         tabView.setBackgroundResource(isSelected ? R.drawable.bg_manage_entrant_tab_selected : R.drawable.bg_manage_entrant_tab_unselected);
         tabView.setTextColor(isSelected ? Color.parseColor("#1D1D1D") : getResources().getColor(R.color.text_secondary));
     }
 
+    /**
+     * Binds the entrants shown for the currently selected tab.
+     */
     private void bindCurrentTab() {
         if (currentEvent == null) {
             updateExportButtonState();
@@ -252,6 +309,13 @@ public class ManageEntrantsActivity extends AppCompatActivity {
         updateExportButtonState();
     }
 
+    /**
+     * Binds a list of entrants into the entrant container.
+     *
+     * @param entrantIds the entrant IDs to display
+     * @param emptyMessageRes the message to show if the list is empty
+     * @param subtitleRes the subtitle resource shown under each entrant
+     */
     private void bindEntrants(List<String> entrantIds, int emptyMessageRes, int subtitleRes) {
         entrantsContainer.removeAllViews();
         LayoutInflater inflater = LayoutInflater.from(this);
@@ -276,6 +340,13 @@ public class ManageEntrantsActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Resolves and displays a user's name for the given entrant ID.
+     * Uses a cache to avoid repeated lookups.
+     *
+     * @param entrantId the entrant device ID
+     * @param nameText the text view to update
+     */
     private void bindUserName(String entrantId, TextView nameText) {
         if (TextUtils.isEmpty(entrantId)) {
             return;
@@ -295,6 +366,12 @@ public class ManageEntrantsActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Returns the selected entrants for the event.
+     *
+     * @param event the event to inspect
+     * @return the selected entrant IDs
+     */
     private List<String> getSelectedEntrants(Event event) {
         if (event.chosen != null && !event.chosen.isEmpty()) {
             return new ArrayList<>(event.chosen);
@@ -305,6 +382,12 @@ public class ManageEntrantsActivity extends AppCompatActivity {
         return new ArrayList<>();
     }
 
+    /**
+     * Returns the cancelled entrants for the event.
+     *
+     * @param event the event to inspect
+     * @return the cancelled entrant IDs
+     */
     private List<String> getCancelledEntrants(Event event) {
         if (event.cancelled != null) {
             return new ArrayList<>(event.cancelled);
@@ -312,6 +395,12 @@ public class ManageEntrantsActivity extends AppCompatActivity {
         return new ArrayList<>();
     }
 
+    /**
+     * Returns the entrants who were not enrolled for the event.
+     *
+     * @param event the event to inspect
+     * @return the not-enrolled entrant IDs
+     */
     private List<String> getNotEnrolledEntrants(Event event) {
         if (event.notEnrolled != null) {
             return new ArrayList<>(event.notEnrolled);
@@ -319,6 +408,12 @@ public class ManageEntrantsActivity extends AppCompatActivity {
         return new ArrayList<>();
     }
 
+    /**
+     * Returns the enrolled entrants for the event.
+     *
+     * @param event the event to inspect
+     * @return the enrolled entrant IDs
+     */
     private List<String> getEnrolledEntrants(Event event) {
         if (event.enrolled != null && !event.enrolled.isEmpty()) {
             return new ArrayList<>(event.enrolled);
@@ -335,6 +430,12 @@ public class ManageEntrantsActivity extends AppCompatActivity {
         return enrolledEntrants;
     }
 
+    /**
+     * Returns all entrants on the event waiting list.
+     *
+     * @param event the event to inspect
+     * @return all entrant IDs
+     */
     private List<String> getAllEntrants(Event event) {
         if (event.waitingList != null && event.waitingList.list != null) {
             return new ArrayList<>(event.waitingList.list);
@@ -342,6 +443,9 @@ public class ManageEntrantsActivity extends AppCompatActivity {
         return new ArrayList<>();
     }
 
+    /**
+     * Updates the visibility and enabled state of the export button.
+     */
     private void updateExportButtonState() {
         boolean shouldShow = selectedTab == Tab.ENROLLED;
         exportFinalListButton.setVisibility(shouldShow ? View.VISIBLE : View.GONE);
@@ -355,6 +459,9 @@ public class ManageEntrantsActivity extends AppCompatActivity {
         exportFinalListButton.setAlpha(hasEnrolledEntrants && !isExporting ? 1f : 0.6f);
     }
 
+    /**
+     * Starts exporting the enrolled entrant list as a CSV file.
+     */
     private void exportFinalList() {
         if (currentEvent == null || isExporting) {
             return;
@@ -374,6 +481,13 @@ public class ManageEntrantsActivity extends AppCompatActivity {
         loadExportNames(enrolledEntrantIds, 0, exportedNames);
     }
 
+    /**
+     * Loads entrant names recursively before exporting them.
+     *
+     * @param entrantIds the entrant IDs to resolve
+     * @param index the current index being loaded
+     * @param exportedNames the list of resolved names
+     */
     private void loadExportNames(List<String> entrantIds, int index, List<String> exportedNames) {
         if (index >= entrantIds.size()) {
             writeCsvFile(exportedNames);
@@ -387,6 +501,13 @@ public class ManageEntrantsActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Builds the display name used for an exported entrant.
+     *
+     * @param entrantId the entrant device ID
+     * @param user the loaded user, if available
+     * @return the export name value
+     */
     private String buildExportName(String entrantId, User user) {
         if (user == null) {
             return safeCsvValue(entrantId, entrantId);
@@ -394,6 +515,11 @@ public class ManageEntrantsActivity extends AppCompatActivity {
         return safeCsvValue(user.getName(), entrantId);
     }
 
+    /**
+     * Writes the CSV file using the appropriate storage method for the current Android version.
+     *
+     * @param exportedNames the list of entrant names to export
+     */
     private void writeCsvFile(List<String> exportedNames) {
         String fileName = buildExportFileName();
         String csvContent = buildCsvContent(exportedNames);
@@ -440,6 +566,12 @@ public class ManageEntrantsActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Writes the CSV file using legacy external storage APIs.
+     *
+     * @param fileName the file name to create
+     * @param csvContent the CSV content to write
+     */
     private void writeCsvFileLegacy(String fileName, String csvContent) {
         File downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
         if (downloadsDir == null) {
@@ -466,6 +598,12 @@ public class ManageEntrantsActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Builds the CSV file content from the list of exported names.
+     *
+     * @param exportedNames the names to include in the CSV
+     * @return the CSV content string
+     */
     private String buildCsvContent(List<String> exportedNames) {
         StringBuilder csvBuilder = new StringBuilder();
         csvBuilder.append("Name\n");
@@ -475,6 +613,11 @@ public class ManageEntrantsActivity extends AppCompatActivity {
         return csvBuilder.toString();
     }
 
+    /**
+     * Builds a safe export file name based on the event title.
+     *
+     * @return the generated CSV file name
+     */
     private String buildExportFileName() {
         String eventTitle = currentEvent == null || TextUtils.isEmpty(currentEvent.title)
                 ? "event"
@@ -492,12 +635,25 @@ public class ManageEntrantsActivity extends AppCompatActivity {
         return safeTitle + "_enrolled_entrants.csv";
     }
 
+    /**
+     * Escapes a value for safe inclusion in a CSV file.
+     *
+     * @param value the value to escape
+     * @return the escaped CSV value
+     */
     private String escapeCsv(String value) {
         String safeValue = value == null ? "" : value;
         String escapedValue = safeValue.replace("\"", "\"\"");
         return "\"" + escapedValue + "\"";
     }
 
+    /**
+     * Returns a trimmed CSV-safe value or a fallback if the value is empty.
+     *
+     * @param value the value to use
+     * @param fallback the fallback value
+     * @return the selected CSV-safe value
+     */
     private String safeCsvValue(String value, String fallback) {
         if (!TextUtils.isEmpty(value)) {
             return value.trim();
@@ -505,6 +661,13 @@ public class ManageEntrantsActivity extends AppCompatActivity {
         return fallback == null ? "" : fallback;
     }
 
+    /**
+     * Finalizes the export flow, restores the UI, and optionally opens the exported file.
+     *
+     * @param success true if the export succeeded
+     * @param fileName the exported file name
+     * @param fileUri the URI of the exported file
+     */
     private void finishExport(boolean success, String fileName, Uri fileUri) {
         isExporting = false;
         pendingExportFileName = null;
@@ -523,6 +686,11 @@ public class ManageEntrantsActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Opens or shares the exported CSV file.
+     *
+     * @param fileUri the URI of the exported CSV file
+     */
     private void openExportedCsv(Uri fileUri) {
         Intent viewIntent = new Intent(Intent.ACTION_VIEW)
                 .setDataAndType(fileUri, "text/csv")
@@ -541,6 +709,13 @@ public class ManageEntrantsActivity extends AppCompatActivity {
         startActivity(Intent.createChooser(shareIntent, getString(R.string.manage_entrants_open_csv)));
     }
 
+    /**
+     * Handles the permission result for legacy export storage access.
+     *
+     * @param requestCode the request code originally supplied
+     * @param permissions the requested permissions
+     * @param grantResults the grant results for the requested permissions
+     */
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);

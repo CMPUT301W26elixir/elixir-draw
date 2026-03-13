@@ -11,7 +11,19 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.allot.R;
 
+/**
+ * Activity for collecting and validating the user's email address
+ * during the profile setup flow.
+ */
 public class EmailActivity extends AppCompatActivity {
+
+    /**
+     * Initializes the activity, binds the input field and button,
+     * validates the entered email, and opens the phone input screen
+     * when the email is valid.
+     *
+     * @param savedInstanceState the saved activity state
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

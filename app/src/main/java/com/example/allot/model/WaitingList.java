@@ -5,7 +5,8 @@ import java.util.HashMap;
 import java.util.Random;
 
 /**
- * CRC Card: WaitingList for the event
+ * Represents the waiting list for an event, including all entrants,
+ * selected entrants, and their enrollment status.
  */
 public class WaitingList {
     public ArrayList<String> list;      // all entrants
@@ -13,14 +14,21 @@ public class WaitingList {
     public HashMap<String, Boolean> status;  // enrolled status
 
     public int limit = -1;               // max waiting list size
-    // Required for Firestore document deserialization.
+
+    /**
+     * Creates an empty WaitingList for Firestore document deserialization.
+     */
     public WaitingList(){
         this.list = new ArrayList<>();
         this.chosen = new ArrayList<>();
         this.status = new HashMap<>();
     }
 
-    // Constructor
+    /**
+     * Creates a WaitingList with the given maximum size.
+     *
+     * @param limit the maximum number of entrants allowed in the waiting list
+     */
     public WaitingList(int limit){
         this.limit = limit;
         this.list = new ArrayList<>();
@@ -28,14 +36,22 @@ public class WaitingList {
         this.status = new HashMap<>();
     }
 
-    // Add entrant to waiting list
+    /**
+     * Adds a user to the waiting list if there is space available
+     * or if the waiting list is unlimited.
+     *
+     * @param user the user ID to add to the waiting list
+     */
     public void joinWaitingList(String user){
         if ((this.limit > 0 && this.list.size() < this.limit) || this.limit == -1){
             this.list.add(user);
         }
     }
 
-    // Randomly select entrants
+    /**
+     * Randomly selects entrants from the waiting list up to the limit
+     * and initializes their enrollment status to false.
+     */
     public void selectedList(){
         ArrayList<Integer> chosenIndex = new ArrayList<>();
         Random rand = new Random();
@@ -57,7 +73,10 @@ public class WaitingList {
 
     }
 
-    // Replace a random entrant not already chosen
+    /**
+     * Replaces a selected entrant by randomly choosing a user who
+     * has not already been selected.
+     */
     public void replace(){
         if (chosen.size() >= list.size()) return;
 
@@ -75,7 +94,11 @@ public class WaitingList {
         }
     }
 
-    // Entrants who have enrolled (status = true)
+    /**
+     * Returns the list of selected entrants who have enrolled.
+     *
+     * @return a list of enrolled user IDs
+     */
     public ArrayList<String> enrolled(){
         ArrayList<String> signed = new ArrayList<>();
         for (String user : this.chosen){
@@ -86,7 +109,11 @@ public class WaitingList {
         return signed;
     }
 
-    // Entrants who have not enrolled (status = false)
+    /**
+     * Returns the list of selected entrants who have not enrolled.
+     *
+     * @return a list of not-enrolled user IDs
+     */
     public ArrayList<String> notEnrolled(){
         ArrayList<String> notSigned = new ArrayList<>();
         for (String user : this.chosen){

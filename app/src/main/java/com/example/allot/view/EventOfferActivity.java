@@ -23,6 +23,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 
+/**
+ * Activity that allows a selected entrant to accept or decline an event offer.
+ * Updates the event state in Firestore based on the user's response.
+ */
 public class EventOfferActivity extends AppCompatActivity {
     public static final String EXTRA_EVENT_ID = "event_id";
     public static final String EXTRA_EVENT_TITLE = "event_title";
@@ -40,6 +44,12 @@ public class EventOfferActivity extends AppCompatActivity {
     private MaterialButton acceptButton;
     private MaterialButton declineButton;
 
+    /**
+     * Initializes the activity, reads event data from the intent,
+     * binds views, sets static content, and registers button listeners.
+     *
+     * @param savedInstanceState the saved activity state
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -56,12 +66,18 @@ public class EventOfferActivity extends AppCompatActivity {
         setupListeners();
     }
 
+    /**
+     * Finishes the activity without transition animation.
+     */
     @Override
     public void finish() {
         super.finish();
         overridePendingTransition(0, 0);
     }
 
+    /**
+     * Binds all view references used by the activity.
+     */
     private void bindViews() {
         eventTitleText = findViewById(R.id.offerEventTitleText);
         stateText = findViewById(R.id.offerStateText);
@@ -70,22 +86,35 @@ public class EventOfferActivity extends AppCompatActivity {
         declineButton = findViewById(R.id.declineOfferButton);
     }
 
+    /**
+     * Sets up the header back button behavior.
+     */
     private void setupHeader() {
         ImageButton backButton = findViewById(R.id.backButton);
         backButton.setOnClickListener(view -> getOnBackPressedDispatcher().onBackPressed());
     }
 
+    /**
+     * Displays the event title or a fallback value if no title was provided.
+     */
     private void bindStaticContent() {
         eventTitleText.setText(TextUtils.isEmpty(currentEventTitle)
                 ? getString(R.string.default_event_name)
                 : currentEventTitle);
     }
 
+    /**
+     * Registers click listeners for the accept and decline actions.
+     */
     private void setupListeners() {
         acceptButton.setOnClickListener(view -> acceptOffer());
         declineButton.setOnClickListener(view -> declineOffer());
     }
 
+    /**
+     * Accepts the current offer and updates the event state in Firestore.
+     * Marks the current user as enrolled and updates their waiting list status.
+     */
     private void acceptOffer() {
         if (isSubmitting || TextUtils.isEmpty(currentEventId)) {
             return;
@@ -117,6 +146,9 @@ public class EventOfferActivity extends AppCompatActivity {
                 });
     }
 
+    /**
+     * Starts the decline flow by loading the current event state from Firestore.
+     */
     private void declineOffer() {
         if (isSubmitting || TextUtils.isEmpty(currentEventId)) {
             return;
@@ -139,6 +171,13 @@ public class EventOfferActivity extends AppCompatActivity {
                 });
     }
 
+    /**
+     * Handles the loaded event snapshot for a declined offer, updates the event state,
+     * and optionally assigns a replacement offer.
+     *
+     * @param documentSnapshot the loaded Firestore document snapshot
+     * @param deviceId the device ID of the user declining the offer
+     */
     private void handleDeclineSnapshot(DocumentSnapshot documentSnapshot, String deviceId) {
         Event event = documentSnapshot == null ? null : documentSnapshot.toObject(Event.class);
         if (event == null) {
@@ -211,6 +250,12 @@ public class EventOfferActivity extends AppCompatActivity {
                 });
     }
 
+    /**
+     * Updates the submitting state of the screen, including loading visibility
+     * and button enabled states.
+     *
+     * @param submitting true if an action is currently being submitted, false otherwise
+     */
     private void setSubmitting(boolean submitting) {
         isSubmitting = submitting;
         loadingIndicator.setVisibility(submitting ? View.VISIBLE : View.GONE);
@@ -224,10 +269,23 @@ public class EventOfferActivity extends AppCompatActivity {
         declineButton.setAlpha(submitting ? 0.6f : 1f);
     }
 
+    /**
+     * Returns a trimmed string value, or an empty string if the value is null.
+     *
+     * @param value the text value to clean
+     * @return the trimmed text or an empty string
+     */
     private String cleanText(String value) {
         return value == null ? "" : value.trim();
     }
 
+    /**
+     * Adds a replacement offer to the event by randomly selecting
+     * an eligible entrant from the waiting list.
+     *
+     * @param event the event whose replacement offer should be assigned
+     * @param declinedDeviceId the device ID of the user who declined the offer
+     */
     private void addReplacementOffer(Event event, String declinedDeviceId) {
         if (event == null || event.waitingList == null || event.waitingList.list == null) {
             return;

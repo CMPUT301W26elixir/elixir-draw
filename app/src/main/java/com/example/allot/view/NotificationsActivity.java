@@ -11,11 +11,25 @@ import com.example.allot.R;
 import com.example.allot.controller.UserController;
 import com.google.android.material.button.MaterialButton;
 
+/**
+ * Activity that lets the user choose whether to enable notifications
+ * during profile setup.
+ *
+ * <p>After the user makes a choice, the profile information collected
+ * from previous setup screens is saved and the app navigates to the
+ * main explore screen.
+ */
 public class NotificationsActivity extends AppCompatActivity {
     private UserController userController;
     private MaterialButton turnOnNotificationsButton;
     private TextView notificationsNotNow;
 
+    /**
+     * Initializes the activity, binds views, creates the user controller,
+     * and sets click listeners for the notification preference options.
+     *
+     * @param savedInstanceState the previously saved activity state, if one exists
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -29,6 +43,15 @@ public class NotificationsActivity extends AppCompatActivity {
         notificationsNotNow.setOnClickListener(view -> saveProfileAndOpenExplore(false));
     }
 
+    /**
+     * Saves the user's profile information along with their notification preference,
+     * then opens the main activity if the save succeeds.
+     *
+     * <p>If the save fails, the buttons are re-enabled and an error message is shown.
+     *
+     * @param notificationsEnabled true if notifications should be enabled;
+     *                             false otherwise
+     */
     private void saveProfileAndOpenExplore(boolean notificationsEnabled) {
         setButtonsEnabled(false);
 
@@ -53,6 +76,13 @@ public class NotificationsActivity extends AppCompatActivity {
                 });
     }
 
+    /**
+     * Enables or disables the notification choice controls.
+     *
+     * <p>When disabled, the "Not now" text is also visually dimmed.
+     *
+     * @param enabled true to enable the controls; false to disable them
+     */
     private void setButtonsEnabled(boolean enabled) {
         turnOnNotificationsButton.setEnabled(enabled);
         notificationsNotNow.setEnabled(enabled);

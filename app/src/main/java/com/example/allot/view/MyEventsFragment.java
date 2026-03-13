@@ -20,6 +20,13 @@ import com.example.allot.model.Event;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Fragment that displays the current user's events in a scrollable list.
+ *
+ * <p>If the user has no events, an empty state message is shown instead.
+ * This fragment loads the user's saved and registered event data, converts
+ * the events into displayable list items, and updates the recycler view.
+ */
 public class MyEventsFragment extends Fragment {
 
     private RecyclerView recyclerView;
@@ -28,6 +35,15 @@ public class MyEventsFragment extends Fragment {
     private UserController userController;
     private EventController eventController;
 
+    /**
+     * Inflates the fragment layout, initializes views, sets up the recycler view,
+     * creates the adapter, and starts loading the current user's events.
+     *
+     * @param inflater the layout inflater used to inflate the fragment view
+     * @param container the parent view that the fragment UI should attach to
+     * @param savedInstanceState the previously saved state of the fragment, if any
+     * @return the root view for this fragment
+     */
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -40,11 +56,25 @@ public class MyEventsFragment extends Fragment {
 
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         adapter = new EventListAdapter(new ArrayList<>(), new EventListAdapter.OnEventClickListener() {
+            /**
+             * Handles clicks on an event item.
+             *
+             * @param event the clicked event list item
+             */
             @Override
             public void onEventClick(EventListItem event) {
                 // Future click logic
             }
 
+            /**
+             * Handles clicks on the heart icon for an event item.
+             *
+             * <p>Fragments do not handle database save logic directly.
+             * That responsibility belongs to MainActivity.
+             *
+             * @param event the event list item whose heart icon was clicked
+             * @param position the adapter position of the clicked item
+             */
             @Override
             public void onHeartClick(EventListItem event, int position) {
                 // Fragments don't need to handle the DB save, MainActivity does it
@@ -60,10 +90,22 @@ public class MyEventsFragment extends Fragment {
         return view;
     }
 
+    /**
+     * Loads the current user's events.
+     *
+     * <p>If the user has registered events, those event IDs are used to fetch the
+     * corresponding event objects. If no events exist, the UI is updated to show
+     * the empty state.
+     */
     private void loadMyEvents() {
         userController.loadOrCreateUser((user, success) -> {
             if (success && user != null && user.myEvents != null && !user.myEvents.isEmpty()) {
                 eventController.getEventsByIds(user.myEvents, new EventController.EventListCallback() {
+                    /**
+                     * Updates the UI once the user's event list has been retrieved.
+                     *
+                     * @param events the list of retrieved events
+                     */
                     @Override
                     public void onCallback(List<Event> events) {
                         updateUI(events, user.getSavedEvents() != null ? user.getSavedEvents() : new ArrayList<>());
@@ -75,6 +117,17 @@ public class MyEventsFragment extends Fragment {
         });
     }
 
+    /**
+     * Updates the fragment UI based on the provided event data.
+     *
+     * <p>If no events are available, the recycler view is hidden and the empty
+     * state text is shown. Otherwise, the events are converted into
+     * {@link EventListItem} objects, marked as saved when applicable,
+     * and passed to the adapter.
+     *
+     * @param events the list of events to display
+     * @param savedEvents the list of saved event IDs for the current user
+     */
     private void updateUI(List<Event> events, List<String> savedEvents) {
         if (events.isEmpty()) {
             recyclerView.setVisibility(View.GONE);

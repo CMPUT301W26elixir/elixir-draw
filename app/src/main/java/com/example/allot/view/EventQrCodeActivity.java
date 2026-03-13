@@ -15,6 +15,10 @@ import com.example.allot.R;
 import com.example.allot.qr.QrCodeGenerator;
 import com.example.allot.qr.QrCodePayloadBuilder;
 
+/**
+ * Activity that displays a QR code for an event and provides navigation
+ * to related screens such as the event page and bottom navigation destinations.
+ */
 public class EventQrCodeActivity extends AppCompatActivity {
     private static final int QR_SIZE_PX = 920;
 
@@ -28,6 +32,12 @@ public class EventQrCodeActivity extends AppCompatActivity {
     private String currentEventDate;
     private String currentEventCategory;
 
+    /**
+     * Initializes the activity, reads event data from the intent,
+     * binds views, generates the QR code, and sets up the bottom navigation bar.
+     *
+     * @param savedInstanceState the saved activity state
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -39,12 +49,18 @@ public class EventQrCodeActivity extends AppCompatActivity {
         setupBottomNav();
     }
 
+    /**
+     * Finishes the activity without transition animation.
+     */
     @Override
     public void finish() {
         super.finish();
         overridePendingTransition(0, 0);
     }
 
+    /**
+     * Reads the event details passed into the activity through intent extras.
+     */
     private void readExtras() {
         Intent intent = getIntent();
         currentEventId = intent.getStringExtra(CreateEventSuccessActivity.EXTRA_EVENT_ID);
@@ -54,6 +70,9 @@ public class EventQrCodeActivity extends AppCompatActivity {
         currentEventCategory = intent.getStringExtra(CreateEventSuccessActivity.EXTRA_EVENT_CATEGORY);
     }
 
+    /**
+     * Binds all view references used by the activity and sets button listeners.
+     */
     private void bindViews() {
         bottomNavBar = findViewById(R.id.bottomNavBar);
         qrImageView = findViewById(R.id.qrImageView);
@@ -66,6 +85,10 @@ public class EventQrCodeActivity extends AppCompatActivity {
         viewEventPageButton.setOnClickListener(view -> openEventPage());
     }
 
+    /**
+     * Generates and displays the QR code for the current event.
+     * Shows an error message if QR code generation fails.
+     */
     private void bindQrCode() {
         try {
             String payload = QrCodePayloadBuilder.buildEventPayload(currentEventId);
@@ -83,6 +106,9 @@ public class EventQrCodeActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Configures the bottom navigation bar and assigns click actions for each tab.
+     */
     private void setupBottomNav() {
         bottomNavBar.setSelectedTab(BottomNavBarView.Tab.MY_EVENTS);
         bottomNavBar.setOnTabClickListener(BottomNavBarView.Tab.EXPLORE, view -> openExploreScreen());
@@ -92,6 +118,10 @@ public class EventQrCodeActivity extends AppCompatActivity {
         bottomNavBar.setOnTabClickListener(BottomNavBarView.Tab.PROFILE, view -> openProfileScreen());
     }
 
+    /**
+     * Opens the event detail page for the current event.
+     * Shows an error message if the event ID is missing.
+     */
     private void openEventPage() {
         if (TextUtils.isEmpty(currentEventId)) {
             Toast.makeText(this, R.string.event_detail_error, Toast.LENGTH_SHORT).show();
@@ -112,6 +142,9 @@ public class EventQrCodeActivity extends AppCompatActivity {
         overridePendingTransition(0, 0);
     }
 
+    /**
+     * Opens the explore screen and clears intermediate activities.
+     */
     private void openExploreScreen() {
         Intent intent = new Intent(this, MainActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
@@ -120,6 +153,9 @@ public class EventQrCodeActivity extends AppCompatActivity {
         finish();
     }
 
+    /**
+     * Opens the saved events screen and clears intermediate activities.
+     */
     private void openSavedScreen() {
         Intent intent = new Intent(this, MainActivity.class);
         intent.putExtra("navigate_to", "saved");
@@ -129,6 +165,9 @@ public class EventQrCodeActivity extends AppCompatActivity {
         finish();
     }
 
+    /**
+     * Opens the hosting tab of the My Events screen and clears intermediate activities.
+     */
     private void openHostingScreen() {
         Intent intent = new Intent(this, MyEventsActivity.class);
         intent.putExtra(MyEventsActivity.EXTRA_INITIAL_TAB, MyEventsActivity.INITIAL_TAB_HOSTING);
@@ -138,6 +177,9 @@ public class EventQrCodeActivity extends AppCompatActivity {
         finish();
     }
 
+    /**
+     * Opens the scan screen and clears intermediate activities.
+     */
     private void openScanScreen() {
         Intent intent = new Intent(this, ScanActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
@@ -146,6 +188,9 @@ public class EventQrCodeActivity extends AppCompatActivity {
         finish();
     }
 
+    /**
+     * Opens the profile screen and clears intermediate activities.
+     */
     private void openProfileScreen() {
         Intent intent = new Intent(this, ProfileActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
