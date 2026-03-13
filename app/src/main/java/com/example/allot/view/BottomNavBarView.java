@@ -93,10 +93,45 @@ public class BottomNavBarView extends LinearLayout {
         updateTabState(profileTab, profileIcon, profileLabel, selectedTab == Tab.PROFILE);
     }
 
+    public void setOnTabClickListener(Tab tab, @Nullable OnClickListener listener) {
+        LinearLayout tabView = getTabView(tab);
+        setTabEnabled(tabView, listener != null);
+        tabView.setOnClickListener(listener);
+    }
+
+    public void setOnTabSelectedListener(@Nullable OnTabSelectedListener listener) {
+        setOnTabClickListener(Tab.EXPLORE,
+                listener == null ? null : view -> listener.onTabSelected(Tab.EXPLORE));
+        setOnTabClickListener(Tab.SAVED,
+                listener == null ? null : view -> listener.onTabSelected(Tab.SAVED));
+        setOnTabClickListener(Tab.MY_EVENTS,
+                listener == null ? null : view -> listener.onTabSelected(Tab.MY_EVENTS));
+        setOnTabClickListener(Tab.SCAN,
+                listener == null ? null : view -> listener.onTabSelected(Tab.SCAN));
+        setOnTabClickListener(Tab.PROFILE,
+                listener == null ? null : view -> listener.onTabSelected(Tab.PROFILE));
+    }
+
     private void setTabEnabled(LinearLayout tabView, boolean enabled) {
         tabView.setEnabled(enabled);
         tabView.setClickable(enabled);
         tabView.setFocusable(enabled);
+    }
+
+    private LinearLayout getTabView(Tab tab) {
+        switch (tab) {
+            case EXPLORE:
+                return exploreTab;
+            case SAVED:
+                return savedTab;
+            case MY_EVENTS:
+                return myEventsTab;
+            case SCAN:
+                return scanTab;
+            case PROFILE:
+            default:
+                return profileTab;
+        }
     }
 
     private void updateTabState(LinearLayout tabView, ImageView iconView, TextView labelView, boolean selected) {
@@ -108,5 +143,9 @@ public class BottomNavBarView extends LinearLayout {
         iconView.setImageTintList(ColorStateList.valueOf(color));
         labelView.setTextColor(color);
         tabView.setSelected(selected);
+    }
+
+    public interface OnTabSelectedListener {
+        void onTabSelected(Tab tab);
     }
 }

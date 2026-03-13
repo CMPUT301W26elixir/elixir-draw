@@ -25,6 +25,9 @@
             android:name=".view.MainActivity"
             android:exported="true" />
         <activity
+            android:name=".view.ProfileActivity"
+            android:exported="false" />
+        <activity
             android:name=".view.WelcomeActivity"
             android:exported="false" />
         <activity

@@ -10,8 +10,14 @@ import com.example.allot.model.User;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FieldPath;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.WriteBatch;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 public class UserController {
@@ -91,7 +97,7 @@ public class UserController {
 
             // If no userexists yet, create a new one
             if (document == null || !document.exists()) {
-                createNewUser(deviceId);
+                createNewUser(deviceId, listener);
                 return;
             }
 
@@ -115,14 +121,24 @@ public class UserController {
      * @paramlistener the listener that receives the created userand success result
      */
     public void createNewUser(String deviceId) {
+        createNewUser(deviceId, null);
+    }
+
+    private void createNewUser(String deviceId, OnCompleteListener<User> listener) {
         User user = new User();
         user.setDeviceId(deviceId);
         DocumentReference userRef = usersCollection.document(deviceId);
         userRef.set(user).addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 Log.d(TAG, "User created: " + deviceId);
+                if (listener != null) {
+                    listener.onComplete(user, true);
+                }
             } else {
                 Log.d(TAG, "Failed to create user", task.getException());
+                if (listener != null) {
+                    listener.onComplete(null, false);
+                }
             }
         });
     }
@@ -164,6 +180,59 @@ public class UserController {
                 listener.onComplete(null, false);
             }
         });
+    }
+
+    /**
+     * Deletes the current user's profile and removes related event references.
+     *
+     * @param listener the listener that receives the deletion success result
+     */
+    public void deleteCurrentUser(OnCompleteListener<Boolean> listener) {
+        FirebaseFirestore database = usersCollection.getFirestore();
+        database.collection("events")
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (!task.isSuccessful()) {
+                        Log.d(TAG, "Failed to load events for cleanup", task.getException());
+                        listener.onComplete(false, false);
+                        return;
+                    }
+
+                    WriteBatch batch = database.batch();
+                    List<DocumentReference> organizerEvents = new ArrayList<>();
+
+                    for (QueryDocumentSnapshot document : task.getResult()) {
+                        String organizerId = document.getString("organizerId");
+                        if (deviceId.equals(organizerId)) {
+                            organizerEvents.add(document.getReference());
+                            continue;
+                        }
+
+                        batch.update(document.getReference(),
+                                "waitingList.list", FieldValue.arrayRemove(deviceId),
+                                "waitingList.chosen", FieldValue.arrayRemove(deviceId),
+                                "chosen", FieldValue.arrayRemove(deviceId),
+                                "enrolled", FieldValue.arrayRemove(deviceId),
+                                "notEnrolled", FieldValue.arrayRemove(deviceId),
+                                FieldPath.of("waitingList", "status", deviceId), FieldValue.delete());
+                    }
+
+                    for (DocumentReference organizerEvent : organizerEvents) {
+                        batch.delete(organizerEvent);
+                    }
+
+                    batch.delete(usersCollection.document(deviceId));
+
+                    batch.commit().addOnCompleteListener(commitTask -> {
+                        if (!commitTask.isSuccessful()) {
+                            Log.d(TAG, "Failed to delete user profile", commitTask.getException());
+                            listener.onComplete(false, false);
+                            return;
+                        }
+
+                        listener.onComplete(true, true);
+                    });
+                });
     }
 
     /**
