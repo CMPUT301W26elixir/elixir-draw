@@ -1,6 +1,7 @@
 package com.example.allot.view;
 
 import android.app.Dialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -240,7 +241,7 @@ public class EventDetailActivity extends AppCompatActivity {
 
     private void onWaitlistButtonPressed() {
         if (isCurrentUserOrganizer) {
-            Toast.makeText(this, R.string.event_detail_manage_event_coming_soon, Toast.LENGTH_SHORT).show();
+            openManageEventScreen();
             return;
         }
 
@@ -249,6 +250,17 @@ public class EventDetailActivity extends AppCompatActivity {
             return;
         }
         showLotteryCriteriaDialog();
+    }
+
+    private void openManageEventScreen() {
+        if (TextUtils.isEmpty(currentEventId)) {
+            return;
+        }
+
+        Intent intent = new Intent(this, ManageEventActivity.class);
+        intent.putExtra(ManageEventActivity.EXTRA_EVENT_ID, currentEventId);
+        startActivity(intent);
+        overridePendingTransition(0, 0);
     }
 
     private void showLotteryCriteriaDialog() {
