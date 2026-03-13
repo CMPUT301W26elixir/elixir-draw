@@ -32,11 +32,11 @@ public class EventListItem {
     public static EventListItem fromEvent(Event event) {
         return new EventListItem(
                 event.eventId,
-                event.getBrowseTitleText(),
-                event.getBrowseLocationText(),
-                event.getBrowseDateText(),
-                event.getBrowsePriceText(),
-                event.getBrowseDeadlineText(),
+                event.title,
+                EventDisplayFormatter.location(event),
+                EventDisplayFormatter.date(event),
+                EventDisplayFormatter.price(event),
+                EventDisplayFormatter.deadline(event),
                 event.category,
                 event.posterUrl
         );

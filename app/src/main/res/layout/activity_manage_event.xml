@@ -38,20 +38,107 @@
                     android:src="@drawable/arrow_back" />
 
                 <TextView
-                    android:id="@+id/createEventTitle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:fontFamily="@font/varela_round_regular"
-                    android:text="@string/create_event_title"
-                    android:textColor="@color/white"
+                    android:text="@string/manage_event_title"
+                    android:textColor="@color/text_primary"
                     android:textSize="24sp" />
             </FrameLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="18dp"
+                android:background="@drawable/bg_my_events_card"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:padding="7dp">
+
+                <FrameLayout
+                    android:layout_width="136dp"
+                    android:layout_height="82dp">
+
+                    <View
+                        android:id="@+id/eventImageBackground"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="@drawable/bg_event_image_one" />
+                </FrameLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="12dp"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/summaryTitleText"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/varela_round_regular"
+                        android:maxLines="2"
+                        android:text="@string/default_event_name"
+                        android:textColor="@color/text_primary"
+                        android:textSize="16sp" />
+
+                    <TextView
+                        android:id="@+id/summaryLocationText"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="6dp"
+                        android:ellipsize="end"
+                        android:fontFamily="@font/varela_round_regular"
+                        android:maxLines="1"
+                        android:text="@string/default_street_name"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="14sp" />
+
+                    <TextView
+                        android:id="@+id/summaryDateText"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="3dp"
+                        android:ellipsize="end"
+                        android:fontFamily="@font/varela_round_regular"
+                        android:maxLines="1"
+                        android:text="@string/default_date"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="14sp" />
+                </LinearLayout>
+
+                <TextView
+                    android:layout_width="52dp"
+                    android:layout_height="52dp"
+                    android:layout_marginStart="8dp"
+                    android:background="@drawable/bg_manage_event_qr"
+                    android:fontFamily="@font/varela_round_regular"
+                    android:gravity="center"
+                    android:text="@string/manage_event_qr"
+                    android:textColor="#1D1D1D"
+                    android:textSize="16sp" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/entrantsLotteryButton"
+                android:layout_width="match_parent"
+                android:layout_height="45dp"
+                android:layout_marginTop="18dp"
+                android:background="@drawable/bg_waitlist_button"
+                android:clickable="true"
+                android:focusable="true"
+                android:fontFamily="@font/varela_round_regular"
+                android:gravity="center"
+                android:text="@string/manage_event_lottery_section"
+                android:textColor="#1D1D1D"
+                android:textSize="20sp" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="28dp"
+                android:layout_marginTop="22dp"
                 android:fontFamily="@font/varela_round_regular"
                 android:text="@string/create_event_name_label"
                 android:textColor="@color/white"
@@ -71,6 +158,44 @@
                 android:textColor="@color/white"
                 android:textColorHint="@color/text_secondary"
                 android:textSize="16sp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:fontFamily="@font/varela_round_regular"
+                android:text="@string/manage_event_banner_label"
+                android:textColor="@color/white"
+                android:textSize="16sp" />
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="92dp"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/bg_profile_input">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:orientation="vertical">
+
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:src="@android:drawable/ic_menu_upload"
+                        android:tint="@color/text_secondary" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:fontFamily="@font/varela_round_regular"
+                        android:text="@string/manage_event_banner_placeholder"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="14sp" />
+                </LinearLayout>
+            </FrameLayout>
 
             <TextView
                 android:layout_width="wrap_content"
@@ -374,23 +499,21 @@
                     android:textColorHint="@color/text_secondary"
                     android:textSize="16sp" />
             </LinearLayout>
+
+            <TextView
+                android:id="@+id/saveChangesButton"
+                android:layout_width="match_parent"
+                android:layout_height="45dp"
+                android:layout_marginTop="24dp"
+                android:background="@drawable/bg_waitlist_button"
+                android:clickable="true"
+                android:focusable="true"
+                android:fontFamily="@font/varela_round_regular"
+                android:gravity="center"
+                android:text="@string/manage_event_save_changes"
+                android:textColor="#1D1D1D"
+                android:textSize="20sp" />
         </LinearLayout>
     </ScrollView>
-
-    <TextView
-        android:id="@+id/createEventNextButton"
-        android:layout_width="match_parent"
-        android:layout_height="45dp"
-        android:layout_marginStart="20dp"
-        android:layout_marginEnd="20dp"
-        android:layout_marginBottom="24dp"
-        android:background="@drawable/bg_waitlist_button"
-        android:clickable="true"
-        android:focusable="true"
-        android:fontFamily="@font/varela_round_regular"
-        android:gravity="center"
-        android:text="@string/create_event_next"
-        android:textColor="#1D1D1D"
-        android:textSize="20sp" />
 
 </LinearLayout>
