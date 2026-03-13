@@ -1,11 +1,8 @@
 package com.example.allot.model;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Locale;
-import java.util.concurrent.TimeUnit;
 
 public class Event {
     public String eventId;
@@ -23,10 +20,10 @@ public class Event {
     public String posterUrl;  // This is the main image for the event
 
     public int limit = -1;
-    public int choosingLimit = 0;
     public WaitingList waitingList;
     public ArrayList<String> chosen;
     public ArrayList<String> enrolled;
+    public ArrayList<String> cancelled;
     public ArrayList<String> notEnrolled;
 
     public ArrayList<String> galleryUrls; // This is for the Gallery
@@ -36,18 +33,19 @@ public class Event {
     // Required for Firestore document deserialization.
     public Event() {
         this.galleryUrls = new ArrayList<>();
+        this.cancelled = new ArrayList<>();
     }
 
     // Organizer Creation
-    public Event(String eventId, String organizerId, String title, int limit, int choosingLimit) {
+    public Event(String eventId, String organizerId, String title, int limit) {
         this.eventId = eventId;
         this.organizerId = organizerId;
         this.title = title;
         this.status = "open";
         this.galleryUrls = new ArrayList<>();
+        this.cancelled = new ArrayList<>();
         this.limit = limit;
-        this.choosingLimit = choosingLimit;
-        this.waitingList = new WaitingList(limit, choosingLimit);
+        this.waitingList = new WaitingList(limit);
     }
 
     //Helper to add a photo to the gallery
@@ -58,59 +56,6 @@ public class Event {
         this.galleryUrls.add(newPhotoUrl);
     }
 
-    public String getBrowseTitleText() {
-        return isBlank(title) ? "Untitled Event" : title;
-    }
-
-    public String getBrowseLocationText() {
-        return isBlank(location) ? "Location TBA" : location;
-    }
-
-    public String getBrowseDateText() {
-        if (eventDate == null) {
-            return "Date TBA";
-        }
-
-        return new SimpleDateFormat("MMM d, yyyy", Locale.getDefault()).format(eventDate);
-    }
-
-    public String getBrowsePriceText() {
-        if (price == null || price <= 0) {
-            return "Free";
-        }
-
-        if (Math.rint(price) == price) {
-            return String.format(Locale.getDefault(), "$%.0f", price);
-        }
-
-        return String.format(Locale.getDefault(), "$%.2f", price);
-    }
-
-    public String getBrowseDeadlineText() {
-        if (registrationDeadline == null) {
-            return "Deadline TBA";
-        }
-
-        long millisRemaining = registrationDeadline.getTime() - System.currentTimeMillis();
-        if (millisRemaining <= 0) {
-            return "Closed";
-        }
-
-        long daysLeft = TimeUnit.MILLISECONDS.toDays(millisRemaining);
-        if (daysLeft == 0) {
-            return "Ends Today";
-        }
-
-        if (daysLeft == 1) {
-            return "1 Day Left";
-        }
-
-        return daysLeft + " Days Left";
-    }
-
-    private boolean isBlank(String value) {
-        return value == null || value.trim().isEmpty();
-    }
     public void lottery(){
         this.waitingList.selectedList();
         this.chosen = this.waitingList.chosen;
@@ -124,7 +69,7 @@ public class Event {
         this.notEnrolled = this.waitingList.notEnrolled();
     }
     public WaitingList getWaitingList() {
-        if (waitingList == null) waitingList = new WaitingList(limit, choosingLimit);
+        if (waitingList == null) waitingList = new WaitingList(limit);
         return waitingList;
     }
 

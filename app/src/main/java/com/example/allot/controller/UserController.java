@@ -237,6 +237,7 @@ public class UserController {
                                 "waitingList.chosen", FieldValue.arrayRemove(deviceId),
                                 "chosen", FieldValue.arrayRemove(deviceId),
                                 "enrolled", FieldValue.arrayRemove(deviceId),
+                                "cancelled", FieldValue.arrayRemove(deviceId),
                                 "notEnrolled", FieldValue.arrayRemove(deviceId),
                                 FieldPath.of("waitingList", "status", deviceId), FieldValue.delete());
                     }
@@ -368,4 +369,3 @@ public class UserController {
         }
     }
 }
-
