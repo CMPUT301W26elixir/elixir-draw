@@ -40,6 +40,10 @@ public class MainActivity extends AppCompatActivity {
     private FrameLayout fragmentContainer;
     private LinearLayout exploreContainer;
 
+    // Added Variables for the Filters
+    private TextView chipFortnite, chipSports, chipArts, chipScience;
+    private String selectedChipFilter = "";
+
     private List<String> userSavedEvents = new ArrayList<>();
 
     @Override
@@ -54,6 +58,13 @@ public class MainActivity extends AppCompatActivity {
         bottomNavBar = findViewById(R.id.bottomNavBar);
         fragmentContainer = findViewById(R.id.fragment_container);
         exploreContainer = findViewById(R.id.exploreContainer);
+
+        // Bind the chips
+        chipFortnite = findViewById(R.id.chipFortnite);
+        chipSports = findViewById(R.id.chipSports);
+        chipArts = findViewById(R.id.chipArts);
+        chipScience = findViewById(R.id.chipScience);
+        setupFilterChips();
 
         eventListAdapter = new EventListAdapter(new ArrayList<>(), new EventListAdapter.OnEventClickListener() {
             @Override
@@ -96,7 +107,6 @@ public class MainActivity extends AppCompatActivity {
             if (success && user != null) {
                 userSavedEvents = user.getSavedEvents() != null ? user.getSavedEvents() : new ArrayList<>();
 
-                // Check if we were told to open the Saved tab from another screen
                 if ("saved".equals(getIntent().getStringExtra("navigate_to"))) {
                     openSavedTab();
                 } else {
@@ -108,7 +118,39 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    // Handles intents when the Activity is already running in the background
+    // --- FILTER CHIP LOGIC ---
+    private void setupFilterChips() {
+        View.OnClickListener chipClickListener = view -> {
+            TextView clickedChip = (TextView) view;
+            String clickedText = clickedChip.getText().toString();
+
+            // Toggle logic: If they click the active chip, turn it off. Otherwise, activate it.
+            if (selectedChipFilter.equals(clickedText)) {
+                selectedChipFilter = "";
+            } else {
+                selectedChipFilter = clickedText;
+            }
+
+            updateChipUI();
+            loadBrowseEvents(searchInput.getText().toString()); // Refresh the list
+        };
+
+        chipFortnite.setOnClickListener(chipClickListener);
+        chipSports.setOnClickListener(chipClickListener);
+        chipArts.setOnClickListener(chipClickListener);
+        chipScience.setOnClickListener(chipClickListener);
+
+        updateChipUI(); // Set initial backgrounds
+    }
+
+    private void updateChipUI() {
+        chipFortnite.setBackgroundResource(selectedChipFilter.equals(chipFortnite.getText().toString()) ? R.drawable.bg_chip_selected : R.drawable.bg_chip_unselected);
+        chipSports.setBackgroundResource(selectedChipFilter.equals(chipSports.getText().toString()) ? R.drawable.bg_chip_selected : R.drawable.bg_chip_unselected);
+        chipArts.setBackgroundResource(selectedChipFilter.equals(chipArts.getText().toString()) ? R.drawable.bg_chip_selected : R.drawable.bg_chip_unselected);
+        chipScience.setBackgroundResource(selectedChipFilter.equals(chipScience.getText().toString()) ? R.drawable.bg_chip_selected : R.drawable.bg_chip_unselected);
+    }
+    // -------------------------
+
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
@@ -127,8 +169,6 @@ public class MainActivity extends AppCompatActivity {
         bottomNavBar.setOnTabClickListener(BottomNavBarView.Tab.MY_EVENTS, v -> openMyEventsScreen());
         bottomNavBar.setOnTabClickListener(BottomNavBarView.Tab.PROFILE, v -> openProfileScreen());
         bottomNavBar.setOnTabClickListener(BottomNavBarView.Tab.SCAN, view -> openScanScreen());
-        // If you have a ScanActivity, link it here like:
-        // bottomNavBar.setOnTabClickListener(BottomNavBarView.Tab.SCAN, v -> openScanScreen());
     }
 
     private void showExploreTab() {
@@ -168,6 +208,13 @@ public class MainActivity extends AppCompatActivity {
         overridePendingTransition(0, 0);
     }
 
+    private void openScanScreen() {
+        Intent intent = new Intent(this, ScanActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        startActivity(intent);
+        overridePendingTransition(0, 0);
+    }
+
     private void openEventDetailScreen(EventListItem eventItem) {
         if (eventItem == null || eventItem.eventId == null || eventItem.eventId.trim().isEmpty()) return;
         Intent intent = new Intent(this, EventDetailActivity.class);
@@ -196,13 +243,33 @@ public class MainActivity extends AppCompatActivity {
             public void onCallback(List<Event> events) {
                 List<EventListItem> browseItems = new ArrayList<>();
                 for (Event event : events) {
+
+                    // --- APPLY THE SELECTED CHIP FILTER ---
+                    if (!selectedChipFilter.isEmpty()) {
+                        String title = event.title != null ? event.title.toLowerCase() : "";
+                        String category = event.category != null ? event.category.toLowerCase() : "";
+                        String desc = event.description != null ? event.description.toLowerCase() : "";
+                        String filter = selectedChipFilter.toLowerCase();
+
+                        // If the chip text isn't anywhere in the title, category, or description, skip it!
+                        if (!title.contains(filter) && !category.contains(filter) && !desc.contains(filter)) {
+                            continue;
+                        }
+                    }
+                    // ---------------------------------------
+
                     EventListItem item = EventListItem.fromEvent(event);
                     item.isSaved = userSavedEvents.contains(event.eventId);
                     browseItems.add(item);
                 }
                 eventListAdapter.updateEvents(browseItems);
-                if (browseItems.isEmpty()) setEmptyState(searchTerm);
-                else setContentState();
+
+                // Handle the text displaying depending on filters/searches
+                if (browseItems.isEmpty()) {
+                    setEmptyState(searchTerm);
+                } else {
+                    setContentState();
+                }
             }
             @Override
             public void onError(Exception exception) {
@@ -229,12 +296,20 @@ public class MainActivity extends AppCompatActivity {
         recyclerView.setVisibility(View.GONE);
         loadingIndicator.setVisibility(View.GONE);
         stateText.setVisibility(View.VISIBLE);
+
+        String displayMsg = "No events match";
         String trimmedSearch = searchTerm == null ? "" : searchTerm.trim();
-        if (trimmedSearch.isEmpty()) {
-            stateText.setText(R.string.browse_state_empty);
-            return;
+
+        if (!trimmedSearch.isEmpty() && !selectedChipFilter.isEmpty()) {
+            displayMsg = String.format(Locale.getDefault(), "No '%s' events match \"%s\".", selectedChipFilter, trimmedSearch);
+        } else if (!trimmedSearch.isEmpty()) {
+            displayMsg = String.format(Locale.getDefault(), "No events match \"%s\".", trimmedSearch);
+        } else if (!selectedChipFilter.isEmpty()) {
+            displayMsg = String.format(Locale.getDefault(), "No %s events found.", selectedChipFilter);
+        } else {
+            displayMsg = getString(R.string.browse_state_empty);
         }
-        stateText.setText(String.format(Locale.getDefault(), "No events match \"%s\".", trimmedSearch));
+        stateText.setText(displayMsg);
     }
 
     private void setErrorState() {
@@ -242,11 +317,5 @@ public class MainActivity extends AppCompatActivity {
         loadingIndicator.setVisibility(View.GONE);
         stateText.setVisibility(View.VISIBLE);
         stateText.setText(R.string.browse_state_error);
-    }
-    private void openScanScreen() {
-        Intent intent = new Intent(this, ScanActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-        startActivity(intent);
-        overridePendingTransition(0, 0);
     }
 }
