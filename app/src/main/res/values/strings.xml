@@ -50,4 +50,18 @@
     <string name="profile_receive_event_updates">Receive event updates</string>
     <string name="profile_delete">Delete profile</string>
     <string name="profile_save_changes">Save Changes</string>
+    <string name="delete_profile_dialog_title">Delete Profile?</string>
+    <string name="delete_profile_dialog_close">Close delete profile dialog</string>
+    <string name="delete_profile_dialog_stay">Stay</string>
+    <string name="delete_profile_dialog_confirm">Delete Profile</string>
+    <string name="delete_profile_success">Profile deleted.</string>
+    <string name="delete_profile_failure">Could not delete your profile. Please try again.</string>
+    <string name="delete_profile_dialog_message">Deleting your profile will permanently remove:
+- Your personal information
+- Your event history
+- Your waiting list entries
+- Any active invitations
+
+This action cannot be undone.</string>
 </resources>
+
