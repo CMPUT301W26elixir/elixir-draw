@@ -278,6 +278,18 @@
                 app:cornerRadius="8dp" />
 
             <TextView
+                android:id="@+id/actionSubtextText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:fontFamily="@font/varela_round_regular"
+                android:gravity="center"
+                android:lineSpacingExtra="2dp"
+                android:textColor="#A6A8A5"
+                android:textSize="12sp"
+                android:visibility="gone" />
+
+            <TextView
                 android:id="@+id/entrantCountText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

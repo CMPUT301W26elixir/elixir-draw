@@ -11,6 +11,7 @@ public class EventListItem {
     public String daysLeft;
     public String category;
     public String posterUrl;
+    public boolean isSaved;
 
     public EventListItem(String title, String street, String date, String price, String daysLeft) {
         this(null, title, street, date, price, daysLeft, null, null);
@@ -31,11 +32,11 @@ public class EventListItem {
     public static EventListItem fromEvent(Event event) {
         return new EventListItem(
                 event.eventId,
-                event.getBrowseTitleText(),
-                event.getBrowseLocationText(),
-                event.getBrowseDateText(),
-                event.getBrowsePriceText(),
-                event.getBrowseDeadlineText(),
+                event.title,
+                EventDisplayFormatter.location(event),
+                EventDisplayFormatter.date(event),
+                EventDisplayFormatter.price(event),
+                EventDisplayFormatter.deadline(event),
                 event.category,
                 event.posterUrl
         );

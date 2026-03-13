@@ -7,10 +7,13 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.allot.R;
@@ -34,6 +37,11 @@ public class MainActivity extends AppCompatActivity {
     private TextView stateText;
     private BottomNavBarView bottomNavBar;
 
+    private FrameLayout fragmentContainer;
+    private LinearLayout exploreContainer;
+
+    private List<String> userSavedEvents = new ArrayList<>();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -44,47 +52,124 @@ public class MainActivity extends AppCompatActivity {
         loadingIndicator = findViewById(R.id.loadingIndicator);
         stateText = findViewById(R.id.stateText);
         bottomNavBar = findViewById(R.id.bottomNavBar);
+        fragmentContainer = findViewById(R.id.fragment_container);
+        exploreContainer = findViewById(R.id.exploreContainer);
 
-        eventListAdapter = new EventListAdapter(new ArrayList<>(), this::openEventDetailScreen);
+        eventListAdapter = new EventListAdapter(new ArrayList<>(), new EventListAdapter.OnEventClickListener() {
+            @Override
+            public void onEventClick(EventListItem event) {
+                openEventDetailScreen(event);
+            }
+
+            @Override
+            public void onHeartClick(EventListItem event, int position) {
+                boolean isSaving = event.isSaved;
+
+                if (isSaving && !userSavedEvents.contains(event.eventId)) {
+                    userSavedEvents.add(event.eventId);
+                } else if (!isSaving) {
+                    userSavedEvents.remove(event.eventId);
+                }
+
+                userController.toggleSavedEvent(event.eventId, isSaving, (success, result) -> {
+                    if (!success) {
+                        event.isSaved = !isSaving;
+                        eventListAdapter.notifyItemChanged(position);
+                        if (isSaving) {
+                            userSavedEvents.remove(event.eventId);
+                        } else if (!userSavedEvents.contains(event.eventId)) {
+                            userSavedEvents.add(event.eventId);
+                        }
+                    }
+                });
+            }
+        });
+
         recyclerView.setAdapter(eventListAdapter);
-        bottomNavBar.setSelectedTab(BottomNavBarView.Tab.EXPLORE);
-        bottomNavBar.setOnTabClickListener(BottomNavBarView.Tab.MY_EVENTS,
-                view -> openMyEventsScreen());
-        bottomNavBar.setOnTabClickListener(BottomNavBarView.Tab.PROFILE,
-                view -> openProfileScreen());
+        setupBottomNavigation();
 
         eventController = new EventController();
         setupSearchInput();
-        loadBrowseEvents("");
 
-        // Keep the existing user setup while we build the search screen UI.
         userController = new UserController(this);
         userController.loadOrCreateUser((user, success) -> {
             if (success && user != null) {
-                Log.d(TAG, "Welcome, " + user.getName());
-                Log.d(TAG, "Role: " + user.getRole());
+                userSavedEvents = user.getSavedEvents() != null ? user.getSavedEvents() : new ArrayList<>();
+
+                // Check if we were told to open the Saved tab from another screen
+                if ("saved".equals(getIntent().getStringExtra("navigate_to"))) {
+                    openSavedTab();
+                } else {
+                    loadBrowseEvents(searchInput.getText().toString());
+                }
             } else {
                 Log.e(TAG, "Failed to load user.");
             }
         });
-
     }
 
-    private void openProfileScreen() {
-        startActivity(new Intent(MainActivity.this, ProfileActivity.class));
-        overridePendingTransition(0, 0);
+    // Handles intents when the Activity is already running in the background
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+        if ("saved".equals(intent.getStringExtra("navigate_to"))) {
+            openSavedTab();
+        } else {
+            showExploreTab();
+        }
+    }
+
+    private void setupBottomNavigation() {
+        bottomNavBar.setSelectedTab(BottomNavBarView.Tab.EXPLORE);
+        bottomNavBar.setOnTabClickListener(BottomNavBarView.Tab.EXPLORE, v -> showExploreTab());
+        bottomNavBar.setOnTabClickListener(BottomNavBarView.Tab.SAVED, v -> openSavedTab());
+        bottomNavBar.setOnTabClickListener(BottomNavBarView.Tab.MY_EVENTS, v -> openMyEventsScreen());
+        bottomNavBar.setOnTabClickListener(BottomNavBarView.Tab.PROFILE, v -> openProfileScreen());
+        bottomNavBar.setOnTabClickListener(BottomNavBarView.Tab.SCAN, view -> openScanScreen());
+        // If you have a ScanActivity, link it here like:
+        // bottomNavBar.setOnTabClickListener(BottomNavBarView.Tab.SCAN, v -> openScanScreen());
+    }
+
+    private void showExploreTab() {
+        bottomNavBar.setSelectedTab(BottomNavBarView.Tab.EXPLORE);
+        if (fragmentContainer != null) fragmentContainer.setVisibility(View.GONE);
+        if (exploreContainer != null) exploreContainer.setVisibility(View.VISIBLE);
+        loadBrowseEvents(searchInput.getText().toString());
+    }
+
+    private void openSavedTab() {
+        bottomNavBar.setSelectedTab(BottomNavBarView.Tab.SAVED);
+        SavedEventsFragment fragment = new SavedEventsFragment();
+        Bundle args = new Bundle();
+        args.putStringArrayList("saved_ids", new ArrayList<>(userSavedEvents));
+        fragment.setArguments(args);
+
+        if (exploreContainer != null) exploreContainer.setVisibility(View.GONE);
+        if (fragmentContainer != null) {
+            fragmentContainer.setVisibility(View.VISIBLE);
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.fragment_container, fragment)
+                    .commit();
+        }
     }
 
     private void openMyEventsScreen() {
-        startActivity(new Intent(MainActivity.this, MyEventsActivity.class));
+        Intent intent = new Intent(this, MyEventsActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        startActivity(intent);
+        overridePendingTransition(0, 0);
+    }
+
+    private void openProfileScreen() {
+        Intent intent = new Intent(this, ProfileActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        startActivity(intent);
         overridePendingTransition(0, 0);
     }
 
     private void openEventDetailScreen(EventListItem eventItem) {
-        if (eventItem == null || eventItem.eventId == null || eventItem.eventId.trim().isEmpty()) {
-            return;
-        }
-
+        if (eventItem == null || eventItem.eventId == null || eventItem.eventId.trim().isEmpty()) return;
         Intent intent = new Intent(this, EventDetailActivity.class);
         intent.putExtra(EventDetailActivity.EXTRA_EVENT_ID, eventItem.eventId);
         intent.putExtra(EventDetailActivity.EXTRA_EVENT_TITLE, eventItem.title);
@@ -98,49 +183,31 @@ public class MainActivity extends AppCompatActivity {
 
     private void setupSearchInput() {
         searchInput.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-                loadBrowseEvents(editable.toString());
-            }
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
+            @Override public void afterTextChanged(Editable editable) { loadBrowseEvents(editable.toString()); }
         });
     }
 
     private void loadBrowseEvents(String searchTerm) {
         setLoadingState();
-
         eventController.searchOpenEvents(searchTerm, new EventController.EventListCallback() {
             @Override
             public void onCallback(List<Event> events) {
                 List<EventListItem> browseItems = new ArrayList<>();
-
                 for (Event event : events) {
-                    browseItems.add(EventListItem.fromEvent(event));
+                    EventListItem item = EventListItem.fromEvent(event);
+                    item.isSaved = userSavedEvents.contains(event.eventId);
+                    browseItems.add(item);
                 }
-
                 eventListAdapter.updateEvents(browseItems);
-
-                if (browseItems.isEmpty()) {
-                    setEmptyState(searchTerm);
-                } else {
-                    setContentState();
-                }
-
-                Log.d(TAG, "Loaded " + browseItems.size() + " browse events.");
+                if (browseItems.isEmpty()) setEmptyState(searchTerm);
+                else setContentState();
             }
-
             @Override
             public void onError(Exception exception) {
                 eventListAdapter.updateEvents(new ArrayList<>());
                 setErrorState();
-                Log.e(TAG, "Failed to load browse events", exception);
             }
         });
     }
@@ -162,18 +229,12 @@ public class MainActivity extends AppCompatActivity {
         recyclerView.setVisibility(View.GONE);
         loadingIndicator.setVisibility(View.GONE);
         stateText.setVisibility(View.VISIBLE);
-
         String trimmedSearch = searchTerm == null ? "" : searchTerm.trim();
         if (trimmedSearch.isEmpty()) {
             stateText.setText(R.string.browse_state_empty);
             return;
         }
-
-        stateText.setText(String.format(
-                Locale.getDefault(),
-                "No events match \"%s\".",
-                trimmedSearch
-        ));
+        stateText.setText(String.format(Locale.getDefault(), "No events match \"%s\".", trimmedSearch));
     }
 
     private void setErrorState() {
@@ -182,7 +243,10 @@ public class MainActivity extends AppCompatActivity {
         stateText.setVisibility(View.VISIBLE);
         stateText.setText(R.string.browse_state_error);
     }
+    private void openScanScreen() {
+        Intent intent = new Intent(this, ScanActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        startActivity(intent);
+        overridePendingTransition(0, 0);
+    }
 }
-
-
-

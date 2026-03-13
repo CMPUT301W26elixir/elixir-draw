@@ -6,7 +6,9 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -29,6 +31,7 @@ public class CreateEventActivity extends AppCompatActivity {
 
     private EditText eventNameInput;
     private EditText locationInput;
+    private CheckBox geolocationCheckbox;
     private Spinner startMonthSpinner;
     private EditText startDayInput;
     private EditText startYearInput;
@@ -60,6 +63,7 @@ public class CreateEventActivity extends AppCompatActivity {
         setupMonthSpinner(startMonthSpinner);
         setupMonthSpinner(registrationStartMonthSpinner);
         setupMonthSpinner(registrationEndMonthSpinner);
+        setupHeader();
         setupListeners();
     }
 
@@ -72,6 +76,7 @@ public class CreateEventActivity extends AppCompatActivity {
     private void bindViews() {
         eventNameInput = findViewById(R.id.eventNameInput);
         locationInput = findViewById(R.id.locationInput);
+        geolocationCheckbox = findViewById(R.id.geolocationCheckbox);
         startMonthSpinner = findViewById(R.id.startMonthSpinner);
         startDayInput = findViewById(R.id.startDayInput);
         startYearInput = findViewById(R.id.startYearInput);
@@ -85,6 +90,11 @@ public class CreateEventActivity extends AppCompatActivity {
         registrationEndDayInput = findViewById(R.id.registrationEndDayInput);
         registrationEndYearInput = findViewById(R.id.registrationEndYearInput);
         nextButton = findViewById(R.id.createEventNextButton);
+    }
+
+    private void setupHeader() {
+        ImageButton backButton = findViewById(R.id.backButton);
+        backButton.setOnClickListener(view -> getOnBackPressedDispatcher().onBackPressed());
     }
 
     private void setupMonthSpinner(Spinner spinner) {
@@ -171,15 +181,15 @@ public class CreateEventActivity extends AppCompatActivity {
             return;
         }
 
-        Event event = new Event(UUID.randomUUID().toString(), userController.getCurrentDeviceId(), title, participants, participants);
+        Event event = new Event(UUID.randomUUID().toString(), userController.getCurrentDeviceId(), title, participants);
         event.title = title;
         event.location = location;
+        event.geoloc = geolocationCheckbox.isChecked();
         event.eventDate = eventDate;
         event.price = price;
         event.description = description;
         event.capacity = participants;
         event.limit = participants;
-        event.choosingLimit = participants;
         event.registrationOpen = registrationStart;
         event.registrationDeadline = registrationEnd;
         event.status = "open";
