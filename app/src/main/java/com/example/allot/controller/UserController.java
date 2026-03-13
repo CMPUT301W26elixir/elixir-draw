@@ -55,6 +55,9 @@ public class UserController {
                 // If the document exists, convert it into an userobject
                 if (document != null && document.exists()) {
                     User user = document.toObject(User.class);
+                    if (user != null && isBlank(user.getDeviceId())) {
+                        user.setDeviceId(deviceId);
+                    }
                     listener.onComplete(user, user != null);
                 } else {
                     // No matching userwas found
@@ -95,6 +98,10 @@ public class UserController {
             // Convert the document into an userobject
             User user = document.toObject(User.class);
             if (user != null) {
+                if (isBlank(user.getDeviceId())) {
+                    user.setDeviceId(deviceId);
+                    backfillDeviceId(userRef, deviceId);
+                }
                 listener.onComplete(user, true);
             } else {
                 listener.onComplete(null, false);
@@ -109,6 +116,7 @@ public class UserController {
      */
     public void createNewUser(String deviceId) {
         User user = new User();
+        user.setDeviceId(deviceId);
         DocumentReference userRef = usersCollection.document(deviceId);
         userRef.set(user).addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
@@ -182,6 +190,11 @@ public class UserController {
 
     public boolean isNewDeviceId() {
         return newDeviceId;
+    }
+
+    private void backfillDeviceId(DocumentReference userRef, String deviceId) {
+        userRef.update("deviceId", deviceId)
+                .addOnFailureListener(e -> Log.d(TAG, "Failed to backfill device ID", e));
     }
 
     /**
