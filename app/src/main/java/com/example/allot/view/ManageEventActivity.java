@@ -319,13 +319,11 @@ public class ManageEventActivity extends AppCompatActivity {
             return;
         }
 
-        if (currentEvent != null && hasDrawResults(currentEvent)) {
-            Toast.makeText(this, R.string.manage_lottery_post_draw_coming_soon, Toast.LENGTH_SHORT).show();
-            return;
-        }
-
         shouldRefreshOnResume = true;
-        startActivity(new android.content.Intent(this, ManageLotteryActivity.class)
+        Class<?> destination = currentEvent != null && hasDrawResults(currentEvent)
+                ? ManageEntrantsActivity.class
+                : ManageLotteryActivity.class;
+        startActivity(new android.content.Intent(this, destination)
                 .putExtra(ManageLotteryActivity.EXTRA_EVENT_ID, currentEventId));
         overridePendingTransition(0, 0);
     }

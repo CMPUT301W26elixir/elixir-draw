@@ -145,6 +145,14 @@ public class ManageLotteryActivity extends AppCompatActivity {
             event.eventId = documentSnapshot.getId();
         }
 
+        if (hasDrawResults(event)) {
+            startActivity(new android.content.Intent(this, ManageEntrantsActivity.class)
+                    .putExtra(ManageEntrantsActivity.EXTRA_EVENT_ID, currentEventId));
+            overridePendingTransition(0, 0);
+            finish();
+            return;
+        }
+
         currentEvent = event;
         Date storedDrawDate = documentSnapshot.getDate("drawDate");
         bindForm(event, storedDrawDate);
@@ -269,6 +277,11 @@ public class ManageLotteryActivity extends AppCompatActivity {
         boolean enabled = !isLoading && !isStartingDraw;
         forceStartDrawButton.setEnabled(enabled);
         forceStartDrawButton.setAlpha(enabled ? 1f : 0.6f);
+    }
+
+    private boolean hasDrawResults(Event event) {
+        return (event.chosen != null && !event.chosen.isEmpty())
+                || (event.waitingList != null && event.waitingList.chosen != null && !event.waitingList.chosen.isEmpty());
     }
 
     private Date parseDrawDate(String value) {

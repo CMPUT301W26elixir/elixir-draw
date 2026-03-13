@@ -96,6 +96,22 @@ This action cannot be undone.</string>
     <string name="manage_lottery_draw_success">Draw started.</string>
     <string name="manage_lottery_draw_failure">Could not start the draw. Please try again.</string>
     <string name="manage_lottery_post_draw_coming_soon">Post-draw view coming soon.</string>
+    <string name="manage_entrants_title">Entrants</string>
+    <string name="manage_entrants_loading">Loading draw results...</string>
+    <string name="manage_entrants_load_failure">Could not load these entrants. Please try again.</string>
+    <string name="manage_entrants_not_found">This event is no longer available.</string>
+    <string name="manage_entrants_tab_selected">Selected</string>
+    <string name="manage_entrants_tab_cancelled">Not enrolled</string>
+    <string name="manage_entrants_tab_enrolled">Enrolled</string>
+    <string name="manage_entrants_tab_all">All entrants</string>
+    <string name="manage_entrants_empty_selected">No selected entrants yet.</string>
+    <string name="manage_entrants_empty_cancelled">No not enrolled users yet.</string>
+    <string name="manage_entrants_empty_enrolled">No enrolled entrants yet.</string>
+    <string name="manage_entrants_empty_all">No entrants found for this event.</string>
+    <string name="manage_entrants_selected_subtitle">Selected in draw</string>
+    <string name="manage_entrants_cancelled_subtitle">Not enrolled</string>
+    <string name="manage_entrants_enrolled_subtitle">Enrollment confirmed</string>
+    <string name="manage_entrants_all_subtitle">Entrant</string>
     <string name="event_detail_waitlist_joined_message">You are on the waiting list for this event.</string>
     <string name="event_detail_registration_opens">Registration opens: %1$s</string>
     <string name="event_detail_registration_closes">Registration closes: %1$s</string>
@@ -192,6 +208,3 @@ This action cannot be undone.</string>
         <item quantity="other">%d Entrants</item>
     </plurals>
 </resources>
-
-
-
