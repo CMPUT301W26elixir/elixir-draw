@@ -239,7 +239,7 @@ public class EventDetailActivity extends AppCompatActivity {
             return;
         }
 
-        if (hasActiveOffer(event)) {
+        if (isCurrentUserSelected(event)) {
             showFooterState(
                     false,
                     true,
@@ -319,16 +319,19 @@ public class EventDetailActivity extends AppCompatActivity {
     }
 
     private boolean hasActiveOffer(Event event) {
+        return isCurrentUserSelected(event) && !isCurrentUserEnrolled(event);
+    }
+
+    private boolean isCurrentUserSelected(Event event) {
         String deviceId = userController.getCurrentDeviceId();
-        return !containsUser(event == null ? null : event.notEnrolled, deviceId)
-                && (containsUser(event == null ? null : event.chosen, deviceId)
-                || containsUser(event != null && event.waitingList != null ? event.waitingList.chosen : null, deviceId));
+        return containsUser(event == null ? null : event.chosen, deviceId)
+                || containsUser(event != null && event.waitingList != null ? event.waitingList.chosen : null, deviceId);
     }
 
     private boolean shouldShowReplacementState(Event event) {
         return hasPublishedSelectionResults(event)
                 && isCurrentUserOnWaitingList(event)
-                && !hasActiveOffer(event)
+                && !isCurrentUserSelected(event)
                 && !isCurrentUserEnrolled(event)
                 && !"finalized".equalsIgnoreCase(cleanText(event == null ? null : event.status));
     }
@@ -336,7 +339,7 @@ public class EventDetailActivity extends AppCompatActivity {
     private boolean shouldShowFinalizedNotSelectedState(Event event) {
         return hasPublishedSelectionResults(event)
                 && isCurrentUserOnWaitingList(event)
-                && !hasActiveOffer(event)
+                && !isCurrentUserSelected(event)
                 && !isCurrentUserEnrolled(event)
                 && "finalized".equalsIgnoreCase(cleanText(event == null ? null : event.status));
     }

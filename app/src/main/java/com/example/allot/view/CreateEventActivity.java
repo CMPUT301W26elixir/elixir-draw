@@ -7,6 +7,7 @@ import android.text.TextUtils;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -60,6 +61,7 @@ public class CreateEventActivity extends AppCompatActivity {
         setupMonthSpinner(startMonthSpinner);
         setupMonthSpinner(registrationStartMonthSpinner);
         setupMonthSpinner(registrationEndMonthSpinner);
+        setupHeader();
         setupListeners();
     }
 
@@ -85,6 +87,11 @@ public class CreateEventActivity extends AppCompatActivity {
         registrationEndDayInput = findViewById(R.id.registrationEndDayInput);
         registrationEndYearInput = findViewById(R.id.registrationEndYearInput);
         nextButton = findViewById(R.id.createEventNextButton);
+    }
+
+    private void setupHeader() {
+        ImageButton backButton = findViewById(R.id.backButton);
+        backButton.setOnClickListener(view -> getOnBackPressedDispatcher().onBackPressed());
     }
 
     private void setupMonthSpinner(Spinner spinner) {
