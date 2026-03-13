@@ -96,7 +96,18 @@ public class MyEventsActivity extends AppCompatActivity {
     private void setupBottomNav() {
         bottomNavBar.setSelectedTab(BottomNavBarView.Tab.MY_EVENTS);
         bottomNavBar.setOnTabClickListener(BottomNavBarView.Tab.EXPLORE, view -> openExploreScreen());
+        bottomNavBar.setOnTabClickListener(BottomNavBarView.Tab.SAVED, view -> openSavedScreen());
         bottomNavBar.setOnTabClickListener(BottomNavBarView.Tab.PROFILE, view -> openProfileScreen());
+        bottomNavBar.setOnTabClickListener(BottomNavBarView.Tab.SCAN, view -> openScanScreen());
+    }
+
+    private void openSavedScreen() {
+        Intent intent = new Intent(MyEventsActivity.this, MainActivity.class);
+        intent.putExtra("navigate_to", "saved");
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        startActivity(intent);
+        overridePendingTransition(0, 0);
+        finish();
     }
 
     private void showRegisteredTab() {
@@ -406,6 +417,14 @@ public class MyEventsActivity extends AppCompatActivity {
     private enum TopTab {
         REGISTERED,
         HOSTING
+    }
+    private void openScanScreen() {
+        Intent intent = new Intent(this, ScanActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        startActivity(intent);
+        overridePendingTransition(0, 0);
+        // Note: Do NOT call finish() here if pasting this into MainActivity.java!
+        // You CAN call finish() here if pasting into MyEventsActivity or ProfileActivity.
     }
 }
 

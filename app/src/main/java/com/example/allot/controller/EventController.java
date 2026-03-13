@@ -48,27 +48,6 @@ public class EventController {
                             });
                 });
     }
-    public void joinWaitingList(String eventId, String deviceId, OnCompleteListener<Boolean> listener) {
-        database.collection("events")
-                .document(eventId)
-                .update("waitingList.list", FieldValue.arrayUnion(deviceId))
-                .addOnSuccessListener(unused -> listener.onComplete(true, true))
-                .addOnFailureListener(exception -> {
-                    Log.e(TAG, "Failed to join waiting list for event " + eventId, exception);
-                    listener.onComplete(false, false);
-                });
-    }
-
-    public void leaveWaitingList(String eventId, String deviceId, OnCompleteListener<Boolean> listener) {
-        database.collection("events")
-                .document(eventId)
-                .update("waitingList.list", FieldValue.arrayRemove(deviceId))
-                .addOnSuccessListener(unused -> listener.onComplete(true, true))
-                .addOnFailureListener(exception -> {
-                    Log.e(TAG, "Failed to leave waiting list for event " + eventId, exception);
-                    listener.onComplete(false, false);
-                });
-    }
 
     /**
      * Removes an event from Firestore.
@@ -91,6 +70,28 @@ public class EventController {
                 })
                 .addOnFailureListener(e -> {
                     Log.e(TAG, "Failed to remove event: " + e.getMessage());
+                });
+    }
+
+    public void joinWaitingList(String eventId, String deviceId, OnCompleteListener<Boolean> listener) {
+        database.collection("events")
+                .document(eventId)
+                .update("waitingList.list", FieldValue.arrayUnion(deviceId))
+                .addOnSuccessListener(unused -> listener.onComplete(true, true))
+                .addOnFailureListener(exception -> {
+                    Log.e(TAG, "Failed to join waiting list for event " + eventId, exception);
+                    listener.onComplete(false, false);
+                });
+    }
+
+    public void leaveWaitingList(String eventId, String deviceId, OnCompleteListener<Boolean> listener) {
+        database.collection("events")
+                .document(eventId)
+                .update("waitingList.list", FieldValue.arrayRemove(deviceId))
+                .addOnSuccessListener(unused -> listener.onComplete(true, true))
+                .addOnFailureListener(exception -> {
+                    Log.e(TAG, "Failed to leave waiting list for event " + eventId, exception);
+                    listener.onComplete(false, false);
                 });
     }
 
@@ -126,6 +127,7 @@ public class EventController {
                             });
                 });
     }
+
     /**
      * US 01.01.03: Get a list of events that are open for joining for entrant
      * Search is filtered client-side because Firestore does not support
@@ -166,6 +168,34 @@ public class EventController {
                         event.eventId = document.getId();
                     }
                     callback.onCallback(event);
+                });
+    }
+
+    public void getEventsByIds(List<String> eventIds, EventListCallback callback) {
+        if (eventIds == null || eventIds.isEmpty()) {
+            callback.onCallback(new ArrayList<>());
+            return;
+        }
+
+        database.collection("events")
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful() && task.getResult() != null) {
+                        List<Event> matchingEvents = new ArrayList<>();
+                        for (QueryDocumentSnapshot document : task.getResult()) {
+                            if (eventIds.contains(document.getId())) {
+                                Event event = document.toObject(Event.class);
+                                // Ensure the ID is attached so it can be clicked later
+                                if (event.eventId == null || event.eventId.isEmpty()) {
+                                    event.eventId = document.getId();
+                                }
+                                matchingEvents.add(event);
+                            }
+                        }
+                        callback.onCallback(matchingEvents);
+                    } else {
+                        callback.onError(task.getException());
+                    }
                 });
     }
 
@@ -323,6 +353,7 @@ public class EventController {
     private boolean containsUser(List<String> users, String deviceId) {
         return users != null && users.contains(deviceId);
     }
+
     // Waits for internet to finish
     public interface EventListCallback {
         void onCallback(List<Event> events);
