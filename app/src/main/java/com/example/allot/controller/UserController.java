@@ -328,8 +328,7 @@ public class UserController {
      * @param phone the phone number entered by the user
      * @return a trimmed phone number, or an empty string if null
      */
-    private String normalizePhone(String phone) {
-        // Store an empty string if phone is null, otherwise trim extra spaces
+    private static String normalizePhone(String phone) {
         return phone == null ? "" : phone.trim();
     }
 
@@ -339,7 +338,7 @@ public class UserController {
      * @param value the string to check
      * @return true if the string is blank, otherwise false
      */
-    private boolean isBlank(String value) {
+    private static boolean isBlank(String value) {
         return value == null || value.trim().isEmpty();
     }
 
