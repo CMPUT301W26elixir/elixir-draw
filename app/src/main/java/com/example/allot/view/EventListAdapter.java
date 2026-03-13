@@ -16,10 +16,16 @@ import java.util.List;
 
 public class EventListAdapter extends RecyclerView.Adapter<EventListAdapter.EventViewHolder> {
 
-    private final List<EventListItem> events;
+    public interface OnEventClickListener {
+        void onEventClick(EventListItem event);
+    }
 
-    public EventListAdapter(List<EventListItem> events) {
+    private final List<EventListItem> events;
+    private final OnEventClickListener onEventClickListener;
+
+    public EventListAdapter(List<EventListItem> events, OnEventClickListener onEventClickListener) {
         this.events = new ArrayList<>(events);
+        this.onEventClickListener = onEventClickListener;
     }
 
     public void updateEvents(List<EventListItem> updatedEvents) {
@@ -47,6 +53,11 @@ public class EventListAdapter extends RecyclerView.Adapter<EventListAdapter.Even
 
         int imageBackground = (position % 2 == 0) ? R.drawable.bg_event_image_one : R.drawable.bg_event_image_two;
         holder.imageFrame.setBackgroundResource(imageBackground);
+        holder.itemView.setOnClickListener(view -> {
+            if (onEventClickListener != null) {
+                onEventClickListener.onEventClick(event);
+            }
+        });
     }
 
     @Override
@@ -64,12 +75,12 @@ public class EventListAdapter extends RecyclerView.Adapter<EventListAdapter.Even
 
         EventViewHolder(@NonNull View itemView) {
             super(itemView);
-            imageFrame = (FrameLayout) itemView.findViewById(R.id.imageFrame);
-            titleText = (TextView) itemView.findViewById(R.id.titleText);
-            streetText = (TextView) itemView.findViewById(R.id.streetText);
-            dateText = (TextView) itemView.findViewById(R.id.dateText);
-            priceText = (TextView) itemView.findViewById(R.id.priceText);
-            daysLeftText = (TextView) itemView.findViewById(R.id.daysLeftText);
+            imageFrame = itemView.findViewById(R.id.imageFrame);
+            titleText = itemView.findViewById(R.id.titleText);
+            streetText = itemView.findViewById(R.id.streetText);
+            dateText = itemView.findViewById(R.id.dateText);
+            priceText = itemView.findViewById(R.id.priceText);
+            daysLeftText = itemView.findViewById(R.id.daysLeftText);
         }
     }
 }

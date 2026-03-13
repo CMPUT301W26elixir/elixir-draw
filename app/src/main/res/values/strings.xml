@@ -63,5 +63,16 @@
 - Any active invitations
 
 This action cannot be undone.</string>
-</resources>
+    <string name="event_detail_back">Go back</string>
+    <string name="event_detail_registration_info">Registration information</string>
+    <string name="event_detail_join_waiting_list">Join waiting list</string>
+    <string name="event_detail_registration_opens">Registration opens: %1$s</string>
+    <string name="event_detail_registration_closes">Registration closes: %1$s</string>
+    <string name="event_detail_error">Could not load this event right now.</string>
+    <string name="event_detail_not_found">This event is no longer available.</string>
 
+    <plurals name="event_detail_entrant_count">
+        <item quantity="one">%d Entrant</item>
+        <item quantity="other">%d Entrants</item>
+    </plurals>
+</resources>

@@ -17,6 +17,7 @@ public class Event {
     public int capacity;
     public Double price;
     public Date eventDate;
+    public Date registrationOpen;
     public Date registrationDeadline;
     public String status;
     public String posterUrl;  // This is the main image for the event
@@ -131,4 +132,3 @@ public class Event {
         return this.waitingList.status;
     }
 }
-

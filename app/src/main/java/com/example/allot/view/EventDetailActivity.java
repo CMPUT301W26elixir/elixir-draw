@@ -1,0 +1,243 @@
+package com.example.allot.view;
+
+import android.os.Bundle;
+import android.text.TextUtils;
+import android.view.View;
+import android.widget.FrameLayout;
+import android.widget.ImageButton;
+import android.widget.ProgressBar;
+import android.widget.TextView;
+
+import androidx.appcompat.app.AppCompatActivity;
+
+import com.example.allot.R;
+import com.example.allot.controller.EventController;
+import com.example.allot.controller.UserController;
+import com.example.allot.model.Event;
+import com.example.allot.model.User;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+
+public class EventDetailActivity extends AppCompatActivity {
+    public static final String EXTRA_EVENT_ID = "event_id";
+    public static final String EXTRA_EVENT_TITLE = "event_title";
+    public static final String EXTRA_EVENT_LOCATION = "event_location";
+    public static final String EXTRA_EVENT_DATE = "event_date";
+    public static final String EXTRA_EVENT_PRICE = "event_price";
+    public static final String EXTRA_EVENT_DEADLINE = "event_deadline";
+    public static final String EXTRA_EVENT_CATEGORY = "event_category";
+
+    private EventController eventController;
+    private UserController userController;
+
+    private FrameLayout heroImageFrame;
+    private TextView heroDeadlineText;
+    private TextView titleText;
+    private TextView priceText;
+    private TextView locationText;
+    private TextView dateText;
+    private TextView organizerText;
+    private TextView descriptionText;
+    private TextView registrationTitleText;
+    private TextView registrationOpenText;
+    private TextView registrationDeadlineText;
+    private TextView entrantCountText;
+    private TextView errorText;
+    private ProgressBar loadingIndicator;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_event_detail);
+
+        eventController = new EventController();
+        userController = new UserController(this);
+
+        heroImageFrame = findViewById(R.id.heroImageFrame);
+        heroDeadlineText = findViewById(R.id.heroDeadlineText);
+        titleText = findViewById(R.id.eventTitleText);
+        priceText = findViewById(R.id.eventPriceText);
+        locationText = findViewById(R.id.eventLocationText);
+        dateText = findViewById(R.id.eventDateText);
+        organizerText = findViewById(R.id.eventOrganizerText);
+        descriptionText = findViewById(R.id.eventDescriptionText);
+        registrationTitleText = findViewById(R.id.registrationInfoTitleText);
+        registrationOpenText = findViewById(R.id.registrationOpenText);
+        registrationDeadlineText = findViewById(R.id.registrationDeadlineText);
+        entrantCountText = findViewById(R.id.entrantCountText);
+        errorText = findViewById(R.id.eventErrorText);
+        loadingIndicator = findViewById(R.id.eventLoadingIndicator);
+        ImageButton backButton = findViewById(R.id.backButton);
+
+        backButton.setOnClickListener(view -> getOnBackPressedDispatcher().onBackPressed());
+
+        bindFallbackContent();
+        loadEventDetails();
+    }
+
+    private void bindFallbackContent() {
+        titleText.setText(getIntent().getStringExtra(EXTRA_EVENT_TITLE));
+        priceText.setText(getIntent().getStringExtra(EXTRA_EVENT_PRICE));
+        bindOptionalText(locationText, getIntent().getStringExtra(EXTRA_EVENT_LOCATION));
+        bindOptionalText(dateText, getIntent().getStringExtra(EXTRA_EVENT_DATE));
+        bindOptionalText(heroDeadlineText, getIntent().getStringExtra(EXTRA_EVENT_DEADLINE));
+        applyHeroBackground(getIntent().getStringExtra(EXTRA_EVENT_CATEGORY));
+
+        organizerText.setVisibility(View.GONE);
+        descriptionText.setVisibility(View.GONE);
+        registrationTitleText.setVisibility(View.GONE);
+        registrationOpenText.setVisibility(View.GONE);
+        registrationDeadlineText.setVisibility(View.GONE);
+        entrantCountText.setVisibility(View.GONE);
+    }
+
+    private void loadEventDetails() {
+        String eventId = getIntent().getStringExtra(EXTRA_EVENT_ID);
+        if (TextUtils.isEmpty(eventId)) {
+            showErrorState(getString(R.string.event_detail_error));
+            return;
+        }
+
+        setLoading(true);
+        eventController.getEventById(eventId, new EventController.EventCallback() {
+            @Override
+            public void onCallback(Event event) {
+                setLoading(false);
+                if (event == null) {
+                    showErrorState(getString(R.string.event_detail_not_found));
+                    return;
+                }
+
+                errorText.setVisibility(View.GONE);
+                bindEvent(event);
+            }
+
+            @Override
+            public void onError(Exception exception) {
+                setLoading(false);
+                showErrorState(getString(R.string.event_detail_error));
+            }
+        });
+    }
+
+    private void bindEvent(Event event) {
+        titleText.setText(event.getBrowseTitleText());
+        priceText.setText(event.getBrowsePriceText());
+        bindOptionalText(locationText, cleanText(event.location));
+        bindOptionalText(dateText, formatDate(event.eventDate));
+        bindOptionalText(heroDeadlineText, event.getBrowseDeadlineText());
+        bindOptionalText(descriptionText, cleanText(event.description));
+        bindOptionalText(registrationOpenText, buildRegistrationOpenText(event.registrationOpen));
+        bindOptionalText(registrationDeadlineText, buildRegistrationDeadlineText(event.registrationDeadline));
+
+        updateRegistrationSectionVisibility();
+        applyHeroBackground(event.category);
+        bindEntrantCount(event);
+        bindOrganizer(event.organizerId);
+    }
+
+    private void bindOrganizer(String organizerId) {
+        if (TextUtils.isEmpty(organizerId)) {
+            organizerText.setVisibility(View.GONE);
+            return;
+        }
+
+        userController.getUserByDeviceId(organizerId, (User user, boolean success) -> {
+            if (!success || user == null || TextUtils.isEmpty(cleanText(user.getName()))) {
+                organizerText.setVisibility(View.GONE);
+                return;
+            }
+
+            organizerText.setVisibility(View.VISIBLE);
+            organizerText.setText(user.getName());
+        });
+    }
+
+    private void bindEntrantCount(Event event) {
+        if (event.waitingList == null || event.waitingList.list == null || event.waitingList.list.isEmpty()) {
+            entrantCountText.setVisibility(View.GONE);
+            return;
+        }
+
+        entrantCountText.setVisibility(View.VISIBLE);
+        entrantCountText.setText(getResources().getQuantityString(
+                R.plurals.event_detail_entrant_count,
+                event.waitingList.list.size(),
+                event.waitingList.list.size()
+        ));
+    }
+
+    private void bindOptionalText(TextView view, String value) {
+        if (TextUtils.isEmpty(cleanText(value))) {
+            view.setVisibility(View.GONE);
+            return;
+        }
+
+        view.setVisibility(View.VISIBLE);
+        view.setText(value);
+    }
+
+    private void updateRegistrationSectionVisibility() {
+        boolean hasRegistrationContent = registrationOpenText.getVisibility() == View.VISIBLE
+                || registrationDeadlineText.getVisibility() == View.VISIBLE;
+        registrationTitleText.setVisibility(hasRegistrationContent ? View.VISIBLE : View.GONE);
+    }
+
+    private void applyHeroBackground(String category) {
+        int backgroundRes = shouldUsePrimaryBackground(category)
+                ? R.drawable.bg_event_image_one
+                : R.drawable.bg_event_image_two;
+        heroImageFrame.setBackgroundResource(backgroundRes);
+    }
+
+    private boolean shouldUsePrimaryBackground(String category) {
+        String normalizedCategory = cleanText(category);
+        if (TextUtils.isEmpty(normalizedCategory)) {
+            return true;
+        }
+        return Math.abs(normalizedCategory.hashCode()) % 2 == 0;
+    }
+
+    private String buildRegistrationOpenText(Date registrationOpen) {
+        if (registrationOpen == null) {
+            return null;
+        }
+        return getString(R.string.event_detail_registration_opens, formatLongDate(registrationOpen));
+    }
+
+    private String buildRegistrationDeadlineText(Date registrationDeadline) {
+        if (registrationDeadline == null) {
+            return null;
+        }
+        return getString(R.string.event_detail_registration_closes, formatLongDate(registrationDeadline));
+    }
+
+    private String formatDate(Date date) {
+        if (date == null) {
+            return null;
+        }
+        return new SimpleDateFormat("MMMM d, yyyy", Locale.getDefault()).format(date);
+    }
+
+    private String formatLongDate(Date date) {
+        if (date == null) {
+            return null;
+        }
+        return new SimpleDateFormat("MMMM d, yyyy", Locale.getDefault()).format(date);
+    }
+
+    private String cleanText(String value) {
+        return value == null ? null : value.trim();
+    }
+
+    private void setLoading(boolean isLoading) {
+        loadingIndicator.setVisibility(isLoading ? View.VISIBLE : View.GONE);
+    }
+
+    private void showErrorState(String message) {
+        errorText.setVisibility(View.VISIBLE);
+        errorText.setText(message);
+    }
+}
