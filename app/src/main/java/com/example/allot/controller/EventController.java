@@ -9,6 +9,7 @@ import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.firestore.WriteBatch;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -203,6 +204,82 @@ public class EventController {
                 });
     }
 
+    /**
+     * Returns every event in Firestore regardless of status.
+     * Intended for admin use only — do not call from entrant/organizer flows.
+     */
+    public void getAllEvents(EventListCallback callback) {
+        database.collection("events")
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (!task.isSuccessful()) {
+                        Log.e(TAG, "getAllEvents: failed", task.getException());
+                        callback.onError(task.getException());
+                        return;
+                    }
+
+                    List<Event> events = new ArrayList<>();
+                    for (QueryDocumentSnapshot document : task.getResult()) {
+                        Event event = document.toObject(Event.class);
+                        if (event != null) {
+                            if (isBlank(event.eventId)) event.eventId = document.getId();
+                            events.add(event);
+                        }
+                    }
+
+                    Collections.sort(events, Comparator
+                            .comparingLong(this::getDeadlineSortValue)
+                            .thenComparingLong(this::getEventDateSortValue)
+                            .thenComparing(e -> safeString(e.title), String.CASE_INSENSITIVE_ORDER));
+
+                    callback.onCallback(events);
+                });
+    }
+
+    /**
+     * Deletes an event and scrubs all references to it from every user document.
+     * Cleans up: the event document, eventId from every user's myEvents and history.
+     * US 03.01.01
+     */
+    public void adminDeleteEvent(String eventId, OnCompleteListener<Boolean> listener) {
+        if (isBlank(eventId)) {
+            listener.onComplete(false, false);
+            return;
+        }
+
+        // Fetch all users so we can clean up their arrays in one batch
+        database.collection("users")
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (!task.isSuccessful()) {
+                        Log.e(TAG, "adminDeleteEvent: failed to fetch users", task.getException());
+                        listener.onComplete(false, false);
+                        return;
+                    }
+
+                    WriteBatch batch = database.batch();
+
+                    for (QueryDocumentSnapshot userDoc : task.getResult()) {
+                        batch.update(userDoc.getReference(),
+                                "myEvents", FieldValue.arrayRemove(eventId),
+                                "history",  FieldValue.arrayRemove(eventId));
+                    }
+
+                    // Delete the event document itself
+                    batch.delete(database.collection("events").document(eventId));
+
+                    batch.commit().addOnCompleteListener(commitTask -> {
+                        if (!commitTask.isSuccessful()) {
+                            Log.e(TAG, "adminDeleteEvent: batch commit failed", commitTask.getException());
+                            listener.onComplete(false, false);
+                            return;
+                        }
+                        Log.d(TAG, "adminDeleteEvent: " + eventId + " deleted.");
+                        listener.onComplete(true, true);
+                    });
+                });
+    }
+
     private List<Event> buildRegisteredEventList(QuerySnapshot querySnapshot, String deviceId) {
         List<Event> registeredEvents = new ArrayList<>();
 
@@ -379,4 +456,3 @@ public class EventController {
     }
 
 }
-

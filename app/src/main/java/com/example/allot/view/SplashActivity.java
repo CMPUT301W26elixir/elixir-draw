@@ -12,11 +12,10 @@ import com.example.allot.controller.UserController;
 import com.example.allot.model.User;
 
 public class SplashActivity extends AppCompatActivity {
-    public static final String EXTRA_REQUIRES_PROFILE_SETUP = "com.example.allot.REQUIRES_PROFILE_SETUP";
     private static final long MIN_SPLASH_DURATION_MS = 900L;
 
     private final Handler handler = new Handler(Looper.getMainLooper());
-    private long startedAtMs;
+    private long    startedAtMs;
     private boolean navigated;
 
     @Override
@@ -27,46 +26,68 @@ public class SplashActivity extends AppCompatActivity {
         startedAtMs = System.currentTimeMillis();
 
         UserController userController = new UserController(this);
+
         if (userController.isNewDeviceId()) {
-            navigateAfterDelay(true);
+            // Brand new device — go straight to profile setup
+            navigateAfterDelay(Destination.WELCOME);
             return;
         }
 
         userController.loadOrCreateUser((user, success) -> {
-            boolean requiresProfileSetup = !success || requiresProfileSetup(user);
-            navigateAfterDelay(requiresProfileSetup);
+            Destination destination = resolveDestination(user, success);
+            navigateAfterDelay(destination);
         });
     }
 
-    private void navigateAfterDelay(boolean requiresProfileSetup) {
-        if (navigated) {
-            return;
-        }
-
-        long elapsedMs = System.currentTimeMillis() - startedAtMs;
-        long remainingMs = Math.max(0L, MIN_SPLASH_DURATION_MS - elapsedMs);
-        handler.postDelayed(() -> openNextScreen(requiresProfileSetup), remainingMs);
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        handler.removeCallbacksAndMessages(null);
     }
 
-    private void openNextScreen(boolean requiresProfileSetup) {
-        if (navigated || isFinishing()) {
-            return;
+    private Destination resolveDestination(User user, boolean success) {
+        if (!success || user == null) {
+            return Destination.WELCOME;
         }
 
+        if (user.isAdmin()) {
+            return Destination.ADMIN;
+        }
+
+        if (requiresProfileSetup(user)) {
+            return Destination.WELCOME;
+        }
+
+        return Destination.MAIN;
+    }
+
+    private void navigateAfterDelay(Destination destination) {
+        if (navigated) return;
+
+        long elapsed   = System.currentTimeMillis() - startedAtMs;
+        long remaining = Math.max(0L, MIN_SPLASH_DURATION_MS - elapsed);
+        handler.postDelayed(() -> openDestination(destination), remaining);
+    }
+
+    private void openDestination(Destination destination) {
+        if (navigated || isFinishing()) return;
         navigated = true;
-        Intent intent = new Intent(
-                this,
-                requiresProfileSetup ? WelcomeActivity.class : MainActivity.class
-        );
+
+        Class<?> target;
+        switch (destination) {
+            case ADMIN:   target = AdminEventListActivity.class; break;
+            case WELCOME: target = WelcomeActivity.class;        break;
+            default:      target = MainActivity.class;           break;
+        }
+
+        Intent intent = new Intent(this, target);
+
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
         finish();
     }
 
     private boolean requiresProfileSetup(User user) {
-        if (user == null) {
-            return true;
-        }
-
         return isBlank(user.getFirstName())
                 || isBlank(user.getLastName())
                 || isBlank(user.getEmail());
@@ -74,5 +95,11 @@ public class SplashActivity extends AppCompatActivity {
 
     private boolean isBlank(String value) {
         return value == null || value.trim().isEmpty();
+    }
+
+    private enum Destination {
+        ADMIN,
+        WELCOME,
+        MAIN
     }
 }

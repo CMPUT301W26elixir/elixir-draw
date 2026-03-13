@@ -42,7 +42,10 @@ public class EventDetailActivity extends AppCompatActivity {
     private boolean isJoiningWaitlist;
     private boolean isLeavingWaitlist;
     private Event currentEvent;
+    private User currentUser;
     private boolean isCurrentUserOrganizer;
+
+    private MaterialButton adminDeleteEventButton;
 
     private FrameLayout heroImageFrame;
     private TextView heroDeadlineText;
@@ -91,12 +94,14 @@ public class EventDetailActivity extends AppCompatActivity {
         entrantCountText = findViewById(R.id.entrantCountText);
         errorText = findViewById(R.id.eventErrorText);
         loadingIndicator = findViewById(R.id.eventLoadingIndicator);
+        adminDeleteEventButton = findViewById(R.id.adminDeleteEventButton);
     }
 
     private void setupListeners() {
         ImageButton backButton = findViewById(R.id.backButton);
         backButton.setOnClickListener(view -> getOnBackPressedDispatcher().onBackPressed());
         joinWaitingListButton.setOnClickListener(view -> onWaitlistButtonPressed());
+        adminDeleteEventButton.setOnClickListener(view -> confirmAdminDelete());
     }
 
     private void bindFallbackContent() {
@@ -129,27 +134,52 @@ public class EventDetailActivity extends AppCompatActivity {
         }
 
         setLoading(true);
+
+        // Load event and user in parallel; bind UI once both have returned
+        final Event[] loadedEvent = {null};
+        final User[]  loadedUser  = {null};
+        final boolean[] eventDone = {false};
+        final boolean[] userDone  = {false};
+
         eventController.getEventById(currentEventId, new EventController.EventCallback() {
             @Override
             public void onCallback(Event event) {
-                setLoading(false);
-                if (event == null) {
-                    showErrorState(getString(R.string.event_detail_not_found));
-                    return;
-                }
-
-                currentEvent = event;
-                isCurrentUserOrganizer = isCurrentUserOrganizer(event);
-                errorText.setVisibility(View.GONE);
-                bindEvent(event);
+                loadedEvent[0] = event;
+                eventDone[0]   = true;
+                if (userDone[0]) onBothLoaded(loadedEvent[0], loadedUser[0]);
             }
-
             @Override
             public void onError(Exception exception) {
                 setLoading(false);
                 showErrorState(getString(R.string.event_detail_error));
             }
         });
+
+        userController.loadOrCreateUser((user, success) -> {
+            loadedUser[0] = (success && user != null) ? user : null;
+            userDone[0]   = true;
+            if (eventDone[0]) onBothLoaded(loadedEvent[0], loadedUser[0]);
+        });
+    }
+
+    private void onBothLoaded(Event event, User user) {
+        setLoading(false);
+
+        if (event == null) {
+            showErrorState(getString(R.string.event_detail_not_found));
+            return;
+        }
+
+        currentEvent          = event;
+        currentUser           = user;
+        isCurrentUserOrganizer = isCurrentUserOrganizer(event);
+        errorText.setVisibility(View.GONE);
+
+        // Show the admin delete button only for admins
+        boolean isAdmin = user != null && user.isAdmin();
+        adminDeleteEventButton.setVisibility(isAdmin ? View.VISIBLE : View.GONE);
+
+        bindEvent(event);
     }
 
     private void bindEvent(Event event) {
@@ -249,6 +279,53 @@ public class EventDetailActivity extends AppCompatActivity {
             return;
         }
         showLotteryCriteriaDialog();
+    }
+
+    private void confirmAdminDelete() {
+        if (TextUtils.isEmpty(currentEventId)) return;
+        String title = currentEvent != null ? currentEvent.title : null;
+
+        android.app.Dialog dialog = new android.app.Dialog(this);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        View dialogView = LayoutInflater.from(this)
+                .inflate(R.layout.dialog_admin_delete_event, null);
+        dialog.setContentView(dialogView);
+        dialog.setCancelable(true);
+
+        android.widget.TextView titleText = dialogView.findViewById(R.id.deleteEventTitleText);
+        android.widget.ImageView closeBtn = dialogView.findViewById(R.id.closeDeleteEventDialogButton);
+        android.widget.Button    cancelBtn = dialogView.findViewById(R.id.cancelDeleteEventButton);
+        android.widget.Button    confirmBtn = dialogView.findViewById(R.id.confirmDeleteEventButton);
+
+        titleText.setText(title != null
+                ? title : getString(R.string.admin_delete_event_title_fallback));
+
+        closeBtn.setOnClickListener(v -> dialog.dismiss());
+        cancelBtn.setOnClickListener(v -> dialog.dismiss());
+        confirmBtn.setOnClickListener(v -> {
+            cancelBtn.setEnabled(false);
+            confirmBtn.setEnabled(false);
+            eventController.adminDeleteEvent(currentEventId, (result, success) -> {
+                if (!success || result == null || !result) {
+                    cancelBtn.setEnabled(true);
+                    confirmBtn.setEnabled(true);
+                    Toast.makeText(this,
+                            R.string.admin_delete_event_failure, Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                dialog.dismiss();
+                Toast.makeText(this,
+                        R.string.admin_delete_event_success, Toast.LENGTH_SHORT).show();
+                finish();
+            });
+        });
+
+        dialog.show();
+        Window window = dialog.getWindow();
+        if (window != null) {
+            window.setLayout(dpToPx(342), dpToPx(342));
+            window.setBackgroundDrawableResource(android.R.color.transparent);
+        }
     }
 
     private void showLotteryCriteriaDialog() {

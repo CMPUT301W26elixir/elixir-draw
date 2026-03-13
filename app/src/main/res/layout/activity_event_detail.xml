@@ -64,6 +64,7 @@
                 android:padding="11dp"
                 android:src="@drawable/ic_heart_outline"
                 app:tint="@color/text_primary" />
+
         </LinearLayout>
     </FrameLayout>
 
@@ -105,6 +106,7 @@
                 android:text="@string/default_price"
                 android:textColor="@color/text_primary"
                 android:textSize="24sp" />
+
         </LinearLayout>
 
         <LinearLayout
@@ -140,6 +142,7 @@
                 android:fontFamily="@font/varela_round_regular"
                 android:textColor="#A6A8A5"
                 android:textSize="14sp" />
+
         </LinearLayout>
 
         <View
@@ -216,12 +219,14 @@
                     android:textColor="#A6A8A5"
                     android:textSize="14sp"
                     android:visibility="gone" />
+
             </LinearLayout>
         </ScrollView>
 
+        <!-- Bottom action container -->
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="165dp"
+            android:layout_height="wrap_content"
             android:background="@drawable/bg_waitlist_container"
             android:gravity="center_horizontal"
             android:orientation="vertical"
@@ -241,6 +246,7 @@
                 android:textSize="12sp"
                 android:visibility="gone" />
 
+            <!-- Normal join/leave/manage button (hidden for admins) -->
             <TextView
                 android:id="@+id/joinWaitingListButton"
                 android:layout_width="match_parent"
@@ -254,6 +260,23 @@
                 android:textColor="#1D1D1D"
                 android:textSize="20sp" />
 
+            <!-- Admin-only delete button (hidden for non-admins) -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/adminDeleteEventButton"
+                android:layout_width="match_parent"
+                android:layout_height="45dp"
+                android:layout_marginTop="10dp"
+                android:fontFamily="@font/varela_round_regular"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
+                android:text="@string/admin_delete_event_button"
+                android:textAllCaps="false"
+                android:textColor="#FFFF7E5D"
+                android:textSize="16sp"
+                android:visibility="gone"
+                app:backgroundTint="#FF9E4141"
+                app:cornerRadius="8dp" />
+
             <TextView
                 android:id="@+id/entrantCountText"
                 android:layout_width="wrap_content"
@@ -263,7 +286,9 @@
                 android:textColor="#A6A8A5"
                 android:textSize="16sp"
                 android:visibility="gone" />
+
         </LinearLayout>
+
     </LinearLayout>
 
 </LinearLayout>

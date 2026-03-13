@@ -101,6 +101,10 @@ public class User {
         this.role = role;
     }
 
+    public boolean isAdmin() {
+        return "admin".equals(role);
+    }
+
     public void addHistory(String eventID){
         this.history.add(eventID);
     }

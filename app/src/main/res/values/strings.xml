@@ -56,13 +56,7 @@
     <string name="delete_profile_dialog_confirm">Delete Profile</string>
     <string name="delete_profile_success">Profile deleted.</string>
     <string name="delete_profile_failure">Could not delete your profile. Please try again.</string>
-    <string name="delete_profile_dialog_message">Deleting your profile will permanently remove:
-- Your personal information
-- Your event history
-- Your waiting list entries
-- Any active invitations
-
-This action cannot be undone.</string>
+    <string name="delete_profile_dialog_message">Deleting your profile will permanently remove:\n- Your personal information\n- Your event history\n- Your waiting list entries\n- Any active invitations\n\nThis action cannot be undone.</string>
     <string name="event_detail_back">Go back</string>
     <string name="event_detail_join_waiting_list">Join waiting list</string>
     <string name="event_detail_leave_waiting_list">Leave waiting list</string>
@@ -85,16 +79,11 @@ This action cannot be undone.</string>
     <string name="lottery_criteria_close">Close lottery criteria dialog</string>
     <string name="lottery_criteria_confirm">Confirm</string>
     <string name="lottery_criteria_eligibility_title">Eligibility</string>
-    <string name="lottery_criteria_eligibility_body">- All entrants who join before registration closes are eligible
-- Registration closes on %1$s</string>
+    <string name="lottery_criteria_eligibility_body">- All entrants who join before registration closes are eligible\n- Registration closes on %1$s</string>
     <string name="lottery_criteria_selection_title">Selection Process</string>
-    <string name="lottery_criteria_selection_body">- %1$d participants will be selected
-- Selection is conducted through a randomized system draw
-- The draw occurs after registration closes</string>
+    <string name="lottery_criteria_selection_body">- %1$d participants will be selected\n- Selection is conducted through a randomized system draw\n- The draw occurs after registration closes</string>
     <string name="lottery_criteria_after_title">After Selection</string>
-    <string name="lottery_criteria_after_body">- Selected entrants will be notified in-app
-- Invitations must be accepted within 48 hours
-- Unclaimed or declined spots will be reassigned</string>
+    <string name="lottery_criteria_after_body">- Selected entrants will be notified in-app\n- Invitations must be accepted within 48 hours\n- Unclaimed or declined spots will be reassigned</string>
     <string name="my_events_registered">Registered</string>
     <string name="my_events_hosting">Hosting</string>
     <string name="my_events_section_selected">Selected:</string>
@@ -159,16 +148,21 @@ This action cannot be undone.</string>
     <string name="create_event_save_success">Event created.</string>
     <string name="create_event_save_failure">Could not create event. Please try again.</string>
 
+    <string name="admin_screen_title">Admin</string>
+    <string name="admin_search_hint">Search events…</string>
+    <string name="admin_access_denied">Access denied.</string>
+    <string name="admin_no_events">No events found.</string>
+    <string name="admin_delete_event_button">Delete event</string>
+    <string name="admin_delete_event_dialog_title">Delete event?</string>
+    <string name="admin_delete_event_dialog_message">This will permanently remove the event and all associated waiting lists.\n\nThis action cannot be undone.</string>
+    <string name="admin_delete_event_dialog_cancel">Keep event</string>
+    <string name="admin_delete_event_dialog_confirm">Yes, delete</string>
+    <string name="admin_delete_event_title_fallback">This event</string>
+    <string name="admin_delete_event_success">Event deleted.</string>
+    <string name="admin_delete_event_failure">Could not delete event. Please try again.</string>
+
     <plurals name="event_detail_entrant_count">
         <item quantity="one">%d Entrant</item>
         <item quantity="other">%d Entrants</item>
     </plurals>
 </resources>
-
-
-
-
-
-
-
-
