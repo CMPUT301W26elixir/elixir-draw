@@ -79,6 +79,23 @@ This action cannot be undone.</string>
     <string name="manage_event_not_found">This event is no longer available.</string>
     <string name="manage_event_save_success">Event updated.</string>
     <string name="manage_event_save_failure">Could not save changes. Please try again.</string>
+    <string name="manage_lottery_title">Manage Lottery</string>
+    <string name="manage_lottery_draw_date">Draw Date:</string>
+    <string name="manage_lottery_draw_date_hint">February 13, 2026</string>
+    <string name="manage_lottery_attendees">Number of attendees to select:</string>
+    <string name="manage_lottery_attendees_hint">20</string>
+    <string name="manage_lottery_force_start">Force Start Draw</string>
+    <string name="manage_lottery_loading">Loading entrants...</string>
+    <string name="manage_lottery_empty">No entrants are waiting for this draw yet.</string>
+    <string name="manage_lottery_join_time_unavailable">Join time unavailable</string>
+    <string name="manage_lottery_load_failure">Could not load this lottery. Please try again.</string>
+    <string name="manage_lottery_not_found">This event is no longer available.</string>
+    <string name="manage_lottery_validation_required">Please fill out both fields.</string>
+    <string name="manage_lottery_validation_date">Use dates like February 13, 2026.</string>
+    <string name="manage_lottery_validation_attendees">Enter a valid attendee count.</string>
+    <string name="manage_lottery_draw_success">Draw started.</string>
+    <string name="manage_lottery_draw_failure">Could not start the draw. Please try again.</string>
+    <string name="manage_lottery_post_draw_coming_soon">Post-draw view coming soon.</string>
     <string name="event_detail_waitlist_joined_message">You are on the waiting list for this event.</string>
     <string name="event_detail_registration_opens">Registration opens: %1$s</string>
     <string name="event_detail_registration_closes">Registration closes: %1$s</string>
@@ -175,7 +192,6 @@ This action cannot be undone.</string>
         <item quantity="other">%d Entrants</item>
     </plurals>
 </resources>
-
 
 
 

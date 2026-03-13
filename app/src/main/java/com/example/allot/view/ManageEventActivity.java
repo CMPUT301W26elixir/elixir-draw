@@ -47,8 +47,8 @@ public class ManageEventActivity extends AppCompatActivity {
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("MMM d, yyyy", Locale.getDefault());
     private FirebaseFirestore database;
 
-    private BottomNavBarView bottomNavBar;
     private View eventImageBackground;
+    private TextView entrantsLotteryButton;
     private TextView summaryTitleText;
     private TextView summaryLocationText;
     private TextView summaryDateText;
@@ -68,6 +68,7 @@ public class ManageEventActivity extends AppCompatActivity {
     private EditText registrationEndYearInput;
     private TextView saveChangesButton;
     private String currentEventId;
+    private Event currentEvent;
     private String currentCategory;
     private String originalTitle = "";
     private String originalLocation = "";
@@ -80,6 +81,7 @@ public class ManageEventActivity extends AppCompatActivity {
     private boolean isBindingEvent;
     private boolean isLoadingEvent;
     private boolean isSaving;
+    private boolean shouldRefreshOnResume;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -95,7 +97,6 @@ public class ManageEventActivity extends AppCompatActivity {
         setupMonthSpinner(registrationStartMonthSpinner);
         setupMonthSpinner(registrationEndMonthSpinner);
         setupHeader();
-        setupBottomNav();
         setupListeners();
         populateUiFromIntent();
         captureOriginalState();
@@ -110,8 +111,8 @@ public class ManageEventActivity extends AppCompatActivity {
     }
 
     private void bindViews() {
-        bottomNavBar = findViewById(R.id.bottomNavBar);
         eventImageBackground = findViewById(R.id.eventImageBackground);
+        entrantsLotteryButton = findViewById(R.id.entrantsLotteryButton);
         summaryTitleText = findViewById(R.id.summaryTitleText);
         summaryLocationText = findViewById(R.id.summaryLocationText);
         summaryDateText = findViewById(R.id.summaryDateText);
@@ -135,10 +136,6 @@ public class ManageEventActivity extends AppCompatActivity {
     private void setupHeader() {
         ImageButton backButton = findViewById(R.id.backButton);
         backButton.setOnClickListener(view -> getOnBackPressedDispatcher().onBackPressed());
-    }
-
-    private void setupBottomNav() {
-        bottomNavBar.setSelectedTab(BottomNavBarView.Tab.MY_EVENTS);
     }
 
     private void setupListeners() {
@@ -180,6 +177,7 @@ public class ManageEventActivity extends AppCompatActivity {
         registrationStartMonthSpinner.setOnItemSelectedListener(dateSelectionListener);
         registrationEndMonthSpinner.setOnItemSelectedListener(dateSelectionListener);
 
+        entrantsLotteryButton.setOnClickListener(view -> openLotteryScreen());
         saveChangesButton.setOnClickListener(view -> saveChanges());
     }
 
@@ -287,6 +285,7 @@ public class ManageEventActivity extends AppCompatActivity {
 
     private void bindEvent(Event event) {
         isBindingEvent = true;
+        currentEvent = event;
 
         currentCategory = cleanText(event.category);
         summaryTitleText.setText(defaultText(cleanText(event.title), getString(R.string.default_event_name)));
@@ -312,6 +311,37 @@ public class ManageEventActivity extends AppCompatActivity {
         isBindingEvent = false;
         captureOriginalState();
         updateSaveButtonState();
+    }
+
+    private void openLotteryScreen() {
+        if (TextUtils.isEmpty(currentEventId)) {
+            Toast.makeText(this, R.string.manage_lottery_load_failure, Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (currentEvent != null && hasDrawResults(currentEvent)) {
+            Toast.makeText(this, R.string.manage_lottery_post_draw_coming_soon, Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        shouldRefreshOnResume = true;
+        startActivity(new android.content.Intent(this, ManageLotteryActivity.class)
+                .putExtra(ManageLotteryActivity.EXTRA_EVENT_ID, currentEventId));
+        overridePendingTransition(0, 0);
+    }
+
+    private boolean hasDrawResults(Event event) {
+        return (event.chosen != null && !event.chosen.isEmpty())
+                || (event.waitingList != null && event.waitingList.chosen != null && !event.waitingList.chosen.isEmpty());
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (shouldRefreshOnResume && !TextUtils.isEmpty(currentEventId)) {
+            shouldRefreshOnResume = false;
+            loadEventFromFirestore();
+        }
     }
 
     private void clearDateFields(Spinner monthSpinner, EditText dayInput, EditText yearInput) {

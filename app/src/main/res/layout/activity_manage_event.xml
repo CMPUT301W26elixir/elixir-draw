@@ -122,10 +122,13 @@
             </LinearLayout>
 
             <TextView
+                android:id="@+id/entrantsLotteryButton"
                 android:layout_width="match_parent"
                 android:layout_height="45dp"
                 android:layout_marginTop="18dp"
                 android:background="@drawable/bg_waitlist_button"
+                android:clickable="true"
+                android:focusable="true"
                 android:fontFamily="@font/varela_round_regular"
                 android:gravity="center"
                 android:text="@string/manage_event_lottery_section"
@@ -491,13 +494,5 @@
                 android:textSize="20sp" />
         </LinearLayout>
     </ScrollView>
-
-    <com.example.allot.view.BottomNavBarView
-        android:id="@+id/bottomNavBar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="5dp"
-        android:layout_marginEnd="5dp"
-        android:layout_marginBottom="8dp" />
 
 </LinearLayout>

@@ -38,6 +38,9 @@
             android:name=".view.ManageEventActivity"
             android:exported="false" />
         <activity
+            android:name=".view.ManageLotteryActivity"
+            android:exported="false" />
+        <activity
             android:name=".view.ProfileActivity"
             android:exported="false" />
         <activity
