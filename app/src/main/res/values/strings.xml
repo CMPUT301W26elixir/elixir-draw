@@ -113,10 +113,31 @@ This action cannot be undone.</string>
     <string name="my_events_empty_completed">No completed events yet.</string>
     <string name="my_events_create_event">Create Event</string>
 
+    <string name="create_event_title">Create Event</string>
+    <string name="create_event_name_label">Event Name *</string>
+    <string name="create_event_name_hint"></string>
+    <string name="create_event_location_label">Location *</string>
+    <string name="create_event_location_hint"></string>
+    <string name="create_event_start_date_label">Start Date *</string>
+    <string name="create_event_start_date_hint"></string>
+    <string name="create_event_price_label">Price *</string>
+    <string name="create_event_price_hint"></string>
+    <string name="create_event_description_label">Description *</string>
+    <string name="create_event_description_hint"></string>
+    <string name="create_event_participants_label">Number of Participants *</string>
+    <string name="create_event_participants_hint"></string>
+    <string name="create_event_registration_start_label">Registration start *</string>
+    <string name="create_event_registration_start_hint"></string>
+    <string name="create_event_registration_end_label">Registration end *</string>
+    <string name="create_event_registration_end_hint"></string>
+    <string name="create_event_next">Next</string>
+
     <plurals name="event_detail_entrant_count">
         <item quantity="one">%d Entrant</item>
         <item quantity="other">%d Entrants</item>
     </plurals>
 </resources>
+
+
 
 

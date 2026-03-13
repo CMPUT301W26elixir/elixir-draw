@@ -84,7 +84,7 @@ public class MyEventsActivity extends AppCompatActivity {
     private void setupTopTabs() {
         registeredTabText.setOnClickListener(view -> showRegisteredTab());
         hostingTabText.setOnClickListener(view -> showHostingTab());
-        createEventButton.setOnClickListener(view -> { });
+        createEventButton.setOnClickListener(view -> openCreateEventScreen());
     }
 
     private void setupBottomNav() {
@@ -380,6 +380,11 @@ public class MyEventsActivity extends AppCompatActivity {
         finish();
     }
 
+    private void openCreateEventScreen() {
+        startActivity(new Intent(this, CreateEventActivity.class));
+        overridePendingTransition(0, 0);
+    }
+
     private int dpToPx(int dp) {
         float density = getResources().getDisplayMetrics().density;
         return Math.round(dp * density);
@@ -397,6 +402,8 @@ public class MyEventsActivity extends AppCompatActivity {
         HOSTING
     }
 }
+
+
 
 
 
