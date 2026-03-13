@@ -14,4 +14,7 @@
     <color name="favorite_bg">#7A4A5058</color>
     <color name="event_image_one">#B88B69</color>
     <color name="event_image_two">#42566F</color>
+    <color name="bottom_nav_bg">#FF020408</color>
+    <color name="bottom_nav_selected">#FF8D93A1</color>
+    <color name="bottom_nav_unselected">#FFF6F7F9</color>
 </resources>

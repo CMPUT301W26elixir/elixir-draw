@@ -35,4 +35,9 @@
     <string name="browse_state_loading">Loading events...</string>
     <string name="browse_state_empty">No events match your search.</string>
     <string name="browse_state_error">Could not load events. Please try again.</string>
+    <string name="nav_explore">Explore</string>
+    <string name="nav_saved">Saved</string>
+    <string name="nav_my_events">My Events</string>
+    <string name="nav_scan">Scan</string>
+    <string name="nav_profile">Profile</string>
 </resources>
