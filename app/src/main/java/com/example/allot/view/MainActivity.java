@@ -14,8 +14,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.allot.R;
-import com.example.allot.controller.UserController;
 import com.example.allot.controller.EventController;
+import com.example.allot.controller.UserController;
 import com.example.allot.model.Event;
 
 import java.util.ArrayList;
@@ -45,7 +45,7 @@ public class MainActivity extends AppCompatActivity {
         stateText = findViewById(R.id.stateText);
         bottomNavBar = findViewById(R.id.bottomNavBar);
 
-        eventListAdapter = new EventListAdapter(new ArrayList<>());
+        eventListAdapter = new EventListAdapter(new ArrayList<>(), this::openEventDetailScreen);
         recyclerView.setAdapter(eventListAdapter);
         bottomNavBar.setSelectedTab(BottomNavBarView.Tab.EXPLORE);
         bottomNavBar.setOnTabClickListener(BottomNavBarView.Tab.PROFILE,
@@ -71,6 +71,22 @@ public class MainActivity extends AppCompatActivity {
     private void openProfileScreen() {
         startActivity(new Intent(MainActivity.this, ProfileActivity.class));
         overridePendingTransition(0, 0);
+    }
+
+    private void openEventDetailScreen(EventListItem eventItem) {
+        if (eventItem == null || eventItem.eventId == null || eventItem.eventId.trim().isEmpty()) {
+            return;
+        }
+
+        Intent intent = new Intent(this, EventDetailActivity.class);
+        intent.putExtra(EventDetailActivity.EXTRA_EVENT_ID, eventItem.eventId);
+        intent.putExtra(EventDetailActivity.EXTRA_EVENT_TITLE, eventItem.title);
+        intent.putExtra(EventDetailActivity.EXTRA_EVENT_LOCATION, eventItem.street);
+        intent.putExtra(EventDetailActivity.EXTRA_EVENT_DATE, eventItem.date);
+        intent.putExtra(EventDetailActivity.EXTRA_EVENT_PRICE, eventItem.price);
+        intent.putExtra(EventDetailActivity.EXTRA_EVENT_DEADLINE, eventItem.daysLeft);
+        intent.putExtra(EventDetailActivity.EXTRA_EVENT_CATEGORY, eventItem.category);
+        startActivity(intent);
     }
 
     private void setupSearchInput() {

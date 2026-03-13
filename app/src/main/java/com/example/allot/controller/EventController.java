@@ -4,6 +4,7 @@ import android.util.Log;
 
 import com.example.allot.common.OnCompleteListener;
 import com.example.allot.model.Event;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
@@ -46,6 +47,28 @@ public class EventController {
                             });
                 });
     }
+    public void joinWaitingList(String eventId, String deviceId, OnCompleteListener<Boolean> listener) {
+        database.collection("events")
+                .document(eventId)
+                .update("waitingList.list", FieldValue.arrayUnion(deviceId))
+                .addOnSuccessListener(unused -> listener.onComplete(true, true))
+                .addOnFailureListener(exception -> {
+                    Log.e(TAG, "Failed to join waiting list for event " + eventId, exception);
+                    listener.onComplete(false, false);
+                });
+    }
+
+    public void leaveWaitingList(String eventId, String deviceId, OnCompleteListener<Boolean> listener) {
+        database.collection("events")
+                .document(eventId)
+                .update("waitingList.list", FieldValue.arrayRemove(deviceId))
+                .addOnSuccessListener(unused -> listener.onComplete(true, true))
+                .addOnFailureListener(exception -> {
+                    Log.e(TAG, "Failed to leave waiting list for event " + eventId, exception);
+                    listener.onComplete(false, false);
+                });
+    }
+
     /**
      * Removes an event from Firestore.
      * Used by organizers to delete their event.
@@ -119,6 +142,32 @@ public class EventController {
         getFilteredOpenEvents("", category, callback);
     }
 
+    public void getEventById(String eventId, EventCallback callback) {
+        database.collection("events")
+                .document(eventId)
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (!task.isSuccessful()) {
+                        Exception exception = task.getException();
+                        Log.e(TAG, "Error getting event " + eventId, exception);
+                        callback.onError(exception);
+                        return;
+                    }
+
+                    DocumentSnapshot document = task.getResult();
+                    if (document == null || !document.exists()) {
+                        callback.onCallback(null);
+                        return;
+                    }
+
+                    Event event = document.toObject(Event.class);
+                    if (event != null && isBlank(event.eventId)) {
+                        event.eventId = document.getId();
+                    }
+                    callback.onCallback(event);
+                });
+    }
+
     public void getFilteredOpenEvents(String searchTerm, String category, EventListCallback callback) {
         database.collection("events")
                 .whereEqualTo("status", OPEN_STATUS)
@@ -142,6 +191,13 @@ public class EventController {
     // Waits for internet to finish
     public interface EventListCallback {
         void onCallback(List<Event> events);
+
+        default void onError(Exception exception) {
+        }
+    }
+
+    public interface EventCallback {
+        void onCallback(Event event);
 
         default void onError(Exception exception) {
         }

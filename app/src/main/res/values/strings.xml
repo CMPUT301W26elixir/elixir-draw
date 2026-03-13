@@ -63,5 +63,39 @@
 - Any active invitations
 
 This action cannot be undone.</string>
-</resources>
+    <string name="event_detail_back">Go back</string>
+    <string name="event_detail_join_waiting_list">Join waiting list</string>
+    <string name="event_detail_leave_waiting_list">Leave waiting list</string>
+    <string name="event_detail_waitlist_joined_message">You are on the waiting list for this event.</string>
+    <string name="event_detail_registration_opens">Registration opens: %1$s</string>
+    <string name="event_detail_registration_closes">Registration closes: %1$s</string>
+    <string name="event_detail_registration_tba">TBA</string>
+    <string name="event_detail_address_tba">Address TBA</string>
+    <string name="event_detail_date_tba">Date TBA</string>
+    <string name="event_detail_organizer_tba">Organizer TBA</string>
+    <string name="event_detail_error">Could not load this event right now.</string>
+    <string name="event_detail_not_found">This event is no longer available.</string>
+    <string name="event_detail_join_success">You joined the waiting list.</string>
+    <string name="event_detail_join_failure">Could not join the waiting list. Please try again.</string>
+    <string name="event_detail_leave_success">You left the waiting list.</string>
+    <string name="event_detail_leave_failure">Could not leave the waiting list. Please try again.</string>
+    <string name="lottery_criteria_title">Lottery Criteria</string>
+    <string name="lottery_criteria_close">Close lottery criteria dialog</string>
+    <string name="lottery_criteria_confirm">Confirm</string>
+    <string name="lottery_criteria_eligibility_title">Eligibility</string>
+    <string name="lottery_criteria_eligibility_body">- All entrants who join before registration closes are eligible
+- Registration closes on %1$s</string>
+    <string name="lottery_criteria_selection_title">Selection Process</string>
+    <string name="lottery_criteria_selection_body">- %1$d participants will be selected
+- Selection is conducted through a randomized system draw
+- The draw occurs after registration closes</string>
+    <string name="lottery_criteria_after_title">After Selection</string>
+    <string name="lottery_criteria_after_body">- Selected entrants will be notified in-app
+- Invitations must be accepted within 48 hours
+- Unclaimed or declined spots will be reassigned</string>
 
+    <plurals name="event_detail_entrant_count">
+        <item quantity="one">%d Entrant</item>
+        <item quantity="other">%d Entrants</item>
+    </plurals>
+</resources>

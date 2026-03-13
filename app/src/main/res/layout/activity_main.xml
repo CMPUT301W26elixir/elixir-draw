@@ -28,7 +28,7 @@
                 android:layout_width="20dp"
                 android:layout_height="20dp"
                 android:src="@android:drawable/ic_menu_search"
-                android:tint="#A9ABA8" />
+                app:tint="#A9ABA8" />
 
             <EditText
                 android:id="@+id/searchInput"
@@ -57,7 +57,7 @@
                     android:layout_height="20dp"
                     android:layout_gravity="center"
                     android:src="@android:drawable/ic_menu_sort_by_size"
-                    android:tint="#A9ABA8" />
+                    app:tint="#A9ABA8" />
             </FrameLayout>
         </LinearLayout>
 

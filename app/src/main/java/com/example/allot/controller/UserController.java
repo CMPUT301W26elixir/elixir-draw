@@ -257,6 +257,9 @@ public class UserController {
         return new DeviceIdResult(newDeviceId, true);
     }
 
+    public String getCurrentDeviceId() {
+        return deviceId;
+    }
     public boolean isNewDeviceId() {
         return newDeviceId;
     }
@@ -341,3 +344,4 @@ public class UserController {
         }
     }
 }
+
