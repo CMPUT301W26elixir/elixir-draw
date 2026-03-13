@@ -66,6 +66,8 @@ This action cannot be undone.</string>
     <string name="event_detail_back">Go back</string>
     <string name="event_detail_join_waiting_list">Join waiting list</string>
     <string name="event_detail_leave_waiting_list">Leave waiting list</string>
+    <string name="event_detail_manage_event">Manage Event</string>
+    <string name="event_detail_manage_event_coming_soon">Manage Event coming soon.</string>
     <string name="event_detail_waitlist_joined_message">You are on the waiting list for this event.</string>
     <string name="event_detail_registration_opens">Registration opens: %1$s</string>
     <string name="event_detail_registration_closes">Registration closes: %1$s</string>

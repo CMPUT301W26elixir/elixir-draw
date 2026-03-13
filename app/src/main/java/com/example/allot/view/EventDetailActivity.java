@@ -42,6 +42,7 @@ public class EventDetailActivity extends AppCompatActivity {
     private boolean isJoiningWaitlist;
     private boolean isLeavingWaitlist;
     private Event currentEvent;
+    private boolean isCurrentUserOrganizer;
 
     private FrameLayout heroImageFrame;
     private TextView heroDeadlineText;
@@ -99,6 +100,7 @@ public class EventDetailActivity extends AppCompatActivity {
     }
 
     private void bindFallbackContent() {
+        isCurrentUserOrganizer = false;
         titleText.setText(getIntent().getStringExtra(EXTRA_EVENT_TITLE));
         priceText.setText(getIntent().getStringExtra(EXTRA_EVENT_PRICE));
         locationText.setVisibility(View.VISIBLE);
@@ -137,6 +139,7 @@ public class EventDetailActivity extends AppCompatActivity {
                 }
 
                 currentEvent = event;
+                isCurrentUserOrganizer = isCurrentUserOrganizer(event);
                 errorText.setVisibility(View.GONE);
                 bindEvent(event);
             }
@@ -203,6 +206,13 @@ public class EventDetailActivity extends AppCompatActivity {
     }
 
     private void bindWaitlistState(Event event) {
+        if (isCurrentUserOrganizer(event)) {
+            waitlistStatusText.setVisibility(View.GONE);
+            joinWaitingListButton.setText(R.string.event_detail_manage_event);
+            joinWaitingListButton.setBackgroundResource(R.drawable.bg_waitlist_button);
+            return;
+        }
+
         boolean isOnWaitingList = isCurrentUserOnWaitingList(event);
         waitlistStatusText.setVisibility(isOnWaitingList ? View.VISIBLE : View.GONE);
         joinWaitingListButton.setText(isOnWaitingList
@@ -220,7 +230,20 @@ public class EventDetailActivity extends AppCompatActivity {
         return event.waitingList.list.contains(userController.getCurrentDeviceId());
     }
 
+    private boolean isCurrentUserOrganizer(Event event) {
+        if (event == null) {
+            return false;
+        }
+        String currentDeviceId = userController.getCurrentDeviceId();
+        return !TextUtils.isEmpty(currentDeviceId) && currentDeviceId.equals(event.organizerId);
+    }
+
     private void onWaitlistButtonPressed() {
+        if (isCurrentUserOrganizer) {
+            Toast.makeText(this, R.string.event_detail_manage_event_coming_soon, Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         if (isCurrentUserOnWaitingList(currentEvent)) {
             leaveWaitingList();
             return;
