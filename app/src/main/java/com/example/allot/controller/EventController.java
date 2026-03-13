@@ -69,6 +69,39 @@ public class EventController {
                     Log.e(TAG, "Failed to remove event: " + e.getMessage());
                 });
     }
+
+    /**
+     * Adds a user to the waiting list for an event
+     * and stores the event in the user's history.
+     */
+    public void joinEvent(String eventId, String userId, OnCompleteListener<Boolean> listener) {
+
+        // First add the user to the event waiting list
+        database.collection("events").document(eventId)
+                .update("waitingList", FieldValue.arrayUnion(userId))
+                .addOnCompleteListener(task -> {
+
+                    if (!task.isSuccessful()) {
+                        Log.e(TAG, "Failed to join waiting list", task.getException());
+                        listener.onComplete(false, false);
+                        return;
+                    }
+
+                    // Now add the event to the user's joined events/history
+                    database.collection("users").document(userId)
+                            .update("history", FieldValue.arrayUnion(eventId))
+                            .addOnCompleteListener(userTask -> {
+
+                                if (userTask.isSuccessful()) {
+                                    Log.d(TAG, "User joined event successfully.");
+                                    listener.onComplete(true, true);
+                                } else {
+                                    Log.e(TAG, "Failed to update user history", userTask.getException());
+                                    listener.onComplete(false, false);
+                                }
+                            });
+                });
+    }
     /**
      * US 01.01.03: Get a list of events that are open for joining for entrant
      * Search is filtered client-side because Firestore does not support
@@ -230,4 +263,5 @@ public class EventController {
     private boolean isBlank(String value) {
         return safeString(value).trim().isEmpty();
     }
+
 }

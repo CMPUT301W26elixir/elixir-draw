@@ -107,4 +107,15 @@ public class User {
     public ArrayList<String> getHistory(){
         return this.history;
     }
+    public void addEvents(String eventID){
+        this.myEvents.add(eventID);
+        if (myEvents.size() == 1){
+            this.role = "organizer";
+        }
+    }
+    public ArrayList<String> getEvents(){
+        return this.myEvents;
+    }
+
+
 }
