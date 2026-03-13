@@ -118,37 +118,25 @@
             <TextView
                 android:id="@+id/eventLocationText"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:drawablePadding="8dp"
-                android:drawableStart="@android:drawable/ic_menu_mylocation"
-                android:drawableTint="#A6A8A5"
-                android:fontFamily="@font/varela_round_regular"
+                android:layout_height="wrap_content"                android:fontFamily="@font/varela_round_regular"
                 android:textColor="#A6A8A5"
-                android:textSize="18sp" />
+                android:textSize="14sp" />
 
             <TextView
                 android:id="@+id/eventDateText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
-                android:drawablePadding="8dp"
-                android:drawableStart="@android:drawable/ic_menu_my_calendar"
-                android:drawableTint="#A6A8A5"
-                android:fontFamily="@font/varela_round_regular"
+                android:layout_marginTop="6dp"                android:fontFamily="@font/varela_round_regular"
                 android:textColor="#A6A8A5"
-                android:textSize="18sp" />
+                android:textSize="14sp" />
 
             <TextView
                 android:id="@+id/eventOrganizerText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
-                android:drawablePadding="8dp"
-                android:drawableStart="@android:drawable/ic_menu_myplaces"
-                android:drawableTint="#A6A8A5"
-                android:fontFamily="@font/varela_round_regular"
+                android:layout_marginTop="6dp"                android:fontFamily="@font/varela_round_regular"
                 android:textColor="#A6A8A5"
-                android:textSize="18sp"
+                android:textSize="14sp"
                 android:visibility="gone" />
         </LinearLayout>
 
@@ -205,16 +193,6 @@
                     android:textSize="14sp"
                     android:visibility="gone" />
 
-                <TextView
-                    android:id="@+id/registrationInfoTitleText"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="24dp"
-                    android:fontFamily="@font/varela_round_regular"
-                    android:text="@string/event_detail_registration_info"
-                    android:textColor="#A6A8A5"
-                    android:textSize="14sp"
-                    android:visibility="gone" />
 
                 <TextView
                     android:id="@+id/registrationOpenText"
@@ -277,6 +255,9 @@
     </LinearLayout>
 
 </LinearLayout>
+
+
+
 
 
 

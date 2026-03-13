@@ -40,7 +40,6 @@ public class EventDetailActivity extends AppCompatActivity {
     private TextView dateText;
     private TextView organizerText;
     private TextView descriptionText;
-    private TextView registrationTitleText;
     private TextView registrationOpenText;
     private TextView registrationDeadlineText;
     private TextView entrantCountText;
@@ -63,7 +62,6 @@ public class EventDetailActivity extends AppCompatActivity {
         dateText = findViewById(R.id.eventDateText);
         organizerText = findViewById(R.id.eventOrganizerText);
         descriptionText = findViewById(R.id.eventDescriptionText);
-        registrationTitleText = findViewById(R.id.registrationInfoTitleText);
         registrationOpenText = findViewById(R.id.registrationOpenText);
         registrationDeadlineText = findViewById(R.id.registrationDeadlineText);
         entrantCountText = findViewById(R.id.entrantCountText);
@@ -80,14 +78,16 @@ public class EventDetailActivity extends AppCompatActivity {
     private void bindFallbackContent() {
         titleText.setText(getIntent().getStringExtra(EXTRA_EVENT_TITLE));
         priceText.setText(getIntent().getStringExtra(EXTRA_EVENT_PRICE));
-        bindOptionalText(locationText, getIntent().getStringExtra(EXTRA_EVENT_LOCATION));
-        bindOptionalText(dateText, getIntent().getStringExtra(EXTRA_EVENT_DATE));
+        locationText.setVisibility(View.VISIBLE);
+        locationText.setText(buildLocationText(getIntent().getStringExtra(EXTRA_EVENT_LOCATION)));
+        dateText.setVisibility(View.VISIBLE);
+        dateText.setText(buildEventDateText(getIntent().getStringExtra(EXTRA_EVENT_DATE)));
+        organizerText.setVisibility(View.VISIBLE);
+        organizerText.setText(getString(R.string.event_detail_organizer_tba));
         bindOptionalText(heroDeadlineText, getIntent().getStringExtra(EXTRA_EVENT_DEADLINE));
         applyHeroBackground(getIntent().getStringExtra(EXTRA_EVENT_CATEGORY));
 
-        organizerText.setVisibility(View.GONE);
         descriptionText.setVisibility(View.GONE);
-        registrationTitleText.setVisibility(View.GONE);
         registrationOpenText.setVisibility(View.GONE);
         registrationDeadlineText.setVisibility(View.GONE);
         entrantCountText.setVisibility(View.GONE);
@@ -125,47 +125,52 @@ public class EventDetailActivity extends AppCompatActivity {
     private void bindEvent(Event event) {
         titleText.setText(event.getBrowseTitleText());
         priceText.setText(event.getBrowsePriceText());
-        bindOptionalText(locationText, cleanText(event.location));
-        bindOptionalText(dateText, formatDate(event.eventDate));
+        locationText.setVisibility(View.VISIBLE);
+        locationText.setText(buildLocationText(event.location));
+        dateText.setVisibility(View.VISIBLE);
+        dateText.setText(buildEventDateText(formatDate(event.eventDate)));
         bindOptionalText(heroDeadlineText, event.getBrowseDeadlineText());
         bindOptionalText(descriptionText, cleanText(event.description));
-        bindOptionalText(registrationOpenText, buildRegistrationOpenText(event.registrationOpen));
-        bindOptionalText(registrationDeadlineText, buildRegistrationDeadlineText(event.registrationDeadline));
 
-        updateRegistrationSectionVisibility();
+        registrationOpenText.setVisibility(View.VISIBLE);
+        registrationOpenText.setText(buildRegistrationOpenText(event.registrationOpen));
+        registrationDeadlineText.setVisibility(View.VISIBLE);
+        registrationDeadlineText.setText(buildRegistrationDeadlineText(event.registrationDeadline));
+
         applyHeroBackground(event.category);
         bindEntrantCount(event);
         bindOrganizer(event.organizerId);
     }
 
     private void bindOrganizer(String organizerId) {
+        organizerText.setVisibility(View.VISIBLE);
+        organizerText.setText(getString(R.string.event_detail_organizer_tba));
+
         if (TextUtils.isEmpty(organizerId)) {
-            organizerText.setVisibility(View.GONE);
             return;
         }
 
         userController.getUserByDeviceId(organizerId, (User user, boolean success) -> {
             if (!success || user == null || TextUtils.isEmpty(cleanText(user.getName()))) {
-                organizerText.setVisibility(View.GONE);
+                organizerText.setText(getString(R.string.event_detail_organizer_tba));
                 return;
             }
 
-            organizerText.setVisibility(View.VISIBLE);
             organizerText.setText(user.getName());
         });
     }
 
     private void bindEntrantCount(Event event) {
-        if (event.waitingList == null || event.waitingList.list == null || event.waitingList.list.isEmpty()) {
-            entrantCountText.setVisibility(View.GONE);
-            return;
+        int entrantCount = 0;
+        if (event.waitingList != null && event.waitingList.list != null) {
+            entrantCount = event.waitingList.list.size();
         }
 
         entrantCountText.setVisibility(View.VISIBLE);
         entrantCountText.setText(getResources().getQuantityString(
                 R.plurals.event_detail_entrant_count,
-                event.waitingList.list.size(),
-                event.waitingList.list.size()
+                entrantCount,
+                entrantCount
         ));
     }
 
@@ -177,12 +182,6 @@ public class EventDetailActivity extends AppCompatActivity {
 
         view.setVisibility(View.VISIBLE);
         view.setText(value);
-    }
-
-    private void updateRegistrationSectionVisibility() {
-        boolean hasRegistrationContent = registrationOpenText.getVisibility() == View.VISIBLE
-                || registrationDeadlineText.getVisibility() == View.VISIBLE;
-        registrationTitleText.setVisibility(hasRegistrationContent ? View.VISIBLE : View.GONE);
     }
 
     private void applyHeroBackground(String category) {
@@ -200,18 +199,34 @@ public class EventDetailActivity extends AppCompatActivity {
         return Math.abs(normalizedCategory.hashCode()) % 2 == 0;
     }
 
-    private String buildRegistrationOpenText(Date registrationOpen) {
-        if (registrationOpen == null) {
-            return null;
+    private String buildLocationText(String location) {
+        String value = cleanText(location);
+        if (TextUtils.isEmpty(value)) {
+            return getString(R.string.event_detail_address_tba);
         }
-        return getString(R.string.event_detail_registration_opens, formatLongDate(registrationOpen));
+        return value;
+    }
+
+    private String buildEventDateText(String eventDate) {
+        String value = cleanText(eventDate);
+        if (TextUtils.isEmpty(value)) {
+            return getString(R.string.event_detail_date_tba);
+        }
+        return value;
+    }
+
+    private String buildRegistrationOpenText(Date registrationOpen) {
+        String value = registrationOpen == null
+                ? getString(R.string.event_detail_registration_tba)
+                : formatLongDate(registrationOpen);
+        return getString(R.string.event_detail_registration_opens, value);
     }
 
     private String buildRegistrationDeadlineText(Date registrationDeadline) {
-        if (registrationDeadline == null) {
-            return null;
-        }
-        return getString(R.string.event_detail_registration_closes, formatLongDate(registrationDeadline));
+        String value = registrationDeadline == null
+                ? getString(R.string.event_detail_registration_tba)
+                : formatLongDate(registrationDeadline);
+        return getString(R.string.event_detail_registration_closes, value);
     }
 
     private String formatDate(Date date) {

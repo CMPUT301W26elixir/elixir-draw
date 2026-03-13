@@ -67,7 +67,7 @@ This action cannot be undone.</string>
     <string name="event_detail_registration_info">Registration information</string>
     <string name="event_detail_join_waiting_list">Join waiting list</string>
     <string name="event_detail_registration_opens">Registration opens: %1$s</string>
-    <string name="event_detail_registration_closes">Registration closes: %1$s</string>
+    <string name="event_detail_registration_closes">Registration closes: %1$s</string>`r`n    <string name="event_detail_registration_tba">TBA</string>`r`n    <string name="event_detail_address_tba">Address TBA</string>`r`n    <string name="event_detail_date_tba">Date TBA</string>`r`n    <string name="event_detail_organizer_tba">Organizer TBA</string>
     <string name="event_detail_error">Could not load this event right now.</string>
     <string name="event_detail_not_found">This event is no longer available.</string>
 
@@ -76,3 +76,5 @@ This action cannot be undone.</string>
         <item quantity="other">%d Entrants</item>
     </plurals>
 </resources>
+
+
