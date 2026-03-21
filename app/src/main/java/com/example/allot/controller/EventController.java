@@ -15,9 +15,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
-import java.util.Random;
 import java.util.UUID;
 
 /**
@@ -30,13 +28,23 @@ public class EventController {
     private static final String OPEN_STATUS = "open";
 
     private final EventRepository eventRepository;
+    private final EventInputValidator eventInputValidator;
+    private final EventBrowseService eventBrowseService;
+    private final EventOfferService eventOfferService;
+    private final EventDetailStateFactory eventDetailStateFactory;
 
     /**
      * Creates an EventController and connects it to Firestore.
      */
     public EventController() {
         // Connect to the database tools
-        this.eventRepository = new EventRepository();
+        this(
+                new EventRepository(),
+                new EventInputValidator(),
+                new EventBrowseService(),
+                new EventOfferService(),
+                new EventDetailStateFactory()
+        );
     }
 
     /**
@@ -45,7 +53,34 @@ public class EventController {
      * @param eventRepository the repository used for event data access
      */
     public EventController(EventRepository eventRepository) {
+        this(
+                eventRepository,
+                new EventInputValidator(),
+                new EventBrowseService(),
+                new EventOfferService(),
+                new EventDetailStateFactory()
+        );
+    }
+
+    /**
+     * Creates an EventController with explicit collaborators.
+     *
+     * @param eventRepository the repository used for event data access
+     * @param eventInputValidator the validator used for create/update input
+     * @param eventBrowseService the browse service used for filtering and sorting
+     * @param eventOfferService the offer service used for decline flows
+     * @param eventDetailStateFactory the state factory used for detail-screen state
+     */
+    public EventController(EventRepository eventRepository,
+                           EventInputValidator eventInputValidator,
+                           EventBrowseService eventBrowseService,
+                           EventOfferService eventOfferService,
+                           EventDetailStateFactory eventDetailStateFactory) {
         this.eventRepository = eventRepository;
+        this.eventInputValidator = eventInputValidator;
+        this.eventBrowseService = eventBrowseService;
+        this.eventOfferService = eventOfferService;
+        this.eventDetailStateFactory = eventDetailStateFactory;
     }
 
     /**
@@ -68,14 +103,7 @@ public class EventController {
      * @param listener the listener that receives the created event
      */
     public void createEvent(CreateEventInput input, String organizerId, OnCompleteListener<Event> listener) {
-        if (!validateEventInput(input.getTitle(),
-                input.getLocation(),
-                input.getPrice(),
-                input.getDescription(),
-                input.getParticipants(),
-                input.getEventDate(),
-                input.getRegistrationStart(),
-                input.getRegistrationEnd())) {
+        if (!eventInputValidator.isValid(input)) {
             listener.onComplete(null, false);
             return;
         }
@@ -257,11 +285,8 @@ public class EventController {
                 return;
             }
 
-            List<Event> openEvents = buildBrowsableEventList(
-                    events,
-                    normalize(searchTerm),
-                    normalize(category)
-            );
+            BrowseFilter browseFilter = new BrowseFilter(searchTerm, category);
+            List<Event> openEvents = eventBrowseService.buildBrowsableEventList(events, browseFilter);
             callback.onCallback(openEvents);
         });
     }
@@ -292,14 +317,7 @@ public class EventController {
      * @param listener the listener that receives the refreshed event
      */
     public void updateEvent(String eventId, UpdateEventInput input, OnCompleteListener<Event> listener) {
-        if (!validateEventInput(input.getTitle(),
-                input.getLocation(),
-                input.getPrice(),
-                input.getDescription(),
-                input.getParticipants(),
-                input.getEventDate(),
-                input.getRegistrationStart(),
-                input.getRegistrationEnd())) {
+        if (!eventInputValidator.isValid(input)) {
             listener.onComplete(null, false);
             return;
         }
@@ -352,52 +370,13 @@ public class EventController {
                 return;
             }
 
-            // Handles the loaded event snapshot for a declined offer, updates the event state,
-            // and optionally assigns a replacement offer.
-            if (event.waitingList == null) {
-                event.getWaitingList();
-            }
-            if (event.waitingList == null) {
+            Event updatedEvent = eventOfferService.buildDeclinedOfferState(event, deviceId);
+            if (updatedEvent == null) {
                 listener.onComplete(false, false);
                 return;
             }
 
-            if (event.waitingList.chosen == null) {
-                event.waitingList.chosen = new ArrayList<>();
-            }
-            if (event.waitingList.status == null) {
-                event.waitingList.status = new HashMap<>();
-            }
-            if (event.chosen == null) {
-                event.chosen = new ArrayList<>();
-            }
-            if (event.enrolled == null) {
-                event.enrolled = new ArrayList<>();
-            }
-            if (event.cancelled == null) {
-                event.cancelled = new ArrayList<>();
-            }
-            if (event.notEnrolled == null) {
-                event.notEnrolled = new ArrayList<>();
-            }
-
-            event.waitingList.chosen.remove(deviceId);
-            event.waitingList.status.remove(deviceId);
-            event.chosen.remove(deviceId);
-            event.enrolled.remove(deviceId);
-            if (!event.cancelled.contains(deviceId)) {
-                event.cancelled.add(deviceId);
-            }
-
-            if ("open".equalsIgnoreCase(normalizeNullable(event.status))) {
-                addReplacementOffer(event, deviceId);
-            }
-
-            event.chosen = new ArrayList<>(event.waitingList.chosen);
-            event.enrolled = event.waitingList.enrolled();
-            event.notEnrolled = event.waitingList.notEnrolled();
-
-            eventRepository.saveDeclinedOfferState(eventId, event, listener);
+            eventRepository.saveDeclinedOfferState(eventId, updatedEvent, listener);
         });
     }
 
@@ -415,7 +394,7 @@ public class EventController {
                 return;
             }
 
-            callback.onComplete(buildEventDetailState(event, deviceId), true);
+            callback.onComplete(eventDetailStateFactory.create(event, deviceId), true);
         });
     }
 
@@ -482,6 +461,50 @@ public class EventController {
     }
 
     /**
+     * Gets the value used to sort an event by event date.
+     *
+     * @param event the event to evaluate
+     * @return the event date time in milliseconds, or Long.MAX_VALUE if unavailable
+     */
+    private long getEventDateSortValue(Event event) {
+        if (event == null || event.eventDate == null) {
+            return Long.MAX_VALUE;
+        }
+
+        return event.eventDate.getTime();
+    }
+
+    /**
+     * Returns a safe string value, replacing null with an empty string.
+     *
+     * @param value the string to sanitize
+     * @return the original string, or an empty string if null
+     */
+    private String safeString(String value) {
+        return value == null ? "" : value;
+    }
+
+    /**
+     * Checks whether a string is blank after trimming whitespace.
+     *
+     * @param value the string to check
+     * @return true if the string is blank, otherwise false
+     */
+    private boolean isBlank(String value) {
+        return safeString(value).trim().isEmpty();
+    }
+
+    /**
+     * Returns a trimmed string value, or null if the value is null.
+     *
+     * @param value the string to normalize
+     * @return the normalized string
+     */
+    private String normalizeNullable(String value) {
+        return value == null ? null : value.trim();
+    }
+
+    /**
      * Callback interface used when a list of events is loaded asynchronously.
      */
     public interface EventListCallback {
@@ -519,422 +542,5 @@ public class EventController {
          */
         default void onError(Exception exception) {
         }
-    }
-
-    /**
-     * Builds a list of open events that match the given normalized filters.
-     *
-     * @param events the loaded events
-     * @param normalizedSearchTerm the normalized search term
-     * @param normalizedCategory the normalized category filter
-     * @return a sorted list of browsable events
-     */
-    private List<Event> buildBrowsableEventList(List<Event> events,
-                                                String normalizedSearchTerm,
-                                                String normalizedCategory) {
-        List<Event> openEvents = new ArrayList<>();
-
-        if (events == null) {
-            return openEvents;
-        }
-
-        for (Event event : events) {
-            if (!isBrowsable(event)) {
-                continue;
-            }
-
-            if (!matchesCategory(event, normalizedCategory)) {
-                continue;
-            }
-
-            if (!matchesSearch(event, normalizedSearchTerm)) {
-                continue;
-            }
-
-            openEvents.add(event);
-        }
-
-        sortBrowsableEvents(openEvents);
-        return openEvents;
-    }
-
-    /**
-     * Checks whether an event should be shown in the browsable event list.
-     *
-     * @param event the event to check
-     * @return true if the event is browsable, otherwise false
-     */
-    private boolean isBrowsable(Event event) {
-        if (event == null) {
-            return false;
-        }
-
-        if (!OPEN_STATUS.equalsIgnoreCase(safeString(event.status))) {
-            return false;
-        }
-
-        return event.registrationDeadline == null
-                || event.registrationDeadline.getTime() > System.currentTimeMillis();
-    }
-
-    /**
-     * Checks whether an event matches the given normalized category.
-     *
-     * @param event the event to check
-     * @param normalizedCategory the normalized category filter
-     * @return true if the event matches the category, otherwise false
-     */
-    private boolean matchesCategory(Event event, String normalizedCategory) {
-        if (normalizedCategory.isEmpty()) {
-            return true;
-        }
-
-        // --- APPLY THE SELECTED CHIP FILTER ---
-        // If the chip text isn't anywhere in the title, category, or description, skip it!
-        return normalize(event.category).equals(normalizedCategory)
-                || containsNormalized(event.title, normalizedCategory)
-                || containsNormalized(event.description, normalizedCategory);
-        // ---------------------------------------
-    }
-
-    /**
-     * Checks whether an event matches the given normalized search term.
-     *
-     * @param event the event to check
-     * @param normalizedSearchTerm the normalized search term
-     * @return true if the event matches the search term, otherwise false
-     */
-    private boolean matchesSearch(Event event, String normalizedSearchTerm) {
-        if (normalizedSearchTerm.isEmpty()) {
-            return true;
-        }
-
-        return containsNormalized(event.title, normalizedSearchTerm)
-                || containsNormalized(event.description, normalizedSearchTerm)
-                || containsNormalized(event.location, normalizedSearchTerm)
-                || containsNormalized(event.category, normalizedSearchTerm);
-    }
-
-    /**
-     * Checks whether a string contains the given normalized search term.
-     *
-     * @param value the string value to search
-     * @param normalizedSearchTerm the normalized search term
-     * @return true if the value contains the search term, otherwise false
-     */
-    private boolean containsNormalized(String value, String normalizedSearchTerm) {
-        return normalize(value).contains(normalizedSearchTerm);
-    }
-
-    /**
-     * Sorts browsable events by registration deadline, event date, and title.
-     *
-     * @param events the list of events to sort
-     */
-    private void sortBrowsableEvents(List<Event> events) {
-        Collections.sort(events, Comparator
-                .comparingLong(this::getDeadlineSortValue)
-                .thenComparingLong(this::getEventDateSortValue)
-                .thenComparing(event -> safeString(event.title), String.CASE_INSENSITIVE_ORDER));
-    }
-
-    /**
-     * Gets the value used to sort an event by registration deadline.
-     *
-     * @param event the event to evaluate
-     * @return the deadline time in milliseconds, or Long.MAX_VALUE if unavailable
-     */
-    private long getDeadlineSortValue(Event event) {
-        if (event == null || event.registrationDeadline == null) {
-            return Long.MAX_VALUE;
-        }
-
-        return event.registrationDeadline.getTime();
-    }
-
-    /**
-     * Gets the value used to sort an event by event date.
-     *
-     * @param event the event to evaluate
-     * @return the event date time in milliseconds, or Long.MAX_VALUE if unavailable
-     */
-    private long getEventDateSortValue(Event event) {
-        if (event == null || event.eventDate == null) {
-            return Long.MAX_VALUE;
-        }
-
-        return event.eventDate.getTime();
-    }
-
-    /**
-     * Normalizes a string by trimming whitespace and converting it to lowercase.
-     *
-     * @param value the string to normalize
-     * @return the normalized string
-     */
-    private String normalize(String value) {
-        return safeString(value).trim().toLowerCase(Locale.getDefault());
-    }
-
-    /**
-     * Returns a safe string value, replacing null with an empty string.
-     *
-     * @param value the string to sanitize
-     * @return the original string, or an empty string if null
-     */
-    private String safeString(String value) {
-        return value == null ? "" : value;
-    }
-
-    /**
-     * Checks whether a string is blank after trimming whitespace.
-     *
-     * @param value the string to check
-     * @return true if the string is blank, otherwise false
-     */
-    private boolean isBlank(String value) {
-        return safeString(value).trim().isEmpty();
-    }
-
-    /**
-     * Returns a trimmed string value, or null if the value is null.
-     *
-     * @param value the string to normalize
-     * @return the normalized string
-     */
-    private String normalizeNullable(String value) {
-        return value == null ? null : value.trim();
-    }
-
-    /**
-     * Returns a trimmed string value, or an empty string if the value is null.
-     *
-     * @param value the text value to clean
-     * @return the trimmed text or an empty string
-     */
-    private String cleanText(String value) {
-        return value == null ? "" : value.trim();
-    }
-
-    /**
-     * Validates the common input used when creating or updating events.
-     *
-     * @param title the event title
-     * @param location the event location
-     * @param price the event price
-     * @param description the event description
-     * @param participants the participant count
-     * @param eventDate the event date
-     * @param registrationStart the registration opening date
-     * @param registrationEnd the registration closing date
-     * @return true if the input is valid, otherwise false
-     */
-    private boolean validateEventInput(String title,
-                                       String location,
-                                       Double price,
-                                       String description,
-                                       Integer participants,
-                                       java.util.Date eventDate,
-                                       java.util.Date registrationStart,
-                                       java.util.Date registrationEnd) {
-        return !isBlank(title)
-                && !isBlank(location)
-                && !isBlank(description)
-                && price != null
-                && price >= 0
-                && participants != null
-                && participants > 0
-                && eventDate != null
-                && registrationStart != null
-                && registrationEnd != null
-                && !registrationEnd.before(registrationStart)
-                && !eventDate.before(registrationEnd);
-    }
-
-    /**
-     * Adds a replacement offer to the event by randomly selecting
-     * an eligible entrant from the waiting list.
-     *
-     * @param event the event whose replacement offer should be assigned
-     * @param declinedDeviceId the device ID of the user who declined the offer
-     */
-    private void addReplacementOffer(Event event, String declinedDeviceId) {
-        if (event == null || event.waitingList == null || event.waitingList.list == null) {
-            return;
-        }
-
-        List<String> eligibleEntrants = new ArrayList<>();
-        for (String entrantId : event.waitingList.list) {
-            if (isBlank(entrantId)) {
-                continue;
-            }
-            if (entrantId.equals(declinedDeviceId)) {
-                continue;
-            }
-            if (event.waitingList.chosen.contains(entrantId)) {
-                continue;
-            }
-            if (event.cancelled.contains(entrantId)) {
-                continue;
-            }
-            eligibleEntrants.add(entrantId);
-        }
-
-        if (eligibleEntrants.isEmpty()) {
-            return;
-        }
-
-        String replacementId = eligibleEntrants.get(new Random().nextInt(eligibleEntrants.size()));
-        event.waitingList.chosen.add(replacementId);
-        event.waitingList.status.put(replacementId, false);
-    }
-
-    /**
-     * Builds detail-screen state for the current event and user.
-     *
-     * @param event the event to evaluate
-     * @param deviceId the current user device ID
-     * @return the derived detail-screen state
-     */
-    private EventDetailState buildEventDetailState(Event event, String deviceId) {
-        if (isCurrentUserOrganizer(event, deviceId)) {
-            return new EventDetailState(event, EventDetailState.ActionType.MANAGE, false, true, true, null);
-        }
-
-        if (isCurrentUserEnrolled(event, deviceId)) {
-            return new EventDetailState(event, EventDetailState.ActionType.ENROLLED, false, false, true, null);
-        }
-
-        if (isCurrentUserSelected(event, deviceId)) {
-            return new EventDetailState(event, EventDetailState.ActionType.OFFER, false, true, true, null);
-        }
-
-        if (shouldShowReplacementState(event, deviceId)) {
-            return new EventDetailState(
-                    event,
-                    EventDetailState.ActionType.NOT_SELECTED_REPLACEMENT,
-                    false,
-                    false,
-                    false,
-                    "You were not selected in the main draw, but you may still receive an offer if spots open up."
-            );
-        }
-
-        if (shouldShowFinalizedNotSelectedState(event, deviceId)) {
-            return new EventDetailState(
-                    event,
-                    EventDetailState.ActionType.NOT_SELECTED_FINAL,
-                    false,
-                    false,
-                    false,
-                    "Registration is finalized and you were not selected for this event."
-            );
-        }
-
-        boolean isOnWaitingList = isCurrentUserOnWaitingList(event, deviceId);
-        return new EventDetailState(
-                event,
-                isOnWaitingList ? EventDetailState.ActionType.LEAVE_WAITLIST : EventDetailState.ActionType.JOIN_WAITLIST,
-                isOnWaitingList,
-                true,
-                true,
-                null
-        );
-    }
-
-    /**
-     * Checks whether the current user is enrolled in the event.
-     *
-     * @param event the event to check
-     * @param deviceId the current user device ID
-     * @return true if the current user is enrolled, otherwise false
-     */
-    private boolean isCurrentUserEnrolled(Event event, String deviceId) {
-        return containsUser(event == null ? null : event.enrolled, deviceId);
-    }
-
-    /**
-     * Checks whether the current user has been selected in the event draw.
-     *
-     * @param event the event to check
-     * @param deviceId the current user device ID
-     * @return true if the current user has been selected, otherwise false
-     */
-    private boolean isCurrentUserSelected(Event event, String deviceId) {
-        return containsUser(event == null ? null : event.chosen, deviceId)
-                || containsUser(event != null && event.waitingList != null ? event.waitingList.chosen : null, deviceId);
-    }
-
-    /**
-     * Checks whether the UI should show the replacement-state message
-     * for a user who was not selected in the main draw.
-     *
-     * @param event the event to check
-     * @param deviceId the current user device ID
-     * @return true if the replacement-state message should be shown
-     */
-    private boolean shouldShowReplacementState(Event event, String deviceId) {
-        return hasPublishedSelectionResults(event)
-                && isCurrentUserOnWaitingList(event, deviceId)
-                && !isCurrentUserSelected(event, deviceId)
-                && !isCurrentUserEnrolled(event, deviceId)
-                && !"finalized".equalsIgnoreCase(normalizeNullable(event == null ? null : event.status));
-    }
-
-    /**
-     * Checks whether the UI should show the finalized not-selected state.
-     *
-     * @param event the event to check
-     * @param deviceId the current user device ID
-     * @return true if the finalized not-selected state should be shown
-     */
-    private boolean shouldShowFinalizedNotSelectedState(Event event, String deviceId) {
-        return hasPublishedSelectionResults(event)
-                && isCurrentUserOnWaitingList(event, deviceId)
-                && !isCurrentUserSelected(event, deviceId)
-                && !isCurrentUserEnrolled(event, deviceId)
-                && "finalized".equalsIgnoreCase(normalizeNullable(event == null ? null : event.status));
-    }
-
-    /**
-     * Checks whether any selection results have been published for the event.
-     *
-     * @param event the event to check
-     * @return true if selection results exist, otherwise false
-     */
-    private boolean hasPublishedSelectionResults(Event event) {
-        return (event != null && event.chosen != null && !event.chosen.isEmpty())
-                || (event != null && event.enrolled != null && !event.enrolled.isEmpty())
-                || (event != null && event.cancelled != null && !event.cancelled.isEmpty())
-                || (event != null && event.notEnrolled != null && !event.notEnrolled.isEmpty())
-                || (event != null && event.waitingList != null && event.waitingList.chosen != null && !event.waitingList.chosen.isEmpty());
-    }
-
-    /**
-     * Checks whether the current user is on the event waiting list.
-     *
-     * @param event the event to check
-     * @param deviceId the current user device ID
-     * @return true if the current user is on the waiting list, otherwise false
-     */
-    private boolean isCurrentUserOnWaitingList(Event event, String deviceId) {
-        if (event == null || event.waitingList == null || event.waitingList.list == null) {
-            return false;
-        }
-        return event.waitingList.list.contains(deviceId);
-    }
-
-    /**
-     * Checks whether the current user is the organizer of the event.
-     *
-     * @param event the event to check
-     * @param deviceId the current user device ID
-     * @return true if the current user is the organizer, otherwise false
-     */
-    private boolean isCurrentUserOrganizer(Event event, String deviceId) {
-        if (event == null) {
-            return false;
-        }
-        return !isBlank(deviceId) && deviceId.equals(event.organizerId);
     }
 }
