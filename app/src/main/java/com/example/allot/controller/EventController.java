@@ -3,18 +3,22 @@ package com.example.allot.controller;
 import android.util.Log;
 
 import com.example.allot.common.OnCompleteListener;
+import com.example.allot.data.EventRepository;
+import com.example.allot.model.BrowseFilter;
+import com.example.allot.model.CreateEventInput;
 import com.example.allot.model.Event;
-import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.FieldValue;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
+import com.example.allot.model.EventDetailState;
+import com.example.allot.model.UpdateEventInput;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Random;
+import java.util.UUID;
 
 /**
  * Handles event-related Firestore operations, including creating events,
@@ -25,14 +29,23 @@ public class EventController {
     private static final String TAG = "EventLogic";
     private static final String OPEN_STATUS = "open";
 
-    public FirebaseFirestore database;
+    private final EventRepository eventRepository;
 
     /**
      * Creates an EventController and connects it to Firestore.
      */
     public EventController() {
         // Connect to the database tools
-        this.database = FirebaseFirestore.getInstance();
+        this.eventRepository = new EventRepository();
+    }
+
+    /**
+     * Creates an EventController with the provided repository.
+     *
+     * @param eventRepository the repository used for event data access
+     */
+    public EventController(EventRepository eventRepository) {
+        this.eventRepository = eventRepository;
     }
 
     /**
@@ -44,20 +57,51 @@ public class EventController {
      * @param listener the listener that receives the success result
      */
     public void createNewEventForUser(Event event, String organizerId, OnCompleteListener<Boolean> listener) {
-        database.collection("events").document(event.eventId)
-                .set(event)
-                .addOnCompleteListener(task -> {
-                    if (!task.isSuccessful()) {
-                        listener.onComplete(false, false);
-                        return;
-                    }
-                    // Event saved, now update the user
-                    database.collection("users").document(organizerId)
-                            .update("myEvents", FieldValue.arrayUnion(event.eventId))
-                            .addOnCompleteListener(userTask -> {
-                                listener.onComplete(userTask.isSuccessful(), userTask.isSuccessful());
-                            });
-                });
+        eventRepository.createNewEventForUser(event, organizerId, listener);
+    }
+
+    /**
+     * Validates user input, builds a new event model, and saves it.
+     *
+     * @param input the create-event input values
+     * @param organizerId the device ID of the organizer creating the event
+     * @param listener the listener that receives the created event
+     */
+    public void createEvent(CreateEventInput input, String organizerId, OnCompleteListener<Event> listener) {
+        if (!validateEventInput(input.getTitle(),
+                input.getLocation(),
+                input.getPrice(),
+                input.getDescription(),
+                input.getParticipants(),
+                input.getEventDate(),
+                input.getRegistrationStart(),
+                input.getRegistrationEnd())) {
+            listener.onComplete(null, false);
+            return;
+        }
+
+        Event event = new Event(UUID.randomUUID().toString(), organizerId, input.getTitle(), input.getParticipants());
+        event.title = input.getTitle().trim();
+        event.location = input.getLocation().trim();
+        event.geoloc = input.isGeolocationEnabled();
+        event.eventDate = input.getEventDate();
+        event.price = input.getPrice();
+        event.description = input.getDescription().trim();
+        event.capacity = input.getParticipants();
+        event.limit = input.getParticipants();
+        event.registrationOpen = input.getRegistrationStart();
+        event.registrationDeadline = input.getRegistrationEnd();
+        event.status = OPEN_STATUS;
+        event.category = normalizeNullable(input.getCategory());
+
+        eventRepository.createNewEventForUser(event, organizerId, (result, success) -> {
+            if (!success || result == null || !result) {
+                listener.onComplete(null, false);
+                return;
+            }
+
+            listener.onComplete(event, true);
+        });
     }
 
     /**
@@ -68,23 +112,13 @@ public class EventController {
      * @param organizerId the device ID of the organizer who owns the event
      */
     public void removeEvent(String eventId, String organizerId) {
-        database.collection("events").document(eventId)
-                .delete()
-                .addOnSuccessListener(aVoid -> {
-                    Log.d(TAG, "Event " + eventId + " removed successfully.");
-                    // Remove event ID from user's myEvents
-                    database.collection("users").document(organizerId)
-                            .update("myEvents", FieldValue.arrayRemove(eventId))
-                            .addOnSuccessListener(aVoid2 -> {
-                                Log.d(TAG, "Event removed from user's myEvents.");
-                            })
-                            .addOnFailureListener(e -> {
-                                Log.e(TAG, "Failed to remove event from user: " + e.getMessage());
-                            });
-                })
-                .addOnFailureListener(e -> {
-                    Log.e(TAG, "Failed to remove event: " + e.getMessage());
-                });
+        eventRepository.removeEvent(eventId, organizerId, (result, success) -> {
+            if (success && result != null && result) {
+                Log.d(TAG, "Event " + eventId + " removed successfully.");
+            } else {
+                Log.e(TAG, "Failed to remove event: " + eventId);
+            }
+        });
     }
 
     /**
@@ -95,14 +129,7 @@ public class EventController {
      * @param listener the listener that receives the success result
      */
     public void joinWaitingList(String eventId, String deviceId, OnCompleteListener<Boolean> listener) {
-        database.collection("events")
-                .document(eventId)
-                .update("waitingList.list", FieldValue.arrayUnion(deviceId))
-                .addOnSuccessListener(unused -> listener.onComplete(true, true))
-                .addOnFailureListener(exception -> {
-                    Log.e(TAG, "Failed to join waiting list for event " + eventId, exception);
-                    listener.onComplete(false, false);
-                });
+        eventRepository.joinWaitingList(eventId, deviceId, listener);
     }
 
     /**
@@ -113,14 +140,7 @@ public class EventController {
      * @param listener the listener that receives the success result
      */
     public void leaveWaitingList(String eventId, String deviceId, OnCompleteListener<Boolean> listener) {
-        database.collection("events")
-                .document(eventId)
-                .update("waitingList.list", FieldValue.arrayRemove(deviceId))
-                .addOnSuccessListener(unused -> listener.onComplete(true, true))
-                .addOnFailureListener(exception -> {
-                    Log.e(TAG, "Failed to leave waiting list for event " + eventId, exception);
-                    listener.onComplete(false, false);
-                });
+        eventRepository.leaveWaitingList(eventId, deviceId, listener);
     }
 
     /**
@@ -132,32 +152,9 @@ public class EventController {
      * @param listener the listener that receives the success result
      */
     public void joinEvent(String eventId, String userId, OnCompleteListener<Boolean> listener) {
-
         // First add the user to the event waiting list
-        database.collection("events").document(eventId)
-                .update("waitingList", FieldValue.arrayUnion(userId))
-                .addOnCompleteListener(task -> {
-
-                    if (!task.isSuccessful()) {
-                        Log.e(TAG, "Failed to join waiting list", task.getException());
-                        listener.onComplete(false, false);
-                        return;
-                    }
-
-                    // Now add the event to the user's joined events/history
-                    database.collection("users").document(userId)
-                            .update("history", FieldValue.arrayUnion(eventId))
-                            .addOnCompleteListener(userTask -> {
-
-                                if (userTask.isSuccessful()) {
-                                    Log.d(TAG, "User joined event successfully.");
-                                    listener.onComplete(true, true);
-                                } else {
-                                    Log.e(TAG, "Failed to update user history", userTask.getException());
-                                    listener.onComplete(false, false);
-                                }
-                            });
-                });
+        // Now add the event to the user's joined events/history
+        joinWaitingList(eventId, userId, listener);
     }
 
     /**
@@ -190,35 +187,32 @@ public class EventController {
     }
 
     /**
+     * Loads browseable events using the provided search term and selected category.
+     *
+     * @param searchTerm the text used to search events
+     * @param selectedCategory the selected category filter
+     * @param callback the callback that receives the filtered events
+     */
+    public void loadBrowseEvents(String searchTerm, String selectedCategory, EventListCallback callback) {
+        BrowseFilter browseFilter = new BrowseFilter(searchTerm, selectedCategory);
+        getFilteredOpenEvents(browseFilter.getSearchTerm(), browseFilter.getSelectedCategory(), callback);
+    }
+
+    /**
      * Loads a single event by its ID.
      *
      * @param eventId the ID of the event to retrieve
      * @param callback the callback that receives the retrieved event
      */
     public void getEventById(String eventId, EventCallback callback) {
-        database.collection("events")
-                .document(eventId)
-                .get()
-                .addOnCompleteListener(task -> {
-                    if (!task.isSuccessful()) {
-                        Exception exception = task.getException();
-                        Log.e(TAG, "Error getting event " + eventId, exception);
-                        callback.onError(exception);
-                        return;
-                    }
+        eventRepository.getEventById(eventId, (event, success) -> {
+            if (!success) {
+                callback.onError(new IllegalStateException("Failed to load event"));
+                return;
+            }
 
-                    DocumentSnapshot document = task.getResult();
-                    if (document == null || !document.exists()) {
-                        callback.onCallback(null);
-                        return;
-                    }
-
-                    Event event = document.toObject(Event.class);
-                    if (event != null && isBlank(event.eventId)) {
-                        event.eventId = document.getId();
-                    }
-                    callback.onCallback(event);
-                });
+            callback.onCallback(event);
+        });
     }
 
     /**
@@ -233,26 +227,20 @@ public class EventController {
             return;
         }
 
-        database.collection("events")
-                .get()
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful() && task.getResult() != null) {
-                        List<Event> matchingEvents = new ArrayList<>();
-                        for (QueryDocumentSnapshot document : task.getResult()) {
-                            if (eventIds.contains(document.getId())) {
-                                Event event = document.toObject(Event.class);
-                                // Ensure the ID is attached so it can be clicked later
-                                if (event.eventId == null || event.eventId.isEmpty()) {
-                                    event.eventId = document.getId();
-                                }
-                                matchingEvents.add(event);
-                            }
-                        }
-                        callback.onCallback(matchingEvents);
-                    } else {
-                        callback.onError(task.getException());
-                    }
-                });
+        eventRepository.getAllEvents((events, success) -> {
+            if (!success || events == null) {
+                callback.onError(new IllegalStateException("Failed to load events"));
+                return;
+            }
+
+            List<Event> matchingEvents = new ArrayList<>();
+            for (Event event : events) {
+                if (event != null && eventIds.contains(event.eventId)) {
+                    matchingEvents.add(event);
+                }
+            }
+            callback.onCallback(matchingEvents);
+        });
     }
 
     /**
@@ -263,23 +251,19 @@ public class EventController {
      * @param callback the callback that receives the filtered events
      */
     public void getFilteredOpenEvents(String searchTerm, String category, EventListCallback callback) {
-        database.collection("events")
-                .whereEqualTo("status", OPEN_STATUS)
-                .get()
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        List<Event> openEvents = buildBrowsableEventList(
-                                task.getResult(),
-                                normalize(searchTerm),
-                                normalize(category)
-                        );
-                        callback.onCallback(openEvents);
-                    } else {
-                        Exception exception = task.getException();
-                        Log.e(TAG, "Error getting events", exception);
-                        callback.onError(exception);
-                    }
-                });
+        eventRepository.getOpenEvents((events, success) -> {
+            if (!success || events == null) {
+                callback.onError(new IllegalStateException("Failed to load events"));
+                return;
+            }
+
+            List<Event> openEvents = buildBrowsableEventList(
+                    events,
+                    normalize(searchTerm),
+                    normalize(category)
+            );
+            callback.onCallback(openEvents);
+        });
     }
 
     /**
@@ -289,38 +273,167 @@ public class EventController {
      * @param callback the callback that receives the registered events
      */
     public void getRegisteredEventsForUser(String deviceId, EventListCallback callback) {
-        database.collection("events")
-                .get()
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        List<Event> registeredEvents = buildRegisteredEventList(task.getResult(), deviceId);
-                        callback.onCallback(registeredEvents);
-                    } else {
-                        Exception exception = task.getException();
-                        Log.e(TAG, "Error getting registered events", exception);
-                        callback.onError(exception);
-                    }
-                });
+        eventRepository.getAllEvents((events, success) -> {
+            if (!success || events == null) {
+                callback.onError(new IllegalStateException("Failed to load events"));
+                return;
+            }
+
+            List<Event> registeredEvents = buildRegisteredEventList(events, deviceId);
+            callback.onCallback(registeredEvents);
+        });
+    }
+
+    /**
+     * Updates an existing event after validating the provided input.
+     *
+     * @param eventId the ID of the event to update
+     * @param input the updated event input values
+     * @param listener the listener that receives the refreshed event
+     */
+    public void updateEvent(String eventId, UpdateEventInput input, OnCompleteListener<Event> listener) {
+        if (!validateEventInput(input.getTitle(),
+                input.getLocation(),
+                input.getPrice(),
+                input.getDescription(),
+                input.getParticipants(),
+                input.getEventDate(),
+                input.getRegistrationStart(),
+                input.getRegistrationEnd())) {
+            listener.onComplete(null, false);
+            return;
+        }
+
+        Map<String, Object> updates = new HashMap<>();
+        updates.put("title", input.getTitle().trim());
+        updates.put("location", input.getLocation().trim());
+        updates.put("eventDate", input.getEventDate());
+        updates.put("price", input.getPrice());
+        updates.put("description", input.getDescription().trim());
+        updates.put("capacity", input.getParticipants());
+        updates.put("limit", input.getParticipants());
+        updates.put("geoloc", input.isGeolocationEnabled());
+        updates.put("registrationOpen", input.getRegistrationStart());
+        updates.put("registrationDeadline", input.getRegistrationEnd());
+
+        eventRepository.updateEvent(eventId, updates, (result, success) -> {
+            if (!success || result == null || !result) {
+                listener.onComplete(null, false);
+                return;
+            }
+
+            eventRepository.getEventById(eventId, listener);
+        });
+    }
+
+    /**
+     * Accepts the current offer and updates the event state in Firestore.
+     * Marks the current user as enrolled and updates their waiting list status.
+     *
+     * @param eventId the event ID to update
+     * @param deviceId the user device ID
+     * @param listener the listener that receives the result
+     */
+    public void acceptOffer(String eventId, String deviceId, OnCompleteListener<Boolean> listener) {
+        eventRepository.acceptOffer(eventId, deviceId, listener);
+    }
+
+    /**
+     * Starts the decline flow by loading the current event state from Firestore.
+     *
+     * @param eventId the event ID to update
+     * @param deviceId the user device ID
+     * @param listener the listener that receives the result
+     */
+    public void declineOffer(String eventId, String deviceId, OnCompleteListener<Boolean> listener) {
+        eventRepository.getEventById(eventId, (event, success) -> {
+            if (!success || event == null) {
+                listener.onComplete(false, false);
+                return;
+            }
+
+            // Handles the loaded event snapshot for a declined offer, updates the event state,
+            // and optionally assigns a replacement offer.
+            if (event.waitingList == null) {
+                event.getWaitingList();
+            }
+            if (event.waitingList == null) {
+                listener.onComplete(false, false);
+                return;
+            }
+
+            if (event.waitingList.chosen == null) {
+                event.waitingList.chosen = new ArrayList<>();
+            }
+            if (event.waitingList.status == null) {
+                event.waitingList.status = new HashMap<>();
+            }
+            if (event.chosen == null) {
+                event.chosen = new ArrayList<>();
+            }
+            if (event.enrolled == null) {
+                event.enrolled = new ArrayList<>();
+            }
+            if (event.cancelled == null) {
+                event.cancelled = new ArrayList<>();
+            }
+            if (event.notEnrolled == null) {
+                event.notEnrolled = new ArrayList<>();
+            }
+
+            event.waitingList.chosen.remove(deviceId);
+            event.waitingList.status.remove(deviceId);
+            event.chosen.remove(deviceId);
+            event.enrolled.remove(deviceId);
+            if (!event.cancelled.contains(deviceId)) {
+                event.cancelled.add(deviceId);
+            }
+
+            if ("open".equalsIgnoreCase(normalizeNullable(event.status))) {
+                addReplacementOffer(event, deviceId);
+            }
+
+            event.chosen = new ArrayList<>(event.waitingList.chosen);
+            event.enrolled = event.waitingList.enrolled();
+            event.notEnrolled = event.waitingList.notEnrolled();
+
+            eventRepository.saveDeclinedOfferState(eventId, event, listener);
+        });
+    }
+
+    /**
+     * Loads the detail-screen state for the given event and current user.
+     *
+     * @param eventId the event ID
+     * @param deviceId the current user device ID
+     * @param callback the callback that receives the detail state
+     */
+    public void getEventDetailState(String eventId, String deviceId, OnCompleteListener<EventDetailState> callback) {
+        eventRepository.getEventById(eventId, (event, success) -> {
+            if (!success || event == null) {
+                callback.onComplete(null, false);
+                return;
+            }
+
+            callback.onComplete(buildEventDetailState(event, deviceId), true);
+        });
     }
 
     /**
      * Builds a list of events that the given user is registered for.
      *
-     * @param querySnapshot the Firestore query snapshot containing events
+     * @param events the loaded events
      * @param deviceId the device ID of the user
      * @return a list of registered events
      */
-    private List<Event> buildRegisteredEventList(QuerySnapshot querySnapshot, String deviceId) {
+    private List<Event> buildRegisteredEventList(List<Event> events, String deviceId) {
         List<Event> registeredEvents = new ArrayList<>();
 
-        if (querySnapshot == null || isBlank(deviceId)) {
+        if (events == null || isBlank(deviceId)) {
             return registeredEvents;
         }
 
-        for (QueryDocumentSnapshot document : querySnapshot) {
-            Event event = document.toObject(Event.class);
-            hydrateMissingFields(event, document);
-
+        for (Event event : events) {
             if (!isUserRegistered(event, deviceId)) {
                 continue;
             }
@@ -411,24 +524,21 @@ public class EventController {
     /**
      * Builds a list of open events that match the given normalized filters.
      *
-     * @param querySnapshot the Firestore query snapshot containing events
+     * @param events the loaded events
      * @param normalizedSearchTerm the normalized search term
      * @param normalizedCategory the normalized category filter
      * @return a sorted list of browsable events
      */
-    private List<Event> buildBrowsableEventList(QuerySnapshot querySnapshot,
+    private List<Event> buildBrowsableEventList(List<Event> events,
                                                 String normalizedSearchTerm,
                                                 String normalizedCategory) {
         List<Event> openEvents = new ArrayList<>();
 
-        if (querySnapshot == null) {
+        if (events == null) {
             return openEvents;
         }
 
-        for (QueryDocumentSnapshot document : querySnapshot) {
-            Event event = document.toObject(Event.class);
-            hydrateMissingFields(event, document);
-
+        for (Event event : events) {
             if (!isBrowsable(event)) {
                 continue;
             }
@@ -446,26 +556,6 @@ public class EventController {
 
         sortBrowsableEvents(openEvents);
         return openEvents;
-    }
-
-    /**
-     * Fills missing event fields using document data and default values.
-     *
-     * @param event the event to update
-     * @param document the document snapshot source
-     */
-    private void hydrateMissingFields(Event event, QueryDocumentSnapshot document) {
-        if (event == null) {
-            return;
-        }
-
-        if (isBlank(event.eventId)) {
-            event.eventId = document.getId();
-        }
-
-        if (isBlank(event.status)) {
-            event.status = OPEN_STATUS;
-        }
     }
 
     /**
@@ -499,7 +589,12 @@ public class EventController {
             return true;
         }
 
-        return normalize(event.category).equals(normalizedCategory);
+        // --- APPLY THE SELECTED CHIP FILTER ---
+        // If the chip text isn't anywhere in the title, category, or description, skip it!
+        return normalize(event.category).equals(normalizedCategory)
+                || containsNormalized(event.title, normalizedCategory)
+                || containsNormalized(event.description, normalizedCategory);
+        // ---------------------------------------
     }
 
     /**
@@ -601,4 +696,245 @@ public class EventController {
         return safeString(value).trim().isEmpty();
     }
 
+    /**
+     * Returns a trimmed string value, or null if the value is null.
+     *
+     * @param value the string to normalize
+     * @return the normalized string
+     */
+    private String normalizeNullable(String value) {
+        return value == null ? null : value.trim();
+    }
+
+    /**
+     * Returns a trimmed string value, or an empty string if the value is null.
+     *
+     * @param value the text value to clean
+     * @return the trimmed text or an empty string
+     */
+    private String cleanText(String value) {
+        return value == null ? "" : value.trim();
+    }
+
+    /**
+     * Validates the common input used when creating or updating events.
+     *
+     * @param title the event title
+     * @param location the event location
+     * @param price the event price
+     * @param description the event description
+     * @param participants the participant count
+     * @param eventDate the event date
+     * @param registrationStart the registration opening date
+     * @param registrationEnd the registration closing date
+     * @return true if the input is valid, otherwise false
+     */
+    private boolean validateEventInput(String title,
+                                       String location,
+                                       Double price,
+                                       String description,
+                                       Integer participants,
+                                       java.util.Date eventDate,
+                                       java.util.Date registrationStart,
+                                       java.util.Date registrationEnd) {
+        return !isBlank(title)
+                && !isBlank(location)
+                && !isBlank(description)
+                && price != null
+                && price >= 0
+                && participants != null
+                && participants > 0
+                && eventDate != null
+                && registrationStart != null
+                && registrationEnd != null
+                && !registrationEnd.before(registrationStart)
+                && !eventDate.before(registrationEnd);
+    }
+
+    /**
+     * Adds a replacement offer to the event by randomly selecting
+     * an eligible entrant from the waiting list.
+     *
+     * @param event the event whose replacement offer should be assigned
+     * @param declinedDeviceId the device ID of the user who declined the offer
+     */
+    private void addReplacementOffer(Event event, String declinedDeviceId) {
+        if (event == null || event.waitingList == null || event.waitingList.list == null) {
+            return;
+        }
+
+        List<String> eligibleEntrants = new ArrayList<>();
+        for (String entrantId : event.waitingList.list) {
+            if (isBlank(entrantId)) {
+                continue;
+            }
+            if (entrantId.equals(declinedDeviceId)) {
+                continue;
+            }
+            if (event.waitingList.chosen.contains(entrantId)) {
+                continue;
+            }
+            if (event.cancelled.contains(entrantId)) {
+                continue;
+            }
+            eligibleEntrants.add(entrantId);
+        }
+
+        if (eligibleEntrants.isEmpty()) {
+            return;
+        }
+
+        String replacementId = eligibleEntrants.get(new Random().nextInt(eligibleEntrants.size()));
+        event.waitingList.chosen.add(replacementId);
+        event.waitingList.status.put(replacementId, false);
+    }
+
+    /**
+     * Builds detail-screen state for the current event and user.
+     *
+     * @param event the event to evaluate
+     * @param deviceId the current user device ID
+     * @return the derived detail-screen state
+     */
+    private EventDetailState buildEventDetailState(Event event, String deviceId) {
+        if (isCurrentUserOrganizer(event, deviceId)) {
+            return new EventDetailState(event, EventDetailState.ActionType.MANAGE, false, true, true, null);
+        }
+
+        if (isCurrentUserEnrolled(event, deviceId)) {
+            return new EventDetailState(event, EventDetailState.ActionType.ENROLLED, false, false, true, null);
+        }
+
+        if (isCurrentUserSelected(event, deviceId)) {
+            return new EventDetailState(event, EventDetailState.ActionType.OFFER, false, true, true, null);
+        }
+
+        if (shouldShowReplacementState(event, deviceId)) {
+            return new EventDetailState(
+                    event,
+                    EventDetailState.ActionType.NOT_SELECTED_REPLACEMENT,
+                    false,
+                    false,
+                    false,
+                    "You were not selected in the main draw, but you may still receive an offer if spots open up."
+            );
+        }
+
+        if (shouldShowFinalizedNotSelectedState(event, deviceId)) {
+            return new EventDetailState(
+                    event,
+                    EventDetailState.ActionType.NOT_SELECTED_FINAL,
+                    false,
+                    false,
+                    false,
+                    "Registration is finalized and you were not selected for this event."
+            );
+        }
+
+        boolean isOnWaitingList = isCurrentUserOnWaitingList(event, deviceId);
+        return new EventDetailState(
+                event,
+                isOnWaitingList ? EventDetailState.ActionType.LEAVE_WAITLIST : EventDetailState.ActionType.JOIN_WAITLIST,
+                isOnWaitingList,
+                true,
+                true,
+                null
+        );
+    }
+
+    /**
+     * Checks whether the current user is enrolled in the event.
+     *
+     * @param event the event to check
+     * @param deviceId the current user device ID
+     * @return true if the current user is enrolled, otherwise false
+     */
+    private boolean isCurrentUserEnrolled(Event event, String deviceId) {
+        return containsUser(event == null ? null : event.enrolled, deviceId);
+    }
+
+    /**
+     * Checks whether the current user has been selected in the event draw.
+     *
+     * @param event the event to check
+     * @param deviceId the current user device ID
+     * @return true if the current user has been selected, otherwise false
+     */
+    private boolean isCurrentUserSelected(Event event, String deviceId) {
+        return containsUser(event == null ? null : event.chosen, deviceId)
+                || containsUser(event != null && event.waitingList != null ? event.waitingList.chosen : null, deviceId);
+    }
+
+    /**
+     * Checks whether the UI should show the replacement-state message
+     * for a user who was not selected in the main draw.
+     *
+     * @param event the event to check
+     * @param deviceId the current user device ID
+     * @return true if the replacement-state message should be shown
+     */
+    private boolean shouldShowReplacementState(Event event, String deviceId) {
+        return hasPublishedSelectionResults(event)
+                && isCurrentUserOnWaitingList(event, deviceId)
+                && !isCurrentUserSelected(event, deviceId)
+                && !isCurrentUserEnrolled(event, deviceId)
+                && !"finalized".equalsIgnoreCase(normalizeNullable(event == null ? null : event.status));
+    }
+
+    /**
+     * Checks whether the UI should show the finalized not-selected state.
+     *
+     * @param event the event to check
+     * @param deviceId the current user device ID
+     * @return true if the finalized not-selected state should be shown
+     */
+    private boolean shouldShowFinalizedNotSelectedState(Event event, String deviceId) {
+        return hasPublishedSelectionResults(event)
+                && isCurrentUserOnWaitingList(event, deviceId)
+                && !isCurrentUserSelected(event, deviceId)
+                && !isCurrentUserEnrolled(event, deviceId)
+                && "finalized".equalsIgnoreCase(normalizeNullable(event == null ? null : event.status));
+    }
+
+    /**
+     * Checks whether any selection results have been published for the event.
+     *
+     * @param event the event to check
+     * @return true if selection results exist, otherwise false
+     */
+    private boolean hasPublishedSelectionResults(Event event) {
+        return (event != null && event.chosen != null && !event.chosen.isEmpty())
+                || (event != null && event.enrolled != null && !event.enrolled.isEmpty())
+                || (event != null && event.cancelled != null && !event.cancelled.isEmpty())
+                || (event != null && event.notEnrolled != null && !event.notEnrolled.isEmpty())
+                || (event != null && event.waitingList != null && event.waitingList.chosen != null && !event.waitingList.chosen.isEmpty());
+    }
+
+    /**
+     * Checks whether the current user is on the event waiting list.
+     *
+     * @param event the event to check
+     * @param deviceId the current user device ID
+     * @return true if the current user is on the waiting list, otherwise false
+     */
+    private boolean isCurrentUserOnWaitingList(Event event, String deviceId) {
+        if (event == null || event.waitingList == null || event.waitingList.list == null) {
+            return false;
+        }
+        return event.waitingList.list.contains(deviceId);
+    }
+
+    /**
+     * Checks whether the current user is the organizer of the event.
+     *
+     * @param event the event to check
+     * @param deviceId the current user device ID
+     * @return true if the current user is the organizer, otherwise false
+     */
+    private boolean isCurrentUserOrganizer(Event event, String deviceId) {
+        if (event == null) {
+            return false;
+        }
+        return !isBlank(deviceId) && deviceId.equals(event.organizerId);
+    }
 }

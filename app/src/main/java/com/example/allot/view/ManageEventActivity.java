@@ -19,14 +19,12 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.allot.R;
+import com.example.allot.controller.EventController;
 import com.example.allot.model.Event;
-import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.FirebaseFirestore;
+import com.example.allot.model.UpdateEventInput;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Date;
 import java.util.Locale;
 
@@ -51,7 +49,7 @@ public class ManageEventActivity extends AppCompatActivity {
     public static final String EXTRA_EVENT_CATEGORY = "event_category";
 
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("MMM d, yyyy", Locale.getDefault());
-    private FirebaseFirestore database;
+    private EventController eventController;
 
     private View eventImageBackground;
     private TextView entrantsLotteryButton;
@@ -103,7 +101,7 @@ public class ManageEventActivity extends AppCompatActivity {
         setContentView(R.layout.activity_manage_event);
 
         dateFormat.setLenient(false);
-        database = FirebaseFirestore.getInstance();
+        eventController = new EventController();
         currentEventId = getIntent().getStringExtra(EXTRA_EVENT_ID);
 
         bindViews();
@@ -294,41 +292,34 @@ public class ManageEventActivity extends AppCompatActivity {
 
         isLoadingEvent = true;
         updateSaveButtonState();
-        database.collection("events")
-                .document(currentEventId)
-                .get()
-                .addOnSuccessListener(this::bindEventSnapshot)
-                .addOnFailureListener(exception -> {
-                    isLoadingEvent = false;
+        eventController.getEventById(currentEventId, new EventController.EventCallback() {
+            @Override
+            public void onCallback(Event event) {
+                isLoadingEvent = false;
+                if (event == null) {
                     updateSaveButtonState();
-                    Toast.makeText(this, R.string.manage_event_load_failure, Toast.LENGTH_SHORT).show();
-                });
+                    Toast.makeText(ManageEventActivity.this, R.string.manage_event_not_found, Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                bindEventSnapshot(event);
+            }
+
+            @Override
+            public void onError(Exception exception) {
+                isLoadingEvent = false;
+                updateSaveButtonState();
+                Toast.makeText(ManageEventActivity.this, R.string.manage_event_load_failure, Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     /**
      * Binds the loaded Firestore event snapshot to the UI.
      *
-     * @param documentSnapshot the loaded Firestore document snapshot
+     * @param event the loaded Firestore event snapshot
      */
-    private void bindEventSnapshot(DocumentSnapshot documentSnapshot) {
-        isLoadingEvent = false;
-        if (documentSnapshot == null || !documentSnapshot.exists()) {
-            updateSaveButtonState();
-            Toast.makeText(this, R.string.manage_event_not_found, Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        Event event = documentSnapshot.toObject(Event.class);
-        if (event == null) {
-            updateSaveButtonState();
-            Toast.makeText(this, R.string.manage_event_load_failure, Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        if (TextUtils.isEmpty(event.eventId)) {
-            event.eventId = documentSnapshot.getId();
-        }
-
+    private void bindEventSnapshot(Event event) {
         bindEvent(event);
     }
 
@@ -481,53 +472,40 @@ public class ManageEventActivity extends AppCompatActivity {
             return;
         }
 
-        Map<String, Object> updates = new HashMap<>();
-        updates.put("title", title);
-        updates.put("location", location);
-        updates.put("eventDate", eventDate);
-        updates.put("price", price);
-        updates.put("description", description);
-        updates.put("capacity", participants);
-        updates.put("limit", participants);
-        updates.put("geoloc", geolocationCheckbox.isChecked());
-        updates.put("registrationOpen", registrationStart);
-        updates.put("registrationDeadline", registrationEnd);
+        UpdateEventInput input = new UpdateEventInput(
+                title,
+                location,
+                geolocationCheckbox.isChecked(),
+                eventDate,
+                price,
+                description,
+                participants,
+                registrationStart,
+                registrationEnd
+        );
 
         isSaving = true;
         updateSaveButtonState();
-        database.collection("events")
-                .document(currentEventId)
-                .update(updates)
-                .addOnCompleteListener(task -> {
-                    if (!task.isSuccessful()) {
-                        isSaving = false;
-                        updateSaveButtonState();
-                        Toast.makeText(this, R.string.manage_event_save_failure, Toast.LENGTH_SHORT).show();
-                        return;
-                    }
+        eventController.updateEvent(currentEventId, input, (event, success) -> {
+            isSaving = false;
 
-                    reloadEventAfterSave();
-                });
+            if (!success || event == null) {
+                updateSaveButtonState();
+                Toast.makeText(this, R.string.manage_event_save_failure, Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            reloadEventAfterSave(event);
+        });
     }
 
     /**
      * Reloads the event after a successful save so the UI reflects the latest values.
      */
-    private void reloadEventAfterSave() {
-        database.collection("events")
-                .document(currentEventId)
-                .get()
-                .addOnSuccessListener(documentSnapshot -> {
-                    isSaving = false;
-                    bindEventSnapshot(documentSnapshot);
-                    setResult(RESULT_OK);
-                    Toast.makeText(this, R.string.manage_event_save_success, Toast.LENGTH_SHORT).show();
-                })
-                .addOnFailureListener(exception -> {
-                    isSaving = false;
-                    updateSaveButtonState();
-                    Toast.makeText(this, R.string.manage_event_save_failure, Toast.LENGTH_SHORT).show();
-                });
+    private void reloadEventAfterSave(Event event) {
+        bindEventSnapshot(event);
+        setResult(RESULT_OK);
+        Toast.makeText(this, R.string.manage_event_save_success, Toast.LENGTH_SHORT).show();
     }
 
     /**

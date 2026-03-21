@@ -20,6 +20,7 @@ import com.example.allot.R;
 import com.example.allot.controller.EventController;
 import com.example.allot.controller.UserController;
 import com.example.allot.model.Event;
+import com.example.allot.model.EventDetailState;
 import com.example.allot.model.User;
 import com.google.android.material.button.MaterialButton;
 
@@ -162,26 +163,19 @@ public class EventDetailActivity extends AppCompatActivity {
         }
 
         setLoading(true);
-        eventController.getEventById(currentEventId, new EventController.EventCallback() {
-            @Override
-            public void onCallback(Event event) {
-                setLoading(false);
-                if (event == null) {
-                    showErrorState(getString(R.string.event_detail_not_found));
-                    return;
-                }
-
-                currentEvent = event;
-                isCurrentUserOrganizer = isCurrentUserOrganizer(event);
-                errorText.setVisibility(View.GONE);
-                bindEvent(event);
-            }
-
-            @Override
-            public void onError(Exception exception) {
-                setLoading(false);
+        eventController.getEventDetailState(currentEventId, userController.getCurrentDeviceId(), (state, success) -> {
+            setLoading(false);
+            if (!success || state == null || state.getEvent() == null) {
                 showErrorState(getString(R.string.event_detail_error));
+                return;
             }
+
+            Event event = state.getEvent();
+            currentEvent = event;
+            isCurrentUserOrganizer = isCurrentUserOrganizer(event);
+            errorText.setVisibility(View.GONE);
+            bindEvent(event);
+            bindWaitlistState(state);
         });
     }
 
@@ -208,7 +202,6 @@ public class EventDetailActivity extends AppCompatActivity {
         applyHeroBackground(event.category);
         bindEntrantCount(event);
         bindOrganizer(event.organizerId);
-        bindWaitlistState(event);
     }
 
     /**
@@ -259,8 +252,8 @@ public class EventDetailActivity extends AppCompatActivity {
      *
      * @param event the event whose waitlist and offer state should be shown
      */
-    private void bindWaitlistState(Event event) {
-        if (isCurrentUserOrganizer(event)) {
+    private void bindWaitlistState(EventDetailState state) {
+        if (state.getActionType() == EventDetailState.ActionType.MANAGE) {
             waitlistStatusText.setVisibility(View.GONE);
             actionSubtextText.setVisibility(View.GONE);
             joinWaitingListButton.setText(R.string.event_detail_manage_event);
@@ -272,7 +265,7 @@ public class EventDetailActivity extends AppCompatActivity {
             return;
         }
 
-        if (isCurrentUserEnrolled(event)) {
+        if (state.getActionType() == EventDetailState.ActionType.ENROLLED) {
             showFooterState(
                     false,
                     false,
@@ -285,7 +278,7 @@ public class EventDetailActivity extends AppCompatActivity {
             return;
         }
 
-        if (isCurrentUserSelected(event)) {
+        if (state.getActionType() == EventDetailState.ActionType.OFFER) {
             showFooterState(
                     false,
                     true,
@@ -298,41 +291,44 @@ public class EventDetailActivity extends AppCompatActivity {
             return;
         }
 
-        if (shouldShowReplacementState(event)) {
+        if (state.getActionType() == EventDetailState.ActionType.NOT_SELECTED_REPLACEMENT) {
             showFooterState(
                     false,
                     false,
                     R.string.event_detail_not_selected_main_draw,
                     R.drawable.bg_event_detail_offer_yellow,
                     getResources().getColor(R.color.black),
-                    getString(R.string.event_detail_not_selected_main_draw_body),
+                    state.getSubtext(),
                     false
             );
             return;
         }
 
-        if (shouldShowFinalizedNotSelectedState(event)) {
+        if (state.getActionType() == EventDetailState.ActionType.NOT_SELECTED_FINAL) {
             showFooterState(
                     false,
                     false,
                     R.string.event_detail_not_selected_final,
                     R.drawable.bg_event_detail_offer_grey,
                     getResources().getColor(R.color.black),
-                    getString(R.string.event_detail_not_selected_final_body),
+                    state.getSubtext(),
                     false
             );
             return;
         }
 
-        boolean isOnWaitingList = isCurrentUserOnWaitingList(event);
         showFooterState(
-                isOnWaitingList,
-                true,
-                isOnWaitingList ? R.string.event_detail_leave_waiting_list : R.string.event_detail_join_waiting_list,
-                isOnWaitingList ? R.drawable.bg_waitlist_button_inactive : R.drawable.bg_waitlist_button,
+                state.shouldShowWaitlistMessage(),
+                state.isButtonEnabled(),
+                state.getActionType() == EventDetailState.ActionType.LEAVE_WAITLIST
+                        ? R.string.event_detail_leave_waiting_list
+                        : R.string.event_detail_join_waiting_list,
+                state.getActionType() == EventDetailState.ActionType.LEAVE_WAITLIST
+                        ? R.drawable.bg_waitlist_button_inactive
+                        : R.drawable.bg_waitlist_button,
                 getResources().getColor(R.color.black),
-                null,
-                true
+                state.getSubtext(),
+                state.shouldShowEntrantCount()
         );
     }
 

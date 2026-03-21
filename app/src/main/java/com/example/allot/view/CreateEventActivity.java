@@ -18,13 +18,13 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.example.allot.R;
 import com.example.allot.controller.EventController;
 import com.example.allot.controller.UserController;
+import com.example.allot.model.CreateEventInput;
 import com.example.allot.model.Event;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
-import java.util.UUID;
 
 /**
  * Activity for creating a new event.
@@ -213,27 +213,27 @@ public class CreateEventActivity extends AppCompatActivity {
             return;
         }
 
-        Event event = new Event(UUID.randomUUID().toString(), userController.getCurrentDeviceId(), title, participants);
-        event.title = title;
-        event.location = location;
-        event.geoloc = geolocationCheckbox.isChecked();
-        event.eventDate = eventDate;
-        event.price = price;
-        event.description = description;
-        event.capacity = participants;
-        event.limit = participants;
-        event.registrationOpen = registrationStart;
-        event.registrationDeadline = registrationEnd;
-        event.status = "open";
+        CreateEventInput input = new CreateEventInput(
+                title,
+                location,
+                geolocationCheckbox.isChecked(),
+                eventDate,
+                price,
+                description,
+                participants,
+                registrationStart,
+                registrationEnd,
+                null
+        );
 
         isSaving = true;
         nextButton.setEnabled(false);
 
-        eventController.createNewEventForUser(event, userController.getCurrentDeviceId(), (result, success) -> {
+        eventController.createEvent(input, userController.getCurrentDeviceId(), (event, success) -> {
             isSaving = false;
             nextButton.setEnabled(true);
 
-            if (!success || result == null || !result) {
+            if (!success || event == null) {
                 Toast.makeText(this, R.string.create_event_save_failure, Toast.LENGTH_SHORT).show();
                 return;
             }

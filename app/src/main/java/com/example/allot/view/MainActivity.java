@@ -293,26 +293,11 @@ public class MainActivity extends AppCompatActivity {
      */
     private void loadBrowseEvents(String searchTerm) {
         setLoadingState();
-        eventController.searchOpenEvents(searchTerm, new EventController.EventListCallback() {
+        eventController.loadBrowseEvents(searchTerm, selectedChipFilter, new EventController.EventListCallback() {
             @Override
             public void onCallback(List<Event> events) {
                 List<EventListItem> browseItems = new ArrayList<>();
                 for (Event event : events) {
-
-                    // --- APPLY THE SELECTED CHIP FILTER ---
-                    if (!selectedChipFilter.isEmpty()) {
-                        String title = event.title != null ? event.title.toLowerCase() : "";
-                        String category = event.category != null ? event.category.toLowerCase() : "";
-                        String desc = event.description != null ? event.description.toLowerCase() : "";
-                        String filter = selectedChipFilter.toLowerCase();
-
-                        // If the chip text isn't anywhere in the title, category, or description, skip it!
-                        if (!title.contains(filter) && !category.contains(filter) && !desc.contains(filter)) {
-                            continue;
-                        }
-                    }
-                    // ---------------------------------------
-
                     EventListItem item = EventListItem.fromEvent(event);
                     item.isSaved = userSavedEvents.contains(event.eventId);
                     browseItems.add(item);
