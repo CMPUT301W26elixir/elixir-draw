@@ -3,10 +3,13 @@ package com.example.allot.controller.explore;
 import com.example.allot.model.BrowseFilter;
 import com.example.allot.model.event.Event;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
+
+/**
+ * Filters and sorts events before they are shown on the explore screen.
+ */
 public class ExploreFilterService {
     private static final String OPEN_STATUS = "open";
 
@@ -77,12 +80,10 @@ public class ExploreFilterService {
             return true;
         }
 
-        // --- APPLY THE SELECTED CHIP FILTER ---
-        // If the chip text isn't anywhere in the title, category, or description, skip it!
+        // Let the chip match the category or other event text
         return normalize(event.getCategory()).equals(normalizedCategory)
                 || containsNormalized(event.getTitle(), normalizedCategory)
                 || containsNormalized(event.getDescription(), normalizedCategory);
-        // ---------------------------------------
     }
 
     /**
@@ -120,7 +121,7 @@ public class ExploreFilterService {
      * @param events the list of events to sort
      */
     private void sortBrowsableEvents(List<Event> events) {
-        Collections.sort(events, Comparator
+        events.sort(Comparator
                 .comparingLong(this::getDeadlineSortValue)
                 .thenComparingLong(this::getEventDateSortValue)
                 .thenComparing(event -> safeString(event.getTitle()), String.CASE_INSENSITIVE_ORDER));

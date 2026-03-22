@@ -1,9 +1,11 @@
 package com.example.allot.controller.lottery;
 
 import com.example.allot.model.event.Event;
-import com.example.allot.model.event.WaitingList;
 import java.util.ArrayList;
 import java.util.HashMap;
+/**
+ * Builds and checks lottery draw data stored on an event.
+ */
 public class LotteryDrawService {
     /**
      * Checks whether the event already has draw results.

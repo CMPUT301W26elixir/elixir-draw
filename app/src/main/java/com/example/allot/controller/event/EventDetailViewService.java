@@ -3,6 +3,9 @@ package com.example.allot.controller.event;
 import com.example.allot.R;
 import com.example.allot.model.event.Event;
 import com.example.allot.model.event.EventActionState;
+/**
+ * Turns event detail state into text and UI values.
+ */
 public class EventDetailViewService {
     /**
      * Represents the footer presentation state for the detail screen.

@@ -10,6 +10,9 @@ import com.example.allot.controller.shared.UserController;
 import com.example.allot.view.explore.ExploreActivity;
 import com.example.allot.view.profile.NameActivity;
 import com.google.android.material.button.MaterialButton;
+/**
+ * Shows the step in the profile setup flow where notification preferences are chosen.
+ */
 public class NotificationsActivity extends AppCompatActivity {
     private UserController userController;
     private MaterialButton turnOnNotificationsButton;

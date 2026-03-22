@@ -3,6 +3,9 @@ package com.example.allot.view.shared;
 import com.example.allot.model.event.Event;
 import java.util.ArrayList;
 import java.util.List;
+/**
+ * Turns event models into the small items used by list adapters.
+ */
 public class EventListItemMapper {
 
     /**

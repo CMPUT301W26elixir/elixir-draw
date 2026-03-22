@@ -10,6 +10,9 @@ import android.widget.TextView;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import com.example.allot.R;
+/**
+ * Renders the shared bottom navigation bar used across the app.
+ */
 public class BottomNavBarView extends LinearLayout {
 
     /**

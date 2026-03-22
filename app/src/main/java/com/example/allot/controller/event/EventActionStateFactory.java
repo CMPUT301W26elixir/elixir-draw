@@ -3,6 +3,9 @@ package com.example.allot.controller.event;
 import com.example.allot.model.event.Event;
 import com.example.allot.model.event.EventActionState;
 import java.util.List;
+/**
+ * Picks the action state the current user should see for an event.
+ */
 public class EventActionStateFactory {
     /**
      * Builds detail-screen state for the current event and user.
@@ -93,7 +96,7 @@ public class EventActionStateFactory {
                 && isCurrentUserOnWaitingList(event, deviceId)
                 && !isCurrentUserSelected(event, deviceId)
                 && !isCurrentUserEnrolled(event, deviceId)
-                && !"finalized".equalsIgnoreCase(normalizeNullable(event == null ? null : event.getStatus()));
+                && !"finalized".equalsIgnoreCase(normalizeNullable(event.getStatus()));
     }
 
     /**
@@ -108,7 +111,7 @@ public class EventActionStateFactory {
                 && isCurrentUserOnWaitingList(event, deviceId)
                 && !isCurrentUserSelected(event, deviceId)
                 && !isCurrentUserEnrolled(event, deviceId)
-                && "finalized".equalsIgnoreCase(normalizeNullable(event == null ? null : event.getStatus()));
+                && "finalized".equalsIgnoreCase(normalizeNullable(event.getStatus()));
     }
 
     /**

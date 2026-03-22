@@ -7,10 +7,11 @@ import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+/**
+ * Handles Firestore reads and writes for events.
+ */
 public class EventRepository {
     private final FirebaseFirestore database;
 
@@ -48,29 +49,8 @@ public class EventRepository {
                     // Event saved, now update the user
                     database.collection("users").document(organizerId)
                             .update("myEvents", FieldValue.arrayUnion(event.getEventId()))
-                            .addOnCompleteListener(userTask -> {
-                                listener.onComplete(userTask.isSuccessful(), userTask.isSuccessful());
-                            });
+                            .addOnCompleteListener(userTask -> listener.onComplete(userTask.isSuccessful(), userTask.isSuccessful()));
                 });
-    }
-
-    /**
-     * Removes an event and unlinks it from the organizer's event list.
-     *
-     * @param eventId the event to remove
-     * @param organizerId the organizer who owns the event
-     * @param listener the listener that receives the result
-     */
-    public void removeEvent(String eventId, String organizerId, OnCompleteListener<Boolean> listener) {
-        database.collection("events").document(eventId)
-                .delete()
-                .addOnSuccessListener(aVoid -> {
-                    database.collection("users").document(organizerId)
-                            .update("myEvents", FieldValue.arrayRemove(eventId))
-                            .addOnSuccessListener(aVoid2 -> listener.onComplete(true, true))
-                            .addOnFailureListener(e -> listener.onComplete(false, false));
-                })
-                .addOnFailureListener(e -> listener.onComplete(false, false));
     }
 
     /**
@@ -126,7 +106,11 @@ public class EventRepository {
                     }
 
                     Event event = document.toObject(Event.class);
-                    if (event != null && (event.getEventId() == null || event.getEventId().trim().isEmpty())) {
+                    if (event == null) {
+                        listener.onComplete(null, false);
+                        return;
+                    }
+                    if (event.getEventId() == null || event.getEventId().trim().isEmpty()) {
                         event.setEventId(document.getId());
                     }
                     listener.onComplete(event, true);
@@ -151,7 +135,7 @@ public class EventRepository {
                     for (QueryDocumentSnapshot document : task.getResult()) {
                         Event event = document.toObject(Event.class);
                         // Ensure the ID is attached so it can be clicked later
-                        if (event != null && (event.getEventId() == null || event.getEventId().trim().isEmpty())) {
+                        if (event.getEventId() == null || event.getEventId().trim().isEmpty()) {
                             event.setEventId(document.getId());
                         }
                         events.add(event);
@@ -179,7 +163,7 @@ public class EventRepository {
                     for (QueryDocumentSnapshot document : task.getResult()) {
                         Event event = document.toObject(Event.class);
                         // Ensure the ID is attached so it can be clicked later
-                        if (event != null && (event.getEventId() == null || event.getEventId().trim().isEmpty())) {
+                        if (event.getEventId() == null || event.getEventId().trim().isEmpty()) {
                             event.setEventId(document.getId());
                         }
                         events.add(event);
@@ -207,12 +191,10 @@ public class EventRepository {
                     List<Event> events = new ArrayList<>();
                     for (QueryDocumentSnapshot document : task.getResult()) {
                         Event event = document.toObject(Event.class);
-                        if (event != null && (event.getEventId() == null || event.getEventId().trim().isEmpty())) {
+                        if (event.getEventId() == null || event.getEventId().trim().isEmpty()) {
                             event.setEventId(document.getId());
                         }
-                        if (event != null) {
-                            events.add(event);
-                        }
+                        events.add(event);
                     }
                     listener.onComplete(events, true);
                 });
@@ -274,31 +256,4 @@ public class EventRepository {
                 .addOnFailureListener(exception -> listener.onComplete(false, false));
     }
 
-    /**
-     * Saves the draw date and lottery result state for an event.
-     *
-     * @param eventId the event ID
-     * @param drawDate the draw date to persist
-     * @param event the updated event state
-     * @param listener the listener that receives the result
-     */
-    public void updateLotteryDraw(String eventId, Date drawDate, Event event, OnCompleteListener<Boolean> listener) {
-        Map<String, Object> updates = new HashMap<>();
-        updates.put("drawDate", drawDate);
-        updates.put("capacity", event.getCapacity());
-        updates.put("limit", event.getLimit());
-        updates.put("chosen", event.getChosen());
-        updates.put("enrolled", event.getEnrolled());
-        updates.put("cancelled", event.getCancelled());
-        updates.put("notEnrolled", event.getNotEnrolled());
-        updates.put("waitingList.limit", event.getWaitingList() == null ? null : event.getWaitingList().limit);
-        updates.put("waitingList.chosen", event.getWaitingList() == null ? null : event.getWaitingList().chosen);
-        updates.put("waitingList.status", event.getWaitingList() == null ? null : event.getWaitingList().status);
-
-        database.collection("events")
-                .document(eventId)
-                .update(updates)
-                .addOnSuccessListener(unused -> listener.onComplete(true, true))
-                .addOnFailureListener(exception -> listener.onComplete(false, false));
-    }
 }

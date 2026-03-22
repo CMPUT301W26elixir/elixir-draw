@@ -9,6 +9,9 @@ import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
 import java.util.EnumMap;
 import java.util.Map;
+/**
+ * Makes QR code images from app text.
+ */
 public final class QrCodeGenerator {
 
     /**

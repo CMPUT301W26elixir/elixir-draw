@@ -1,4 +1,7 @@
 package com.example.allot.model.event;
+/**
+ * Stores the action button state and text for an event detail user.
+ */
 public class EventActionState {
     public enum ActionType {
         MANAGE,

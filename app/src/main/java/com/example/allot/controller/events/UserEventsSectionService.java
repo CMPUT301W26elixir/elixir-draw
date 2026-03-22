@@ -3,6 +3,9 @@ package com.example.allot.controller.events;
 import com.example.allot.model.event.Event;
 import java.util.ArrayList;
 import java.util.List;
+/**
+ * Sorts the user's events into the sections shown by the UI.
+ */
 public class UserEventsSectionService {
     /**
      * Represents the different event status sections shown in the registered tab.

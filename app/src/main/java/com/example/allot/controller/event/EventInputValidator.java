@@ -2,6 +2,9 @@ package com.example.allot.controller.event;
 
 import com.example.allot.model.event.EventSubmissionInput;
 import java.util.Date;
+/**
+ * Checks event input before it is saved.
+ */
 public class EventInputValidator {
     /**
      * Validates create-event input.
@@ -47,9 +50,9 @@ public class EventInputValidator {
                                        Date eventDate,
                                        Date registrationStart,
                                        Date registrationEnd) {
-        return !isBlank(title)
-                && !isBlank(location)
-                && !isBlank(description)
+        return hasText(title)
+                && hasText(location)
+                && hasText(description)
                 && price != null
                 && price >= 0
                 && participants != null
@@ -67,8 +70,8 @@ public class EventInputValidator {
      * @param value the string to check
      * @return true if the string is blank, otherwise false
      */
-    private boolean isBlank(String value) {
-        return safeString(value).trim().isEmpty();
+    private boolean hasText(String value) {
+        return !safeString(value).trim().isEmpty();
     }
 
     /**

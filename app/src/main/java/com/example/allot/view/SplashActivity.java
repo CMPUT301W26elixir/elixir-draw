@@ -1,5 +1,6 @@
 package com.example.allot.view;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -10,13 +11,11 @@ import com.example.allot.common.TextHelper;
 import com.example.allot.controller.shared.UserController;
 import com.example.allot.model.profile.User;
 import com.example.allot.view.explore.ExploreActivity;
+@SuppressLint("CustomSplashScreen")
+/**
+ * Decides the first screen to show after the splash delay finishes.
+ */
 public class SplashActivity extends AppCompatActivity {
-
-    /**
-     * Intent extra key indicating whether the user still needs to complete
-     * profile setup.
-     */
-    public static final String EXTRA_REQUIRES_PROFILE_SETUP = "com.example.allot.REQUIRES_PROFILE_SETUP";
 
     /**
      * The minimum amount of time, in milliseconds, that the splash screen

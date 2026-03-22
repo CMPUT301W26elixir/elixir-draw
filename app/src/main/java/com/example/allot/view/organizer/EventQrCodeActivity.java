@@ -16,6 +16,9 @@ import com.example.allot.view.event.EventCreatedActivity;
 import com.example.allot.view.event.EventDetailActivity;
 import com.example.allot.view.shared.AppNavigator;
 import com.example.allot.view.shared.BottomNavBarView;
+/**
+ * Displays the QR code used to share or scan into an event.
+ */
 public class EventQrCodeActivity extends AppCompatActivity {
     private static final int QR_SIZE_PX = 920;
 

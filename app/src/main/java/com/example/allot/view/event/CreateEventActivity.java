@@ -16,22 +16,10 @@ import com.example.allot.model.event.Event;
 import com.example.allot.model.event.EventFormData;
 import com.example.allot.view.shared.EventDisplayFormatter;
 import com.example.allot.view.shared.EventFormUiHelper;
+/**
+ * Shows the form for creating a new event and forwards user actions to the controller.
+ */
 public class CreateEventActivity extends AppCompatActivity {
-    private EditText eventNameInput;
-    private EditText locationInput;
-    private CheckBox geolocationCheckbox;
-    private Spinner startMonthSpinner;
-    private EditText startDayInput;
-    private EditText startYearInput;
-    private EditText priceInput;
-    private EditText descriptionInput;
-    private EditText participantsInput;
-    private Spinner registrationStartMonthSpinner;
-    private EditText registrationStartDayInput;
-    private EditText registrationStartYearInput;
-    private Spinner registrationEndMonthSpinner;
-    private EditText registrationEndDayInput;
-    private EditText registrationEndYearInput;
     private TextView nextButton;
 
     private CreateEventController createEventController;
@@ -70,21 +58,21 @@ public class CreateEventActivity extends AppCompatActivity {
      * Binds all view references used by the activity.
      */
     private void bindViews() {
-        eventNameInput = findViewById(R.id.eventNameInput);
-        locationInput = findViewById(R.id.locationInput);
-        geolocationCheckbox = findViewById(R.id.geolocationCheckbox);
-        startMonthSpinner = findViewById(R.id.startMonthSpinner);
-        startDayInput = findViewById(R.id.startDayInput);
-        startYearInput = findViewById(R.id.startYearInput);
-        priceInput = findViewById(R.id.priceInput);
-        descriptionInput = findViewById(R.id.descriptionInput);
-        participantsInput = findViewById(R.id.participantsInput);
-        registrationStartMonthSpinner = findViewById(R.id.registrationStartMonthSpinner);
-        registrationStartDayInput = findViewById(R.id.registrationStartDayInput);
-        registrationStartYearInput = findViewById(R.id.registrationStartYearInput);
-        registrationEndMonthSpinner = findViewById(R.id.registrationEndMonthSpinner);
-        registrationEndDayInput = findViewById(R.id.registrationEndDayInput);
-        registrationEndYearInput = findViewById(R.id.registrationEndYearInput);
+        EditText eventNameInput = findViewById(R.id.eventNameInput);
+        EditText locationInput = findViewById(R.id.locationInput);
+        CheckBox geolocationCheckbox = findViewById(R.id.geolocationCheckbox);
+        Spinner startMonthSpinner = findViewById(R.id.startMonthSpinner);
+        EditText startDayInput = findViewById(R.id.startDayInput);
+        EditText startYearInput = findViewById(R.id.startYearInput);
+        EditText priceInput = findViewById(R.id.priceInput);
+        EditText descriptionInput = findViewById(R.id.descriptionInput);
+        EditText participantsInput = findViewById(R.id.participantsInput);
+        Spinner registrationStartMonthSpinner = findViewById(R.id.registrationStartMonthSpinner);
+        EditText registrationStartDayInput = findViewById(R.id.registrationStartDayInput);
+        EditText registrationStartYearInput = findViewById(R.id.registrationStartYearInput);
+        Spinner registrationEndMonthSpinner = findViewById(R.id.registrationEndMonthSpinner);
+        EditText registrationEndDayInput = findViewById(R.id.registrationEndDayInput);
+        EditText registrationEndYearInput = findViewById(R.id.registrationEndYearInput);
         nextButton = findViewById(R.id.createEventNextButton);
         formUiHelper = new EventFormUiHelper(
                 eventNameInput,

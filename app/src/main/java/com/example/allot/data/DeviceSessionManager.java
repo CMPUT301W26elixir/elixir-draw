@@ -3,6 +3,9 @@ package com.example.allot.data;
 import android.content.Context;
 import android.content.SharedPreferences;
 import java.util.UUID;
+/**
+ * Manages the device ID for the current app user.
+ */
 public class DeviceSessionManager {
     private static final String PREFS_NAME = "allot_prefs";
     private static final String DEVICE_ID_KEY = "device_id";

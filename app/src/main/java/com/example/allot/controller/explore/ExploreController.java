@@ -11,6 +11,9 @@ import com.example.allot.view.shared.EventListItem;
 import com.example.allot.view.shared.EventListItemMapper;
 import java.util.ArrayList;
 import java.util.List;
+/**
+ * Loads explore screen data and handles save and unsave actions.
+ */
 public class ExploreController {
     private final EventRepository eventRepository;
     private final UserController userController;

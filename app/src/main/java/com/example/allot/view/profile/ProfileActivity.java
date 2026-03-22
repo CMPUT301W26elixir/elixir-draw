@@ -24,6 +24,9 @@ import com.example.allot.view.shared.AppNavigator;
 import com.example.allot.view.shared.BottomNavBarView;
 import com.example.allot.view.shared.SimpleTextWatcher;
 import com.example.allot.view.shared.UiHelper;
+/**
+ * Shows the main profile screen where the user can view and update their details.
+ */
 public class ProfileActivity extends AppCompatActivity {
     /**
      * Background color used for the save button when saving is not currently available.

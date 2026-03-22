@@ -12,17 +12,19 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import com.example.allot.R;
 import com.example.allot.common.AppResult;
 import com.example.allot.controller.event.EventDetailController;
 import com.example.allot.model.event.Event;
-import com.example.allot.model.event.EventActionState;
 import com.example.allot.model.event.EventDetailData;
-import com.example.allot.view.event.EditEventActivity;
 import com.example.allot.view.shared.AppDialogHelper;
 import com.example.allot.view.shared.EventDisplayFormatter;
 import com.example.allot.view.shared.UiHelper;
 import com.google.android.material.button.MaterialButton;
+/**
+ * Displays the full event detail screen and reacts to the main event actions.
+ */
 public class EventDetailActivity extends AppCompatActivity {
     public static final String EXTRA_EVENT_ID = "event_id";
     public static final String EXTRA_EVENT_TITLE = "event_title";
@@ -38,7 +40,6 @@ public class EventDetailActivity extends AppCompatActivity {
     private boolean isJoiningWaitlist;
     private boolean isLeavingWaitlist;
     private Event currentEvent;
-    private EventActionState currentDetailState;
     private EventDetailData currentScreenState;
     private boolean shouldRefreshOnResume;
 
@@ -207,7 +208,7 @@ public class EventDetailActivity extends AppCompatActivity {
                 return;
             case NONE:
             default:
-                return;
+                break;
         }
     }
 
@@ -412,7 +413,6 @@ public class EventDetailActivity extends AppCompatActivity {
 
         currentScreenState = state;
         currentEvent = state.getCurrentEvent();
-        currentDetailState = state.getCurrentDetailState();
 
         if (state.getStatus() == EventDetailData.Status.ERROR) {
             showErrorState(state.getErrorMessage());
@@ -446,7 +446,7 @@ public class EventDetailActivity extends AppCompatActivity {
                 state.isButtonEnabled(),
                 state.getButtonTextRes(),
                 state.getButtonBackgroundRes(),
-                getResources().getColor(state.getButtonTextColorRes()),
+                ContextCompat.getColor(this, state.getButtonTextColorRes()),
                 state.getSubtext(),
                 state.shouldShowEntrantCount()
         );

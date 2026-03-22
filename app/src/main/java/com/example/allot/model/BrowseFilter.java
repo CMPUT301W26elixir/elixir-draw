@@ -1,4 +1,7 @@
 package com.example.allot.model;
+/**
+ * Stores the search text and category filter for browsing events.
+ */
 public class BrowseFilter {
     private final String searchTerm;
     private final String selectedCategory;

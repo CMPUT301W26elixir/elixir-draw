@@ -3,7 +3,6 @@ package com.example.allot.data;
 import android.util.Log;
 import com.example.allot.common.OnCompleteListener;
 import com.example.allot.common.TextHelper;
-import com.example.allot.model.event.Event;
 import com.example.allot.model.profile.User;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
@@ -15,6 +14,9 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.WriteBatch;
 import java.util.ArrayList;
 import java.util.List;
+/**
+ * Handles Firestore reads and writes for users.
+ */
 public class UserRepository {
     private static final String TAG = "UserRepository";
 
@@ -43,14 +45,14 @@ public class UserRepository {
      * @param listener the listener that receives the user
      */
     public void getUserByDeviceId(String deviceId, OnCompleteListener<User> listener) {
-        // Get the document in the users collection that matches the device ID
+        // Get the Firestore user doc for this device
         DocumentReference userRef = usersCollection.document(deviceId);
 
         userRef.get().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 DocumentSnapshot document = task.getResult();
 
-                // If the document exists, convert it into an userobject
+                // Turn the doc into a User object
                 if (document != null && document.exists()) {
                     User user = document.toObject(User.class);
                     if (user != null && isBlank(user.getDeviceId())) {
@@ -58,11 +60,11 @@ public class UserRepository {
                     }
                     listener.onComplete(user, user != null);
                 } else {
-                    // No matching userwas found
+                    // This device does not have a user yet
                     listener.onComplete(null, false);
                 }
             } else {
-                // Firestore request failed to work
+                // Let the caller know the Firestore call failed
                 Log.d(TAG, "Failed to get user", task.getException());
                 listener.onComplete(null, false);
             }
@@ -112,7 +114,7 @@ public class UserRepository {
                                   String phone,
                                   boolean notiEnabled,
                                   OnCompleteListener<User> listener) {
-        // Update the userdocument with the new profile values
+        // Only update the profile fields the user can change
         DocumentReference userRef = usersCollection.document(deviceId);
         userRef.update(
                 "firstName", firstName.trim(),
@@ -122,10 +124,10 @@ public class UserRepository {
                 "notiEnabled", notiEnabled
         ).addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
-                // Reload the userso the listener gets the updated object
+                // Load the user again so the caller gets fresh data
                 getUserByDeviceId(deviceId, listener);
             } else {
-                // Update failed
+                // Let the UI know the save failed
                 Log.d(TAG, "Failed to update user", task.getException());
                 listener.onComplete(null, false);
             }
@@ -143,7 +145,7 @@ public class UserRepository {
     public void toggleSavedEvent(String deviceId, String eventId, boolean isSaving, OnCompleteListener<Boolean> listener) {
         DocumentReference userRef = usersCollection.document(deviceId);
 
-        // FieldValue allows us to atomically add or remove from an array in Firestore
+        // FieldValue lets Firestore add or remove one saved event
         FieldValue updateAction = isSaving ?
                 FieldValue.arrayUnion(eventId) :
                 FieldValue.arrayRemove(eventId);
@@ -215,22 +217,6 @@ public class UserRepository {
     }
 
     /**
-     * Removes a user from Firestore.
-     *
-     * @param deviceId the user device ID
-     */
-    public void removeUser(String deviceId) {
-        this.usersCollection.document(deviceId)
-                .delete()
-                .addOnSuccessListener(aVoid -> {
-                    Log.d(TAG, "Event " + deviceId + " removed successfully.");
-                })
-                .addOnFailureListener(e -> {
-                    Log.e(TAG, "Failed to remove event: " + e.getMessage());
-                });
-    }
-
-    /**
      * Updates a user's device ID if it is missing.
      *
      * @param deviceId the device ID to backfill
@@ -258,7 +244,7 @@ public class UserRepository {
      * @return a trimmed phone number, or an empty string if null
      */
     private String normalizePhone(String phone) {
-        // Store an empty string if phone is null, otherwise trim extra spaces
+        // Keep the phone value safe for Firestore
         return phone == null ? "" : phone.trim();
     }
 }

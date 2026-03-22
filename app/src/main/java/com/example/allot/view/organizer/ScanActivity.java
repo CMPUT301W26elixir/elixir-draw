@@ -5,6 +5,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.example.allot.R;
 import com.example.allot.view.shared.AppNavigator;
 import com.example.allot.view.shared.BottomNavBarView;
+/**
+ * Hosts the scan tab and shared bottom navigation for organizer tools.
+ */
 public class ScanActivity extends AppCompatActivity {
     private BottomNavBarView bottomNavBar;
 

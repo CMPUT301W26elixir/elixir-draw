@@ -8,6 +8,9 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+/**
+ * Reads and formats event form values for create and edit screens.
+ */
 public class EventFormService {
     public static final String ERROR_REQUIRED = "required";
     public static final String ERROR_DATE = "date";
@@ -21,9 +24,15 @@ public class EventFormService {
         dateFormat.setLenient(false);
     }
 
+    /**
+     * Checks create-event form values and turns them into input data.
+     *
+     * @param formData the raw form values entered by the user
+     * @return a good input result or a failed check result
+     */
     public AppResult<EventSubmissionInput> buildCreateEventInput(EventFormData formData) {
         ValidationResult validationResult = validateForm(formData);
-        if (!validationResult.isSuccess()) {
+        if (validationResult.isFailure()) {
             return AppResult.failure(validationResult.getMessage());
         }
 
@@ -41,9 +50,15 @@ public class EventFormService {
         ));
     }
 
+    /**
+     * Checks edit-event form values and turns them into input data.
+     *
+     * @param formData the raw form values entered by the user
+     * @return a good input result or a failed check result
+     */
     public AppResult<EventSubmissionInput> buildUpdateEventInput(EventFormData formData) {
         ValidationResult validationResult = validateForm(formData);
-        if (!validationResult.isSuccess()) {
+        if (validationResult.isFailure()) {
             return AppResult.failure(validationResult.getMessage());
         }
 
@@ -69,8 +84,8 @@ public class EventFormService {
      * @param year the entered year
      * @return true if the date input is complete, otherwise false
      */
-    public boolean isDateInputComplete(String month, String day, String year) {
-        return !isBlank(month) && !isBlank(day) && !isBlank(year);
+    private boolean isDateInputIncomplete(String month, String day, String year) {
+        return isBlank(month) || isBlank(day) || isBlank(year);
     }
 
     /**
@@ -82,7 +97,7 @@ public class EventFormService {
      * @return the parsed date, or null if parsing fails
      */
     public Date parseDate(String month, String day, String year) {
-        if (!isDateInputComplete(month, day, year)) {
+        if (isDateInputIncomplete(month, day, year)) {
             return null;
         }
 
@@ -182,9 +197,9 @@ public class EventFormService {
                 || isBlank(formData.getPrice())
                 || isBlank(formData.getDescription())
                 || isBlank(formData.getParticipants())
-                || !isDateInputComplete(formData.getEventMonth(), formData.getEventDay(), formData.getEventYear())
-                || !isDateInputComplete(formData.getRegistrationStartMonth(), formData.getRegistrationStartDay(), formData.getRegistrationStartYear())
-                || !isDateInputComplete(formData.getRegistrationEndMonth(), formData.getRegistrationEndDay(), formData.getRegistrationEndYear())) {
+                || isDateInputIncomplete(formData.getEventMonth(), formData.getEventDay(), formData.getEventYear())
+                || isDateInputIncomplete(formData.getRegistrationStartMonth(), formData.getRegistrationStartDay(), formData.getRegistrationStartYear())
+                || isDateInputIncomplete(formData.getRegistrationEndMonth(), formData.getRegistrationEndDay(), formData.getRegistrationEndYear())) {
             return ValidationResult.failure(ERROR_REQUIRED);
         }
 
@@ -257,8 +272,8 @@ public class EventFormService {
             return new ValidationResult(true, null, eventDate, registrationStart, registrationEnd, price, participants);
         }
 
-        private boolean isSuccess() {
-            return success;
+        private boolean isFailure() {
+            return !success;
         }
 
         private String getMessage() {

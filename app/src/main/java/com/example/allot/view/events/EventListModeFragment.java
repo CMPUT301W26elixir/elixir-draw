@@ -17,6 +17,10 @@ import com.example.allot.view.shared.EventListAdapter.OnEventClickListener;
 import com.example.allot.view.shared.EventListItem;
 import java.util.ArrayList;
 import java.util.List;
+
+/**
+ * Shows either the user's own events or saved events in one fragment layout.
+ */
 public class EventListModeFragment extends Fragment {
     private static final String ARG_MODE = "mode";
     private static final String ARG_SAVED_IDS = "saved_ids";
@@ -29,6 +33,11 @@ public class EventListModeFragment extends Fragment {
     private EventListAdapter adapter;
     private UserEventsController userEventsController;
 
+    /**
+     * Creates a fragment configured to show the user's own events.
+     *
+     * @return a fragment instance for the My Events mode
+     */
     public static EventListModeFragment newMyEventsInstance() {
         EventListModeFragment fragment = new EventListModeFragment();
         Bundle args = new Bundle();
@@ -37,6 +46,12 @@ public class EventListModeFragment extends Fragment {
         return fragment;
     }
 
+    /**
+     * Creates a fragment configured to show saved events.
+     *
+     * @param savedIds the saved event IDs to load
+     * @return a fragment instance for the Saved Events mode
+     */
     public static EventListModeFragment newSavedEventsInstance(ArrayList<String> savedIds) {
         EventListModeFragment fragment = new EventListModeFragment();
         Bundle args = new Bundle();
@@ -46,6 +61,14 @@ public class EventListModeFragment extends Fragment {
         return fragment;
     }
 
+    /**
+     * Inflates the fragment layout and loads the requested event list.
+     *
+     * @param inflater the inflater used to create the view
+     * @param container the optional parent view group
+     * @param savedInstanceState the previously saved state bundle
+     * @return the fragment root view
+     */
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -73,6 +96,9 @@ public class EventListModeFragment extends Fragment {
         return view;
     }
 
+    /**
+     * Loads either the hosted events list or the saved events list based on the current mode.
+     */
     private void loadItems() {
         if (MODE_MY_EVENTS.equals(getMode())) {
             userEventsController.loadMyEventsList((items, success) -> updateUi(items));
@@ -90,6 +116,11 @@ public class EventListModeFragment extends Fragment {
         userEventsController.loadSavedEvents(savedIds, (items, success) -> updateUi(items));
     }
 
+    /**
+     * Updates the empty state and list visibility after items are loaded.
+     *
+     * @param items the items returned by the controller
+     */
     private void updateUi(List<EventListItem> items) {
         if (items == null || items.isEmpty()) {
             recyclerView.setVisibility(View.GONE);
@@ -103,11 +134,21 @@ public class EventListModeFragment extends Fragment {
         adapter.updateEvents(items);
     }
 
+    /**
+     * Reads the current fragment mode from the arguments bundle.
+     *
+     * @return the active list mode
+     */
     private String getMode() {
         Bundle args = getArguments();
         return args == null ? MODE_MY_EVENTS : args.getString(ARG_MODE, MODE_MY_EVENTS);
     }
 
+    /**
+     * Builds the empty-state message for the current list mode.
+     *
+     * @return the empty-state text shown when no events are available
+     */
     private String getEmptyMessage() {
         return MODE_SAVED_EVENTS.equals(getMode())
                 ? "You haven't saved any events yet."

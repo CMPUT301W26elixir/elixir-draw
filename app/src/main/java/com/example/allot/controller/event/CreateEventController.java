@@ -10,6 +10,9 @@ import com.example.allot.model.event.Event;
 import com.example.allot.model.event.EventFormData;
 import com.example.allot.model.event.EventSubmissionInput;
 import java.util.UUID;
+/**
+ * Handles checking and saving for the create-event flow.
+ */
 public class CreateEventController {
     private final EventRepository eventRepository;
     private final EventFormService eventFormService;

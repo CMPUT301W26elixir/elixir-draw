@@ -12,6 +12,9 @@ import com.example.allot.R;
 import com.example.allot.controller.event.EventDetailController;
 import com.example.allot.view.shared.UiHelper;
 import com.google.android.material.button.MaterialButton;
+/**
+ * Lets a selected entrant accept or decline an event offer.
+ */
 public class OfferResponseActivity extends AppCompatActivity {
     public static final String EXTRA_EVENT_ID = "event_id";
     public static final String EXTRA_EVENT_TITLE = "event_title";

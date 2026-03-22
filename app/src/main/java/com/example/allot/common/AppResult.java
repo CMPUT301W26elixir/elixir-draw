@@ -1,4 +1,9 @@
 package com.example.allot.common;
+/**
+ * Holds the result of an app action plus any data and message info.
+ *
+ * @param <T> the type of data carried by the result
+ */
 public class AppResult<T> {
     private final boolean success;
     private final T data;

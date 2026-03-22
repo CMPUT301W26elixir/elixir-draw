@@ -21,6 +21,9 @@ import com.example.allot.view.organizer.EventEntrantsActivity;
 import com.example.allot.view.shared.SimpleTextWatcher;
 import com.example.allot.view.shared.UiHelper;
 import com.google.android.material.button.MaterialButton;
+/**
+ * Lets organizers review entrants and run the event lottery draw.
+ */
 public class RunLotteryActivity extends AppCompatActivity {
     public static final String EXTRA_EVENT_ID = "event_id";
 

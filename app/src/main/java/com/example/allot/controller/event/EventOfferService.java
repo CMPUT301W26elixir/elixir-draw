@@ -5,6 +5,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
+/**
+ * Handles the rules for event offers and extra draws.
+ */
 public class EventOfferService {
     /**
      * Handles the loaded event snapshot for a declined offer, updates the event state,

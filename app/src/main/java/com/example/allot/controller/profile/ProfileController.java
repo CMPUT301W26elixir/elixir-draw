@@ -6,6 +6,10 @@ import com.example.allot.controller.shared.UserController;
 import com.example.allot.model.profile.ProfileActionResult;
 import com.example.allot.model.profile.ProfileFormSnapshot;
 import com.example.allot.model.profile.User;
+import java.util.Objects;
+/**
+ * Handles profile loading, compare checks, and updates.
+ */
 public class ProfileController {
     private final UserController userController;
 
@@ -47,9 +51,7 @@ public class ProfileController {
                                    ProfileFormSnapshot currentSnapshot,
                                    boolean isSaving,
                                    boolean isDeleting) {
-        boolean hasUnsavedChanges = originalSnapshot == null
-                ? currentSnapshot != null
-                : !originalSnapshot.equals(currentSnapshot);
+        boolean hasUnsavedChanges = !Objects.equals(originalSnapshot, currentSnapshot);
         return hasUnsavedChanges && !isSaving && !isDeleting;
     }
 

@@ -11,8 +11,8 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.allot.R;
 import com.example.allot.controller.explore.ExploreController;
@@ -21,11 +21,13 @@ import com.example.allot.view.events.EventListModeFragment;
 import com.example.allot.view.shared.AppNavigator;
 import com.example.allot.view.shared.BottomNavBarView;
 import com.example.allot.view.shared.EventListAdapter;
-import com.example.allot.view.shared.EventListAdapter.OnEventClickListener;
 import com.example.allot.view.shared.EventListItem;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+/**
+ * Shows the explore screen where users can browse, search, and save events.
+ */
 public class ExploreActivity extends AppCompatActivity {
     private static final String TAG = "Allot_Logic";
 
@@ -40,7 +42,7 @@ public class ExploreActivity extends AppCompatActivity {
     private FrameLayout fragmentContainer;
     private LinearLayout exploreContainer;
 
-    // Added Variables for the Filters
+    // These chips help filter the event list
     private TextView chipFortnite, chipSports, chipArts, chipScience;
     private String selectedChipFilter = "";
 
@@ -66,7 +68,7 @@ public class ExploreActivity extends AppCompatActivity {
         exploreContainer = findViewById(R.id.exploreContainer);
         browseController = new ExploreController(this);
 
-        // Bind the chips
+        // Set up the chips before loading events
         chipFortnite = findViewById(R.id.chipFortnite);
         chipSports = findViewById(R.id.chipSports);
         chipArts = findViewById(R.id.chipArts);
@@ -85,7 +87,8 @@ public class ExploreActivity extends AppCompatActivity {
 
                 browseController.toggleSavedEvent(userSavedEvents, event.getEventId(), isSaving, (savedEventIds, success) -> {
                     userSavedEvents = new ArrayList<>(savedEventIds == null ? new ArrayList<>() : savedEventIds);
-                    event.isSaved = success ? isSaving : !isSaving;
+                    // Update the heart after the save call finishes
+                    event.isSaved = success == isSaving;
                     eventListAdapter.notifyItemChanged(position);
                 });
             }
@@ -121,7 +124,8 @@ public class ExploreActivity extends AppCompatActivity {
             selectedChipFilter = toggleChipFilter(selectedChipFilter, clickedText);
 
             updateChipUI();
-            loadBrowseEvents(searchInput.getText().toString()); // Refresh the list
+            // Load the list again with the new chip filter
+            loadBrowseEvents(searchInput.getText().toString());
         };
 
         chipFortnite.setOnClickListener(chipClickListener);
@@ -129,7 +133,8 @@ public class ExploreActivity extends AppCompatActivity {
         chipArts.setOnClickListener(chipClickListener);
         chipScience.setOnClickListener(chipClickListener);
 
-        updateChipUI(); // Set initial backgrounds
+        // Show the starting chip look
+        updateChipUI();
     }
 
     /**
@@ -149,7 +154,7 @@ public class ExploreActivity extends AppCompatActivity {
      * @param intent the new intent delivered to the activity
      */
     @Override
-    protected void onNewIntent(Intent intent) {
+    protected void onNewIntent(@NonNull Intent intent) {
         super.onNewIntent(intent);
         setIntent(intent);
         if ("saved".equals(intent.getStringExtra("navigate_to"))) {
@@ -291,7 +296,7 @@ public class ExploreActivity extends AppCompatActivity {
     }
 
     private String toggleChipFilter(String currentFilter, String clickedChipText) {
-        String safeCurrentFilter = normalize(clickedChipText == null ? currentFilter : currentFilter);
+        String safeCurrentFilter = normalize(currentFilter);
         String safeClickedChip = normalize(clickedChipText);
         return safeCurrentFilter.equals(safeClickedChip) ? "" : safeClickedChip;
     }

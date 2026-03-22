@@ -11,6 +11,9 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.allot.R;
 import java.util.ArrayList;
 import java.util.List;
+/**
+ * Shows event list items in the shared RecyclerView rows.
+ */
 public class EventListAdapter extends RecyclerView.Adapter<EventListAdapter.EventViewHolder> {
 
     /**
@@ -31,7 +34,7 @@ public class EventListAdapter extends RecyclerView.Adapter<EventListAdapter.Even
          * @param event the event whose heart icon was clicked
          * @param position the position of the event in the adapter
          */
-        void onHeartClick(EventListItem event, int position); // ADDED for the save feature
+        void onHeartClick(EventListItem event, int position);
     }
 
     private final List<EventListItem> events;
@@ -90,24 +93,23 @@ public class EventListAdapter extends RecyclerView.Adapter<EventListAdapter.Even
         holder.priceText.setText(event.getPrice());
         holder.daysLeftText.setText(event.daysLeft);
 
-        // --- ADDED: Heart UI Toggle Logic ---
+        // Show the right heart icon for this item
         if (event.isSaved) {
             holder.heartIcon.setImageResource(R.drawable.ic_heart_filled);
             holder.heartIcon.setColorFilter(holder.itemView.getContext().getResources().getColor(R.color.bottom_nav_selected));
         } else {
-            // Uses your ic_heart_outline.xml
             holder.heartIcon.setImageResource(R.drawable.ic_heart_outline);
             holder.heartIcon.setColorFilter(holder.itemView.getContext().getResources().getColor(R.color.white));
         }
 
         holder.heartIcon.setOnClickListener(v -> {
             if (onEventClickListener != null) {
-                event.isSaved = !event.isSaved; // Visually toggle immediately
+                // Flip the icon right away
+                event.isSaved = !event.isSaved;
                 notifyItemChanged(position);
                 onEventClickListener.onHeartClick(event, position);
             }
         });
-        // -------------------------------------
 
         int imageBackground = (position % 2 == 0) ? R.drawable.bg_event_image_one : R.drawable.bg_event_image_two;
         holder.imageFrame.setBackgroundResource(imageBackground);

@@ -1,6 +1,7 @@
 package com.example.allot.view.organizer;
 
 import android.Manifest;
+import android.content.ActivityNotFoundException;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -17,6 +18,7 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -35,6 +37,9 @@ import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Locale;
+/**
+ * Shows entrant lists and organizer actions for a specific event.
+ */
 public class EventEntrantsActivity extends AppCompatActivity {
     public static final String EXTRA_EVENT_ID = "event_id";
     private static final int EXPORT_STORAGE_PERMISSION_REQUEST = 1001;
@@ -207,15 +212,14 @@ public class EventEntrantsActivity extends AppCompatActivity {
      */
     private void applyTabStyle(TextView tabView, boolean isSelected) {
         tabView.setBackgroundResource(isSelected ? R.drawable.bg_manage_entrant_tab_selected : R.drawable.bg_manage_entrant_tab_unselected);
-        tabView.setTextColor(isSelected ? Color.parseColor("#1D1D1D") : getResources().getColor(R.color.text_secondary));
+        tabView.setTextColor(isSelected ? Color.parseColor("#1D1D1D") : ContextCompat.getColor(this, R.color.text_secondary));
     }
 
     /**
      * Binds a list of entrants into the entrant container.
      *
-     * @param entrantIds the entrant IDs to display
+     * @param entrantItems the entrant items to display
      * @param emptyMessageRes the message to show if the list is empty
-     * @param subtitleRes the subtitle resource shown under each entrant
      */
     private void bindEntrants(List<LotteryEntrantItem> entrantItems, int emptyMessageRes) {
         entrantsContainer.removeAllViews();
@@ -400,12 +404,11 @@ public class EventEntrantsActivity extends AppCompatActivity {
                 .putExtra(Intent.EXTRA_STREAM, fileUri)
                 .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
 
-        if (viewIntent.resolveActivity(getPackageManager()) != null) {
+        try {
             startActivity(Intent.createChooser(viewIntent, getString(R.string.manage_entrants_open_csv)));
-            return;
+        } catch (ActivityNotFoundException exception) {
+            startActivity(Intent.createChooser(shareIntent, getString(R.string.manage_entrants_open_csv)));
         }
-
-        startActivity(Intent.createChooser(shareIntent, getString(R.string.manage_entrants_open_csv)));
     }
 
     /**
@@ -416,7 +419,7 @@ public class EventEntrantsActivity extends AppCompatActivity {
      * @param grantResults the grant results for the requested permissions
      */
     @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode != EXPORT_STORAGE_PERMISSION_REQUEST) {
             return;

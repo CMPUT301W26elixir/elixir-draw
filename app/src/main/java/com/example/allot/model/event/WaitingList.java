@@ -3,12 +3,20 @@ package com.example.allot.model.event;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
-public class WaitingList {
-    public ArrayList<String> list;      // all entrants
-    public ArrayList<String> chosen;    // selected entrants
-    public HashMap<String, Boolean> status;  // enrolled status
 
-    public int limit = -1;               // max waiting list size
+/**
+ * Tracks everyone who joined an event waiting list and the draw results for them.
+ */
+public class WaitingList {
+    /** Stores every user who joined the waiting list. */
+    public ArrayList<String> list;
+    /** Stores the entrants selected during the draw. */
+    public ArrayList<String> chosen;
+    /** Tracks whether each selected entrant has accepted their spot. */
+    public HashMap<String, Boolean> status;
+
+    /** Limits how many entrants can be selected, or stays -1 when no limit is set yet. */
+    public int limit = -1;
 
     /**
      * Creates an empty WaitingList for Firestore document deserialization.
@@ -32,18 +40,6 @@ public class WaitingList {
     }
 
     /**
-     * Adds a user to the waiting list if there is space available
-     * or if the waiting list is unlimited.
-     *
-     * @param user the user ID to add to the waiting list
-     */
-    public void joinWaitingList(String user){
-        if ((this.limit > 0 && this.list.size() < this.limit) || this.limit == -1){
-            this.list.add(user);
-        }
-    }
-
-    /**
      * Randomly selects entrants from the waiting list up to the limit
      * and initializes their enrollment status to false.
      */
@@ -52,8 +48,9 @@ public class WaitingList {
         Random rand = new Random();
 
         for (int i = 0; i < this.limit; i++){
-            if (list.size() == 0) break;
+            if (list.isEmpty()) break;
 
+            // Pick a random entrant and skip repeats
             int index = rand.nextInt(this.list.size());
             if (!chosenIndex.contains(index)){
                 chosenIndex.add(index);
@@ -61,32 +58,11 @@ public class WaitingList {
                 this.chosen.add(user);
                 this.status.put(user, false);
             } else {
-                if (chosenIndex.size() >= list.size()) break; // can't pick more than available
-                i--; // try again
+                if (chosenIndex.size() >= list.size()) break; // Stop if every entrant was already checked
+                i--; // Try this spot again
             }
         }
 
-    }
-
-    /**
-     * Replaces a selected entrant by randomly choosing a user who
-     * has not already been selected.
-     */
-    public void replace(){
-        if (chosen.size() >= list.size()) return;
-
-        Random rand = new Random();
-        boolean keepGoing = true;
-
-        while(keepGoing){
-            int index = rand.nextInt(this.list.size());
-            String user = this.list.get(index);
-            if(!this.chosen.contains(user)){
-                this.chosen.add(user);
-                this.status.put(user, false);
-                keepGoing = false;
-            }
-        }
     }
 
     /**
@@ -97,6 +73,7 @@ public class WaitingList {
     public ArrayList<String> enrolled(){
         ArrayList<String> signed = new ArrayList<>();
         for (String user : this.chosen){
+            // True means this chosen user joined
             if(Boolean.TRUE.equals(this.status.get(user))){
                 signed.add(user);
             }
@@ -112,6 +89,7 @@ public class WaitingList {
     public ArrayList<String> notEnrolled(){
         ArrayList<String> notSigned = new ArrayList<>();
         for (String user : this.chosen){
+            // False means this chosen user did not join
             if(Boolean.FALSE.equals(this.status.get(user))){
                 notSigned.add(user);
             }

@@ -7,6 +7,9 @@ import com.example.allot.common.TextHelper;
 import com.example.allot.data.DeviceSessionManager;
 import com.example.allot.data.UserRepository;
 import com.example.allot.model.profile.User;
+/**
+ * Holds shared user and session actions across the app.
+ */
 public class UserController {
     private final UserRepository userRepository;
     private final DeviceSessionManager deviceSessionManager;
@@ -57,14 +60,11 @@ public class UserController {
     }
 
     /**
-     * Creates a new userwith default values and saves it to Firestore.
+     * Creates a new user with default values and saves it to Firestore.
      *
-     * @paramlistener the listener that receives the created userand success result
+     * @param deviceId the device ID for the created user
+     * @param listener the listener that receives the created user and success result
      */
-    public void createNewUser(String deviceId) {
-        createNewUser(deviceId, null);
-    }
-
     private void createNewUser(String deviceId, OnCompleteListener<User> listener) {
         userRepository.createNewUser(deviceId, listener);
     }
@@ -154,14 +154,6 @@ public class UserController {
         return TextHelper.isBlank(value);
     }
 
-    /**
-     * Removes the current userfrom Firestore.
-     *
-     * @paramlistener the listener that receives the result of the deletion
-     */
-    public void removeUser(String deviceId) {
-        this.userRepository.removeUser(deviceId);
-    }
 }
 
 

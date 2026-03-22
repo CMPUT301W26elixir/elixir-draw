@@ -16,6 +16,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+/**
+ * Handles the organizer lottery flow from load to save.
+ */
 public class LotteryController {
     private final EventRepository eventRepository;
     private final UserController userController;

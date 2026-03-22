@@ -1,4 +1,7 @@
 package com.example.allot.qr;
+/**
+ * Builds the text saved inside event QR codes.
+ */
 public final class QrCodePayloadBuilder {
     private static final String EVENT_URI_PREFIX = "allot://event/";
 

@@ -13,6 +13,9 @@ import com.example.allot.model.event.EventSubmissionInput;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+/**
+ * Handles loading, checking, and updating an event.
+ */
 public class EditEventController {
     private final EventRepository eventRepository;
     private final EventFormService eventFormService;
@@ -49,7 +52,6 @@ public class EditEventController {
      * @param participants the fallback participant count
      * @param registrationStart the fallback registration start
      * @param registrationEnd the fallback registration end
-     * @param category the fallback category
      * @return the fallback form values
      */
     public EventFormData buildFallbackViewModel(String title,
@@ -68,8 +70,7 @@ public class EditEventController {
                 description,
                 participants,
                 registrationStart,
-                registrationEnd,
-                false
+                registrationEnd
         );
     }
 
@@ -93,7 +94,6 @@ public class EditEventController {
     /**
      * Returns whether save should be enabled for the current form.
      *
-     * @param currentEvent the current loaded event
      * @param currentFormData the form values shown in the view
      * @param originalSnapshot the original loaded snapshot
      * @param isSaving whether a save is in progress
@@ -210,27 +210,11 @@ public class EditEventController {
     }
 
     /**
-     * Builds the form values for a loaded event.
+     * Turns a saved event into form values for the edit screen.
      *
-     * @param event the event to display
-     * @return the loaded form values
+     * @param event the event being edited
+     * @return form data ready to bind into the UI
      */
-    public EventFormData buildLoadedViewModel(Event event) {
-        return buildViewModel(event);
-    }
-
-    public EventFormData buildLoadedViewModel(String title,
-                                              String location,
-                                              String eventDate,
-                                              String price,
-                                              String description,
-                                              String participants,
-                                              String registrationStart,
-                                              String registrationEnd,
-                                              boolean geolocationEnabled) {
-        return buildViewModel(title, location, eventDate, price, description, participants, registrationStart, registrationEnd, geolocationEnabled);
-    }
-
     public EventFormData buildViewModel(Event event) {
         if (event == null) {
             return EventFormData.forBinding("", "", false, "", "", "", "", "", "", "", "", "", "", "", "");
@@ -264,12 +248,11 @@ public class EditEventController {
                                          String description,
                                          String participants,
                                          String registrationStart,
-                                         String registrationEnd,
-                                         boolean geolocationEnabled) {
+                                         String registrationEnd) {
         return EventFormData.forBinding(
                 safeValue(title),
                 safeValue(location),
-                geolocationEnabled,
+                false,
                 monthFromFormattedDate(eventDate),
                 dayFromFormattedDate(eventDate),
                 yearFromFormattedDate(eventDate),
@@ -285,6 +268,12 @@ public class EditEventController {
         );
     }
 
+    /**
+     * Builds the short date text shown while the user edits an event.
+     *
+     * @param formData the current form values
+     * @return a readable summary date, or an empty string when the date is incomplete
+     */
     public String buildSummaryDate(EventFormData formData) {
         if (formData == null) {
             return "";

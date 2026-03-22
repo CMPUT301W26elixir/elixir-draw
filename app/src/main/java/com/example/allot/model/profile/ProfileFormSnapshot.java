@@ -1,4 +1,7 @@
 package com.example.allot.model.profile;
+/**
+ * Holds the current profile form values so the UI can spot unsaved changes.
+ */
 public class ProfileFormSnapshot {
     private final String firstName;
     private final String lastName;

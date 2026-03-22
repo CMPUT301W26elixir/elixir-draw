@@ -9,6 +9,9 @@ import com.example.allot.view.shared.EventListItem;
 import com.example.allot.view.shared.EventListItemMapper;
 import java.util.ArrayList;
 import java.util.List;
+/**
+ * Loads and builds the event lists used by the user's event screens.
+ */
 public class UserEventsController {
     public static class RegisteredEventGroups {
         private final List<EventListItem> selectedItems;
@@ -112,9 +115,10 @@ public class UserEventsController {
     public void loadMyEventsList(OnCompleteListener<List<EventListItem>> listener) {
         userController.loadOrCreateUser((user, success) -> {
             List<String> eventIds = success && user != null ? user.getMyEvents() : new ArrayList<>();
+            List<String> savedEventIds = success && user != null ? user.getSavedEvents() : new ArrayList<>();
             if (eventIds != null && !eventIds.isEmpty()) {
                 loadEventsByIds(eventIds, (events, loadSuccess) -> listener.onComplete(
-                        eventListItemMapper.mapEvents(events, user.getSavedEvents() != null ? user.getSavedEvents() : new ArrayList<>()),
+                        eventListItemMapper.mapEvents(events, savedEventIds),
                         loadSuccess
                 ));
             } else {

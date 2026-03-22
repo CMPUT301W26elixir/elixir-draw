@@ -13,6 +13,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+/**
+ * Loads entrant data and actions for the event entrants screen.
+ */
 public class EventEntrantsController {
     public enum Tab {
         SELECTED,

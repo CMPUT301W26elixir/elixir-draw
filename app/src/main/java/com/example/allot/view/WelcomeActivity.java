@@ -6,6 +6,9 @@ import android.widget.Button;
 import androidx.appcompat.app.AppCompatActivity;
 import com.example.allot.R;
 import com.example.allot.view.profile.NameActivity;
+/**
+ * Shows the welcome screen at the start of the onboarding flow.
+ */
 public class WelcomeActivity extends AppCompatActivity {
 
     /**

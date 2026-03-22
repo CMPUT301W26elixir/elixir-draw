@@ -7,6 +7,9 @@ import android.widget.EditText;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import com.example.allot.R;
+/**
+ * Collects the user's first and last name during profile setup.
+ */
 public class NameActivity extends AppCompatActivity {
 
     /**

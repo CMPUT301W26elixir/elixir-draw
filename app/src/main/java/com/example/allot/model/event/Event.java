@@ -3,6 +3,9 @@ package com.example.allot.model.event;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+/**
+ * Holds an event and all of the saved data tied to it.
+ */
 public class Event {
     private String eventId;
     private String organizerId;

@@ -14,6 +14,9 @@ import com.example.allot.view.organizer.EventQrCodeActivity;
 import com.example.allot.view.shared.AppNavigator;
 import com.example.allot.view.shared.BottomNavBarView;
 import com.example.allot.view.shared.UiHelper;
+/**
+ * Shows the confirmation screen after a new event is created.
+ */
 public class EventCreatedActivity extends AppCompatActivity {
     public static final String EXTRA_EVENT_ID = "event_id";
     public static final String EXTRA_EVENT_TITLE = "event_title";

@@ -11,9 +11,11 @@ import com.example.allot.model.event.EventDetailData;
 import com.example.allot.model.profile.User;
 import com.example.allot.view.shared.EventDisplayFormatter;
 import com.example.allot.view.shared.UiHelper;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+/**
+ * Builds and updates the data shown on the event detail screen.
+ */
 public class EventDetailController {
     private final EventRepository eventRepository;
     private final UserController userController;
@@ -84,13 +86,13 @@ public class EventDetailController {
      */
     public void loadEventActionState(String eventId, OnCompleteListener<EventDetailData> listener) {
         if (isBlank(eventId)) {
-            listener.onComplete(buildErrorState("Could not load this event right now."), false);
+            listener.onComplete(buildErrorState(), false);
             return;
         }
 
         eventRepository.getEventById(eventId, (event, success) -> {
             if (!success || event == null) {
-                listener.onComplete(buildErrorState("Could not load this event right now."), false);
+                listener.onComplete(buildErrorState(), false);
                 return;
             }
 
@@ -135,6 +137,12 @@ public class EventDetailController {
         });
     }
 
+    /**
+     * Accepts the user's current offer for the given event.
+     *
+     * @param eventId the event whose offer is being accepted
+     * @param listener the callback that receives the action result
+     */
     public void acceptOffer(String eventId, OnCompleteListener<AppResult<Void>> listener) {
         eventRepository.acceptOffer(eventId, userController.getCurrentDeviceId(), (result, success) -> {
             if (!success || result == null || !result) {
@@ -146,6 +154,12 @@ public class EventDetailController {
         });
     }
 
+    /**
+     * Declines the user's current offer and saves any new offer changes.
+     *
+     * @param eventId the event whose offer is being declined
+     * @param listener the callback that receives the action result
+     */
     public void declineOffer(String eventId, OnCompleteListener<AppResult<Void>> listener) {
         eventRepository.getEventById(eventId, (event, success) -> {
             if (!success || event == null) {
@@ -237,23 +251,43 @@ public class EventDetailController {
         );
     }
 
+    /**
+     * Builds the location text used on manage screens.
+     *
+     * @param event the loaded event
+     * @param fallbackLocation the fallback location passed through the intent
+     * @return the location text shown in the management UI
+     */
     public String buildManageLocationText(Event event, String fallbackLocation) {
         return event == null
                 ? fallbackLocation
                 : EventDisplayFormatter.detailLocation(event.getLocation());
     }
 
+    /**
+     * Builds the event date text used on manage screens.
+     *
+     * @param event the loaded event
+     * @param fallbackDate the fallback date passed through the intent
+     * @return the date text shown in the management UI
+     */
     public String buildManageDateText(Event event, String fallbackDate) {
         return event == null
                 ? fallbackDate
                 : EventDisplayFormatter.shortDate(event.getEventDate());
     }
 
+    /**
+     * Formats a registration date for manage screens.
+     *
+     * @param date the registration date to format
+     * @return the formatted registration text, or a fallback when the date is missing
+     */
     public String buildManageRegistrationText(Date date) {
         return EventDisplayFormatter.shortDate(date);
     }
 
-    private EventDetailData buildErrorState(String message) {
+    private EventDetailData buildErrorState() {
         return new EventDetailData(
                 EventDetailData.Status.ERROR,
                 null, null, null, null, null, null, null, null, null,
@@ -266,7 +300,7 @@ public class EventDetailController {
                 R.color.black,
                 null,
                 false,
-                message,
+                "Could not load this event right now.",
                 null,
                 null,
                 EventDetailData.NextAction.NONE

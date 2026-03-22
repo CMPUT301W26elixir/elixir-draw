@@ -19,6 +19,9 @@ import com.example.allot.view.shared.BottomNavBarView;
 import com.example.allot.view.shared.EventListItem;
 import com.example.allot.view.shared.UiHelper;
 import java.util.List;
+/**
+ * Shows the user's registered and hosted event lists.
+ */
 public class UserEventsActivity extends AppCompatActivity {
 
     /**
@@ -213,7 +216,11 @@ public class UserEventsActivity extends AppCompatActivity {
      * Classifies and binds registered events into their corresponding status sections:
      * selected, waiting, not selected, and past.
      *
-     * @param events the list of registered events to categorize and display
+     * @param selectedItems the selected event items to display
+     * @param waitingItems the waiting-list event items to display
+     * @param notSelectedItems the not-selected event items to display
+     * @param pastItems the past event items to display
+     * @param stateMessageRes the optional state message resource to show above the sections
      */
     private void bindRegisteredSections(List<EventListItem> selectedItems,
                                         List<EventListItem> waitingItems,
@@ -237,7 +244,9 @@ public class UserEventsActivity extends AppCompatActivity {
     /**
      * Splits hosted events into ongoing and completed sections and displays them.
      *
-     * @param events the list of hosted events to bind
+     * @param ongoingItems the ongoing hosted event items to display
+     * @param completedItems the completed hosted event items to display
+     * @param stateMessageRes the optional state message resource to show above the sections
      */
     private void bindHostedSections(List<EventListItem> ongoingItems,
                                     List<EventListItem> completedItems,
@@ -260,7 +269,7 @@ public class UserEventsActivity extends AppCompatActivity {
      * <p>If the list is empty, an empty-state message is shown instead.
      *
      * @param container the layout container that will hold the event cards
-     * @param events the events to display in the section
+     * @param items the event items to display in the section
      * @param emptyMessageRes the string resource to show when the section is empty
      */
     private void bindSection(LinearLayout container, List<EventListItem> items, int emptyMessageRes) {
@@ -298,7 +307,7 @@ public class UserEventsActivity extends AppCompatActivity {
      * to open the event detail screen.
      *
      * @param cardView the card view to populate
-     * @param event the event whose information should be displayed
+     * @param eventItem the event item whose information should be displayed
      */
     private void bindCard(View cardView, EventListItem eventItem) {
         View imageBackground = cardView.findViewById(R.id.imageBackground);
@@ -345,7 +354,7 @@ public class UserEventsActivity extends AppCompatActivity {
      * <p>If the event is null or does not contain a valid event ID, the method returns
      * without doing anything.
      *
-     * @param event the event to display in detail
+     * @param eventItem the event item to display in detail
      */
     private void openEventDetailScreen(EventListItem eventItem) {
         if (eventItem == null || TextUtils.isEmpty(eventItem.eventId)) {

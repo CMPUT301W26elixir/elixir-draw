@@ -1,6 +1,9 @@
 package com.example.allot.view.shared;
 
 import com.example.allot.model.event.Event;
+/**
+ * Holds the values shown in one event list row.
+ */
 public class EventListItem {
     public String eventId;
     public String title;

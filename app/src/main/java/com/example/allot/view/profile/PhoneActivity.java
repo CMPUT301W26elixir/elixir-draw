@@ -7,6 +7,9 @@ import android.widget.EditText;
 import androidx.appcompat.app.AppCompatActivity;
 import com.example.allot.R;
 import com.example.allot.view.events.NotificationsActivity;
+/**
+ * Collects the user's phone number during profile setup.
+ */
 public class PhoneActivity extends AppCompatActivity {
 
     /**

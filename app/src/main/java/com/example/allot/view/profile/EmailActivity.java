@@ -8,6 +8,9 @@ import android.widget.EditText;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import com.example.allot.R;
+/**
+ * Collects the user's email address during profile setup.
+ */
 public class EmailActivity extends AppCompatActivity {
 
     /**

@@ -1,6 +1,9 @@
 package com.example.allot.model.profile;
 
 import java.util.ArrayList;
+/**
+ * Holds a user profile and the event lists tied to that user.
+ */
 public class User {
     private String deviceId;
     private String firstName;
@@ -18,9 +21,9 @@ public class User {
      * Creates an empty User object with initialized event lists.
      */
     public User(){
-        this.history = new ArrayList<String>();
-        this.myEvents = new ArrayList<String>();
-        this.savedEvents = new ArrayList<String>();
+        this.history = new ArrayList<>();
+        this.myEvents = new ArrayList<>();
+        this.savedEvents = new ArrayList<>();
     }
 
     /**
@@ -41,9 +44,9 @@ public class User {
         this.phone = phone;
         this.notiEnabled = true;
         this.role = role;
-        this.history = new ArrayList<String>();
-        this.myEvents = new ArrayList<String>();
-        this.savedEvents = new ArrayList<String>();
+        this.history = new ArrayList<>();
+        this.myEvents = new ArrayList<>();
+        this.savedEvents = new ArrayList<>();
     }
 
     /**
@@ -134,6 +137,7 @@ public class User {
      *
      * @param email the email address to assign
      */
+    @SuppressWarnings("unused")
     public void setEmail(String email) {
         this.email = email;
     }
@@ -170,6 +174,7 @@ public class User {
      *
      * @param notiEnabled true to enable notifications, false otherwise
      */
+    @SuppressWarnings("unused")
     public void setNotiEnabled(boolean notiEnabled) {
         this.notiEnabled = notiEnabled;
     }
@@ -179,6 +184,7 @@ public class User {
      *
      * @return the user's role
      */
+    @SuppressWarnings("unused")
     public String getRole() {
         return role;
     }
@@ -188,17 +194,9 @@ public class User {
      *
      * @param role the role to assign
      */
+    @SuppressWarnings("unused")
     public void setRole(String role) {
         this.role = role;
-    }
-
-    /**
-     * Adds an event ID to the user's history.
-     *
-     * @param eventID the event ID to add
-     */
-    public void addHistory(String eventID){
-        getHistory().add(eventID);
     }
 
     /**
@@ -213,30 +211,9 @@ public class User {
         return history;
     }
 
+    @SuppressWarnings("unused")
     public void setHistory(ArrayList<String> history) {
         this.history = history;
-    }
-
-    /**
-     * Adds an event ID to the user's created events list.
-     * Sets the user's role to organizer when the first event is added.
-     *
-     * @param eventID the event ID to add
-     */
-    public void addEvents(String eventID){
-        getMyEvents().add(eventID);
-        if (getMyEvents().size() == 1){
-            role = "organizer";
-        }
-    }
-
-    /**
-     * Returns the list of events created by the user.
-     *
-     * @return the list of created event IDs
-     */
-    public ArrayList<String> getEvents(){
-        return getMyEvents();
     }
 
     public ArrayList<String> getMyEvents() {
@@ -246,28 +223,9 @@ public class User {
         return myEvents;
     }
 
+    @SuppressWarnings("unused")
     public void setMyEvents(ArrayList<String> myEvents) {
         this.myEvents = myEvents;
-    }
-
-    /**
-     * Adds an event ID to the user's saved events list if it is not already saved.
-     *
-     * @param eventID the event ID to save
-     */
-    public void addSavedEvent(String eventID) {
-        if (!getSavedEvents().contains(eventID)) {
-            getSavedEvents().add(eventID);
-        }
-    }
-
-    /**
-     * Removes an event ID from the user's saved events list.
-     *
-     * @param eventID the event ID to remove
-     */
-    public void removeSavedEvent(String eventID) {
-        getSavedEvents().remove(eventID);
     }
 
     /**
@@ -282,6 +240,7 @@ public class User {
         return savedEvents;
     }
 
+    @SuppressWarnings("unused")
     public void setSavedEvents(ArrayList<String> savedEvents) {
         this.savedEvents = savedEvents;
     }

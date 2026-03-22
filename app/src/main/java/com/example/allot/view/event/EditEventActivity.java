@@ -25,6 +25,9 @@ import com.example.allot.view.organizer.EventEntrantsActivity;
 import com.example.allot.view.shared.EventFormUiHelper;
 import com.example.allot.view.shared.SimpleTextWatcher;
 import com.example.allot.view.shared.UiHelper;
+/**
+ * Shows the edit-event form and updates the screen as the user changes values.
+ */
 public class EditEventActivity extends AppCompatActivity {
     private static final int SAVE_INACTIVE_COLOR = Color.parseColor("#A6A8A5");
     private static final int SAVE_ACTIVE_COLOR = Color.parseColor("#FFFFFF");
@@ -252,11 +255,11 @@ public class EditEventActivity extends AppCompatActivity {
                 return;
             }
 
-            bindEvent(event, true);
+            bindEvent(event);
         });
     }
 
-    private void bindEvent(Event event, boolean captureOriginalSnapshot) {
+    private void bindEvent(Event event) {
         if (event == null) {
             return;
         }
@@ -269,9 +272,7 @@ public class EditEventActivity extends AppCompatActivity {
         bindFormViewModel(viewModel);
         updateSummary(viewModel.getTitle(), viewModel.getLocation(), manageEventController.buildSummaryDate(readFormData()), currentCategory);
 
-        if (captureOriginalSnapshot) {
-            originalFormSnapshot = manageEventController.buildSnapshot(readFormData());
-        }
+        originalFormSnapshot = manageEventController.buildSnapshot(readFormData());
 
         isBindingEvent = false;
         updateSaveButtonState();
@@ -344,7 +345,7 @@ public class EditEventActivity extends AppCompatActivity {
      * Reloads the event after a successful save so the UI reflects the latest values.
      */
     private void reloadEventAfterSave(AppResult<Event> result) {
-        bindEvent(result.getData(), true);
+        bindEvent(result.getData());
         setResult(RESULT_OK);
         Toast.makeText(this, result.getMessageResId(), Toast.LENGTH_SHORT).show();
     }
