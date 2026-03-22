@@ -113,6 +113,14 @@ public class EventDetailViewServiceTest {
         assertEquals(3, service.getSelectionCriteriaCount(event));
     }
 
+    @Test
+    public void buildFooterState_returnsDisabledJoinDefaultsWhenStateMissing() {
+        EventDetailViewService.FooterState footerState = service.buildFooterState(null);
+
+        assertFalse(footerState.isButtonEnabled());
+        assertEquals(R.string.event_detail_join_waiting_list, footerState.getButtonTextRes());
+    }
+
     private Event buildEvent() {
         Event event = new Event();
         event.setWaitingList(new WaitingList());

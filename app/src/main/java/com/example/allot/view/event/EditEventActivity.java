@@ -7,7 +7,6 @@ import android.text.Editable;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -26,9 +25,6 @@ import com.example.allot.view.organizer.EventEntrantsActivity;
 import com.example.allot.view.shared.EventFormUiHelper;
 import com.example.allot.view.shared.SimpleTextWatcher;
 import com.example.allot.view.shared.UiHelper;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
 public class EditEventActivity extends AppCompatActivity {
     private static final int SAVE_INACTIVE_COLOR = Color.parseColor("#A6A8A5");
     private static final int SAVE_ACTIVE_COLOR = Color.parseColor("#FFFFFF");
@@ -214,43 +210,6 @@ public class EditEventActivity extends AppCompatActivity {
     }
 
     /**
-     * Configures a month spinner with the available month values and custom styling.
-     *
-     * @param spinner the spinner to configure
-     */
-    private void setupMonthSpinner(Spinner spinner) {
-        ArrayAdapter<CharSequence> adapter = new ArrayAdapter<CharSequence>(
-                this,
-                android.R.layout.simple_spinner_item,
-                getResources().getTextArray(R.array.create_event_months)
-        ) {
-            @Override
-            public View getView(int position, View convertView, android.view.ViewGroup parent) {
-                View view = super.getView(position, convertView, parent);
-                TextView textView = view.findViewById(android.R.id.text1);
-                if (textView != null) {
-                    textView.setTextColor(position == 0 ? getResources().getColor(R.color.text_secondary) : Color.WHITE);
-                    textView.setTextSize(16f);
-                    textView.setPadding(12, textView.getPaddingTop(), 12, textView.getPaddingBottom());
-                }
-                return view;
-            }
-
-            @Override
-            public View getDropDownView(int position, View convertView, android.view.ViewGroup parent) {
-                View view = super.getDropDownView(position, convertView, parent);
-                TextView textView = view.findViewById(android.R.id.text1);
-                if (textView != null) {
-                    textView.setTextColor(Color.BLACK);
-                }
-                return view;
-            }
-        };
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinner.setAdapter(adapter);
-    }
-
-    /**
      * Populates the UI using values passed through the launching intent.
      */
     private void populateUiFromIntent() {
@@ -295,24 +254,6 @@ public class EditEventActivity extends AppCompatActivity {
 
             bindEvent(event, true);
         });
-    }
-
-    /**
-     * Binds the loaded Firestore event snapshot to the UI.
-     *
-     * @param event the loaded Firestore event snapshot
-     */
-    private void bindEventSnapshot(Event event) {
-        bindEvent(event, false);
-    }
-
-    /**
-     * Binds an event model to the form and summary UI.
-     *
-     * @param event the event to display
-     */
-    private void bindEvent(Event event) {
-        bindEvent(event, false);
     }
 
     private void bindEvent(Event event, boolean captureOriginalSnapshot) {
@@ -364,19 +305,6 @@ public class EditEventActivity extends AppCompatActivity {
             shouldRefreshOnResume = false;
             loadEventFromFirestore();
         }
-    }
-
-    /**
-     * Clears the date fields for the provided month, day, and year inputs.
-     *
-     * @param monthSpinner the month spinner
-     * @param dayInput the day input
-     * @param yearInput the year input
-     */
-    private void clearDateFields(Spinner monthSpinner, EditText dayInput, EditText yearInput) {
-        monthSpinner.setSelection(0);
-        dayInput.setText("");
-        yearInput.setText("");
     }
 
     /**
@@ -457,97 +385,6 @@ public class EditEventActivity extends AppCompatActivity {
         return formUiHelper.readFormData();
     }
 
-    private EventFormSnapshot readFormSnapshot() {
-        return manageEventController.buildSnapshot(readFormData());
-    }
-
-    private void showValidationError(String message) {
-        Toast.makeText(this, R.string.create_event_validation_required, Toast.LENGTH_SHORT).show();
-    }
-
-    private String readText(EditText editText) {
-        return editText.getText() == null ? "" : editText.getText().toString().trim();
-    }
-
-    /**
-     * Returns the current date field values as a formatted date string.
-     *
-     * @param monthSpinner the month spinner
-     * @param dayInput the day input
-     * @param yearInput the year input
-     * @return the formatted date string, or an empty string if invalid
-     */
-    private String currentDateValue(Spinner monthSpinner, EditText dayInput, EditText yearInput) {
-        String month = readMonth(monthSpinner);
-        String day = readText(dayInput);
-        String year = readText(yearInput);
-        if (TextUtils.isEmpty(month) || TextUtils.isEmpty(day) || TextUtils.isEmpty(year)) {
-            return "";
-        }
-        return month + " " + day + ", " + year;
-    }
-
-    /**
-     * Populates month, day, and year inputs from a formatted date string.
-     *
-     * @param value the formatted date string
-     * @param monthSpinner the month spinner
-     * @param dayInput the day input
-     * @param yearInput the year input
-     */
-    private void populateDateFields(String value, Spinner monthSpinner, EditText dayInput, EditText yearInput) {
-        if (TextUtils.isEmpty(value)) {
-            return;
-        }
-
-        setSpinnerToMonth(monthSpinner, monthFromFormattedDate(value));
-        dayInput.setText(dayFromFormattedDate(value));
-        yearInput.setText(yearFromFormattedDate(value));
-    }
-
-    private String monthFromFormattedDate(String value) {
-        if (TextUtils.isEmpty(value) || value.length() < 3) {
-            return "";
-        }
-        return value.substring(0, 3);
-    }
-
-    private String dayFromFormattedDate(String value) {
-        String[] parts = value.split(" ");
-        if (parts.length < 2) {
-            return "";
-        }
-        return parts[1].replace(",", "");
-    }
-
-    private String yearFromFormattedDate(String value) {
-        String[] parts = value.split(" ");
-        if (parts.length < 3) {
-            return "";
-        }
-        return parts[2];
-    }
-
-    /**
-     * Sets a spinner to the entry that matches the provided month text.
-     *
-     * @param spinner the spinner to update
-     * @param month the month text to match
-     */
-    private void setSpinnerToMonth(Spinner spinner, String month) {
-        if (spinner == null || TextUtils.isEmpty(month)) {
-            return;
-        }
-
-        for (int i = 0; i < spinner.getCount(); i++) {
-            Object item = spinner.getItemAtPosition(i);
-            if (item != null && month.equalsIgnoreCase(item.toString())) {
-                spinner.setSelection(i);
-                return;
-            }
-        }
-    }
-
     /**
      * Applies the summary card image based on the event category.
      *
@@ -555,73 +392,6 @@ public class EditEventActivity extends AppCompatActivity {
      */
     private void applySummaryImage(String category) {
         eventImageBackground.setBackgroundResource(UiHelper.eventImageBackgroundRes(category));
-    }
-
-    /**
-     * Determines which summary image should be used for the given category.
-     *
-     * @param category the event category
-     * @return true if the primary image should be used, otherwise false
-     */
-    private boolean shouldUsePrimaryImage(String category) {
-        if (TextUtils.isEmpty(category)) {
-            return true;
-        }
-        return Math.abs(category.hashCode()) % 2 == 0;
-    }
-
-    /**
-     * Formats a date using the activity's date format.
-     *
-     * @param date the date to format
-     * @return the formatted date string, or null if the date is null
-     */
-    private String formatDate(Date date) {
-        if (date == null) {
-            return null;
-        }
-        return new SimpleDateFormat("MMM d, yyyy", Locale.getDefault()).format(date);
-    }
-
-    /**
-     * Formats a price value for display in the form.
-     *
-     * @param price the price to format
-     * @return the formatted price string
-     */
-    private String formatPriceValue(Double price) {
-        if (price == null) {
-            return "";
-        }
-        if (Math.rint(price) == price) {
-            return String.format(Locale.getDefault(), "%.0f", price);
-        }
-        return String.format(Locale.getDefault(), "%.2f", price);
-    }
-
-    /**
-     * Trims a string value if it is not null.
-     *
-     * @param value the text to clean
-     * @return the trimmed text, or null if the value is null
-     */
-    private String cleanText(String value) {
-        return value == null ? null : value.trim();
-    }
-
-    /**
-     * Returns the value if non-empty, otherwise returns the fallback text.
-     *
-     * @param value the primary text value
-     * @param fallback the fallback text
-     * @return the value or the fallback
-     */
-    private String defaultText(String value, String fallback) {
-        return UiHelper.defaultText(value, fallback);
-    }
-
-    private String readMonth(Spinner spinner) {
-        return spinner.getSelectedItemPosition() <= 0 ? "" : spinner.getSelectedItem().toString();
     }
 
     /**
@@ -634,9 +404,9 @@ public class EditEventActivity extends AppCompatActivity {
     }
 
     private void updateSummary(String title, String location, String date, String category) {
-        summaryTitleText.setText(defaultText(title, getString(R.string.default_event_name)));
-        summaryLocationText.setText(defaultText(location, getString(R.string.default_street_name)));
-        summaryDateText.setText(defaultText(date, getString(R.string.default_date)));
+        summaryTitleText.setText(UiHelper.defaultText(title, getString(R.string.default_event_name)));
+        summaryLocationText.setText(UiHelper.defaultText(location, getString(R.string.default_street_name)));
+        summaryDateText.setText(UiHelper.defaultText(date, getString(R.string.default_date)));
         applySummaryImage(category);
     }
 }

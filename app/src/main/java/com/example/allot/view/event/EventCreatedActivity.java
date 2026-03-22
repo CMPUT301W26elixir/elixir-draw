@@ -97,9 +97,9 @@ public class EventCreatedActivity extends AppCompatActivity {
      * Displays the event information on the summary card and selects the background image.
      */
     private void bindEventCard() {
-        titleText.setText(defaultText(currentEventTitle, getString(R.string.default_event_name)));
-        locationText.setText(defaultText(currentEventLocation, getString(R.string.default_street_name)));
-        dateText.setText(defaultText(currentEventDate, getString(R.string.default_date)));
+        titleText.setText(UiHelper.defaultText(currentEventTitle, getString(R.string.default_event_name)));
+        locationText.setText(UiHelper.defaultText(currentEventLocation, getString(R.string.default_street_name)));
+        dateText.setText(UiHelper.defaultText(currentEventDate, getString(R.string.default_date)));
         imageBackground.setBackgroundResource(UiHelper.eventImageBackgroundRes(currentEventCategory));
     }
 
@@ -161,17 +161,6 @@ public class EventCreatedActivity extends AppCompatActivity {
 
     private void openHostingScreen() {
         AppNavigator.openMyEventsHosting(this, true);
-    }
-
-    /**
-     * Returns the given value if it is not empty, otherwise returns the fallback text.
-     *
-     * @param value the text value to check
-     * @param fallback the fallback text to use if the value is empty
-     * @return the value or the fallback text
-     */
-    private String defaultText(String value, String fallback) {
-        return UiHelper.defaultText(value, fallback);
     }
 }
 

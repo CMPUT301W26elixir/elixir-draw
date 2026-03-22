@@ -14,9 +14,7 @@ import com.example.allot.qr.QrCodeGenerator;
 import com.example.allot.qr.QrCodePayloadBuilder;
 import com.example.allot.view.event.EventCreatedActivity;
 import com.example.allot.view.event.EventDetailActivity;
-import com.example.allot.view.events.UserEventsActivity;
-import com.example.allot.view.explore.ExploreActivity;
-import com.example.allot.view.profile.ProfileActivity;
+import com.example.allot.view.shared.AppNavigator;
 import com.example.allot.view.shared.BottomNavBarView;
 public class EventQrCodeActivity extends AppCompatActivity {
     private static final int QR_SIZE_PX = 920;
@@ -78,7 +76,7 @@ public class EventQrCodeActivity extends AppCompatActivity {
         qrErrorText = findViewById(R.id.qrErrorText);
 
         ImageButton backButton = findViewById(R.id.backButton);
-        backButton.setOnClickListener(view -> getOnBackPressedDispatcher().onBackPressed());
+        backButton.setOnClickListener(view -> AppNavigator.openMyEventsHosting(this, true));
 
         TextView viewEventPageButton = findViewById(R.id.viewEventPageButton);
         viewEventPageButton.setOnClickListener(view -> openEventPage());
@@ -110,11 +108,11 @@ public class EventQrCodeActivity extends AppCompatActivity {
      */
     private void setupBottomNav() {
         bottomNavBar.setSelectedTab(BottomNavBarView.Tab.MY_EVENTS);
-        bottomNavBar.setOnTabClickListener(BottomNavBarView.Tab.EXPLORE, view -> openExploreScreen());
-        bottomNavBar.setOnTabClickListener(BottomNavBarView.Tab.SAVED, view -> openSavedScreen());
-        bottomNavBar.setOnTabClickListener(BottomNavBarView.Tab.MY_EVENTS, view -> openHostingScreen());
-        bottomNavBar.setOnTabClickListener(BottomNavBarView.Tab.SCAN, view -> openScanScreen());
-        bottomNavBar.setOnTabClickListener(BottomNavBarView.Tab.PROFILE, view -> openProfileScreen());
+        bottomNavBar.setOnTabClickListener(BottomNavBarView.Tab.EXPLORE, view -> AppNavigator.openExplore(this, true));
+        bottomNavBar.setOnTabClickListener(BottomNavBarView.Tab.SAVED, view -> AppNavigator.openSaved(this, true));
+        bottomNavBar.setOnTabClickListener(BottomNavBarView.Tab.MY_EVENTS, view -> AppNavigator.openMyEventsHosting(this, true));
+        bottomNavBar.setOnTabClickListener(BottomNavBarView.Tab.SCAN, view -> AppNavigator.openScan(this, true));
+        bottomNavBar.setOnTabClickListener(BottomNavBarView.Tab.PROFILE, view -> AppNavigator.openProfile(this, true));
     }
 
     /**
@@ -141,62 +139,6 @@ public class EventQrCodeActivity extends AppCompatActivity {
         overridePendingTransition(0, 0);
     }
 
-    /**
-     * Opens the explore screen and clears intermediate activities.
-     */
-    private void openExploreScreen() {
-        Intent intent = new Intent(this, ExploreActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-        startActivity(intent);
-        overridePendingTransition(0, 0);
-        finish();
-    }
-
-    /**
-     * Opens the saved events screen and clears intermediate activities.
-     */
-    private void openSavedScreen() {
-        Intent intent = new Intent(this, ExploreActivity.class);
-        intent.putExtra("navigate_to", "saved");
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-        startActivity(intent);
-        overridePendingTransition(0, 0);
-        finish();
-    }
-
-    /**
-     * Opens the hosting tab of the My Events screen and clears intermediate activities.
-     */
-    private void openHostingScreen() {
-        Intent intent = new Intent(this, UserEventsActivity.class);
-        intent.putExtra(UserEventsActivity.EXTRA_INITIAL_TAB, UserEventsActivity.INITIAL_TAB_HOSTING);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-        startActivity(intent);
-        overridePendingTransition(0, 0);
-        finish();
-    }
-
-    /**
-     * Opens the scan screen and clears intermediate activities.
-     */
-    private void openScanScreen() {
-        Intent intent = new Intent(this, ScanActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-        startActivity(intent);
-        overridePendingTransition(0, 0);
-        finish();
-    }
-
-    /**
-     * Opens the profile screen and clears intermediate activities.
-     */
-    private void openProfileScreen() {
-        Intent intent = new Intent(this, ProfileActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-        startActivity(intent);
-        overridePendingTransition(0, 0);
-        finish();
-    }
 }
 
 

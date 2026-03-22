@@ -19,6 +19,7 @@ import com.example.allot.model.lottery.LotteryEntrantItem;
 import com.example.allot.model.lottery.RunLotteryData;
 import com.example.allot.view.organizer.EventEntrantsActivity;
 import com.example.allot.view.shared.SimpleTextWatcher;
+import com.example.allot.view.shared.UiHelper;
 import com.google.android.material.button.MaterialButton;
 public class RunLotteryActivity extends AppCompatActivity {
     public static final String EXTRA_EVENT_ID = "event_id";
@@ -190,8 +191,8 @@ public class RunLotteryActivity extends AppCompatActivity {
         lotteryController.startLotteryDraw(
                 currentEventId,
                 currentEvent,
-                currentText(drawDateInput),
-                currentText(attendeesToSelectInput),
+                UiHelper.readText(drawDateInput),
+                UiHelper.readText(attendeesToSelectInput),
                 (AppResult<Event> result, boolean success) -> {
             isStartingDraw = false;
             updateActionState();
@@ -234,16 +235,6 @@ public class RunLotteryActivity extends AppCompatActivity {
         } catch (NumberFormatException exception) {
             return null;
         }
-    }
-
-    /**
-     * Returns the trimmed text currently entered in the given EditText.
-     *
-     * @param editText the input field to read from
-     * @return the trimmed text, or an empty string if no text exists
-     */
-    private String currentText(EditText editText) {
-        return editText.getText() == null ? "" : editText.getText().toString().trim();
     }
 
     /**
