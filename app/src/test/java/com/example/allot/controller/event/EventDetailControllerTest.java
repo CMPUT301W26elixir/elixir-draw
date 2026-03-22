@@ -27,7 +27,6 @@ public class EventDetailControllerTest {
                 eventRepository,
                 userController,
                 new EventActionStateFactory(),
-                new EventOfferService(),
                 new EventDetailViewService()
         );
     }
@@ -56,6 +55,28 @@ public class EventDetailControllerTest {
         });
     }
 
+    @Test
+    public void declineOffer_returnsSuccessMessageWhenRepositorySucceeds() {
+        eventRepository.declineOfferSuccess = true;
+
+        controller.declineOffer("event-1", (AppResult<Void> result, boolean success) -> {
+            assertTrue(success);
+            assertTrue(result.isSuccess());
+            assertEquals(Integer.valueOf(R.string.event_offer_decline_success), result.getMessageResId());
+        });
+    }
+
+    @Test
+    public void declineOffer_returnsFailureMessageWhenRepositoryFails() {
+        eventRepository.declineOfferSuccess = false;
+
+        controller.declineOffer("event-1", (AppResult<Void> result, boolean success) -> {
+            assertTrue(!success);
+            assertTrue(!result.isSuccess());
+            assertEquals(Integer.valueOf(R.string.event_offer_action_failure), result.getMessageResId());
+        });
+    }
+
     private Event buildEvent() {
         Event event = new Event();
         event.setEventId("event-1");
@@ -81,6 +102,7 @@ public class EventDetailControllerTest {
 
         private Event event;
         private boolean leaveWaitingListSuccess;
+        private boolean declineOfferSuccess;
 
         @Override
         public void getEventById(String eventId, com.example.allot.common.OnCompleteListener<Event> listener) {
@@ -90,6 +112,11 @@ public class EventDetailControllerTest {
         @Override
         public void leaveWaitingList(String eventId, String deviceId, com.example.allot.common.OnCompleteListener<Boolean> listener) {
             listener.onComplete(leaveWaitingListSuccess, leaveWaitingListSuccess);
+        }
+
+        @Override
+        public void declineOffer(String eventId, String deviceId, com.example.allot.common.OnCompleteListener<Boolean> listener) {
+            listener.onComplete(declineOfferSuccess, declineOfferSuccess);
         }
     }
 

@@ -20,7 +20,6 @@ public class EventDetailController {
     private final EventRepository eventRepository;
     private final UserController userController;
     private final EventActionStateFactory eventActionStateFactory;
-    private final EventOfferService eventOfferService;
     private final EventDetailViewService eventDetailViewService;
 
     public EventDetailController(android.content.Context context) {
@@ -28,7 +27,6 @@ public class EventDetailController {
                 new EventRepository(),
                 new UserController(context),
                 new EventActionStateFactory(),
-                new EventOfferService(),
                 new EventDetailViewService()
         );
     }
@@ -36,12 +34,10 @@ public class EventDetailController {
     EventDetailController(EventRepository eventRepository,
                           UserController userController,
                           EventActionStateFactory eventActionStateFactory,
-                          EventOfferService eventOfferService,
                           EventDetailViewService eventDetailViewService) {
         this.eventRepository = eventRepository;
         this.userController = userController;
         this.eventActionStateFactory = eventActionStateFactory;
-        this.eventOfferService = eventOfferService;
         this.eventDetailViewService = eventDetailViewService;
     }
 
@@ -161,26 +157,12 @@ public class EventDetailController {
      * @param listener the callback that receives the action result
      */
     public void declineOffer(String eventId, OnCompleteListener<AppResult<Void>> listener) {
-        eventRepository.getEventById(eventId, (event, success) -> {
-            if (!success || event == null) {
+        eventRepository.declineOffer(eventId, userController.getCurrentDeviceId(), (result, success) -> {
+            if (!success || result == null || !result) {
                 listener.onComplete(AppResult.failure(R.string.event_offer_action_failure), false);
                 return;
             }
-
-            Event updatedEvent = eventOfferService.buildDeclinedOfferState(event, userController.getCurrentDeviceId());
-            if (updatedEvent == null) {
-                listener.onComplete(AppResult.failure(R.string.event_offer_action_failure), false);
-                return;
-            }
-
-            eventRepository.saveDeclinedOfferState(eventId, updatedEvent, (result, saveSuccess) -> {
-                if (!saveSuccess || result == null || !result) {
-                    listener.onComplete(AppResult.failure(R.string.event_offer_action_failure), false);
-                    return;
-                }
-
-                listener.onComplete(AppResult.success(null, R.string.event_offer_decline_success), true);
-            });
+            listener.onComplete(AppResult.success(null, R.string.event_offer_decline_success), true);
         });
     }
 

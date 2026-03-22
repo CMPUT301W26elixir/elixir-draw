@@ -1,11 +1,14 @@
 package com.example.allot.data;
 
 import com.example.allot.common.OnCompleteListener;
+import com.example.allot.controller.event.EventOfferService;
 import com.example.allot.model.event.Event;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.Transaction;
+import com.google.firebase.firestore.WriteBatch;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -14,6 +17,7 @@ import java.util.Map;
  */
 public class EventRepository {
     private final FirebaseFirestore database;
+    private final EventOfferService eventOfferService = new EventOfferService();
 
     /**
      * Creates an EventRepository and connects it to Firestore.
@@ -39,18 +43,13 @@ public class EventRepository {
      * @param listener the listener that receives the result
      */
     public void createNewEventForUser(Event event, String organizerId, OnCompleteListener<Boolean> listener) {
-        database.collection("events").document(event.getEventId())
-                .set(event)
-                .addOnCompleteListener(task -> {
-                    if (!task.isSuccessful()) {
-                        listener.onComplete(false, false);
-                        return;
-                    }
-                    // Event saved, now update the user
-                    database.collection("users").document(organizerId)
-                            .update("myEvents", FieldValue.arrayUnion(event.getEventId()))
-                            .addOnCompleteListener(userTask -> listener.onComplete(userTask.isSuccessful(), userTask.isSuccessful()));
-                });
+        WriteBatch batch = database.batch();
+        batch.set(database.collection("events").document(event.getEventId()), event);
+        batch.update(database.collection("users").document(organizerId),
+                "myEvents", FieldValue.arrayUnion(event.getEventId()));
+        batch.commit()
+                .addOnSuccessListener(unused -> listener.onComplete(true, true))
+                .addOnFailureListener(exception -> listener.onComplete(false, false));
     }
 
     /**
@@ -235,24 +234,42 @@ public class EventRepository {
     }
 
     /**
-     * Saves the declined-offer state for the current event.
+     * Declines the current user's offer and saves any replacement selection atomically.
      *
      * @param eventId the event ID
-     * @param event the updated event state
+     * @param deviceId the user device ID
      * @param listener the listener that receives the result
      */
-    public void saveDeclinedOfferState(String eventId, Event event, OnCompleteListener<Boolean> listener) {
-        database.collection("events")
-                .document(eventId)
-                .update(
-                        "chosen", event.getChosen(),
-                        "enrolled", event.getEnrolled(),
-                        "cancelled", event.getCancelled(),
-                        "notEnrolled", event.getNotEnrolled(),
-                        "waitingList.chosen", event.getWaitingList().chosen,
-                        "waitingList.status", event.getWaitingList().status
-                )
-                .addOnSuccessListener(unused -> listener.onComplete(true, true))
+    public void declineOffer(String eventId, String deviceId, OnCompleteListener<Boolean> listener) {
+        database.runTransaction((Transaction.Function<Boolean>) transaction -> {
+                    DocumentSnapshot snapshot = transaction.get(database.collection("events").document(eventId));
+                    if (!snapshot.exists()) {
+                        return false;
+                    }
+
+                    Event event = snapshot.toObject(Event.class);
+                    if (event == null) {
+                        return false;
+                    }
+                    if (event.getEventId() == null || event.getEventId().trim().isEmpty()) {
+                        event.setEventId(snapshot.getId());
+                    }
+
+                    Event updatedEvent = eventOfferService.buildDeclinedOfferState(event, deviceId);
+                    if (updatedEvent == null) {
+                        return false;
+                    }
+
+                    transaction.update(snapshot.getReference(),
+                            "chosen", updatedEvent.getChosen(),
+                            "enrolled", updatedEvent.getEnrolled(),
+                            "cancelled", updatedEvent.getCancelled(),
+                            "notEnrolled", updatedEvent.getNotEnrolled(),
+                            "waitingList.chosen", updatedEvent.getWaitingList().chosen,
+                            "waitingList.status", updatedEvent.getWaitingList().status);
+                    return true;
+                })
+                .addOnSuccessListener(result -> listener.onComplete(Boolean.TRUE.equals(result), Boolean.TRUE.equals(result)))
                 .addOnFailureListener(exception -> listener.onComplete(false, false));
     }
 

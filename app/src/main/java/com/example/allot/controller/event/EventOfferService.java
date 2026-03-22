@@ -1,6 +1,7 @@
 package com.example.allot.controller.event;
 
 import com.example.allot.model.event.Event;
+import com.example.allot.model.event.WaitingList;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -22,18 +23,16 @@ public class EventOfferService {
             return null;
         }
 
-        if (event.getWaitingList() == null) {
-            event.getWaitingList();
-        }
-        if (event.getWaitingList() == null) {
+        WaitingList waitingList = event.getWaitingList();
+        if (waitingList == null) {
             return null;
         }
 
-        if (event.getWaitingList().chosen == null) {
-            event.getWaitingList().chosen = new ArrayList<>();
+        if (waitingList.chosen == null) {
+            waitingList.chosen = new ArrayList<>();
         }
-        if (event.getWaitingList().status == null) {
-            event.getWaitingList().status = new HashMap<>();
+        if (waitingList.status == null) {
+            waitingList.status = new HashMap<>();
         }
         if (event.getChosen() == null) {
             event.setChosen(new ArrayList<>());
@@ -48,8 +47,8 @@ public class EventOfferService {
             event.setNotEnrolled(new ArrayList<>());
         }
 
-        event.getWaitingList().chosen.remove(declinedDeviceId);
-        event.getWaitingList().status.remove(declinedDeviceId);
+        waitingList.chosen.remove(declinedDeviceId);
+        waitingList.status.remove(declinedDeviceId);
         event.getChosen().remove(declinedDeviceId);
         event.getEnrolled().remove(declinedDeviceId);
         if (!event.getCancelled().contains(declinedDeviceId)) {
@@ -60,9 +59,9 @@ public class EventOfferService {
             addReplacementOffer(event, declinedDeviceId);
         }
 
-        event.setChosen(new ArrayList<>(event.getWaitingList().chosen));
-        event.setEnrolled(event.getWaitingList().enrolled());
-        event.setNotEnrolled(event.getWaitingList().notEnrolled());
+        event.setChosen(new ArrayList<>(waitingList.chosen));
+        event.setEnrolled(waitingList.enrolled());
+        event.setNotEnrolled(waitingList.notEnrolled());
         return event;
     }
 
@@ -74,19 +73,24 @@ public class EventOfferService {
      * @param declinedDeviceId the device ID of the user who declined the offer
      */
     private void addReplacementOffer(Event event, String declinedDeviceId) {
-        if (event == null || event.getWaitingList() == null || event.getWaitingList().list == null) {
+        if (event == null) {
+            return;
+        }
+
+        WaitingList waitingList = event.getWaitingList();
+        if (waitingList == null || waitingList.list == null) {
             return;
         }
 
         List<String> eligibleEntrants = new ArrayList<>();
-        for (String entrantId : event.getWaitingList().list) {
+        for (String entrantId : waitingList.list) {
             if (isBlank(entrantId)) {
                 continue;
             }
             if (entrantId.equals(declinedDeviceId)) {
                 continue;
             }
-            if (event.getWaitingList().chosen.contains(entrantId)) {
+            if (waitingList.chosen.contains(entrantId)) {
                 continue;
             }
             if (event.getCancelled().contains(entrantId)) {
@@ -100,8 +104,8 @@ public class EventOfferService {
         }
 
         String replacementId = eligibleEntrants.get(new Random().nextInt(eligibleEntrants.size()));
-        event.getWaitingList().chosen.add(replacementId);
-        event.getWaitingList().status.put(replacementId, false);
+        waitingList.chosen.add(replacementId);
+        waitingList.status.put(replacementId, false);
     }
 
     /**

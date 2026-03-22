@@ -19,6 +19,7 @@ import java.util.List;
  */
 public class UserRepository {
     private static final String TAG = "UserRepository";
+    static final int MAX_BATCH_OPERATIONS = 500;
 
     private final CollectionReference usersCollection;
 
@@ -178,42 +179,147 @@ public class UserRepository {
                         return;
                     }
 
-                    WriteBatch batch = database.batch();
-                    List<DocumentReference> organizerEvents = new ArrayList<>();
-
+                    List<EventCleanupTarget> cleanupTargets = new ArrayList<>();
                     for (QueryDocumentSnapshot document : task.getResult()) {
-                        String organizerId = document.getString("organizerId");
-                        if (deviceId.equals(organizerId)) {
-                            organizerEvents.add(document.getReference());
-                            continue;
-                        }
-
-                        batch.update(document.getReference(),
-                                "waitingList.list", FieldValue.arrayRemove(deviceId),
-                                "waitingList.chosen", FieldValue.arrayRemove(deviceId),
-                                "chosen", FieldValue.arrayRemove(deviceId),
-                                "enrolled", FieldValue.arrayRemove(deviceId),
-                                "cancelled", FieldValue.arrayRemove(deviceId),
-                                "notEnrolled", FieldValue.arrayRemove(deviceId),
-                                FieldPath.of("waitingList", "status", deviceId), FieldValue.delete());
+                        cleanupTargets.add(new EventCleanupTarget(
+                                document.getReference().getPath(),
+                                document.getString("organizerId")));
                     }
 
-                    for (DocumentReference organizerEvent : organizerEvents) {
-                        batch.delete(organizerEvent);
-                    }
-
-                    batch.delete(usersCollection.document(deviceId));
-
-                    batch.commit().addOnCompleteListener(commitTask -> {
-                        if (!commitTask.isSuccessful()) {
-                            Log.d(TAG, "Failed to delete user profile", commitTask.getException());
-                            listener.onComplete(false, false);
-                            return;
-                        }
-
-                        listener.onComplete(true, true);
-                    });
+                    List<CleanupOperation> cleanupOperations = buildCleanupOperations(deviceId, cleanupTargets);
+                    cleanupOperations.add(CleanupOperation.deleteUser(deviceId));
+                    List<List<CleanupOperation>> batches = chunkCleanupOperations(cleanupOperations);
+                    commitCleanupOperations(database, batches, 0, listener);
                 });
+    }
+
+    void commitCleanupOperations(FirebaseFirestore database,
+                                 List<List<CleanupOperation>> batches,
+                                 int startIndex,
+                                 OnCompleteListener<Boolean> listener) {
+        if (startIndex >= batches.size()) {
+            listener.onComplete(true, true);
+            return;
+        }
+
+        WriteBatch batch = database.batch();
+        for (CleanupOperation operation : batches.get(startIndex)) {
+            operation.apply(batch, database, usersCollection);
+        }
+
+        batch.commit().addOnCompleteListener(commitTask -> {
+            if (!commitTask.isSuccessful()) {
+                Log.d(TAG, "Failed to delete user profile", commitTask.getException());
+                listener.onComplete(false, false);
+                return;
+            }
+
+            commitCleanupOperations(database, batches, startIndex + 1, listener);
+        });
+    }
+
+    static List<CleanupOperation> buildCleanupOperations(String deviceId, Iterable<EventCleanupTarget> cleanupTargets) {
+        List<CleanupOperation> operations = new ArrayList<>();
+        for (EventCleanupTarget cleanupTarget : cleanupTargets) {
+            if (deviceId.equals(cleanupTarget.getOrganizerId())) {
+                operations.add(CleanupOperation.deleteEvent(cleanupTarget.getDocumentPath()));
+                continue;
+            }
+
+            operations.add(CleanupOperation.removeUserFromEvent(cleanupTarget.getDocumentPath(), deviceId));
+        }
+        return operations;
+    }
+
+    static List<List<CleanupOperation>> chunkCleanupOperations(List<CleanupOperation> operations) {
+        List<List<CleanupOperation>> batches = new ArrayList<>();
+        for (int i = 0; i < operations.size(); i += MAX_BATCH_OPERATIONS) {
+            int endIndex = Math.min(i + MAX_BATCH_OPERATIONS, operations.size());
+            batches.add(new ArrayList<>(operations.subList(i, endIndex)));
+        }
+        return batches;
+    }
+
+    static final class CleanupOperation {
+        enum Type {
+            REMOVE_USER_FROM_EVENT,
+            DELETE_EVENT,
+            DELETE_USER
+        }
+
+        private final Type type;
+        private final String documentPath;
+        private final String deviceId;
+
+        private CleanupOperation(Type type, String documentPath, String deviceId) {
+            this.type = type;
+            this.documentPath = documentPath;
+            this.deviceId = deviceId;
+        }
+
+        static CleanupOperation removeUserFromEvent(String documentPath, String deviceId) {
+            return new CleanupOperation(Type.REMOVE_USER_FROM_EVENT, documentPath, deviceId);
+        }
+
+        static CleanupOperation deleteEvent(String documentPath) {
+            return new CleanupOperation(Type.DELETE_EVENT, documentPath, null);
+        }
+
+        static CleanupOperation deleteUser(String deviceId) {
+            return new CleanupOperation(Type.DELETE_USER, null, deviceId);
+        }
+
+        Type getType() {
+            return type;
+        }
+
+        String getDocumentPath() {
+            return documentPath;
+        }
+
+        String getDeviceId() {
+            return deviceId;
+        }
+
+        void apply(WriteBatch batch, FirebaseFirestore database, CollectionReference usersCollection) {
+            if (type == Type.REMOVE_USER_FROM_EVENT) {
+                DocumentReference reference = database.document(documentPath);
+                batch.update(reference,
+                        "waitingList.list", FieldValue.arrayRemove(deviceId),
+                        "waitingList.chosen", FieldValue.arrayRemove(deviceId),
+                        "chosen", FieldValue.arrayRemove(deviceId),
+                        "enrolled", FieldValue.arrayRemove(deviceId),
+                        "cancelled", FieldValue.arrayRemove(deviceId),
+                        "notEnrolled", FieldValue.arrayRemove(deviceId),
+                        FieldPath.of("waitingList", "status", deviceId), FieldValue.delete());
+                return;
+            }
+
+            if (type == Type.DELETE_EVENT) {
+                batch.delete(database.document(documentPath));
+                return;
+            }
+
+            batch.delete(usersCollection.document(deviceId));
+        }
+    }
+
+    static final class EventCleanupTarget {
+        private final String documentPath;
+        private final String organizerId;
+
+        EventCleanupTarget(String documentPath, String organizerId) {
+            this.documentPath = documentPath;
+            this.organizerId = organizerId;
+        }
+
+        String getDocumentPath() {
+            return documentPath;
+        }
+
+        String getOrganizerId() {
+            return organizerId;
+        }
     }
 
     /**

@@ -1,6 +1,7 @@
 package com.example.allot.controller.lottery;
 
 import com.example.allot.model.event.Event;
+import com.example.allot.model.event.WaitingList;
 import java.util.ArrayList;
 import java.util.HashMap;
 /**
@@ -34,18 +35,16 @@ public class LotteryDrawService {
             return null;
         }
 
-        if (event.getWaitingList() == null) {
-            event.getWaitingList();
-        }
-        if (event.getWaitingList() == null || event.getWaitingList().list == null || event.getWaitingList().list.isEmpty()) {
+        WaitingList waitingList = event.getWaitingList();
+        if (waitingList == null || waitingList.list == null || waitingList.list.isEmpty()) {
             return null;
         }
 
         event.setCapacity(attendeesToSelect);
         event.setLimit(attendeesToSelect);
-        event.getWaitingList().limit = attendeesToSelect;
-        event.getWaitingList().chosen = new ArrayList<>();
-        event.getWaitingList().status = new HashMap<>();
+        waitingList.limit = attendeesToSelect;
+        waitingList.chosen = new ArrayList<>();
+        waitingList.status = new HashMap<>();
         event.setChosen(new ArrayList<>());
         event.setEnrolled(new ArrayList<>());
         event.setCancelled(new ArrayList<>());

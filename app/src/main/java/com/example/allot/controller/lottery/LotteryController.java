@@ -6,6 +6,7 @@ import com.example.allot.common.OnCompleteListener;
 import com.example.allot.controller.shared.UserController;
 import com.example.allot.data.EventRepository;
 import com.example.allot.model.event.Event;
+import com.example.allot.model.event.WaitingList;
 import com.example.allot.model.lottery.LotteryEntrantItem;
 import com.example.allot.model.lottery.RunLotteryData;
 import com.example.allot.model.profile.User;
@@ -97,10 +98,8 @@ public class LotteryController {
             return;
         }
 
-        if (currentEvent.getWaitingList() == null) {
-            currentEvent.getWaitingList();
-        }
-        if (currentEvent.getWaitingList() == null || currentEvent.getWaitingList().list == null || currentEvent.getWaitingList().list.isEmpty()) {
+        WaitingList waitingList = currentEvent.getWaitingList();
+        if (waitingList == null || waitingList.list == null || waitingList.list.isEmpty()) {
             listener.onComplete(AppResult.failure(R.string.manage_lottery_empty), false);
             return;
         }
