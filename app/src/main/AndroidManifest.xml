@@ -27,56 +27,56 @@
         </activity>
 
         <activity
-            android:name=".view.MainActivity"
+            android:name=".view.explore.ExploreActivity"
             android:exported="true" />
         <activity
-            android:name=".view.MyEventsActivity"
+            android:name=".view.events.UserEventsActivity"
             android:exported="false" />
         <activity
-            android:name=".view.CreateEventActivity"
+            android:name=".view.event.CreateEventActivity"
             android:exported="false" />
         <activity
-            android:name=".view.CreateEventSuccessActivity"
+            android:name=".view.event.EventCreatedActivity"
             android:exported="false" />
         <activity
-            android:name=".view.EventQrCodeActivity"
+            android:name=".view.organizer.EventQrCodeActivity"
             android:exported="false" />
         <activity
-            android:name=".view.EventDetailActivity"
+            android:name=".view.event.EventDetailActivity"
             android:exported="false" />
         <activity
-            android:name=".view.ManageEventActivity"
+            android:name=".view.event.EditEventActivity"
             android:exported="false" />
         <activity
-            android:name=".view.ManageLotteryActivity"
+            android:name=".view.lottery.RunLotteryActivity"
             android:exported="false" />
         <activity
-            android:name=".view.EventOfferActivity"
+            android:name=".view.event.OfferResponseActivity"
             android:exported="false" />
         <activity
-            android:name=".view.ManageEntrantsActivity"
+            android:name=".view.organizer.EventEntrantsActivity"
             android:exported="false" />
         <activity
-            android:name=".view.ProfileActivity"
+            android:name=".view.profile.ProfileActivity"
             android:exported="false" />
         <activity
             android:name=".view.WelcomeActivity"
             android:exported="false" />
         <activity
-            android:name=".view.NameActivity"
+            android:name=".view.profile.NameActivity"
             android:exported="false" />
         <activity
-            android:name=".view.EmailActivity"
+            android:name=".view.profile.EmailActivity"
             android:exported="false" />
         <activity
-            android:name=".view.PhoneActivity"
+            android:name=".view.profile.PhoneActivity"
             android:exported="false" />
         <activity
-            android:name=".view.NotificationsActivity"
+            android:name=".view.events.NotificationsActivity"
             android:exported="false" />
 
         <activity
-            android:name=".view.ScanActivity"
+            android:name=".view.organizer.ScanActivity"
             android:exported="false"
             android:screenOrientation="portrait" />
         <provider
@@ -91,3 +91,7 @@
     </application>
 
 </manifest>
+
+
+
+

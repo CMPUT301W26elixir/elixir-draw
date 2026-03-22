@@ -39,7 +39,7 @@
             android:textSize="18sp" />
     </LinearLayout>
 
-    <com.example.allot.view.BottomNavBarView
+    <com.example.allot.view.shared.BottomNavBarView
         android:id="@+id/bottomNavBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
