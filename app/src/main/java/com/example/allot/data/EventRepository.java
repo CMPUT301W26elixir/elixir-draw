@@ -1,19 +1,16 @@
 package com.example.allot.data;
 
 import com.example.allot.common.OnCompleteListener;
-import com.example.allot.model.Event;
+import com.example.allot.model.event.Event;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
-
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-/**
- * Handles Firebase access for event-related data operations.
- */
 public class EventRepository {
     private final FirebaseFirestore database;
 
@@ -41,7 +38,7 @@ public class EventRepository {
      * @param listener the listener that receives the result
      */
     public void createNewEventForUser(Event event, String organizerId, OnCompleteListener<Boolean> listener) {
-        database.collection("events").document(event.eventId)
+        database.collection("events").document(event.getEventId())
                 .set(event)
                 .addOnCompleteListener(task -> {
                     if (!task.isSuccessful()) {
@@ -50,7 +47,7 @@ public class EventRepository {
                     }
                     // Event saved, now update the user
                     database.collection("users").document(organizerId)
-                            .update("myEvents", FieldValue.arrayUnion(event.eventId))
+                            .update("myEvents", FieldValue.arrayUnion(event.getEventId()))
                             .addOnCompleteListener(userTask -> {
                                 listener.onComplete(userTask.isSuccessful(), userTask.isSuccessful());
                             });
@@ -129,8 +126,8 @@ public class EventRepository {
                     }
 
                     Event event = document.toObject(Event.class);
-                    if (event != null && (event.eventId == null || event.eventId.trim().isEmpty())) {
-                        event.eventId = document.getId();
+                    if (event != null && (event.getEventId() == null || event.getEventId().trim().isEmpty())) {
+                        event.setEventId(document.getId());
                     }
                     listener.onComplete(event, true);
                 });
@@ -154,8 +151,8 @@ public class EventRepository {
                     for (QueryDocumentSnapshot document : task.getResult()) {
                         Event event = document.toObject(Event.class);
                         // Ensure the ID is attached so it can be clicked later
-                        if (event != null && (event.eventId == null || event.eventId.trim().isEmpty())) {
-                            event.eventId = document.getId();
+                        if (event != null && (event.getEventId() == null || event.getEventId().trim().isEmpty())) {
+                            event.setEventId(document.getId());
                         }
                         events.add(event);
                     }
@@ -182,10 +179,40 @@ public class EventRepository {
                     for (QueryDocumentSnapshot document : task.getResult()) {
                         Event event = document.toObject(Event.class);
                         // Ensure the ID is attached so it can be clicked later
-                        if (event != null && (event.eventId == null || event.eventId.trim().isEmpty())) {
-                            event.eventId = document.getId();
+                        if (event != null && (event.getEventId() == null || event.getEventId().trim().isEmpty())) {
+                            event.setEventId(document.getId());
                         }
                         events.add(event);
+                    }
+                    listener.onComplete(events, true);
+                });
+    }
+
+    /**
+     * Loads all events hosted by the given organizer.
+     *
+     * @param organizerId the organizer device ID
+     * @param listener the listener that receives the events
+     */
+    public void getHostedEvents(String organizerId, OnCompleteListener<List<Event>> listener) {
+        database.collection("events")
+                .whereEqualTo("organizerId", organizerId)
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (!task.isSuccessful() || task.getResult() == null) {
+                        listener.onComplete(null, false);
+                        return;
+                    }
+
+                    List<Event> events = new ArrayList<>();
+                    for (QueryDocumentSnapshot document : task.getResult()) {
+                        Event event = document.toObject(Event.class);
+                        if (event != null && (event.getEventId() == null || event.getEventId().trim().isEmpty())) {
+                            event.setEventId(document.getId());
+                        }
+                        if (event != null) {
+                            events.add(event);
+                        }
                     }
                     listener.onComplete(events, true);
                 });
@@ -236,13 +263,41 @@ public class EventRepository {
         database.collection("events")
                 .document(eventId)
                 .update(
-                        "chosen", event.chosen,
-                        "enrolled", event.enrolled,
-                        "cancelled", event.cancelled,
-                        "notEnrolled", event.notEnrolled,
-                        "waitingList.chosen", event.waitingList.chosen,
-                        "waitingList.status", event.waitingList.status
+                        "chosen", event.getChosen(),
+                        "enrolled", event.getEnrolled(),
+                        "cancelled", event.getCancelled(),
+                        "notEnrolled", event.getNotEnrolled(),
+                        "waitingList.chosen", event.getWaitingList().chosen,
+                        "waitingList.status", event.getWaitingList().status
                 )
+                .addOnSuccessListener(unused -> listener.onComplete(true, true))
+                .addOnFailureListener(exception -> listener.onComplete(false, false));
+    }
+
+    /**
+     * Saves the draw date and lottery result state for an event.
+     *
+     * @param eventId the event ID
+     * @param drawDate the draw date to persist
+     * @param event the updated event state
+     * @param listener the listener that receives the result
+     */
+    public void updateLotteryDraw(String eventId, Date drawDate, Event event, OnCompleteListener<Boolean> listener) {
+        Map<String, Object> updates = new HashMap<>();
+        updates.put("drawDate", drawDate);
+        updates.put("capacity", event.getCapacity());
+        updates.put("limit", event.getLimit());
+        updates.put("chosen", event.getChosen());
+        updates.put("enrolled", event.getEnrolled());
+        updates.put("cancelled", event.getCancelled());
+        updates.put("notEnrolled", event.getNotEnrolled());
+        updates.put("waitingList.limit", event.getWaitingList() == null ? null : event.getWaitingList().limit);
+        updates.put("waitingList.chosen", event.getWaitingList() == null ? null : event.getWaitingList().chosen);
+        updates.put("waitingList.status", event.getWaitingList() == null ? null : event.getWaitingList().status);
+
+        database.collection("events")
+                .document(eventId)
+                .update(updates)
                 .addOnSuccessListener(unused -> listener.onComplete(true, true))
                 .addOnFailureListener(exception -> listener.onComplete(false, false));
     }

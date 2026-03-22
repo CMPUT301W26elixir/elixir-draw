@@ -1,15 +1,9 @@
 package com.example.allot.common;
-
-/**
- * Represents the result of an application operation, including whether it
- * succeeded, the returned data, and an optional message.
- *
- * @param <T> the type of data returned by the operation
- */
 public class AppResult<T> {
     private final boolean success;
     private final T data;
     private final String message;
+    private final Integer messageResId;
 
     /**
      * Creates a result object for an application operation.
@@ -19,9 +13,22 @@ public class AppResult<T> {
      * @param message an optional message describing the result
      */
     public AppResult(boolean success, T data, String message) {
+        this(success, data, message, null);
+    }
+
+    /**
+     * Creates a result object for an application operation using a string resource message.
+     *
+     * @param success true if the operation succeeded, otherwise false
+     * @param data the returned data, or null if none is available
+     * @param message the optional literal result message
+     * @param messageResId the optional string resource ID describing the result
+     */
+    public AppResult(boolean success, T data, String message, Integer messageResId) {
         this.success = success;
         this.data = data;
         this.message = message;
+        this.messageResId = messageResId;
     }
 
     /**
@@ -36,6 +43,18 @@ public class AppResult<T> {
     }
 
     /**
+     * Creates a successful result with a string resource message.
+     *
+     * @param data the returned data
+     * @param messageResId the result message resource
+     * @param <T> the type of data returned
+     * @return a successful result object
+     */
+    public static <T> AppResult<T> success(T data, int messageResId) {
+        return new AppResult<>(true, data, null, messageResId);
+    }
+
+    /**
      * Creates a failed result.
      *
      * @param message the message describing the failure
@@ -44,6 +63,17 @@ public class AppResult<T> {
      */
     public static <T> AppResult<T> failure(String message) {
         return new AppResult<>(false, null, message);
+    }
+
+    /**
+     * Creates a failed result with a string resource message.
+     *
+     * @param messageResId the message resource describing the failure
+     * @param <T> the type of data returned
+     * @return a failed result object
+     */
+    public static <T> AppResult<T> failure(int messageResId) {
+        return new AppResult<>(false, null, null, messageResId);
     }
 
     /**
@@ -72,4 +102,20 @@ public class AppResult<T> {
     public String getMessage() {
         return message;
     }
+
+    /**
+     * Returns the result message resource ID when one is available.
+     *
+     * @return the optional result message resource ID
+     */
+    public Integer getMessageResId() {
+        return messageResId;
+    }
 }
+
+
+
+
+
+
+

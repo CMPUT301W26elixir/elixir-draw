@@ -2,19 +2,13 @@ package com.example.allot.qr;
 
 import android.graphics.Bitmap;
 import android.graphics.Color;
-
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.EncodeHintType;
 import com.google.zxing.MultiFormatWriter;
 import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
-
 import java.util.EnumMap;
 import java.util.Map;
-
-/**
- * Utility class for generating QR code bitmaps from text payloads.
- */
 public final class QrCodeGenerator {
 
     /**
@@ -76,3 +70,9 @@ public final class QrCodeGenerator {
         return bitmap;
     }
 }
+
+
+
+
+
+

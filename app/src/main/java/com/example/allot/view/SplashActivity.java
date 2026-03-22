@@ -4,22 +4,12 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-
 import androidx.appcompat.app.AppCompatActivity;
-
 import com.example.allot.R;
-import com.example.allot.controller.UserController;
-import com.example.allot.model.User;
-
-/**
- * Activity that displays the app splash screen and decides which screen
- * to open next.
- *
- * <p>This activity ensures the splash screen remains visible for a minimum
- * amount of time, checks whether the current device is new, loads the user
- * profile when needed, and then routes the user either to profile setup
- * or to the main screen.
- */
+import com.example.allot.common.TextHelper;
+import com.example.allot.controller.shared.UserController;
+import com.example.allot.model.profile.User;
+import com.example.allot.view.explore.ExploreActivity;
 public class SplashActivity extends AppCompatActivity {
 
     /**
@@ -87,7 +77,7 @@ public class SplashActivity extends AppCompatActivity {
      * Opens the next screen after the splash screen.
      *
      * <p>If profile setup is required, this method opens {@link WelcomeActivity}.
-     * Otherwise, it opens {@link MainActivity}. Navigation only occurs once,
+     * Otherwise, it opens {@link ExploreActivity}. Navigation only occurs once,
      * and it is skipped if the activity is already finishing.
      *
      * @param requiresProfileSetup true if the user should be sent to the
@@ -101,7 +91,7 @@ public class SplashActivity extends AppCompatActivity {
         navigated = true;
         Intent intent = new Intent(
                 this,
-                requiresProfileSetup ? WelcomeActivity.class : MainActivity.class
+                requiresProfileSetup ? WelcomeActivity.class : ExploreActivity.class
         );
         startActivity(intent);
         finish();
@@ -133,6 +123,15 @@ public class SplashActivity extends AppCompatActivity {
      * @return true if the string is blank; false otherwise
      */
     private boolean isBlank(String value) {
-        return value == null || value.trim().isEmpty();
+        return TextHelper.isBlank(value);
     }
 }
+
+
+
+
+
+
+
+
+

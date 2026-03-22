@@ -1,9 +1,10 @@
 package com.example.allot.data;
 
 import android.util.Log;
-
 import com.example.allot.common.OnCompleteListener;
-import com.example.allot.model.User;
+import com.example.allot.common.TextHelper;
+import com.example.allot.model.event.Event;
+import com.example.allot.model.profile.User;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -12,13 +13,8 @@ import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.WriteBatch;
-
 import java.util.ArrayList;
 import java.util.List;
-
-/**
- * Handles Firebase access for user-related data operations.
- */
 public class UserRepository {
     private static final String TAG = "UserRepository";
 
@@ -252,7 +248,7 @@ public class UserRepository {
      * @return true if the string is blank, otherwise false
      */
     private boolean isBlank(String value) {
-        return value == null || value.trim().isEmpty();
+        return TextHelper.isBlank(value);
     }
 
     /**
@@ -266,3 +262,11 @@ public class UserRepository {
         return phone == null ? "" : phone.trim();
     }
 }
+
+
+
+
+
+
+
+

@@ -1,8 +1,4 @@
 package com.example.allot.qr;
-
-/**
- * Utility class for building QR code payload strings used by the application.
- */
 public final class QrCodePayloadBuilder {
     private static final String EVENT_URI_PREFIX = "allot://event/";
 
@@ -26,3 +22,9 @@ public final class QrCodePayloadBuilder {
         return EVENT_URI_PREFIX + eventId.trim();
     }
 }
+
+
+
+
+
+

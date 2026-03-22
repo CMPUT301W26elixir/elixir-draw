@@ -1,8 +1,4 @@
 package com.example.allot.model;
-
-/**
- * Represents the active filters used when browsing open events.
- */
 public class BrowseFilter {
     private final String searchTerm;
     private final String selectedCategory;
@@ -36,3 +32,11 @@ public class BrowseFilter {
         return selectedCategory;
     }
 }
+
+
+
+
+
+
+
+
