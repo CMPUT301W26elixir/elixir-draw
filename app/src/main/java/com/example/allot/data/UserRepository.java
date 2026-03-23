@@ -353,6 +353,63 @@ public class UserRepository {
         // Keep the phone value safe for Firestore
         return phone == null ? "" : phone.trim();
     }
+
+    /**
+     * Loads all users for admin browsing.
+     *
+     * @param listener the listener that receives the users list and success result
+     */
+    public void getAllUsers(OnCompleteListener<List<User>> listener) {
+        usersCollection.get().addOnCompleteListener(task -> {
+            if (!task.isSuccessful()) {
+                Log.d(TAG, "Failed to load all users", task.getException());
+                listener.onComplete(null, false);
+                return;
+            }
+
+            List<User> users = new ArrayList<>();
+            for (QueryDocumentSnapshot document : task.getResult()) {
+                User user = document.toObject(User.class);
+                if (user != null && isBlank(user.getDeviceId())) {
+                    user.setDeviceId(document.getId());
+                }
+                users.add(user);
+            }
+            listener.onComplete(users, true);
+        });
+    }
+
+    /**
+     * Deletes a user with admin privileges.
+     * Removes the user document and all references from event documents.
+     *
+     * @param deviceId the device ID of the user to delete
+     * @param listener the listener that receives the deletion success result
+     */
+    public void deleteUserAsAdmin(String deviceId, OnCompleteListener<Boolean> listener) {
+        FirebaseFirestore database = usersCollection.getFirestore();
+        database.collection("events")
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (!task.isSuccessful()) {
+                        Log.d(TAG, "Failed to load events for cleanup", task.getException());
+                        listener.onComplete(false, false);
+                        return;
+                    }
+
+                    List<EventCleanupTarget> cleanupTargets = new ArrayList<>();
+                    for (QueryDocumentSnapshot document : task.getResult()) {
+                        cleanupTargets.add(new EventCleanupTarget(
+                                document.getReference().getPath(),
+                                document.getString("organizerId")));
+                    }
+
+                    List<CleanupOperation> cleanupOperations = buildCleanupOperations(deviceId, cleanupTargets);
+                    cleanupOperations.add(CleanupOperation.deleteUser(deviceId));
+                    List<List<CleanupOperation>> batches = chunkCleanupOperations(cleanupOperations);
+                    commitCleanupOperations(database, batches, 0, listener);
+                });
+    }
 }
 
 
