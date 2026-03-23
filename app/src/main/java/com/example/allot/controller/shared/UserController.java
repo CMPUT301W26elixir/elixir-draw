@@ -4,6 +4,7 @@ import android.content.Context;
 import android.util.Patterns;
 import com.example.allot.common.OnCompleteListener;
 import com.example.allot.common.TextHelper;
+import com.example.allot.common.UserRole;
 import com.example.allot.data.DeviceSessionManager;
 import com.example.allot.data.UserRepository;
 import com.example.allot.model.profile.User;
@@ -13,6 +14,7 @@ import com.example.allot.model.profile.User;
 public class UserController {
     private final UserRepository userRepository;
     private final DeviceSessionManager deviceSessionManager;
+    private User cachedCurrentUser;
 
     /**
      * Creates an UserController and sets up Firestore and the device ID.
@@ -81,7 +83,7 @@ public class UserController {
      * @param listener the listener that receives the updated userand success result
      */
     public void updateUserProfile(String firstName, String lastName, String email,
-                                     String phone, boolean notiEnabled, OnCompleteListener<User> listener) {
+                                  String phone, boolean notiEnabled, OnCompleteListener<User> listener) {
         // Make sure required fields are valid before updating
         if (!validateProfileFields(firstName, lastName, email)) {
             listener.onComplete(null, false);
@@ -107,6 +109,23 @@ public class UserController {
      */
     public void deleteCurrentUser(OnCompleteListener<Boolean> listener) {
         userRepository.deleteCurrentUser(getCurrentDeviceId(), listener);
+    }
+
+    /**
+     * Checks if the current user has admin role.
+     *
+     * @param listener the listener that receives true if user is admin, false otherwise
+     */
+    public void isCurrentUserAdmin(OnCompleteListener<Boolean> listener) {
+        String deviceId = getCurrentDeviceId();
+        userRepository.getUserByDeviceId(deviceId, (user, success) -> {
+            if (success && user != null) {
+                cachedCurrentUser = user;
+                listener.onComplete(UserRole.isAdmin(user), true);
+            } else {
+                listener.onComplete(false, false);
+            }
+        });
     }
 
     public String getCurrentDeviceId() {
@@ -155,12 +174,3 @@ public class UserController {
     }
 
 }
-
-
-
-
-
-
-
-
-
