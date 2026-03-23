@@ -79,6 +79,9 @@
             android:name=".view.organizer.ScanActivity"
             android:exported="false"
             android:screenOrientation="portrait" />
+        <activity
+            android:name=".view.admin.AdminActivity"
+            android:exported="false" />
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"
@@ -91,7 +94,3 @@
     </application>
 
 </manifest>
-
-
-
-

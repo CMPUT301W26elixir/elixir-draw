@@ -3,6 +3,7 @@ package com.example.allot.data;
 import com.example.allot.common.OnCompleteListener;
 import com.example.allot.controller.event.EventOfferService;
 import com.example.allot.model.event.Event;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -16,6 +17,7 @@ import java.util.Map;
  * Handles Firestore reads and writes for events.
  */
 public class EventRepository {
+    static final int MAX_BATCH_OPERATIONS = 500;
     private final FirebaseFirestore database;
     private final EventOfferService eventOfferService = new EventOfferService();
 
@@ -271,6 +273,147 @@ public class EventRepository {
                 })
                 .addOnSuccessListener(result -> listener.onComplete(Boolean.TRUE.equals(result), Boolean.TRUE.equals(result)))
                 .addOnFailureListener(exception -> listener.onComplete(false, false));
+    }
+
+    /**
+     * Deletes an event and removes all references from user documents.
+     * This is an admin operation that completely removes the event from the system.
+     *
+     * @param eventId the event ID to delete
+     * @param listener the listener that receives the result
+     */
+    public void deleteEventAsAdmin(String eventId, OnCompleteListener<Boolean> listener) {
+        database.collection("users")
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (!task.isSuccessful()) {
+                        listener.onComplete(false, false);
+                        return;
+                    }
+
+                    List<UserCleanupTarget> cleanupTargets = new ArrayList<>();
+                    for (QueryDocumentSnapshot document : task.getResult()) {
+                        cleanupTargets.add(new UserCleanupTarget(
+                                document.getReference().getPath(),
+                                document.getId()));
+                    }
+
+                    List<CleanupOperation> cleanupOperations = buildEventCleanupOperations(eventId, cleanupTargets);
+                    cleanupOperations.add(CleanupOperation.deleteEvent(eventId));
+                    List<List<CleanupOperation>> batches = chunkCleanupOperations(cleanupOperations);
+                    commitEventCleanupOperations(database, batches, 0, listener);
+                });
+    }
+
+    void commitEventCleanupOperations(FirebaseFirestore database,
+                                      List<List<CleanupOperation>> batches,
+                                      int startIndex,
+                                      OnCompleteListener<Boolean> listener) {
+        if (startIndex >= batches.size()) {
+            listener.onComplete(true, true);
+            return;
+        }
+
+        WriteBatch batch = database.batch();
+        for (CleanupOperation operation : batches.get(startIndex)) {
+            operation.apply(batch, database);
+        }
+
+        batch.commit().addOnCompleteListener(commitTask -> {
+            if (!commitTask.isSuccessful()) {
+                listener.onComplete(false, false);
+                return;
+            }
+
+            commitEventCleanupOperations(database, batches, startIndex + 1, listener);
+        });
+    }
+
+    static List<CleanupOperation> buildEventCleanupOperations(String eventId, Iterable<UserCleanupTarget> cleanupTargets) {
+        List<CleanupOperation> operations = new ArrayList<>();
+        for (UserCleanupTarget cleanupTarget : cleanupTargets) {
+            operations.add(CleanupOperation.removeEventFromUser(cleanupTarget.getDocumentPath(), eventId));
+        }
+        return operations;
+    }
+
+    static List<List<CleanupOperation>> chunkCleanupOperations(List<CleanupOperation> operations) {
+        List<List<CleanupOperation>> batches = new ArrayList<>();
+        for (int i = 0; i < operations.size(); i += MAX_BATCH_OPERATIONS) {
+            int endIndex = Math.min(i + MAX_BATCH_OPERATIONS, operations.size());
+            batches.add(new ArrayList<>(operations.subList(i, endIndex)));
+        }
+        return batches;
+    }
+
+    static final class CleanupOperation {
+        enum Type {
+            REMOVE_EVENT_FROM_USER,
+            DELETE_EVENT
+        }
+
+        private final Type type;
+        private final String documentPath;
+        private final String eventId;
+
+        private CleanupOperation(Type type, String documentPath, String eventId) {
+            this.type = type;
+            this.documentPath = documentPath;
+            this.eventId = eventId;
+        }
+
+        static CleanupOperation removeEventFromUser(String documentPath, String eventId) {
+            return new CleanupOperation(Type.REMOVE_EVENT_FROM_USER, documentPath, eventId);
+        }
+
+        static CleanupOperation deleteEvent(String eventId) {
+            return new CleanupOperation(Type.DELETE_EVENT, null, eventId);
+        }
+
+        Type getType() {
+            return type;
+        }
+
+        String getDocumentPath() {
+            return documentPath;
+        }
+
+        String getEventId() {
+            return eventId;
+        }
+
+        void apply(WriteBatch batch, FirebaseFirestore database) {
+            if (type == Type.REMOVE_EVENT_FROM_USER) {
+                DocumentReference reference = database.document(documentPath);
+                batch.update(reference,
+                        "myEvents", FieldValue.arrayRemove(eventId),
+                        "savedEvents", FieldValue.arrayRemove(eventId),
+                        "history", FieldValue.arrayRemove(eventId));
+                return;
+            }
+
+            if (type == Type.DELETE_EVENT) {
+                batch.delete(database.collection("events").document(eventId));
+            }
+        }
+    }
+
+    static final class UserCleanupTarget {
+        private final String documentPath;
+        private final String userId;
+
+        UserCleanupTarget(String documentPath, String userId) {
+            this.documentPath = documentPath;
+            this.userId = userId;
+        }
+
+        String getDocumentPath() {
+            return documentPath;
+        }
+
+        String getUserId() {
+            return userId;
+        }
     }
 
 }

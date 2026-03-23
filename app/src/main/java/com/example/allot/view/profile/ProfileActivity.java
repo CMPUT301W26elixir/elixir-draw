@@ -15,6 +15,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import com.example.allot.R;
 import com.example.allot.controller.profile.ProfileController;
+import com.example.allot.controller.shared.UserController;
 import com.example.allot.model.profile.ProfileActionResult;
 import com.example.allot.model.profile.ProfileFormSnapshot;
 import com.example.allot.model.profile.User;
@@ -40,12 +41,14 @@ public class ProfileActivity extends AppCompatActivity {
 
     private BottomNavBarView bottomNavBar;
     private ProfileController profileController;
+    private UserController userController;
     private EditText firstNameInput;
     private EditText lastNameInput;
     private EditText emailInput;
     private EditText phoneInput;
     private CheckBox eventUpdatesCheckbox;
     private Button saveChangesButton;
+    private TextView adminPanelButton;
     private TextView deleteProfileText;
 
     private ProfileFormSnapshot originalProfileSnapshot = new ProfileFormSnapshot("", "", "", "", false);
@@ -65,10 +68,12 @@ public class ProfileActivity extends AppCompatActivity {
         setContentView(R.layout.activity_profile);
 
         profileController = new ProfileController(this);
+        userController = new UserController(this);
         bindViews();
         setupBottomNav();
         setupFormListeners();
         updateSaveButtonState();
+        checkAdminStatus();
         loadProfile();
     }
 
@@ -92,6 +97,7 @@ public class ProfileActivity extends AppCompatActivity {
         phoneInput = findViewById(R.id.phoneInput);
         eventUpdatesCheckbox = findViewById(R.id.eventUpdatesCheckbox);
         saveChangesButton = findViewById(R.id.saveChangesButton);
+        adminPanelButton = findViewById(R.id.adminPanelButton);
         deleteProfileText = findViewById(R.id.deleteProfileText);
     }
 
@@ -138,6 +144,7 @@ public class ProfileActivity extends AppCompatActivity {
         });
 
         saveChangesButton.setOnClickListener(view -> saveProfile());
+        adminPanelButton.setOnClickListener(view -> openAdminPanel());
         deleteProfileText.setOnClickListener(view -> showDeleteProfileDialog());
     }
 
@@ -161,6 +168,28 @@ public class ProfileActivity extends AppCompatActivity {
 
             bindProfileState(snapshot);
         });
+    }
+
+    /**
+     * Checks if the current user has admin role and shows/hides the admin panel button accordingly.
+     */
+    private void checkAdminStatus() {
+        userController.isCurrentUserAdmin((isAdmin, success) -> {
+            if (success && isAdmin) {
+                adminPanelButton.setVisibility(android.view.View.VISIBLE);
+            } else {
+                adminPanelButton.setVisibility(android.view.View.GONE);
+            }
+        });
+    }
+
+    /**
+     * Opens the admin panel activity.
+     */
+    private void openAdminPanel() {
+        Intent intent = new Intent(this, com.example.allot.view.admin.AdminActivity.class);
+        startActivity(intent);
+        overridePendingTransition(0, 0);
     }
 
     /**
