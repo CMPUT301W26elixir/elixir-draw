@@ -315,7 +315,8 @@ public class EventDetailActivity extends AppCompatActivity {
         confirmButton.setEnabled(false);
         joinWaitingListButton.setEnabled(false);
 
-        eventDetailController.joinWaitingList(currentEventId, (AppResult<Void> result, boolean success) -> {
+        // TODO: When event geolocation is enabled, block joining if no captured location is available.
+        eventDetailController.joinWaitingList(currentEventId, 0d, 0d, new java.util.Date(), (AppResult<Void> result, boolean success) -> {
             isJoiningWaitlist = false;
             confirmButton.setEnabled(true);
             joinWaitingListButton.setEnabled(true);
