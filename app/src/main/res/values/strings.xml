@@ -203,6 +203,8 @@ This action cannot be undone.</string>
     <string name="create_event_name_hint"></string>
     <string name="create_event_location_label">Location *</string>
     <string name="create_event_location_hint"></string>
+    <string name="create_event_places_unavailable">Google Places autocomplete is unavailable right now.</string>
+    <string name="create_event_places_error">Could not load place suggestions.</string>
     <string name="create_event_geolocation_preferences">Geolocation</string>
     <string name="create_event_enable_geolocation">Require geolocation for this event</string>
     <string name="create_event_start_date_label">Start Date *</string>

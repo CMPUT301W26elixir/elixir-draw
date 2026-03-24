@@ -6,9 +6,11 @@ import android.widget.ImageButton;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import com.example.allot.R;
+import com.example.allot.controller.shared.UserController;
 import com.example.allot.data.EventRepository;
 import com.example.allot.model.event.Event;
 import com.example.allot.model.event.WaitlistJoinLocation;
+import com.example.allot.model.profile.User;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -17,7 +19,10 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Shows a standalone map screen that is ready for event marker integration.
@@ -30,6 +35,9 @@ public class MapViewActivity extends AppCompatActivity implements OnMapReadyCall
     private static final int MAP_BOUNDS_PADDING = 140;
 
     private final EventRepository eventRepository = new EventRepository();
+    private UserController userController;
+    private final Map<String, String> userNameCache = new HashMap<>();
+    private final Set<String> pendingUserIds = new HashSet<>();
     private GoogleMap googleMap;
     private Event currentEvent;
     private String currentEventId;
@@ -41,6 +49,7 @@ public class MapViewActivity extends AppCompatActivity implements OnMapReadyCall
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map_view);
 
+        userController = new UserController(this);
         currentEventId = getIntent().getStringExtra(EXTRA_EVENT_ID);
 
         bindViews();
@@ -166,6 +175,7 @@ public class MapViewActivity extends AppCompatActivity implements OnMapReadyCall
 
         int markerCount = 0;
         for (Map.Entry<String, WaitlistJoinLocation> entry : currentEvent.getWaitingList().getJoinLocations().entrySet()) {
+            String deviceId = entry.getKey();
             WaitlistJoinLocation joinLocation = entry.getValue();
             if (joinLocation == null || joinLocation.getLatitude() == null || joinLocation.getLongitude() == null) {
                 continue;
@@ -174,11 +184,39 @@ public class MapViewActivity extends AppCompatActivity implements OnMapReadyCall
             LatLng entrantLocation = new LatLng(joinLocation.getLatitude(), joinLocation.getLongitude());
             googleMap.addMarker(new MarkerOptions()
                     .position(entrantLocation)
-                    .title(entry.getKey()));
+                    .title(getEntrantMarkerTitle(deviceId)));
             boundsBuilder.include(entrantLocation);
             markerCount++;
         }
         return markerCount;
+    }
+
+    private String getEntrantMarkerTitle(String deviceId) {
+        String cachedName = userNameCache.get(deviceId);
+        if (!TextUtils.isEmpty(cachedName)) {
+            return cachedName;
+        }
+
+        loadEntrantName(deviceId);
+        return deviceId;
+    }
+
+    private void loadEntrantName(String deviceId) {
+        if (TextUtils.isEmpty(deviceId) || pendingUserIds.contains(deviceId) || userNameCache.containsKey(deviceId)) {
+            return;
+        }
+
+        pendingUserIds.add(deviceId);
+        userController.getUserByDeviceId(deviceId, (User user, boolean success) -> {
+            String displayName = deviceId;
+            if (success && user != null && !TextUtils.isEmpty(user.getName())) {
+                displayName = user.getName();
+            }
+
+            userNameCache.put(deviceId, displayName);
+            pendingUserIds.remove(deviceId);
+            runOnUiThread(this::renderMapContent);
+        });
     }
 
     private LatLng getSingleMarkerTarget() {
