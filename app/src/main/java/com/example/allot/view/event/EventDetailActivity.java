@@ -21,6 +21,7 @@ import androidx.core.content.ContextCompat;
 import com.example.allot.R;
 import com.example.allot.common.AppResult;
 import com.example.allot.controller.event.EventDetailController;
+import com.example.allot.controller.event.EventJoinDistanceValidator;
 import com.example.allot.model.event.Event;
 import com.example.allot.model.event.EventDetailData;
 import com.example.allot.view.shared.AppDialogHelper;
@@ -46,6 +47,7 @@ public class EventDetailActivity extends AppCompatActivity {
 
     private EventDetailController eventDetailController;
     private FusedLocationProviderClient fusedLocationProviderClient;
+    private final EventJoinDistanceValidator eventJoinDistanceValidator = new EventJoinDistanceValidator();
 
     private String currentEventId;
     private boolean isJoiningWaitlist;
@@ -417,6 +419,25 @@ public class EventDetailActivity extends AppCompatActivity {
         return currentEvent != null && Boolean.TRUE.equals(currentEvent.getGeoloc());
     }
 
+    private boolean shouldBlockJoinForDistance(Double entrantLatitude, Double entrantLongitude) {
+        if (!isJoinLocationRequired() || currentEvent == null) {
+            return false;
+        }
+
+        Double eventLatitude = currentEvent.getEventLatitude();
+        Double eventLongitude = currentEvent.getEventLongitude();
+        if (eventLatitude == null || eventLongitude == null) {
+            return false;
+        }
+
+        return !eventJoinDistanceValidator.isWithinAllowedRadius(
+                entrantLatitude,
+                entrantLongitude,
+                eventLatitude,
+                eventLongitude
+        );
+    }
+
     private void captureLocationAndJoin() {
         CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
         fusedLocationProviderClient
@@ -444,6 +465,10 @@ public class EventDetailActivity extends AppCompatActivity {
     private void completeJoinWaitingList(Location location) {
         Double latitude = location == null ? null : location.getLatitude();
         Double longitude = location == null ? null : location.getLongitude();
+        if (shouldBlockJoinForDistance(latitude, longitude)) {
+            failJoinWaitingList(R.string.event_detail_join_too_far);
+            return;
+        }
 
         eventDetailController.joinWaitingList(currentEventId, latitude, longitude, new java.util.Date(), (AppResult<Void> result, boolean success) -> {
             isJoiningWaitlist = false;
