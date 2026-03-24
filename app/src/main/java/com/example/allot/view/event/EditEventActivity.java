@@ -87,7 +87,7 @@ public class EditEventActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_manage_event);
 
-        manageEventController = new EditEventController();
+        manageEventController = new EditEventController(this);
         currentEventId = getIntent().getStringExtra(EXTRA_EVENT_ID);
 
         bindViews();
