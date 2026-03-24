@@ -24,6 +24,9 @@
     <string name="notifications_footer">Manage your notifications in Settings at any time</string>
     <string name="search_hint">Find events</string>
     <string name="map_view_title">Map view</string>
+    <string name="map_view_event_marker">Event location</string>
+    <string name="map_view_no_join_locations">No entrant join locations are available yet.</string>
+    <string name="map_view_event_load_failure">Could not load this event map.</string>
     <string name="chip_nearby">Nearby</string>
     <string name="chip_sports">Sports</string>
     <string name="chip_arts">Arts &amp; Crafts</string>
@@ -130,6 +133,7 @@ This action cannot be undone.</string>
     <string name="manage_entrants_all_subtitle">Entrant</string>
     <string name="manage_entrants_export_final_list">Export Final List</string>
     <string name="manage_entrants_export_unavailable">CSV export is currently unavailable.</string>
+    <string name="manage_entrants_view_map">View entrant map</string>
     <string name="event_detail_waitlist_joined_message">You are on the waiting list for this event.</string>
     <string name="event_detail_offer">You have an offer</string>
     <string name="event_detail_enrolled">You are enrolled</string>

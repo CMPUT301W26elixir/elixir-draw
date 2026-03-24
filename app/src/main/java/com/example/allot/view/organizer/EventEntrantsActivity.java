@@ -15,6 +15,7 @@ import com.example.allot.R;
 import com.example.allot.controller.organizer.EventEntrantsController;
 import com.example.allot.model.event.Event;
 import com.example.allot.model.lottery.LotteryEntrantItem;
+import com.example.allot.view.explore.MapViewActivity;
 import com.google.android.material.button.MaterialButton;
 import java.text.SimpleDateFormat;
 import java.util.List;
@@ -46,6 +47,7 @@ public class EventEntrantsActivity extends AppCompatActivity {
     private TextView allEntrantsTabText;
     private TextView stateText;
     private LinearLayout entrantsContainer;
+    private MaterialButton viewEntrantMapButton;
     private MaterialButton exportFinalListButton;
 
     private String currentEventId;
@@ -94,6 +96,7 @@ public class EventEntrantsActivity extends AppCompatActivity {
         allEntrantsTabText = findViewById(R.id.allEntrantsTabText);
         stateText = findViewById(R.id.stateText);
         entrantsContainer = findViewById(R.id.entrantsContainer);
+        viewEntrantMapButton = findViewById(R.id.viewEntrantMapButton);
         exportFinalListButton = findViewById(R.id.exportFinalListButton);
     }
 
@@ -114,6 +117,7 @@ public class EventEntrantsActivity extends AppCompatActivity {
         notEnrolledTabText.setOnClickListener(view -> showTab(Tab.NOT_ENROLLED));
         enrolledTabText.setOnClickListener(view -> showTab(Tab.ENROLLED));
         allEntrantsTabText.setOnClickListener(view -> showTab(Tab.ALL));
+        viewEntrantMapButton.setOnClickListener(view -> openEntrantMap());
         exportFinalListButton.setOnClickListener(view ->
                 Toast.makeText(this, R.string.manage_entrants_export_unavailable, Toast.LENGTH_SHORT).show()
         );
@@ -131,6 +135,7 @@ public class EventEntrantsActivity extends AppCompatActivity {
             return;
         }
 
+        viewEntrantMapButton.setVisibility(View.GONE);
         stateText.setVisibility(View.VISIBLE);
         stateText.setText(R.string.manage_entrants_loading);
         entrantsContainer.removeAllViews();
@@ -144,6 +149,7 @@ public class EventEntrantsActivity extends AppCompatActivity {
             }
 
             currentEvent = event;
+            viewEntrantMapButton.setVisibility(View.VISIBLE);
             drawDateValueText.setText(buildDrawDateText(event));
             attendeesValueText.setText(buildAttendeesText(event));
 
@@ -272,6 +278,17 @@ public class EventEntrantsActivity extends AppCompatActivity {
 
         int attendeesToSelect = event.getLimit() > 0 ? event.getLimit() : event.getCapacity();
         return attendeesToSelect > 0 ? String.valueOf(attendeesToSelect) : "20";
+    }
+
+    private void openEntrantMap() {
+        if (TextUtils.isEmpty(currentEventId) || currentEvent == null) {
+            Toast.makeText(this, R.string.manage_entrants_load_failure, Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        startActivity(new android.content.Intent(this, MapViewActivity.class)
+                .putExtra(MapViewActivity.EXTRA_EVENT_ID, currentEventId));
+        overridePendingTransition(0, 0);
     }
 }
 
