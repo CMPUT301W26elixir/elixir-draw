@@ -222,6 +222,29 @@
                 android:textSize="16sp" />
 
             <TextView
+                android:id="@+id/visibilityLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:fontFamily="@font/varela_round_regular"
+                android:text="@string/create_event_visibility_label"
+                android:textColor="@color/white"
+                android:textSize="16sp" />
+
+            <CheckBox
+                android:id="@+id/privateEventCheckbox"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:buttonTint="@color/white"
+                android:focusable="false"
+                android:focusableInTouchMode="false"
+                android:fontFamily="@font/varela_round_regular"
+                android:text="@string/create_event_private_option"
+                android:textColor="@color/white"
+                android:textSize="16sp" />
+
+            <TextView
                 android:id="@+id/geolocationPreferencesLabel"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

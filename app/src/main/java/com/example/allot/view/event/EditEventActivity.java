@@ -52,6 +52,7 @@ public class EditEventActivity extends AppCompatActivity {
     private TextView summaryDateText;
     private EditText eventNameInput;
     private EditText locationInput;
+    private CheckBox privateEventCheckbox;
     private CheckBox geolocationCheckbox;
     private Spinner startMonthSpinner;
     private EditText startDayInput;
@@ -70,7 +71,7 @@ public class EditEventActivity extends AppCompatActivity {
     private String currentEventId;
     private Event currentEvent;
     private String currentCategory;
-    private EventFormSnapshot originalFormSnapshot = new EventFormSnapshot("", "", "", "", "", "", "", "", false);
+    private EventFormSnapshot originalFormSnapshot = new EventFormSnapshot("", "", "", "", "", "", "", "", false, false);
     private boolean isBindingEvent;
     private boolean isLoadingEvent;
     private boolean isSaving;
@@ -120,6 +121,7 @@ public class EditEventActivity extends AppCompatActivity {
         summaryDateText = findViewById(R.id.summaryDateText);
         eventNameInput = findViewById(R.id.eventNameInput);
         locationInput = findViewById(R.id.locationInput);
+        privateEventCheckbox = findViewById(R.id.privateEventCheckbox);
         geolocationCheckbox = findViewById(R.id.geolocationCheckbox);
         startMonthSpinner = findViewById(R.id.startMonthSpinner);
         startDayInput = findViewById(R.id.startDayInput);
@@ -137,6 +139,7 @@ public class EditEventActivity extends AppCompatActivity {
         formUiHelper = new EventFormUiHelper(
                 eventNameInput,
                 locationInput,
+                privateEventCheckbox,
                 geolocationCheckbox,
                 startMonthSpinner,
                 startDayInput,
@@ -190,6 +193,13 @@ public class EditEventActivity extends AppCompatActivity {
                 updateSaveButtonState();
             }
         });
+        if (privateEventCheckbox != null) {
+            privateEventCheckbox.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                if (!isBindingEvent) {
+                    updateSaveButtonState();
+                }
+            });
+        }
 
         AdapterView.OnItemSelectedListener dateSelectionListener = new AdapterView.OnItemSelectedListener() {
             @Override
@@ -313,6 +323,9 @@ public class EditEventActivity extends AppCompatActivity {
      */
     private void saveChanges() {
         if (isSaving || isLoadingEvent || !hasUnsavedChanges()) {
+            if (!isSaving && !isLoadingEvent && !hasUnsavedChanges()) {
+                Toast.makeText(this, R.string.manage_event_no_changes, Toast.LENGTH_SHORT).show();
+            }
             return;
         }
 
@@ -323,22 +336,28 @@ public class EditEventActivity extends AppCompatActivity {
 
         isSaving = true;
         updateSaveButtonState();
-        manageEventController.saveChanges(currentEventId, readFormData(), (AppResult<Event> result, boolean success) -> {
+        try {
+            manageEventController.saveChanges(currentEventId, readFormData(), (AppResult<Event> result, boolean success) -> {
+                isSaving = false;
+                if (result == null) {
+                    updateSaveButtonState();
+                    Toast.makeText(this, R.string.manage_event_save_failure, Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                if (!result.isSuccess() || result.getData() == null) {
+                    updateSaveButtonState();
+                    Toast.makeText(this, result.getMessageResId(), Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                reloadEventAfterSave(result);
+            });
+        } catch (RuntimeException exception) {
             isSaving = false;
-            if (result == null) {
-                updateSaveButtonState();
-                Toast.makeText(this, R.string.manage_event_save_failure, Toast.LENGTH_SHORT).show();
-                return;
-            }
-
-            if (!result.isSuccess() || result.getData() == null) {
-                updateSaveButtonState();
-                Toast.makeText(this, result.getMessageResId(), Toast.LENGTH_SHORT).show();
-                return;
-            }
-
-            reloadEventAfterSave(result);
-        });
+            updateSaveButtonState();
+            Toast.makeText(this, R.string.manage_event_save_failure, Toast.LENGTH_SHORT).show();
+        }
     }
 
     /**

@@ -31,6 +31,7 @@ public class EventQrCodeActivity extends AppCompatActivity {
     private String currentEventLocation;
     private String currentEventDate;
     private String currentEventCategory;
+    private String currentEventVisibility;
 
     /**
      * Initializes the activity, reads event data from the intent,
@@ -68,6 +69,7 @@ public class EventQrCodeActivity extends AppCompatActivity {
         currentEventLocation = intent.getStringExtra(EventCreatedActivity.EXTRA_EVENT_LOCATION);
         currentEventDate = intent.getStringExtra(EventCreatedActivity.EXTRA_EVENT_DATE);
         currentEventCategory = intent.getStringExtra(EventCreatedActivity.EXTRA_EVENT_CATEGORY);
+        currentEventVisibility = intent.getStringExtra(EventCreatedActivity.EXTRA_EVENT_VISIBILITY);
     }
 
     /**
@@ -90,6 +92,14 @@ public class EventQrCodeActivity extends AppCompatActivity {
      * Shows an error message if QR code generation fails.
      */
     private void bindQrCode() {
+        if (!com.example.allot.model.event.Event.VISIBILITY_PUBLIC.equalsIgnoreCase(currentEventVisibility)) {
+            qrImageView.setImageDrawable(null);
+            qrImageView.setVisibility(android.view.View.GONE);
+            qrErrorText.setVisibility(android.view.View.VISIBLE);
+            qrErrorText.setText(R.string.event_qr_private_unavailable);
+            Toast.makeText(this, R.string.event_qr_private_unavailable, Toast.LENGTH_SHORT).show();
+            return;
+        }
         try {
             String payload = QrCodePayloadBuilder.buildEventPayload(currentEventId);
             Bitmap qrBitmap = QrCodeGenerator.generate(payload, QR_SIZE_PX);
