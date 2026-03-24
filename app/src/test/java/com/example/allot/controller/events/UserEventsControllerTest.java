@@ -80,6 +80,11 @@ public class UserEventsControllerTest {
         public void getHostedEvents(String organizerId, com.example.allot.common.OnCompleteListener<java.util.List<Event>> listener) {
             listener.onComplete(hostedEvents, hostedEvents != null);
         }
+
+        @Override
+        public void getManagedEvents(String organizerId, com.example.allot.common.OnCompleteListener<java.util.List<Event>> listener) {
+            listener.onComplete(hostedEvents, hostedEvents != null);
+        }
     }
 
     private static class FakeUserController extends UserController {
