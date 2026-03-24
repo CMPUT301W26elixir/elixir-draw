@@ -101,8 +101,10 @@ public class EventRepository {
                                                     Date joinedAt) {
         Map<String, Object> updates = new HashMap<>();
         updates.put("waitingList.list", FieldValue.arrayUnion(deviceId));
-        updates.put("waitingList.joinLocations." + deviceId,
-                new WaitlistJoinLocation(latitude, longitude, joinedAt));
+        if (latitude != null && longitude != null) {
+            updates.put("waitingList.joinLocations." + deviceId,
+                    new WaitlistJoinLocation(latitude, longitude, joinedAt));
+        }
         return updates;
     }
 

@@ -147,6 +147,8 @@ This action cannot be undone.</string>
     <string name="event_detail_not_found">This event is no longer available.</string>
     <string name="event_detail_join_success">You joined the waiting list.</string>
     <string name="event_detail_join_failure">Could not join the waiting list. Please try again.</string>
+    <string name="event_detail_join_location_required">Location permission is required to join this event.</string>
+    <string name="event_detail_join_location_unavailable">Could not get your location. Please try again.</string>
     <string name="event_detail_leave_success">You left the waiting list.</string>
     <string name="event_detail_leave_failure">Could not leave the waiting list. Please try again.</string>
     <string name="event_offer_title">Your Offer</string>

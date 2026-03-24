@@ -37,4 +37,14 @@ public class EventRepositoryTest {
         assertNotNull(updates.get("waitingList.list"));
         assertNotNull(updates.get("waitingList.joinLocations.device-1"));
     }
+
+    @Test
+    public void buildJoinWaitingListUpdates_skipsJoinLocationWhenCoordinatesMissing() {
+        EventRepository repository = new EventRepository(null);
+
+        Map<String, Object> updates = repository.buildJoinWaitingListUpdates("device-1", null, null, new Date());
+
+        assertTrue(updates.containsKey("waitingList.list"));
+        assertTrue(!updates.containsKey("waitingList.joinLocations.device-1"));
+    }
 }
