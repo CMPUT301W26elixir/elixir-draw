@@ -3,6 +3,7 @@ package com.example.allot.data;
 import com.example.allot.common.OnCompleteListener;
 import com.example.allot.controller.event.EventOfferService;
 import com.example.allot.model.event.Event;
+import com.example.allot.model.event.EventComment;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
@@ -80,6 +81,21 @@ public class EventRepository {
         database.collection("events")
                 .document(eventId)
                 .update("waitingList.list", FieldValue.arrayRemove(deviceId))
+                .addOnSuccessListener(unused -> listener.onComplete(true, true))
+                .addOnFailureListener(exception -> listener.onComplete(false, false));
+    }
+
+    /**
+     * Adds a comment or reply to the given event.
+     *
+     * @param eventId the event ID
+     * @param comment the comment to add
+     * @param listener the listener that receives the result
+     */
+    public void addComment(String eventId, EventComment comment, OnCompleteListener<Boolean> listener) {
+        database.collection("events")
+                .document(eventId)
+                .update("comments", FieldValue.arrayUnion(comment))
                 .addOnSuccessListener(unused -> listener.onComplete(true, true))
                 .addOnFailureListener(exception -> listener.onComplete(false, false));
     }

@@ -8,6 +8,8 @@ import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -17,11 +19,20 @@ import com.example.allot.R;
 import com.example.allot.common.AppResult;
 import com.example.allot.controller.event.EventDetailController;
 import com.example.allot.model.event.Event;
+import com.example.allot.model.event.EventComment;
 import com.example.allot.model.event.EventDetailData;
 import com.example.allot.view.shared.AppDialogHelper;
 import com.example.allot.view.shared.EventDisplayFormatter;
 import com.example.allot.view.shared.UiHelper;
 import com.google.android.material.button.MaterialButton;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 /**
  * Displays the full event detail screen and reacts to the main event actions.
  */
@@ -39,6 +50,7 @@ public class EventDetailActivity extends AppCompatActivity {
     private String currentEventId;
     private boolean isJoiningWaitlist;
     private boolean isLeavingWaitlist;
+    private boolean isPostingComment;
     private Event currentEvent;
     private EventDetailData currentScreenState;
     private boolean shouldRefreshOnResume;
@@ -59,6 +71,10 @@ public class EventDetailActivity extends AppCompatActivity {
     private TextView entrantCountText;
     private TextView errorText;
     private ProgressBar loadingIndicator;
+    private LinearLayout commentsContainer;
+    private TextView commentEmptyText;
+    private EditText commentInputText;
+    private TextView commentSubmitButton;
 
     /**
      * Initializes the activity, binds views, shows fallback content,
@@ -100,6 +116,10 @@ public class EventDetailActivity extends AppCompatActivity {
         entrantCountText = findViewById(R.id.entrantCountText);
         errorText = findViewById(R.id.eventErrorText);
         loadingIndicator = findViewById(R.id.eventLoadingIndicator);
+        commentsContainer = findViewById(R.id.commentsContainer);
+        commentEmptyText = findViewById(R.id.commentEmptyText);
+        commentInputText = findViewById(R.id.commentInputText);
+        commentSubmitButton = findViewById(R.id.commentSubmitButton);
     }
 
     /**
@@ -109,6 +129,7 @@ public class EventDetailActivity extends AppCompatActivity {
         ImageButton backButton = findViewById(R.id.backButton);
         backButton.setOnClickListener(view -> getOnBackPressedDispatcher().onBackPressed());
         joinWaitingListButton.setOnClickListener(view -> onWaitlistButtonPressed());
+        commentSubmitButton.setOnClickListener(view -> postComment(null, null));
     }
 
     /**
@@ -450,6 +471,187 @@ public class EventDetailActivity extends AppCompatActivity {
                 state.getSubtext(),
                 state.shouldShowEntrantCount()
         );
+
+        renderComments(state.getCurrentEvent());
+    }
+
+    private void renderComments(Event event) {
+        List<EventComment> comments = event == null ? null : event.getComments();
+        commentsContainer.removeAllViews();
+
+        if (comments == null || comments.isEmpty()) {
+            commentEmptyText.setVisibility(View.VISIBLE);
+            return;
+        }
+
+        commentEmptyText.setVisibility(View.GONE);
+
+        Map<String, List<EventComment>> repliesByParent = new HashMap<>();
+        List<EventComment> rootComments = new ArrayList<>();
+        for (EventComment comment : comments) {
+            if (comment == null) {
+                continue;
+            }
+
+            if (UiHelper.isBlank(comment.getParentId())) {
+                rootComments.add(comment);
+                continue;
+            }
+
+            repliesByParent
+                    .computeIfAbsent(comment.getParentId(), key -> new ArrayList<>())
+                    .add(comment);
+        }
+
+        rootComments.sort(commentComparator());
+        for (EventComment root : rootComments) {
+            renderCommentTree(root, 0, repliesByParent, commentsContainer);
+        }
+    }
+
+    private void renderCommentTree(EventComment comment,
+                                   int depth,
+                                   Map<String, List<EventComment>> repliesByParent,
+                                   LinearLayout container) {
+        if (comment == null) {
+            return;
+        }
+
+        int layoutRes = depth == 0 ? R.layout.item_event_comment : R.layout.item_event_comment_reply;
+        View commentView = getLayoutInflater().inflate(layoutRes, container, false);
+        TextView authorText = commentView.findViewById(R.id.commentAuthorText);
+        TextView dateText = commentView.findViewById(R.id.commentDateText);
+        TextView bodyText = commentView.findViewById(R.id.commentBodyText);
+        TextView replyButton = commentView.findViewById(R.id.commentReplyButton);
+        LinearLayout replyListContainer = commentView.findViewById(R.id.commentReplyListContainer);
+        LinearLayout replyInputContainer = commentView.findViewById(R.id.commentReplyInputContainer);
+
+        authorText.setText(resolveAuthorName(comment));
+        dateText.setText(formatCommentDate(comment.getCreatedAt()));
+        bodyText.setText(UiHelper.cleanText(comment.getText()));
+
+        replyButton.setOnClickListener(view -> toggleReplyInput(replyInputContainer, comment));
+        container.addView(commentView);
+
+        List<EventComment> replies = repliesByParent.get(comment.getCommentId());
+        if (replies == null || replies.isEmpty()) {
+            return;
+        }
+
+        replies.sort(commentComparator());
+        for (EventComment reply : replies) {
+            renderCommentTree(reply, depth + 1, repliesByParent, replyListContainer);
+        }
+    }
+
+    private void toggleReplyInput(LinearLayout replyInputContainer, EventComment parentComment) {
+        if (replyInputContainer.getChildCount() > 0) {
+            replyInputContainer.removeAllViews();
+            return;
+        }
+
+        View inputView = getLayoutInflater().inflate(
+                R.layout.item_event_comment_reply_input, replyInputContainer, false);
+        EditText replyInput = inputView.findViewById(R.id.replyInputText);
+        TextView replySubmit = inputView.findViewById(R.id.replySubmitButton);
+
+        replySubmit.setOnClickListener(view -> {
+            if (parentComment == null) {
+                return;
+            }
+            postComment(parentComment.getCommentId(), new CommentPostCallback() {
+                @Override
+                public void onSuccess() {
+                    replyInputContainer.removeAllViews();
+                }
+
+                @Override
+                public void onFailure() {
+                    replySubmit.setEnabled(true);
+                }
+            }, replyInput, replySubmit);
+        });
+
+        replyInputContainer.addView(inputView);
+    }
+
+    private void postComment(String parentId, CommentPostCallback callback) {
+        postComment(parentId, callback, commentInputText, commentSubmitButton);
+    }
+
+    private void postComment(String parentId,
+                             CommentPostCallback callback,
+                             EditText inputView,
+                             TextView submitButton) {
+        if (isPostingComment || TextUtils.isEmpty(currentEventId)) {
+            return;
+        }
+
+        String message = inputView.getText().toString().trim();
+        if (TextUtils.isEmpty(message)) {
+            Toast.makeText(this, R.string.event_comment_post_failure, Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        isPostingComment = true;
+        submitButton.setEnabled(false);
+
+        eventDetailController.addComment(currentEventId, message, parentId, (result, success) -> {
+            isPostingComment = false;
+            submitButton.setEnabled(true);
+
+            if (result == null || !result.isSuccess()) {
+                Toast.makeText(this, R.string.event_comment_post_failure, Toast.LENGTH_SHORT).show();
+                if (callback != null) {
+                    callback.onFailure();
+                }
+                return;
+            }
+
+            inputView.setText("");
+            Toast.makeText(this, result.getMessageResId(), Toast.LENGTH_SHORT).show();
+            if (callback != null) {
+                callback.onSuccess();
+            }
+            loadEventDetails();
+        });
+    }
+
+    private String resolveAuthorName(EventComment comment) {
+        if (comment == null || UiHelper.isBlank(comment.getAuthorName())) {
+            return getString(R.string.event_comment_author_unknown);
+        }
+        return comment.getAuthorName();
+    }
+
+    private String formatCommentDate(Date date) {
+        if (date == null) {
+            return "";
+        }
+        SimpleDateFormat formatter = new SimpleDateFormat("MMM d, h:mm a", Locale.getDefault());
+        return formatter.format(date);
+    }
+
+    private Comparator<EventComment> commentComparator() {
+        return (first, second) -> {
+            Date firstDate = first == null ? null : first.getCreatedAt();
+            Date secondDate = second == null ? null : second.getCreatedAt();
+            if (firstDate == null && secondDate == null) {
+                return 0;
+            }
+            if (firstDate == null) {
+                return -1;
+            }
+            if (secondDate == null) {
+                return 1;
+            }
+            return firstDate.compareTo(secondDate);
+        };
+    }
+
+    private interface CommentPostCallback {
+        void onSuccess();
+        void onFailure();
     }
 }
 

@@ -7,12 +7,14 @@ import com.example.allot.controller.shared.UserController;
 import com.example.allot.data.EventRepository;
 import com.example.allot.model.event.Event;
 import com.example.allot.model.event.EventActionState;
+import com.example.allot.model.event.EventComment;
 import com.example.allot.model.event.EventDetailData;
 import com.example.allot.model.profile.User;
 import com.example.allot.view.shared.EventDisplayFormatter;
 import com.example.allot.view.shared.UiHelper;
 import java.util.Date;
 import java.util.Locale;
+import java.util.UUID;
 /**
  * Builds and updates the data shown on the event detail screen.
  */
@@ -130,6 +132,50 @@ public class EventDetailController {
             }
 
             listener.onComplete(AppResult.success(null, R.string.event_detail_leave_success), true);
+        });
+    }
+
+    /**
+     * Adds a comment or reply to the event.
+     *
+     * @param eventId the event ID
+     * @param message the comment text
+     * @param parentId the parent comment ID if this is a reply
+     * @param listener the callback that receives the action result
+     */
+    public void addComment(String eventId,
+                           String message,
+                           String parentId,
+                           OnCompleteListener<AppResult<Void>> listener) {
+        if (isBlank(eventId) || isBlank(message)) {
+            listener.onComplete(AppResult.failure(R.string.event_comment_post_failure), false);
+            return;
+        }
+
+        String deviceId = userController.getCurrentDeviceId();
+        userController.getUserByDeviceId(deviceId, (User user, boolean success) -> {
+            String authorName = "Anonymous";
+            if (success && user != null && !isBlank(cleanText(user.getName()))) {
+                authorName = user.getName();
+            }
+
+            EventComment comment = new EventComment(
+                    UUID.randomUUID().toString(),
+                    deviceId,
+                    authorName,
+                    message.trim(),
+                    new Date(),
+                    isBlank(parentId) ? null : parentId
+            );
+
+            eventRepository.addComment(eventId, comment, (result, addSuccess) -> {
+                if (!addSuccess || result == null || !result) {
+                    listener.onComplete(AppResult.failure(R.string.event_comment_post_failure), false);
+                    return;
+                }
+
+                listener.onComplete(AppResult.success(null, R.string.event_comment_post_success), true);
+            });
         });
     }
 

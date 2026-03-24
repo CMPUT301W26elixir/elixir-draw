@@ -30,6 +30,7 @@ public class Event {
     private ArrayList<String> notEnrolled;
 
     private ArrayList<String> galleryUrls;
+    private ArrayList<EventComment> comments;
 
     private Boolean geoloc;
 
@@ -42,6 +43,7 @@ public class Event {
         this.enrolled = new ArrayList<>();
         this.cancelled = new ArrayList<>();
         this.notEnrolled = new ArrayList<>();
+        this.comments = new ArrayList<>();
     }
 
     /**
@@ -62,6 +64,7 @@ public class Event {
         this.enrolled = new ArrayList<>();
         this.cancelled = new ArrayList<>();
         this.notEnrolled = new ArrayList<>();
+        this.comments = new ArrayList<>();
         this.limit = limit;
         this.waitingList = new WaitingList(limit);
     }
@@ -298,6 +301,17 @@ public class Event {
 
     public void setGalleryUrls(ArrayList<String> galleryUrls) {
         this.galleryUrls = galleryUrls;
+    }
+
+    public ArrayList<EventComment> getComments() {
+        if (comments == null) {
+            comments = new ArrayList<>();
+        }
+        return comments;
+    }
+
+    public void setComments(ArrayList<EventComment> comments) {
+        this.comments = comments;
     }
 
     public Boolean getGeoloc() {
