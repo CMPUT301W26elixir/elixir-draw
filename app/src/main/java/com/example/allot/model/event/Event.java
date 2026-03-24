@@ -265,6 +265,8 @@ public class Event {
 
     public boolean isPrivate() {
         return VISIBILITY_PRIVATE.equalsIgnoreCase(getVisibility());
+    }
+
     public Double getEventLatitude() {
         return eventLatitude;
     }

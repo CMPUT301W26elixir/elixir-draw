@@ -113,18 +113,19 @@ public class EventDetailController {
                                 Double longitude,
                                 Date joinedAt,
                                 OnCompleteListener<AppResult<Void>> listener) {
-        eventRepository.joinWaitingList(eventId, userController.getCurrentDeviceId(), latitude, longitude, joinedAt, (result, success) -> {
-            if (!success || result == null || !result) {
+        String deviceId = userController.getCurrentDeviceId();
+        eventRepository.getEventById(eventId, (event, success) -> {
+            if (!success || event == null) {
                 listener.onComplete(AppResult.failure(R.string.event_detail_join_failure), false);
                 return;
             }
 
-            if (event.isPrivate()) {
+            if (event.isPrivate() && !event.isInvited(deviceId)) {
                 listener.onComplete(AppResult.failure(R.string.event_detail_invite_only), false);
                 return;
             }
 
-            eventRepository.joinWaitingList(eventId, userController.getCurrentDeviceId(), (result, joinSuccess) -> {
+            eventRepository.joinWaitingList(eventId, deviceId, latitude, longitude, joinedAt, (result, joinSuccess) -> {
                 if (!joinSuccess || result == null || !result) {
                     listener.onComplete(AppResult.failure(R.string.event_detail_join_failure), false);
                     return;
