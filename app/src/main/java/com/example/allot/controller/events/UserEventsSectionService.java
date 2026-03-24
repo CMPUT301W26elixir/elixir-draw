@@ -27,6 +27,7 @@ public class UserEventsSectionService {
         private final List<Event> waitingEvents = new ArrayList<>();
         private final List<Event> notSelectedEvents = new ArrayList<>();
         private final List<Event> pastEvents = new ArrayList<>();
+        private final List<Event> coOrganizerInvites = new ArrayList<>();
 
         public List<Event> getInvitedEvents() {
             return invitedEvents;
@@ -46,6 +47,10 @@ public class UserEventsSectionService {
 
         public List<Event> getPastEvents() {
             return pastEvents;
+        }
+
+        public List<Event> getCoOrganizerInvites() {
+            return coOrganizerInvites;
         }
     }
 
@@ -81,6 +86,10 @@ public class UserEventsSectionService {
         }
 
         for (Event event : events) {
+            if (isInvitedCoOrganizer(event, deviceId)) {
+                sections.getCoOrganizerInvites().add(event);
+                continue;
+            }
             RegisteredSection section = classifyRegisteredEvent(event, deviceId);
             switch (section) {
                 case INVITED:
@@ -193,6 +202,21 @@ public class UserEventsSectionService {
         return containsUser(event == null ? null : event.getEnrolled(), deviceId)
                 || containsUser(event == null ? null : event.getChosen(), deviceId)
                 || containsUser(event != null && event.getWaitingList() != null ? event.getWaitingList().chosen : null, deviceId);
+    }
+
+    /**
+     * Determines whether the current user has been invited to co-organize the event.
+     *
+     * @param event the event to check
+     * @param deviceId the current user's device ID
+     * @return true if the user has a co-organizer invite
+     */
+    public boolean isInvitedCoOrganizer(Event event, String deviceId) {
+        return event != null
+                && deviceId != null
+                && event.getCoOrganizerInvites() != null
+                && event.getCoOrganizerInvites().contains(deviceId)
+                && (event.getCoOrganizers() == null || !event.getCoOrganizers().contains(deviceId));
     }
 
     /**

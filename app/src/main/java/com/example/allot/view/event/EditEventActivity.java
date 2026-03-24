@@ -1,5 +1,6 @@
 package com.example.allot.view.event;
 
+import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -22,6 +23,7 @@ import com.example.allot.model.event.EventFormData;
 import com.example.allot.model.event.EventFormSnapshot;
 import com.example.allot.view.lottery.RunLotteryActivity;
 import com.example.allot.view.organizer.EventEntrantsActivity;
+import com.example.allot.view.organizer.InviteCoOrganizerActivity;
 import com.example.allot.view.shared.EventFormUiHelper;
 import com.example.allot.view.shared.SimpleTextWatcher;
 import com.example.allot.view.shared.UiHelper;
@@ -48,6 +50,7 @@ public class EditEventActivity extends AppCompatActivity {
     private View eventImageBackground;
     private TextView entrantsLotteryButton;
     private TextView inviteEntrantsButton;
+    private TextView inviteCoOrganizerButton;
     private TextView summaryTitleText;
     private TextView summaryLocationText;
     private TextView summaryDateText;
@@ -118,6 +121,7 @@ public class EditEventActivity extends AppCompatActivity {
         eventImageBackground = findViewById(R.id.eventImageBackground);
         entrantsLotteryButton = findViewById(R.id.entrantsLotteryButton);
         inviteEntrantsButton = findViewById(R.id.inviteEntrantsButton);
+        inviteCoOrganizerButton = findViewById(R.id.inviteCoOrganizerButton);
         summaryTitleText = findViewById(R.id.summaryTitleText);
         summaryLocationText = findViewById(R.id.summaryLocationText);
         summaryDateText = findViewById(R.id.summaryDateText);
@@ -222,6 +226,7 @@ public class EditEventActivity extends AppCompatActivity {
 
         entrantsLotteryButton.setOnClickListener(view -> openLotteryScreen());
         inviteEntrantsButton.setOnClickListener(view -> openInviteScreen());
+        inviteCoOrganizerButton.setOnClickListener(view -> openInviteCoOrganizerScreen());
         saveChangesButton.setOnClickListener(view -> saveChanges());
     }
 
@@ -307,6 +312,18 @@ public class EditEventActivity extends AppCompatActivity {
                 : RunLotteryActivity.class;
         startActivity(new android.content.Intent(this, destination)
                 .putExtra(RunLotteryActivity.EXTRA_EVENT_ID, currentEventId));
+        overridePendingTransition(0, 0);
+    }
+
+    private void openInviteCoOrganizerScreen() {
+        if (TextUtils.isEmpty(currentEventId)) {
+            Toast.makeText(this, R.string.manage_event_load_failure, Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        Intent intent = new Intent(this, InviteCoOrganizerActivity.class);
+        intent.putExtra(InviteCoOrganizerActivity.EXTRA_EVENT_ID, currentEventId);
+        startActivity(intent);
         overridePendingTransition(0, 0);
     }
 
@@ -426,10 +443,12 @@ public class EditEventActivity extends AppCompatActivity {
     }
 
     private void updateInviteButtonVisibility(Event event) {
-        if (inviteEntrantsButton == null) {
-            return;
+        if (inviteEntrantsButton != null) {
+            inviteEntrantsButton.setVisibility(event != null && event.isPrivate() ? View.VISIBLE : View.GONE);
         }
-        inviteEntrantsButton.setVisibility(event != null && event.isPrivate() ? View.VISIBLE : View.GONE);
+        if (inviteCoOrganizerButton != null) {
+            inviteCoOrganizerButton.setVisibility(event != null ? View.VISIBLE : View.GONE);
+        }
     }
 
     private void openInviteScreen() {

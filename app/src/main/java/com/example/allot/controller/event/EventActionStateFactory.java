@@ -175,7 +175,13 @@ public class EventActionStateFactory {
         if (event == null) {
             return false;
         }
-        return !isBlank(deviceId) && deviceId.equals(event.getOrganizerId());
+        if (isBlank(deviceId)) {
+            return false;
+        }
+        if (deviceId.equals(event.getOrganizerId())) {
+            return true;
+        }
+        return event.getCoOrganizers() != null && event.getCoOrganizers().contains(deviceId);
     }
 
     /**

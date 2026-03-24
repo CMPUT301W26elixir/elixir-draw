@@ -291,6 +291,8 @@ public class UserRepository {
                         "enrolled", FieldValue.arrayRemove(deviceId),
                         "cancelled", FieldValue.arrayRemove(deviceId),
                         "notEnrolled", FieldValue.arrayRemove(deviceId),
+                        "coOrganizers", FieldValue.arrayRemove(deviceId),
+                        "coOrganizerInvites", FieldValue.arrayRemove(deviceId),
                         FieldPath.of("waitingList", "status", deviceId), FieldValue.delete());
                 return;
             }
@@ -334,14 +336,14 @@ public class UserRepository {
     }
 
     /**
-     * Searches users by name, phone, or email.
+     * Searches users by name, email, or phone.
      *
-     * @param query the search query
-     * @param listener the listener that receives matching users
+     * @param query the query to match
+     * @param listener the listener that receives the results
      */
     public void searchUsers(String query, OnCompleteListener<List<User>> listener) {
-        String normalizedQuery = normalize(query);
-        if (normalizedQuery.isEmpty()) {
+        String safeQuery = query == null ? "" : query.trim().toLowerCase();
+        if (safeQuery.isEmpty()) {
             listener.onComplete(new ArrayList<>(), true);
             return;
         }
@@ -352,7 +354,7 @@ public class UserRepository {
                 return;
             }
 
-            List<User> matches = new ArrayList<>();
+            List<User> results = new ArrayList<>();
             for (QueryDocumentSnapshot document : task.getResult()) {
                 User user = document.toObject(User.class);
                 if (user == null) {
@@ -362,12 +364,15 @@ public class UserRepository {
                     user.setDeviceId(document.getId());
                 }
 
-                if (matchesQuery(user, normalizedQuery)) {
-                    matches.add(user);
+                String name = safeString(user.getName());
+                String email = safeString(user.getEmail());
+                String phone = safeString(user.getPhone());
+                if (name.contains(safeQuery) || email.contains(safeQuery) || phone.contains(safeQuery)) {
+                    results.add(user);
                 }
             }
 
-            listener.onComplete(matches, true);
+            listener.onComplete(results, true);
         });
     }
 
@@ -381,6 +386,10 @@ public class UserRepository {
         return TextHelper.isBlank(value);
     }
 
+    private String safeString(String value) {
+        return value == null ? "" : value.trim().toLowerCase();
+    }
+
     /**
      * Cleans up the phone number before storing it.
      *
@@ -392,15 +401,7 @@ public class UserRepository {
         return phone == null ? "" : phone.trim();
     }
 
-    private boolean matchesQuery(User user, String normalizedQuery) {
-        return normalize(user == null ? null : user.getName()).contains(normalizedQuery)
-                || normalize(user == null ? null : user.getEmail()).contains(normalizedQuery)
-                || normalize(user == null ? null : user.getPhone()).contains(normalizedQuery);
-    }
-
-    private String normalize(String value) {
-        return value == null ? "" : value.trim().toLowerCase();
-    }
+    
 }
 
 

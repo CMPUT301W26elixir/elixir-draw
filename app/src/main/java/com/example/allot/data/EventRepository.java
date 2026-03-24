@@ -297,6 +297,82 @@ public class EventRepository {
     }
 
     /**
+     * Loads all events managed by the given organizer or co-organizer.
+     *
+     * @param deviceId the organizer or co-organizer device ID
+     * @param listener the listener that receives the events
+     */
+    public void getManagedEvents(String deviceId, OnCompleteListener<List<Event>> listener) {
+        getAllEvents((events, success) -> {
+            if (!success || events == null) {
+                listener.onComplete(null, false);
+                return;
+            }
+
+            List<Event> managedEvents = new ArrayList<>();
+            for (Event event : events) {
+                if (event == null) {
+                    continue;
+                }
+                if (deviceId != null
+                        && (deviceId.equals(event.getOrganizerId())
+                        || (event.getCoOrganizers() != null && event.getCoOrganizers().contains(deviceId)))) {
+                    managedEvents.add(event);
+                }
+            }
+            listener.onComplete(managedEvents, true);
+        });
+    }
+
+    /**
+     * Invites a user to co-organize an event.
+     *
+     * @param eventId the event ID
+     * @param deviceId the user device ID to invite
+     * @param listener the listener that receives the result
+     */
+    public void inviteCoOrganizer(String eventId, String deviceId, OnCompleteListener<Boolean> listener) {
+        database.collection("events")
+                .document(eventId)
+                .update("coOrganizerInvites", FieldValue.arrayUnion(deviceId))
+                .addOnSuccessListener(unused -> listener.onComplete(true, true))
+                .addOnFailureListener(exception -> listener.onComplete(false, false));
+    }
+
+    /**
+     * Accepts a co-organizer invitation.
+     *
+     * @param eventId the event ID
+     * @param deviceId the user device ID accepting
+     * @param listener the listener that receives the result
+     */
+    public void acceptCoOrganizerInvite(String eventId, String deviceId, OnCompleteListener<Boolean> listener) {
+        database.collection("events")
+                .document(eventId)
+                .update(
+                        "coOrganizerInvites", FieldValue.arrayRemove(deviceId),
+                        "coOrganizers", FieldValue.arrayUnion(deviceId)
+                )
+                .addOnSuccessListener(unused -> listener.onComplete(true, true))
+                .addOnFailureListener(exception -> listener.onComplete(false, false));
+    }
+
+    /**
+     * Declines a co-organizer invitation.
+     *
+     * @param eventId the event ID
+     * @param deviceId the user device ID declining
+     * @param listener the listener that receives the result
+     */
+    public void declineCoOrganizerInvite(String eventId, String deviceId, OnCompleteListener<Boolean> listener) {
+        database.collection("events")
+                .document(eventId)
+                .update("coOrganizerInvites", FieldValue.arrayRemove(deviceId))
+                .addOnSuccessListener(unused -> listener.onComplete(true, true))
+                .addOnFailureListener(exception -> listener.onComplete(false, false));
+    }
+
+    /**
      * Updates the given event using a Firestore update map.
      *
      * @param eventId the event ID to update

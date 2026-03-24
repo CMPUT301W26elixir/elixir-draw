@@ -151,6 +151,20 @@
                 android:visibility="gone" />
 
             <TextView
+                android:id="@+id/inviteCoOrganizerButton"
+                android:layout_width="match_parent"
+                android:layout_height="45dp"
+                android:layout_marginTop="12dp"
+                android:background="@drawable/bg_waitlist_button"
+                android:clickable="true"
+                android:focusable="true"
+                android:fontFamily="@font/varela_round_regular"
+                android:gravity="center"
+                android:text="@string/manage_event_invite_coorganizer"
+                android:textColor="#1D1D1D"
+                android:textSize="18sp" />
+
+            <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="22dp"

@@ -138,6 +138,7 @@ public class UserController {
         });
     }
 
+
     public String getCurrentDeviceId() {
         return deviceSessionManager.getCurrentDeviceId();
     }

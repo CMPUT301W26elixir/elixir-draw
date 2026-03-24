@@ -8,9 +8,11 @@ import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import com.example.allot.R;
+import com.example.allot.common.OnCompleteListener;
 import com.example.allot.controller.events.UserEventsController;
 import com.example.allot.view.event.CreateEventActivity;
 import com.example.allot.view.event.EventDetailActivity;
@@ -41,6 +43,7 @@ public class UserEventsActivity extends AppCompatActivity {
     private TextView stateText;
     private LinearLayout registeredSectionsContainer;
     private LinearLayout invitedContainer;
+    private LinearLayout coOrganizerInvitesContainer;
     private LinearLayout selectedContainer;
     private LinearLayout waitingContainer;
     private LinearLayout notSelectedContainer;
@@ -98,6 +101,7 @@ public class UserEventsActivity extends AppCompatActivity {
         stateText = findViewById(R.id.stateText);
         registeredSectionsContainer = findViewById(R.id.registeredSectionsContainer);
         invitedContainer = findViewById(R.id.invitedContainer);
+        coOrganizerInvitesContainer = findViewById(R.id.coOrganizerInvitesContainer);
         selectedContainer = findViewById(R.id.selectedContainer);
         waitingContainer = findViewById(R.id.waitingContainer);
         notSelectedContainer = findViewById(R.id.notSelectedContainer);
@@ -180,6 +184,7 @@ public class UserEventsActivity extends AppCompatActivity {
 
             bindRegisteredSections(
                     groups.getInvitedItems(),
+                    groups.getCoOrganizerInviteItems(),
                     groups.getSelectedItems(),
                     groups.getWaitingItems(),
                     groups.getNotSelectedItems(),
@@ -226,12 +231,14 @@ public class UserEventsActivity extends AppCompatActivity {
      * @param stateMessageRes the optional state message resource to show above the sections
      */
     private void bindRegisteredSections(List<EventListItem> invitedItems,
+                                        List<EventListItem> coOrganizerInviteItems,
                                         List<EventListItem> selectedItems,
                                         List<EventListItem> waitingItems,
                                         List<EventListItem> notSelectedItems,
                                         List<EventListItem> pastItems,
                                         int stateMessageRes) {
         bindSection(invitedContainer, invitedItems, R.string.my_events_empty_invited);
+        bindCoOrganizerInviteSection(coOrganizerInviteItems);
         bindSection(selectedContainer, selectedItems, R.string.my_events_empty_selected);
         bindSection(waitingContainer, waitingItems, R.string.my_events_empty_waiting);
         bindSection(notSelectedContainer, notSelectedItems, R.string.my_events_empty_not_selected);
@@ -292,6 +299,21 @@ public class UserEventsActivity extends AppCompatActivity {
         }
     }
 
+    private void bindCoOrganizerInviteSection(List<EventListItem> items) {
+        coOrganizerInvitesContainer.removeAllViews();
+
+        if (items == null || items.isEmpty()) {
+            coOrganizerInvitesContainer.addView(createEmptyTextView(R.string.my_events_empty_coorganizer_invites));
+            return;
+        }
+
+        for (EventListItem item : items) {
+            View cardView = layoutInflater.inflate(R.layout.item_coorganizer_invite_card, coOrganizerInvitesContainer, false);
+            bindCoOrganizerInviteCard(cardView, item);
+            coOrganizerInvitesContainer.addView(cardView);
+        }
+    }
+
     /**
      * Creates a styled text view used for section empty states.
      *
@@ -329,6 +351,47 @@ public class UserEventsActivity extends AppCompatActivity {
         ));
 
         cardView.setOnClickListener(view -> openEventDetailScreen(eventItem));
+    }
+
+    private void bindCoOrganizerInviteCard(View cardView, EventListItem eventItem) {
+        TextView titleText = cardView.findViewById(R.id.titleText);
+        TextView locationText = cardView.findViewById(R.id.locationText);
+        TextView dateText = cardView.findViewById(R.id.dateText);
+        TextView acceptButton = cardView.findViewById(R.id.acceptButton);
+        TextView declineButton = cardView.findViewById(R.id.declineButton);
+
+        titleText.setText(eventItem == null ? null : eventItem.title);
+        locationText.setText(eventItem == null ? null : eventItem.street);
+        dateText.setText(eventItem == null ? null : eventItem.date);
+
+        acceptButton.setOnClickListener(view -> handleCoOrganizerInvite(eventItem, true));
+        declineButton.setOnClickListener(view -> handleCoOrganizerInvite(eventItem, false));
+    }
+
+    private void handleCoOrganizerInvite(EventListItem eventItem, boolean isAccepting) {
+        if (eventItem == null || TextUtils.isEmpty(eventItem.eventId)) {
+            return;
+        }
+
+        OnCompleteListener<Boolean> listener = (result, success) -> {
+            if (!success || result == null || !result) {
+                Toast.makeText(this, R.string.my_events_invite_action_failure, Toast.LENGTH_SHORT).show();
+                return;
+            }
+            Toast.makeText(this,
+                    isAccepting ? R.string.my_events_invite_accept_success : R.string.my_events_invite_decline_success,
+                    Toast.LENGTH_SHORT).show();
+            loadRegisteredEvents();
+            if (isAccepting) {
+                showHostingTab();
+            }
+        };
+
+        if (isAccepting) {
+            myEventsController.acceptCoOrganizerInvite(eventItem.eventId, listener);
+        } else {
+            myEventsController.declineCoOrganizerInvite(eventItem.eventId, listener);
+        }
     }
 
     /**
@@ -405,6 +468,7 @@ public class UserEventsActivity extends AppCompatActivity {
 
     private boolean areAllRegisteredSectionsEmpty(UserEventsController.RegisteredEventGroups groups) {
         return groups.getInvitedItems().isEmpty()
+                && groups.getCoOrganizerInviteItems().isEmpty()
                 && groups.getSelectedItems().isEmpty()
                 && groups.getWaitingItems().isEmpty()
                 && groups.getNotSelectedItems().isEmpty()

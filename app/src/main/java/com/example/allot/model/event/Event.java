@@ -32,6 +32,8 @@ public class Event {
     private ArrayList<String> enrolled;
     private ArrayList<String> cancelled;
     private ArrayList<String> notEnrolled;
+    private ArrayList<String> coOrganizers;
+    private ArrayList<String> coOrganizerInvites;
 
     private ArrayList<String> galleryUrls;
     private ArrayList<String> invited;
@@ -49,6 +51,8 @@ public class Event {
         this.notEnrolled = new ArrayList<>();
         this.invited = new ArrayList<>();
         this.visibility = VISIBILITY_PUBLIC;
+        this.coOrganizers = new ArrayList<>();
+        this.coOrganizerInvites = new ArrayList<>();
     }
 
     /**
@@ -70,6 +74,8 @@ public class Event {
         this.cancelled = new ArrayList<>();
         this.notEnrolled = new ArrayList<>();
         this.invited = new ArrayList<>();
+        this.coOrganizers = new ArrayList<>();
+        this.coOrganizerInvites = new ArrayList<>();
         this.limit = limit;
         this.waitingList = new WaitingList(limit);
         this.visibility = VISIBILITY_PUBLIC;
@@ -313,6 +319,28 @@ public class Event {
 
     public void setNotEnrolled(ArrayList<String> notEnrolled) {
         this.notEnrolled = notEnrolled;
+    }
+
+    public ArrayList<String> getCoOrganizers() {
+        if (coOrganizers == null) {
+            coOrganizers = new ArrayList<>();
+        }
+        return coOrganizers;
+    }
+
+    public void setCoOrganizers(ArrayList<String> coOrganizers) {
+        this.coOrganizers = coOrganizers;
+    }
+
+    public ArrayList<String> getCoOrganizerInvites() {
+        if (coOrganizerInvites == null) {
+            coOrganizerInvites = new ArrayList<>();
+        }
+        return coOrganizerInvites;
+    }
+
+    public void setCoOrganizerInvites(ArrayList<String> coOrganizerInvites) {
+        this.coOrganizerInvites = coOrganizerInvites;
     }
 
     public ArrayList<String> getGalleryUrls() {
