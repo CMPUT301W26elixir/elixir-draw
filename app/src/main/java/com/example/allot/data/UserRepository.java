@@ -334,6 +334,44 @@ public class UserRepository {
     }
 
     /**
+     * Searches users by name, phone, or email.
+     *
+     * @param query the search query
+     * @param listener the listener that receives matching users
+     */
+    public void searchUsers(String query, OnCompleteListener<List<User>> listener) {
+        String normalizedQuery = normalize(query);
+        if (normalizedQuery.isEmpty()) {
+            listener.onComplete(new ArrayList<>(), true);
+            return;
+        }
+
+        usersCollection.get().addOnCompleteListener(task -> {
+            if (!task.isSuccessful() || task.getResult() == null) {
+                listener.onComplete(new ArrayList<>(), false);
+                return;
+            }
+
+            List<User> matches = new ArrayList<>();
+            for (QueryDocumentSnapshot document : task.getResult()) {
+                User user = document.toObject(User.class);
+                if (user == null) {
+                    continue;
+                }
+                if (isBlank(user.getDeviceId())) {
+                    user.setDeviceId(document.getId());
+                }
+
+                if (matchesQuery(user, normalizedQuery)) {
+                    matches.add(user);
+                }
+            }
+
+            listener.onComplete(matches, true);
+        });
+    }
+
+    /**
      * Checks if a string is null or empty after trimming spaces.
      *
      * @param value the string to check
@@ -352,6 +390,16 @@ public class UserRepository {
     private String normalizePhone(String phone) {
         // Keep the phone value safe for Firestore
         return phone == null ? "" : phone.trim();
+    }
+
+    private boolean matchesQuery(User user, String normalizedQuery) {
+        return normalize(user == null ? null : user.getName()).contains(normalizedQuery)
+                || normalize(user == null ? null : user.getEmail()).contains(normalizedQuery)
+                || normalize(user == null ? null : user.getPhone()).contains(normalizedQuery);
+    }
+
+    private String normalize(String value) {
+        return value == null ? "" : value.trim().toLowerCase();
     }
 }
 

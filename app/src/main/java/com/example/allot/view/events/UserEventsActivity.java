@@ -40,6 +40,7 @@ public class UserEventsActivity extends AppCompatActivity {
     private ProgressBar loadingIndicator;
     private TextView stateText;
     private LinearLayout registeredSectionsContainer;
+    private LinearLayout invitedContainer;
     private LinearLayout selectedContainer;
     private LinearLayout waitingContainer;
     private LinearLayout notSelectedContainer;
@@ -96,6 +97,7 @@ public class UserEventsActivity extends AppCompatActivity {
         loadingIndicator = findViewById(R.id.loadingIndicator);
         stateText = findViewById(R.id.stateText);
         registeredSectionsContainer = findViewById(R.id.registeredSectionsContainer);
+        invitedContainer = findViewById(R.id.invitedContainer);
         selectedContainer = findViewById(R.id.selectedContainer);
         waitingContainer = findViewById(R.id.waitingContainer);
         notSelectedContainer = findViewById(R.id.notSelectedContainer);
@@ -177,6 +179,7 @@ public class UserEventsActivity extends AppCompatActivity {
             }
 
             bindRegisteredSections(
+                    groups.getInvitedItems(),
                     groups.getSelectedItems(),
                     groups.getWaitingItems(),
                     groups.getNotSelectedItems(),
@@ -222,11 +225,13 @@ public class UserEventsActivity extends AppCompatActivity {
      * @param pastItems the past event items to display
      * @param stateMessageRes the optional state message resource to show above the sections
      */
-    private void bindRegisteredSections(List<EventListItem> selectedItems,
+    private void bindRegisteredSections(List<EventListItem> invitedItems,
+                                        List<EventListItem> selectedItems,
                                         List<EventListItem> waitingItems,
                                         List<EventListItem> notSelectedItems,
                                         List<EventListItem> pastItems,
                                         int stateMessageRes) {
+        bindSection(invitedContainer, invitedItems, R.string.my_events_empty_invited);
         bindSection(selectedContainer, selectedItems, R.string.my_events_empty_selected);
         bindSection(waitingContainer, waitingItems, R.string.my_events_empty_waiting);
         bindSection(notSelectedContainer, notSelectedItems, R.string.my_events_empty_not_selected);
@@ -399,7 +404,8 @@ public class UserEventsActivity extends AppCompatActivity {
     }
 
     private boolean areAllRegisteredSectionsEmpty(UserEventsController.RegisteredEventGroups groups) {
-        return groups.getSelectedItems().isEmpty()
+        return groups.getInvitedItems().isEmpty()
+                && groups.getSelectedItems().isEmpty()
                 && groups.getWaitingItems().isEmpty()
                 && groups.getNotSelectedItems().isEmpty()
                 && groups.getPastItems().isEmpty();

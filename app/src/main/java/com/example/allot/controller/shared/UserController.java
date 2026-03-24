@@ -41,6 +41,16 @@ public class UserController {
     }
 
     /**
+     * Searches users by name, phone, or email.
+     *
+     * @param query the search query
+     * @param listener the listener that receives matching users
+     */
+    public void searchUsers(String query, OnCompleteListener<java.util.List<User>> listener) {
+        userRepository.searchUsers(query, listener);
+    }
+
+    /**
      * Loads the current userfor this device, or creates one if none exists.
      *
      * @param listener the listener that receives the userand success result

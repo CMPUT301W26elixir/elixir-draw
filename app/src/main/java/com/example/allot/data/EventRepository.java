@@ -85,6 +85,101 @@ public class EventRepository {
     }
 
     /**
+     * Invites a user to a private event and adds it to their My Events list.
+     *
+     * @param eventId the event ID
+     * @param deviceId the user device ID to invite
+     * @param listener the listener that receives the result
+     */
+    public void inviteUserToEvent(String eventId, String deviceId, OnCompleteListener<Boolean> listener) {
+        if (isBlank(eventId) || isBlank(deviceId)) {
+            listener.onComplete(false, false);
+            return;
+        }
+
+        getEventById(eventId, (event, success) -> {
+            if (!success || event == null) {
+                listener.onComplete(false, false);
+                return;
+            }
+
+            if (!event.isPrivate()) {
+                listener.onComplete(false, true);
+                return;
+            }
+
+            WriteBatch batch = database.batch();
+            DocumentReference eventRef = database.collection("events").document(eventId);
+            DocumentReference userRef = database.collection("users").document(deviceId);
+            batch.update(eventRef, "invited", FieldValue.arrayUnion(deviceId));
+            batch.update(userRef, "myEvents", FieldValue.arrayUnion(eventId));
+            batch.commit()
+                    .addOnSuccessListener(unused -> listener.onComplete(true, true))
+                    .addOnFailureListener(exception -> listener.onComplete(false, false));
+        });
+    }
+
+    /**
+     * Accepts a private event invite and joins the waiting list.
+     *
+     * @param eventId the event ID
+     * @param deviceId the user device ID accepting the invite
+     * @param listener the listener that receives the result
+     */
+    public void acceptInvite(String eventId, String deviceId, OnCompleteListener<Boolean> listener) {
+        if (isBlank(eventId) || isBlank(deviceId)) {
+            listener.onComplete(false, false);
+            return;
+        }
+
+        getEventById(eventId, (event, success) -> {
+            if (!success || event == null) {
+                listener.onComplete(false, false);
+                return;
+            }
+
+            if (!event.isPrivate() || !event.isInvited(deviceId)) {
+                listener.onComplete(false, true);
+                return;
+            }
+
+            WriteBatch batch = database.batch();
+            DocumentReference eventRef = database.collection("events").document(eventId);
+            DocumentReference userRef = database.collection("users").document(deviceId);
+            batch.update(eventRef,
+                    "invited", FieldValue.arrayRemove(deviceId),
+                    "waitingList.list", FieldValue.arrayUnion(deviceId));
+            batch.update(userRef, "myEvents", FieldValue.arrayUnion(eventId));
+            batch.commit()
+                    .addOnSuccessListener(unused -> listener.onComplete(true, true))
+                    .addOnFailureListener(exception -> listener.onComplete(false, false));
+        });
+    }
+
+    /**
+     * Declines a private event invite and removes it from the user's My Events list.
+     *
+     * @param eventId the event ID
+     * @param deviceId the user device ID declining the invite
+     * @param listener the listener that receives the result
+     */
+    public void declineInvite(String eventId, String deviceId, OnCompleteListener<Boolean> listener) {
+        if (isBlank(eventId) || isBlank(deviceId)) {
+            listener.onComplete(false, false);
+            return;
+        }
+
+        WriteBatch batch = database.batch();
+        DocumentReference eventRef = database.collection("events").document(eventId);
+        DocumentReference userRef = database.collection("users").document(deviceId);
+        batch.update(eventRef, "invited", FieldValue.arrayRemove(deviceId));
+        batch.update(userRef, "myEvents", FieldValue.arrayRemove(eventId));
+        batch.commit()
+                .addOnSuccessListener(unused -> listener.onComplete(true, true))
+                .addOnFailureListener(exception -> listener.onComplete(false, false));
+    }
+
+    /**
      * Loads an event by its ID.
      *
      * @param eventId the event ID
@@ -414,6 +509,10 @@ public class EventRepository {
         String getUserId() {
             return userId;
         }
+    }
+
+    private boolean isBlank(String value) {
+        return value == null || value.trim().isEmpty();
     }
 
 }

@@ -14,21 +14,25 @@ import java.util.List;
  */
 public class UserEventsController {
     public static class RegisteredEventGroups {
+        private final List<EventListItem> invitedItems;
         private final List<EventListItem> selectedItems;
         private final List<EventListItem> waitingItems;
         private final List<EventListItem> notSelectedItems;
         private final List<EventListItem> pastItems;
 
-        RegisteredEventGroups(List<EventListItem> selectedItems,
+        RegisteredEventGroups(List<EventListItem> invitedItems,
+                              List<EventListItem> selectedItems,
                               List<EventListItem> waitingItems,
                               List<EventListItem> notSelectedItems,
                               List<EventListItem> pastItems) {
+            this.invitedItems = copyItems(invitedItems);
             this.selectedItems = copyItems(selectedItems);
             this.waitingItems = copyItems(waitingItems);
             this.notSelectedItems = copyItems(notSelectedItems);
             this.pastItems = copyItems(pastItems);
         }
 
+        public List<EventListItem> getInvitedItems() { return copyItems(invitedItems); }
         public List<EventListItem> getSelectedItems() { return copyItems(selectedItems); }
         public List<EventListItem> getWaitingItems() { return copyItems(waitingItems); }
         public List<EventListItem> getNotSelectedItems() { return copyItems(notSelectedItems); }
@@ -83,6 +87,7 @@ public class UserEventsController {
             );
 
             listener.onComplete(new RegisteredEventGroups(
+                    mapItems(sections.getInvitedEvents()),
                     mapItems(sections.getSelectedEvents()),
                     mapItems(sections.getWaitingEvents()),
                     mapItems(sections.getNotSelectedEvents()),
@@ -202,7 +207,8 @@ public class UserEventsController {
                     || containsUser(event.getWaitingList() == null ? null : event.getWaitingList().chosen, deviceId)
                     || containsUser(event.getChosen(), deviceId)
                     || containsUser(event.getEnrolled(), deviceId)
-                    || containsUser(event.getNotEnrolled(), deviceId)) {
+                    || containsUser(event.getNotEnrolled(), deviceId)
+                    || event.isInvited(deviceId)) {
                 registeredEvents.add(event);
             }
         }

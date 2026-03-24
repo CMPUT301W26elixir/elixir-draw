@@ -26,6 +26,16 @@ public class UserEventsSectionServiceTest {
     }
 
     @Test
+    public void classifyRegisteredEvent_returnsInvitedForPrivateInvite() {
+        Event event = buildEvent(System.currentTimeMillis() + 20_000L, System.currentTimeMillis() + 10_000L);
+        event.setVisibility(Event.VISIBILITY_PRIVATE);
+        event.getInvited().add("user1");
+
+        assertEquals(UserEventsSectionService.RegisteredSection.INVITED,
+                service.classifyRegisteredEvent(event, "user1"));
+    }
+
+    @Test
     public void classifyRegisteredEvent_returnsWaitingBeforeDeadline() {
         Event event = buildEvent(System.currentTimeMillis() + 20_000L, System.currentTimeMillis() + 10_000L);
 
@@ -60,6 +70,10 @@ public class UserEventsSectionServiceTest {
 
     @Test
     public void groupRegisteredEvents_splitsEventsIntoExpectedSections() {
+        Event invited = buildEvent(System.currentTimeMillis() + 15_000L, System.currentTimeMillis() + 10_000L);
+        invited.setVisibility(Event.VISIBILITY_PRIVATE);
+        invited.getInvited().add("user1");
+
         Event selected = buildEvent(System.currentTimeMillis() + 30_000L, System.currentTimeMillis() + 20_000L);
         selected.getEnrolled().add("user1");
 
@@ -71,10 +85,11 @@ public class UserEventsSectionServiceTest {
         Event past = buildEvent(System.currentTimeMillis() - 30_000L, System.currentTimeMillis() - 40_000L);
 
         UserEventsSectionService.RegisteredSections sections = service.groupRegisteredEvents(
-                Arrays.asList(selected, waiting, notSelected, past),
+                Arrays.asList(invited, selected, waiting, notSelected, past),
                 "user1"
         );
 
+        assertEquals(1, sections.getInvitedEvents().size());
         assertEquals(1, sections.getSelectedEvents().size());
         assertEquals(1, sections.getWaitingEvents().size());
         assertEquals(1, sections.getNotSelectedEvents().size());

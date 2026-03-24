@@ -136,6 +136,21 @@
                 android:textSize="20sp" />
 
             <TextView
+                android:id="@+id/inviteEntrantsButton"
+                android:layout_width="match_parent"
+                android:layout_height="45dp"
+                android:layout_marginTop="12dp"
+                android:background="@drawable/bg_waitlist_button"
+                android:clickable="true"
+                android:focusable="true"
+                android:fontFamily="@font/varela_round_regular"
+                android:gravity="center"
+                android:text="@string/manage_event_invite_button"
+                android:textColor="#1D1D1D"
+                android:textSize="20sp"
+                android:visibility="gone" />
+
+            <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="22dp"
@@ -219,6 +234,27 @@
                 android:paddingEnd="12dp"
                 android:textColor="@color/white"
                 android:textColorHint="@color/text_secondary"
+                android:textSize="16sp" />
+
+            <TextView
+                android:id="@+id/visibilityLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:fontFamily="@font/varela_round_regular"
+                android:text="@string/create_event_visibility_label"
+                android:textColor="@color/white"
+                android:textSize="16sp" />
+
+            <CheckBox
+                android:id="@+id/privateEventCheckbox"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:buttonTint="@color/white"
+                android:fontFamily="@font/varela_round_regular"
+                android:text="@string/create_event_private_option"
+                android:textColor="@color/white"
                 android:textSize="16sp" />
 
             <TextView

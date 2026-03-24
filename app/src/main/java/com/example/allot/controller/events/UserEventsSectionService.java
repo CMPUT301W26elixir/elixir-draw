@@ -11,6 +11,7 @@ public class UserEventsSectionService {
      * Represents the different event status sections shown in the registered tab.
      */
     public enum RegisteredSection {
+        INVITED,
         SELECTED,
         WAITING,
         NOT_SELECTED,
@@ -21,10 +22,15 @@ public class UserEventsSectionService {
      * Groups registered events into their display sections.
      */
     public static class RegisteredSections {
+        private final List<Event> invitedEvents = new ArrayList<>();
         private final List<Event> selectedEvents = new ArrayList<>();
         private final List<Event> waitingEvents = new ArrayList<>();
         private final List<Event> notSelectedEvents = new ArrayList<>();
         private final List<Event> pastEvents = new ArrayList<>();
+
+        public List<Event> getInvitedEvents() {
+            return invitedEvents;
+        }
 
         public List<Event> getSelectedEvents() {
             return selectedEvents;
@@ -77,6 +83,9 @@ public class UserEventsSectionService {
         for (Event event : events) {
             RegisteredSection section = classifyRegisteredEvent(event, deviceId);
             switch (section) {
+                case INVITED:
+                    sections.getInvitedEvents().add(event);
+                    break;
                 case SELECTED:
                     sections.getSelectedEvents().add(event);
                     break;
@@ -132,6 +141,10 @@ public class UserEventsSectionService {
             return RegisteredSection.PAST;
         }
 
+        if (isInvited(event, deviceId)) {
+            return RegisteredSection.INVITED;
+        }
+
         if (isSelected(event, deviceId)) {
             return RegisteredSection.SELECTED;
         }
@@ -141,6 +154,17 @@ public class UserEventsSectionService {
         }
 
         return RegisteredSection.NOT_SELECTED;
+    }
+
+    private boolean isInvited(Event event, String deviceId) {
+        if (event == null || !event.isPrivate()) {
+            return false;
+        }
+        if (deviceId == null || deviceId.trim().isEmpty()) {
+            return false;
+        }
+        return event.isInvited(deviceId)
+                && !containsUser(event.getWaitingList() == null ? null : event.getWaitingList().list, deviceId);
     }
 
     /**
