@@ -85,38 +85,6 @@ public class EventRepository {
     }
 
     /**
-     * Invites an entrant to a private event.
-     *
-     * @param eventId the event ID
-     * @param entrantId the entrant device ID to invite
-     * @param listener the listener that receives the result
-     */
-    public void inviteEntrant(String eventId, String entrantId, OnCompleteListener<Boolean> listener) {
-        if (isBlank(eventId) || isBlank(entrantId)) {
-            listener.onComplete(false, false);
-            return;
-        }
-
-        getEventById(eventId, (event, success) -> {
-            if (!success || event == null) {
-                listener.onComplete(false, false);
-                return;
-            }
-
-            if (!event.isPrivate()) {
-                listener.onComplete(false, true);
-                return;
-            }
-
-            database.collection("events")
-                    .document(eventId)
-                    .update("invited", FieldValue.arrayUnion(entrantId))
-                    .addOnSuccessListener(unused -> listener.onComplete(true, true))
-                    .addOnFailureListener(exception -> listener.onComplete(false, false));
-        });
-    }
-
-    /**
      * Loads an event by its ID.
      *
      * @param eventId the event ID
@@ -448,7 +416,4 @@ public class EventRepository {
         }
     }
 
-    private boolean isBlank(String value) {
-        return value == null || value.trim().isEmpty();
-    }
 }

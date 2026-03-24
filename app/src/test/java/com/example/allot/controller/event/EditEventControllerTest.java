@@ -44,7 +44,6 @@ public class EditEventControllerTest {
         return new EventFormData(
                 title,
                 "Location",
-                false,
                 true,
                 "Jan",
                 "5",

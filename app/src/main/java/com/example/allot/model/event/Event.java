@@ -7,9 +7,6 @@ import java.util.HashMap;
  * Holds an event and all of the saved data tied to it.
  */
 public class Event {
-    public static final String VISIBILITY_PUBLIC = "public";
-    public static final String VISIBILITY_PRIVATE = "private";
-
     private String eventId;
     private String organizerId;
     private String title;
@@ -24,7 +21,6 @@ public class Event {
     private Date registrationDeadline;
     private String status;
     private String posterUrl;
-    private String visibility;
 
     private int limit = -1;
     private WaitingList waitingList;
@@ -34,7 +30,6 @@ public class Event {
     private ArrayList<String> notEnrolled;
 
     private ArrayList<String> galleryUrls;
-    private ArrayList<String> invited;
 
     private Boolean geoloc;
 
@@ -47,8 +42,6 @@ public class Event {
         this.enrolled = new ArrayList<>();
         this.cancelled = new ArrayList<>();
         this.notEnrolled = new ArrayList<>();
-        this.invited = new ArrayList<>();
-        this.visibility = VISIBILITY_PUBLIC;
     }
 
     /**
@@ -69,10 +62,8 @@ public class Event {
         this.enrolled = new ArrayList<>();
         this.cancelled = new ArrayList<>();
         this.notEnrolled = new ArrayList<>();
-        this.invited = new ArrayList<>();
         this.limit = limit;
         this.waitingList = new WaitingList(limit);
-        this.visibility = VISIBILITY_PUBLIC;
     }
 
     /**
@@ -107,28 +98,6 @@ public class Event {
      */
     public void notenrolled() {
         notEnrolled = getWaitingList().notEnrolled();
-    }
-
-    /**
-     * Invites an entrant to a private event.
-     *
-     * @param entrantId the entrant device ID to invite
-     * @throws IllegalStateException when the event is not private
-     */
-    public void invite(String entrantId) {
-        if (!isPrivate()) {
-            throw new IllegalStateException("Invites are only supported for private events.");
-        }
-        if (entrantId == null || entrantId.trim().isEmpty()) {
-            return;
-        }
-        if (invited == null) {
-            invited = new ArrayList<>();
-        }
-        String normalizedEntrantId = entrantId.trim();
-        if (!invited.contains(normalizedEntrantId)) {
-            invited.add(normalizedEntrantId);
-        }
     }
 
     /**
@@ -264,23 +233,6 @@ public class Event {
         this.posterUrl = posterUrl;
     }
 
-    public String getVisibility() {
-        String normalized = normalizeVisibility(visibility);
-        return normalized == null ? VISIBILITY_PUBLIC : normalized;
-    }
-
-    public void setVisibility(String visibility) {
-        this.visibility = normalizeVisibility(visibility);
-    }
-
-    public boolean isPublic() {
-        return VISIBILITY_PUBLIC.equalsIgnoreCase(getVisibility());
-    }
-
-    public boolean isPrivate() {
-        return VISIBILITY_PRIVATE.equalsIgnoreCase(getVisibility());
-    }
-
     public int getLimit() {
         return limit;
     }
@@ -348,37 +300,12 @@ public class Event {
         this.galleryUrls = galleryUrls;
     }
 
-    public ArrayList<String> getInvited() {
-        if (invited == null) {
-            invited = new ArrayList<>();
-        }
-        return invited;
-    }
-
-    public void setInvited(ArrayList<String> invited) {
-        this.invited = invited;
-    }
-
     public Boolean getGeoloc() {
         return geoloc;
     }
 
     public void setGeoloc(Boolean geoloc) {
         this.geoloc = geoloc;
-    }
-
-    private String normalizeVisibility(String value) {
-        if (value == null) {
-            return null;
-        }
-        String trimmed = value.trim().toLowerCase();
-        if (VISIBILITY_PUBLIC.equals(trimmed)) {
-            return VISIBILITY_PUBLIC;
-        }
-        if (VISIBILITY_PRIVATE.equals(trimmed)) {
-            return VISIBILITY_PRIVATE;
-        }
-        return VISIBILITY_PUBLIC;
     }
 }
 

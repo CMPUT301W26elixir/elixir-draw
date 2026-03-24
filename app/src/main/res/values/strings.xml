@@ -199,8 +199,6 @@ This action cannot be undone.</string>
     <string name="create_event_name_hint"></string>
     <string name="create_event_location_label">Location *</string>
     <string name="create_event_location_hint"></string>
-    <string name="create_event_visibility_label">Visibility</string>
-    <string name="create_event_private_option">Private event (invite only)</string>
     <string name="create_event_geolocation_preferences">Geolocation</string>
     <string name="create_event_enable_geolocation">Require geolocation for this event</string>
     <string name="create_event_start_date_label">Start Date *</string>
@@ -250,8 +248,6 @@ This action cannot be undone.</string>
     <string name="create_event_success_generate_qr">Generate QR code</string>
     <string name="create_event_success_view_event">View Event Page</string>
     <string name="create_event_success_qr_placeholder">QR code generation coming soon.</string>
-    <string name="event_qr_private_unavailable">QR codes are only available for public events.</string>
-    <string name="manage_event_no_changes">No changes to save yet.</string>
     <string name="event_qr_title">Share your event through this QR code!</string>
     <string name="event_qr_generation_failure">Could not generate this QR code right now.</string>
     <string name="event_qr_image_description">QR code for this event</string>

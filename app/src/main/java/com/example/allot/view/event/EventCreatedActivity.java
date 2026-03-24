@@ -25,7 +25,6 @@ public class EventCreatedActivity extends AppCompatActivity {
     public static final String EXTRA_EVENT_PRICE = "event_price";
     public static final String EXTRA_EVENT_DEADLINE = "event_deadline";
     public static final String EXTRA_EVENT_CATEGORY = "event_category";
-    public static final String EXTRA_EVENT_VISIBILITY = "event_visibility";
 
     private BottomNavBarView bottomNavBar;
     private View imageBackground;
@@ -38,7 +37,6 @@ public class EventCreatedActivity extends AppCompatActivity {
     private String currentEventLocation;
     private String currentEventDate;
     private String currentEventCategory;
-    private String currentEventVisibility;
 
     /**
      * Initializes the activity, reads event data from the intent,
@@ -76,7 +74,6 @@ public class EventCreatedActivity extends AppCompatActivity {
         currentEventLocation = intent.getStringExtra(EXTRA_EVENT_LOCATION);
         currentEventDate = intent.getStringExtra(EXTRA_EVENT_DATE);
         currentEventCategory = intent.getStringExtra(EXTRA_EVENT_CATEGORY);
-        currentEventVisibility = intent.getStringExtra(EXTRA_EVENT_VISIBILITY);
     }
 
     /**
@@ -94,10 +91,6 @@ public class EventCreatedActivity extends AppCompatActivity {
 
         TextView generateQrButton = findViewById(R.id.generateQrButton);
         generateQrButton.setOnClickListener(view -> openQrCodeScreen());
-        if (!com.example.allot.model.event.Event.VISIBILITY_PUBLIC.equalsIgnoreCase(currentEventVisibility)) {
-            generateQrButton.setEnabled(false);
-            generateQrButton.setAlpha(0.5f);
-        }
 
         TextView viewEventPageButton = findViewById(R.id.viewEventPageButton);
         viewEventPageButton.setOnClickListener(view -> openEventPage());
@@ -134,10 +127,6 @@ public class EventCreatedActivity extends AppCompatActivity {
             Toast.makeText(this, R.string.event_qr_generation_failure, Toast.LENGTH_SHORT).show();
             return;
         }
-        if (!com.example.allot.model.event.Event.VISIBILITY_PUBLIC.equalsIgnoreCase(currentEventVisibility)) {
-            Toast.makeText(this, R.string.event_qr_private_unavailable, Toast.LENGTH_SHORT).show();
-            return;
-        }
 
         Intent intent = new Intent(this, EventQrCodeActivity.class);
         intent.putExtra(EXTRA_EVENT_ID, currentEventId);
@@ -147,7 +136,6 @@ public class EventCreatedActivity extends AppCompatActivity {
         intent.putExtra(EXTRA_EVENT_PRICE, getIntent().getStringExtra(EXTRA_EVENT_PRICE));
         intent.putExtra(EXTRA_EVENT_DEADLINE, getIntent().getStringExtra(EXTRA_EVENT_DEADLINE));
         intent.putExtra(EXTRA_EVENT_CATEGORY, currentEventCategory);
-        intent.putExtra(EXTRA_EVENT_VISIBILITY, currentEventVisibility);
         startActivity(intent);
         overridePendingTransition(0, 0);
     }

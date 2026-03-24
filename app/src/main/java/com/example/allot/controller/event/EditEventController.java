@@ -119,7 +119,7 @@ public class EditEventController {
      */
     public EventFormSnapshot buildSnapshot(EventFormData formData) {
         if (formData == null) {
-            return new EventFormSnapshot("", "", "", "", "", "", "", "", false, false);
+            return new EventFormSnapshot("", "", "", "", "", "", "", "", false);
         }
 
         return new EventFormSnapshot(
@@ -139,8 +139,7 @@ public class EditEventController {
                         formData.getRegistrationEndDay(),
                         formData.getRegistrationEndYear()
                 ),
-                formData.isGeolocationEnabled(),
-                formData.isPrivateEvent()
+                formData.isGeolocationEnabled()
         );
     }
 
@@ -182,7 +181,6 @@ public class EditEventController {
         updates.put("geoloc", input.isGeolocationEnabled());
         updates.put("registrationOpen", input.getRegistrationStart());
         updates.put("registrationDeadline", input.getRegistrationEnd());
-        updates.put("visibility", input.getVisibility());
 
         eventRepository.updateEvent(eventId, updates, (updateResult, success) -> {
             if (!success || updateResult == null || !updateResult) {
@@ -219,7 +217,7 @@ public class EditEventController {
      */
     public EventFormData buildViewModel(Event event) {
         if (event == null) {
-            return EventFormData.forBinding("", "", false, false, "", "", "", "", "", "", "", "", "", "", "", "");
+            return EventFormData.forBinding("", "", false, "", "", "", "", "", "", "", "", "", "", "", "");
         }
 
         int participantCount = event.getCapacity() > 0 ? event.getCapacity() : event.getLimit();
@@ -227,7 +225,6 @@ public class EditEventController {
         return EventFormData.forBinding(
                 safeValue(event.getTitle()),
                 safeValue(event.getLocation()),
-                event.isPrivate(),
                 Boolean.TRUE.equals(event.getGeoloc()),
                 monthValue(event.getEventDate()),
                 dayValue(event.getEventDate()),
@@ -255,7 +252,6 @@ public class EditEventController {
         return EventFormData.forBinding(
                 safeValue(title),
                 safeValue(location),
-                false,
                 false,
                 monthFromFormattedDate(eventDate),
                 dayFromFormattedDate(eventDate),

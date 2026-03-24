@@ -65,7 +65,6 @@ public class CreateEventController {
         event.setRegistrationDeadline(input.getRegistrationEnd());
         event.setStatus("open");
         event.setCategory(normalizeNullable(input.getCategory()));
-        event.setVisibility(input.getVisibility());
 
         eventRepository.createNewEventForUser(event, deviceSessionManager.getCurrentDeviceId(), (resultValue, success) -> {
             if (!success || resultValue == null || !resultValue) {

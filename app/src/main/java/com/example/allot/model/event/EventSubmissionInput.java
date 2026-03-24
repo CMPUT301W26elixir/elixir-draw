@@ -16,7 +16,6 @@ public class EventSubmissionInput {
     private final Date registrationStart;
     private final Date registrationEnd;
     private final String category;
-    private final String visibility;
 
     /**
      * Creates a parsed event submission model.
@@ -31,7 +30,6 @@ public class EventSubmissionInput {
      * @param registrationStart the parsed registration start date
      * @param registrationEnd the parsed registration end date
      * @param category the selected event category
-     * @param visibility the selected event visibility
      */
     public EventSubmissionInput(String title,
                                 String location,
@@ -42,8 +40,7 @@ public class EventSubmissionInput {
                                 Integer participants,
                                 Date registrationStart,
                                 Date registrationEnd,
-                                String category,
-                                String visibility) {
+                                String category) {
         this.title = title;
         this.location = location;
         this.geolocationEnabled = geolocationEnabled;
@@ -54,7 +51,6 @@ public class EventSubmissionInput {
         this.registrationStart = registrationStart;
         this.registrationEnd = registrationEnd;
         this.category = category;
-        this.visibility = visibility;
     }
 
     /**
@@ -125,12 +121,5 @@ public class EventSubmissionInput {
      */
     public String getCategory() {
         return category;
-    }
-
-    /**
-     * @return the event visibility
-     */
-    public String getVisibility() {
-        return visibility;
     }
 }

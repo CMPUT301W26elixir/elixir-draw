@@ -18,7 +18,6 @@ import com.example.allot.model.event.EventFormData;
 public class EventFormUiHelper {
     private final EditText titleInput;
     private final EditText locationInput;
-    private final CheckBox privateEventCheckbox;
     private final CheckBox geolocationCheckbox;
     private final Spinner eventMonthSpinner;
     private final EditText eventDayInput;
@@ -38,7 +37,6 @@ public class EventFormUiHelper {
      *
      * @param titleInput the title field
      * @param locationInput the location field
-     * @param privateEventCheckbox the private event checkbox
      * @param geolocationCheckbox the geolocation checkbox
      * @param eventMonthSpinner the event month spinner
      * @param eventDayInput the event day field
@@ -55,7 +53,6 @@ public class EventFormUiHelper {
      */
     public EventFormUiHelper(EditText titleInput,
                              EditText locationInput,
-                             CheckBox privateEventCheckbox,
                              CheckBox geolocationCheckbox,
                              Spinner eventMonthSpinner,
                              EditText eventDayInput,
@@ -71,7 +68,6 @@ public class EventFormUiHelper {
                              EditText registrationEndYearInput) {
         this.titleInput = titleInput;
         this.locationInput = locationInput;
-        this.privateEventCheckbox = privateEventCheckbox;
         this.geolocationCheckbox = geolocationCheckbox;
         this.eventMonthSpinner = eventMonthSpinner;
         this.eventDayInput = eventDayInput;
@@ -107,7 +103,6 @@ public class EventFormUiHelper {
         return new EventFormData(
                 readText(titleInput),
                 readText(locationInput),
-                privateEventCheckbox != null && privateEventCheckbox.isChecked(),
                 geolocationCheckbox.isChecked(),
                 readMonth(eventMonthSpinner),
                 readText(eventDayInput),
@@ -136,9 +131,6 @@ public class EventFormUiHelper {
 
         titleInput.setText(formData.getTitle());
         locationInput.setText(formData.getLocation());
-        if (privateEventCheckbox != null) {
-            privateEventCheckbox.setChecked(formData.isPrivateEvent());
-        }
         geolocationCheckbox.setChecked(formData.isGeolocationEnabled());
         priceInput.setText(formData.getPrice());
         descriptionInput.setText(formData.getDescription());

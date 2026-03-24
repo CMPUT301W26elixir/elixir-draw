@@ -60,7 +60,6 @@ public class CreateEventActivity extends AppCompatActivity {
     private void bindViews() {
         EditText eventNameInput = findViewById(R.id.eventNameInput);
         EditText locationInput = findViewById(R.id.locationInput);
-        CheckBox privateEventCheckbox = findViewById(R.id.privateEventCheckbox);
         CheckBox geolocationCheckbox = findViewById(R.id.geolocationCheckbox);
         Spinner startMonthSpinner = findViewById(R.id.startMonthSpinner);
         EditText startDayInput = findViewById(R.id.startDayInput);
@@ -78,7 +77,6 @@ public class CreateEventActivity extends AppCompatActivity {
         formUiHelper = new EventFormUiHelper(
                 eventNameInput,
                 locationInput,
-                privateEventCheckbox,
                 geolocationCheckbox,
                 startMonthSpinner,
                 startDayInput,
@@ -116,47 +114,39 @@ public class CreateEventActivity extends AppCompatActivity {
      */
     private void submitEvent() {
         if (isSaving) {
-            Toast.makeText(this, R.string.create_event_save_failure, Toast.LENGTH_SHORT).show();
             return;
         }
 
         isSaving = true;
         nextButton.setEnabled(false);
 
-        try {
-            createEventController.submitEvent(readFormData(), (AppResult<Event> result, boolean success) -> {
-                isSaving = false;
-                nextButton.setEnabled(true);
-
-                if (result == null) {
-                    Toast.makeText(this, R.string.create_event_save_failure, Toast.LENGTH_SHORT).show();
-                    return;
-                }
-
-                Toast.makeText(this, result.getMessageResId(), Toast.LENGTH_SHORT).show();
-                if (!result.isSuccess() || result.getData() == null) {
-                    return;
-                }
-
-                Event event = result.getData();
-                Intent intent = new Intent(this, EventCreatedActivity.class);
-                intent.putExtra(EventCreatedActivity.EXTRA_EVENT_ID, event.getEventId());
-                intent.putExtra(EventCreatedActivity.EXTRA_EVENT_TITLE, event.getTitle());
-                intent.putExtra(EventCreatedActivity.EXTRA_EVENT_LOCATION, event.getLocation());
-                intent.putExtra(EventCreatedActivity.EXTRA_EVENT_DATE, EventDisplayFormatter.date(event));
-                intent.putExtra(EventCreatedActivity.EXTRA_EVENT_PRICE, EventDisplayFormatter.price(event));
-                intent.putExtra(EventCreatedActivity.EXTRA_EVENT_DEADLINE, EventDisplayFormatter.deadline(event));
-                intent.putExtra(EventCreatedActivity.EXTRA_EVENT_CATEGORY, event.getCategory());
-                intent.putExtra(EventCreatedActivity.EXTRA_EVENT_VISIBILITY, event.getVisibility());
-                startActivity(intent);
-                overridePendingTransition(0, 0);
-                finish();
-            });
-        } catch (RuntimeException exception) {
+        createEventController.submitEvent(readFormData(), (AppResult<Event> result, boolean success) -> {
             isSaving = false;
             nextButton.setEnabled(true);
-            Toast.makeText(this, R.string.create_event_save_failure, Toast.LENGTH_SHORT).show();
-        }
+
+            if (result == null) {
+                Toast.makeText(this, R.string.create_event_save_failure, Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            Toast.makeText(this, result.getMessageResId(), Toast.LENGTH_SHORT).show();
+            if (!result.isSuccess() || result.getData() == null) {
+                return;
+            }
+
+            Event event = result.getData();
+            Intent intent = new Intent(this, EventCreatedActivity.class);
+            intent.putExtra(EventCreatedActivity.EXTRA_EVENT_ID, event.getEventId());
+            intent.putExtra(EventCreatedActivity.EXTRA_EVENT_TITLE, event.getTitle());
+            intent.putExtra(EventCreatedActivity.EXTRA_EVENT_LOCATION, event.getLocation());
+            intent.putExtra(EventCreatedActivity.EXTRA_EVENT_DATE, EventDisplayFormatter.date(event));
+            intent.putExtra(EventCreatedActivity.EXTRA_EVENT_PRICE, EventDisplayFormatter.price(event));
+            intent.putExtra(EventCreatedActivity.EXTRA_EVENT_DEADLINE, EventDisplayFormatter.deadline(event));
+            intent.putExtra(EventCreatedActivity.EXTRA_EVENT_CATEGORY, event.getCategory());
+            startActivity(intent);
+            overridePendingTransition(0, 0);
+            finish();
+        });
     }
 
     private EventFormData readFormData() {

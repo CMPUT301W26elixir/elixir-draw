@@ -34,7 +34,6 @@ public class EventFormServiceTest {
                 "",
                 "Location",
                 false,
-                false,
                 "Jan",
                 "5",
                 "2027",
@@ -59,7 +58,6 @@ public class EventFormServiceTest {
         EventFormData formData = new EventFormData(
                 "Sample Event",
                 "Location",
-                false,
                 false,
                 "Jan",
                 "40",
@@ -86,7 +84,6 @@ public class EventFormServiceTest {
                 "Sample Event",
                 "Location",
                 false,
-                false,
                 "Jan",
                 "5",
                 "2027",
@@ -111,7 +108,6 @@ public class EventFormServiceTest {
         EventFormData formData = new EventFormData(
                 "Sample Event",
                 "Location",
-                false,
                 false,
                 "Jan",
                 "5",
@@ -138,7 +134,6 @@ public class EventFormServiceTest {
                 "Sample Event",
                 "Location",
                 false,
-                false,
                 "Jan",
                 "1",
                 "2027",
@@ -162,7 +157,6 @@ public class EventFormServiceTest {
         return new EventFormData(
                 "Sample Event",
                 "Location",
-                false,
                 true,
                 "Jan",
                 "5",

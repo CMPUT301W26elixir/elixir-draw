@@ -4,7 +4,6 @@ import com.example.allot.R;
 import com.example.allot.common.AppResult;
 import com.example.allot.model.event.EventFormData;
 import com.example.allot.model.event.EventSubmissionInput;
-import com.example.allot.model.event.Event;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -47,8 +46,7 @@ public class EventFormService {
                 validationResult.getParticipants(),
                 validationResult.getRegistrationStart(),
                 validationResult.getRegistrationEnd(),
-                null,
-                visibilityFromForm(formData)
+                null
         ));
     }
 
@@ -74,8 +72,7 @@ public class EventFormService {
                 validationResult.getParticipants(),
                 validationResult.getRegistrationStart(),
                 validationResult.getRegistrationEnd(),
-                null,
-                visibilityFromForm(formData)
+                null
         ));
     }
 
@@ -236,13 +233,6 @@ public class EventFormService {
 
     private String safeString(String value) {
         return value == null ? "" : value;
-    }
-
-    private String visibilityFromForm(EventFormData formData) {
-        if (formData != null && formData.isPrivateEvent()) {
-            return Event.VISIBILITY_PRIVATE;
-        }
-        return Event.VISIBILITY_PUBLIC;
     }
 
     private static class ValidationResult {
