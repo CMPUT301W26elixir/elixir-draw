@@ -18,19 +18,28 @@ public class CreateEventController {
     private final EventFormService eventFormService;
     private final EventInputValidator eventInputValidator;
     private final DeviceSessionManager deviceSessionManager;
+    private final EventLocationGeocodingService geocodingService;
 
     public CreateEventController(Context context) {
-        this(new EventRepository(), new EventFormService(), new EventInputValidator(), new DeviceSessionManager(context));
+        this(
+                new EventRepository(),
+                new EventFormService(),
+                new EventInputValidator(),
+                new DeviceSessionManager(context),
+                new AndroidEventLocationGeocodingService(context)
+        );
     }
 
     CreateEventController(EventRepository eventRepository,
                           EventFormService eventFormService,
                           EventInputValidator eventInputValidator,
-                          DeviceSessionManager deviceSessionManager) {
+                          DeviceSessionManager deviceSessionManager,
+                          EventLocationGeocodingService geocodingService) {
         this.eventRepository = eventRepository;
         this.eventFormService = eventFormService;
         this.eventInputValidator = eventInputValidator;
         this.deviceSessionManager = deviceSessionManager;
+        this.geocodingService = geocodingService;
     }
 
     /**
@@ -65,6 +74,7 @@ public class CreateEventController {
         event.setRegistrationDeadline(input.getRegistrationEnd());
         event.setStatus("open");
         event.setCategory(normalizeNullable(input.getCategory()));
+        applyResolvedCoordinates(event, input.getLocation());
 
         eventRepository.createNewEventForUser(event, deviceSessionManager.getCurrentDeviceId(), (resultValue, success) -> {
             if (!success || resultValue == null || !resultValue) {
@@ -78,6 +88,18 @@ public class CreateEventController {
 
     private String normalizeNullable(String value) {
         return value == null ? null : value.trim();
+    }
+
+    private void applyResolvedCoordinates(Event event, String location) {
+        EventLocationCoordinates coordinates = geocodingService == null ? null : geocodingService.geocode(location);
+        if (coordinates == null) {
+            event.setEventLatitude(null);
+            event.setEventLongitude(null);
+            return;
+        }
+
+        event.setEventLatitude(coordinates.getLatitude());
+        event.setEventLongitude(coordinates.getLongitude());
     }
 }
 

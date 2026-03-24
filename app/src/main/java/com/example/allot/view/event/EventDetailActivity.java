@@ -1,7 +1,10 @@
 package com.example.allot.view.event;
 
+import android.Manifest;
 import android.app.Dialog;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.location.Location;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
@@ -11,16 +14,23 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import com.example.allot.R;
 import com.example.allot.common.AppResult;
 import com.example.allot.controller.event.EventDetailController;
+import com.example.allot.controller.event.EventJoinDistanceValidator;
 import com.example.allot.model.event.Event;
 import com.example.allot.model.event.EventDetailData;
 import com.example.allot.view.shared.AppDialogHelper;
 import com.example.allot.view.shared.EventDisplayFormatter;
 import com.example.allot.view.shared.UiHelper;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.Priority;
+import com.google.android.gms.tasks.CancellationTokenSource;
 import com.google.android.material.button.MaterialButton;
 /**
  * Displays the full event detail screen and reacts to the main event actions.
@@ -33,8 +43,11 @@ public class EventDetailActivity extends AppCompatActivity {
     public static final String EXTRA_EVENT_PRICE = "event_price";
     public static final String EXTRA_EVENT_DEADLINE = "event_deadline";
     public static final String EXTRA_EVENT_CATEGORY = "event_category";
+    private static final int LOCATION_PERMISSION_REQUEST = 1002;
 
     private EventDetailController eventDetailController;
+    private FusedLocationProviderClient fusedLocationProviderClient;
+    private final EventJoinDistanceValidator eventJoinDistanceValidator = new EventJoinDistanceValidator();
 
     private String currentEventId;
     private boolean isJoiningWaitlist;
@@ -59,6 +72,8 @@ public class EventDetailActivity extends AppCompatActivity {
     private TextView entrantCountText;
     private TextView errorText;
     private ProgressBar loadingIndicator;
+    private Dialog pendingJoinDialog;
+    private MaterialButton pendingJoinConfirmButton;
 
     /**
      * Initializes the activity, binds views, shows fallback content,
@@ -72,6 +87,7 @@ public class EventDetailActivity extends AppCompatActivity {
         setContentView(R.layout.activity_event_detail);
 
         eventDetailController = new EventDetailController(this);
+        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
         currentEventId = getIntent().getStringExtra(EXTRA_EVENT_ID);
 
         bindViews();
@@ -314,26 +330,19 @@ public class EventDetailActivity extends AppCompatActivity {
         isJoiningWaitlist = true;
         confirmButton.setEnabled(false);
         joinWaitingListButton.setEnabled(false);
+        pendingJoinDialog = dialog;
+        pendingJoinConfirmButton = confirmButton;
 
-        eventDetailController.joinWaitingList(currentEventId, (AppResult<Void> result, boolean success) -> {
-            isJoiningWaitlist = false;
-            confirmButton.setEnabled(true);
-            joinWaitingListButton.setEnabled(true);
+        if (hasLocationPermission()) {
+            captureLocationAndJoin();
+            return;
+        }
 
-            if (result == null) {
-                Toast.makeText(this, R.string.event_detail_join_failure, Toast.LENGTH_SHORT).show();
-                return;
-            }
-
-            if (!result.isSuccess()) {
-                Toast.makeText(this, result.getMessageResId(), Toast.LENGTH_SHORT).show();
-                return;
-            }
-
-            dialog.dismiss();
-            Toast.makeText(this, result.getMessageResId(), Toast.LENGTH_SHORT).show();
-            loadEventDetails();
-        });
+        ActivityCompat.requestPermissions(
+                this,
+                new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                LOCATION_PERMISSION_REQUEST
+        );
     }
 
     /**
@@ -399,6 +408,129 @@ public class EventDetailActivity extends AppCompatActivity {
     private void showErrorState(String message) {
         errorText.setVisibility(View.VISIBLE);
         errorText.setText(message);
+    }
+
+    private boolean hasLocationPermission() {
+        return ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED;
+    }
+
+    private boolean isJoinLocationRequired() {
+        return currentEvent != null && Boolean.TRUE.equals(currentEvent.getGeoloc());
+    }
+
+    private boolean shouldBlockJoinForDistance(Double entrantLatitude, Double entrantLongitude) {
+        if (!isJoinLocationRequired() || currentEvent == null) {
+            return false;
+        }
+
+        Double eventLatitude = currentEvent.getEventLatitude();
+        Double eventLongitude = currentEvent.getEventLongitude();
+        if (eventLatitude == null || eventLongitude == null) {
+            return false;
+        }
+
+        return !eventJoinDistanceValidator.isWithinAllowedRadius(
+                entrantLatitude,
+                entrantLongitude,
+                eventLatitude,
+                eventLongitude
+        );
+    }
+
+    private void captureLocationAndJoin() {
+        CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+        fusedLocationProviderClient
+                .getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, cancellationTokenSource.getToken())
+                .addOnSuccessListener(this, location -> {
+                    if (location == null) {
+                        handleUnavailableLocation();
+                        return;
+                    }
+
+                    completeJoinWaitingList(location);
+                })
+                .addOnFailureListener(this, exception -> handleUnavailableLocation());
+    }
+
+    private void handleUnavailableLocation() {
+        if (isJoinLocationRequired()) {
+            failJoinWaitingList(R.string.event_detail_join_location_unavailable);
+            return;
+        }
+
+        completeJoinWaitingList(null);
+    }
+
+    private void completeJoinWaitingList(Location location) {
+        Double latitude = location == null ? null : location.getLatitude();
+        Double longitude = location == null ? null : location.getLongitude();
+        if (shouldBlockJoinForDistance(latitude, longitude)) {
+            failJoinWaitingList(R.string.event_detail_join_too_far);
+            return;
+        }
+
+        eventDetailController.joinWaitingList(currentEventId, latitude, longitude, new java.util.Date(), (AppResult<Void> result, boolean success) -> {
+            isJoiningWaitlist = false;
+            if (pendingJoinConfirmButton != null) {
+                pendingJoinConfirmButton.setEnabled(true);
+            }
+            joinWaitingListButton.setEnabled(true);
+
+            if (result == null) {
+                clearPendingJoinState();
+                Toast.makeText(this, R.string.event_detail_join_failure, Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            if (!result.isSuccess()) {
+                clearPendingJoinState();
+                Toast.makeText(this, result.getMessageResId(), Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            if (pendingJoinDialog != null) {
+                pendingJoinDialog.dismiss();
+            }
+            clearPendingJoinState();
+            Toast.makeText(this, result.getMessageResId(), Toast.LENGTH_SHORT).show();
+            loadEventDetails();
+        });
+    }
+
+    private void failJoinWaitingList(int messageResId) {
+        isJoiningWaitlist = false;
+        if (pendingJoinConfirmButton != null) {
+            pendingJoinConfirmButton.setEnabled(true);
+        }
+        joinWaitingListButton.setEnabled(true);
+        clearPendingJoinState();
+        Toast.makeText(this, messageResId, Toast.LENGTH_SHORT).show();
+    }
+
+    private void clearPendingJoinState() {
+        pendingJoinDialog = null;
+        pendingJoinConfirmButton = null;
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode != LOCATION_PERMISSION_REQUEST) {
+            return;
+        }
+
+        if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            captureLocationAndJoin();
+            return;
+        }
+
+        if (isJoinLocationRequired()) {
+            failJoinWaitingList(R.string.event_detail_join_location_required);
+            return;
+        }
+
+        completeJoinWaitingList(null);
     }
 
     /**

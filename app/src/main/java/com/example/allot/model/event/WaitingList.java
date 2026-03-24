@@ -14,6 +14,8 @@ public class WaitingList {
     public ArrayList<String> chosen;
     /** Tracks whether each selected entrant has accepted their spot. */
     public HashMap<String, Boolean> status;
+    /** Stores each entrant's join location details keyed by device ID. */
+    private HashMap<String, WaitlistJoinLocation> joinLocations;
 
     /** Limits how many entrants can be selected, or stays -1 when no limit is set yet. */
     public int limit = -1;
@@ -25,6 +27,7 @@ public class WaitingList {
         this.list = new ArrayList<>();
         this.chosen = new ArrayList<>();
         this.status = new HashMap<>();
+        this.joinLocations = new HashMap<>();
     }
 
     /**
@@ -37,6 +40,7 @@ public class WaitingList {
         this.list = new ArrayList<>();
         this.chosen = new ArrayList<>();
         this.status = new HashMap<>();
+        this.joinLocations = new HashMap<>();
     }
 
     /**
@@ -95,6 +99,17 @@ public class WaitingList {
             }
         }
         return notSigned;
+    }
+
+    public HashMap<String, WaitlistJoinLocation> getJoinLocations() {
+        if (joinLocations == null) {
+            joinLocations = new HashMap<>();
+        }
+        return joinLocations;
+    }
+
+    public void setJoinLocations(HashMap<String, WaitlistJoinLocation> joinLocations) {
+        this.joinLocations = joinLocations;
     }
 }
 
