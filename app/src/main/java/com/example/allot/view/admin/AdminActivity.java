@@ -9,11 +9,14 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.allot.R;
 import com.example.allot.controller.admin.AdminEventController;
+import com.example.allot.controller.admin.AdminProfileController;
 import com.example.allot.model.event.Event;
+import com.example.allot.model.profile.User;
 import com.example.allot.view.shared.AppDialogHelper;
 import com.example.allot.view.shared.AppNavigator;
 import com.example.allot.view.shared.BottomNavBarView;
@@ -22,18 +25,39 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Activity for admin event management.
- * Allows admins to browse all events and delete them.
+ * Activity for admin panel with tab-based navigation.
+ * Allows admins to browse and delete events and profiles.
  */
 public class AdminActivity extends AppCompatActivity {
-    private AdminEventController adminEventController;
+    private enum AdminTab {
+        EVENTS,
+        PROFILES
+    }
+
     private BottomNavBarView bottomNavBar;
-    private RecyclerView eventsRecyclerView;
-    private View loadingLayout;
-    private TextView emptyStateText;
     private ImageView backButton;
-    private AdminEventListAdapter adapter;
+    private TextView eventsTabText;
+    private TextView profilesTabText;
+
+    // Event management
+    private AdminEventController adminEventController;
+    private RecyclerView eventsRecyclerView;
+    private AdminEventListAdapter eventsAdapter;
     private List<Event> eventsList;
+    private View eventsContainer;
+    private View eventsLoadingLayout;
+    private TextView eventsEmptyStateText;
+
+    // Profile management
+    private AdminProfileController adminProfileController;
+    private RecyclerView profilesRecyclerView;
+    private AdminProfileListAdapter profilesAdapter;
+    private List<User> profilesList;
+    private View profilesContainer;
+    private View profilesLoadingLayout;
+    private TextView profilesEmptyStateText;
+
+    private AdminTab currentTab = AdminTab.EVENTS;
 
     /**
      * Initializes the activity, binds views, sets up navigation,
@@ -47,11 +71,14 @@ public class AdminActivity extends AppCompatActivity {
         setContentView(R.layout.activity_admin);
 
         adminEventController = new AdminEventController(this);
+        adminProfileController = new AdminProfileController(this);
         eventsList = new ArrayList<>();
+        profilesList = new ArrayList<>();
 
         bindViews();
         setupBottomNav();
-        setupRecyclerView();
+        setupTabButtons();
+        setupRecyclerViews();
         setupBackButton();
         loadEvents();
     }
@@ -70,10 +97,21 @@ public class AdminActivity extends AppCompatActivity {
      */
     private void bindViews() {
         bottomNavBar = findViewById(R.id.bottomNavBar);
-        eventsRecyclerView = findViewById(R.id.eventsRecyclerView);
-        loadingLayout = findViewById(R.id.loadingLayout);
-        emptyStateText = findViewById(R.id.emptyStateText);
         backButton = findViewById(R.id.backButton);
+        eventsTabText = findViewById(R.id.eventsTabText);
+        profilesTabText = findViewById(R.id.profilesTabText);
+
+        // Events
+        eventsContainer = findViewById(R.id.eventsContainer);
+        eventsRecyclerView = findViewById(R.id.eventsRecyclerView);
+        eventsLoadingLayout = findViewById(R.id.eventsLoadingLayout);
+        eventsEmptyStateText = findViewById(R.id.eventsEmptyStateText);
+
+        // Profiles
+        profilesContainer = findViewById(R.id.profilesContainer);
+        profilesRecyclerView = findViewById(R.id.profilesRecyclerView);
+        profilesLoadingLayout = findViewById(R.id.profilesLoadingLayout);
+        profilesEmptyStateText = findViewById(R.id.profilesEmptyStateText);
     }
 
     /**
@@ -89,12 +127,38 @@ public class AdminActivity extends AppCompatActivity {
     }
 
     /**
-     * Sets up the RecyclerView with an adapter.
+     * Sets up the tab buttons for switching between events and profiles.
      */
-    private void setupRecyclerView() {
-        adapter = new AdminEventListAdapter(eventsList, this::onDeleteClick);
+    private void setupTabButtons() {
+        eventsTabText.setOnClickListener(view -> showEventsTab());
+        profilesTabText.setOnClickListener(view -> showProfilesTab());
+        updateTabStyles();
+    }
+
+    /**
+     * Updates the tab text colors to show which tab is active.
+     */
+    private void updateTabStyles() {
+        int activeColor = ContextCompat.getColor(this, R.color.text_primary);
+        int inactiveColor = ContextCompat.getColor(this, R.color.my_events_tab_inactive);
+
+        eventsTabText.setTextColor(currentTab == AdminTab.EVENTS ? activeColor : inactiveColor);
+        profilesTabText.setTextColor(currentTab == AdminTab.PROFILES ? activeColor : inactiveColor);
+    }
+
+    /**
+     * Sets up both RecyclerViews with their respective adapters.
+     */
+    private void setupRecyclerViews() {
+        // Events RecyclerView
+        eventsAdapter = new AdminEventListAdapter(eventsList, this::onEventDeleteClick);
         eventsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-        eventsRecyclerView.setAdapter(adapter);
+        eventsRecyclerView.setAdapter(eventsAdapter);
+
+        // Profiles RecyclerView
+        profilesAdapter = new AdminProfileListAdapter(profilesList, this::onProfileDeleteClick);
+        profilesRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        profilesRecyclerView.setAdapter(profilesAdapter);
     }
 
     /**
@@ -105,29 +169,148 @@ public class AdminActivity extends AppCompatActivity {
     }
 
     /**
+     * Shows the events tab and loads events if not already loaded.
+     */
+    private void showEventsTab() {
+        currentTab = AdminTab.EVENTS;
+        updateTabStyles();
+        eventsContainer.setVisibility(View.VISIBLE);
+        profilesContainer.setVisibility(View.GONE);
+
+        if (eventsList.isEmpty()) {
+            loadEvents();
+        }
+    }
+
+    /**
+     * Shows the profiles tab and loads profiles if not already loaded.
+     */
+    private void showProfilesTab() {
+        currentTab = AdminTab.PROFILES;
+        updateTabStyles();
+        eventsContainer.setVisibility(View.GONE);
+        profilesContainer.setVisibility(View.VISIBLE);
+
+        if (profilesList.isEmpty()) {
+            loadProfiles();
+        }
+    }
+
+    /**
      * Loads all events from the database.
      * Shows loading state while loading, then displays events or empty state.
      */
     private void loadEvents() {
-        showLoadingState();
+        setEventsLoadingState();
         adminEventController.loadAllEvents((events, success) -> {
             if (!success || events == null) {
-                showEmptyState(getString(R.string.admin_error_loading_events));
+                setEventsEmptyState(getString(R.string.admin_error_loading_events));
                 Toast.makeText(this, R.string.admin_error_loading_events, Toast.LENGTH_SHORT).show();
                 return;
             }
 
             if (events.isEmpty()) {
-                showEmptyState(getString(R.string.admin_no_events));
+                setEventsEmptyState(getString(R.string.admin_no_events));
                 return;
             }
 
             eventsList.clear();
             eventsList.addAll(events);
-            showEventsState();
-            adapter.notifyDataSetChanged();
+            setEventsVisibleState();
+            eventsAdapter.notifyDataSetChanged();
         });
     }
+
+    /**
+     * Loads all profiles from the database.
+     * Shows loading state while loading, then displays profiles or empty state.
+     */
+    private void loadProfiles() {
+        setProfilesLoadingState();
+        adminProfileController.loadAllProfiles((profiles, success) -> {
+            if (!success || profiles == null) {
+                setProfilesEmptyState(getString(R.string.admin_error_loading_profiles));
+                Toast.makeText(this, R.string.admin_error_loading_profiles, Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            if (profiles.isEmpty()) {
+                setProfilesEmptyState(getString(R.string.admin_no_profiles));
+                return;
+            }
+
+            profilesList.clear();
+            profilesList.addAll(profiles);
+            setProfilesVisibleState();
+            profilesAdapter.notifyDataSetChanged();
+        });
+    }
+
+    // ============== Event state management ==============
+
+    /**
+     * Shows the events loading state.
+     */
+    private void setEventsLoadingState() {
+        eventsRecyclerView.setVisibility(View.GONE);
+        eventsLoadingLayout.setVisibility(View.VISIBLE);
+        eventsEmptyStateText.setVisibility(View.GONE);
+    }
+
+    /**
+     * Shows the events visible state (RecyclerView is displayed).
+     */
+    private void setEventsVisibleState() {
+        eventsRecyclerView.setVisibility(View.VISIBLE);
+        eventsLoadingLayout.setVisibility(View.GONE);
+        eventsEmptyStateText.setVisibility(View.GONE);
+    }
+
+    /**
+     * Shows the events empty state.
+     *
+     * @param message the message to display
+     */
+    private void setEventsEmptyState(String message) {
+        eventsRecyclerView.setVisibility(View.GONE);
+        eventsLoadingLayout.setVisibility(View.GONE);
+        eventsEmptyStateText.setVisibility(View.VISIBLE);
+        eventsEmptyStateText.setText(message);
+    }
+
+    // ============== Profile state management ==============
+
+    /**
+     * Shows the profiles loading state.
+     */
+    private void setProfilesLoadingState() {
+        profilesRecyclerView.setVisibility(View.GONE);
+        profilesLoadingLayout.setVisibility(View.VISIBLE);
+        profilesEmptyStateText.setVisibility(View.GONE);
+    }
+
+    /**
+     * Shows the profiles visible state (RecyclerView is displayed).
+     */
+    private void setProfilesVisibleState() {
+        profilesRecyclerView.setVisibility(View.VISIBLE);
+        profilesLoadingLayout.setVisibility(View.GONE);
+        profilesEmptyStateText.setVisibility(View.GONE);
+    }
+
+    /**
+     * Shows the profiles empty state.
+     *
+     * @param message the message to display
+     */
+    private void setProfilesEmptyState(String message) {
+        profilesRecyclerView.setVisibility(View.GONE);
+        profilesLoadingLayout.setVisibility(View.GONE);
+        profilesEmptyStateText.setVisibility(View.VISIBLE);
+        profilesEmptyStateText.setText(message);
+    }
+
+    // ============== Delete handlers ==============
 
     /**
      * Handles delete button click for an event.
@@ -136,17 +319,28 @@ public class AdminActivity extends AppCompatActivity {
      * @param event the event to delete
      * @param position the position in the list
      */
-    private void onDeleteClick(Event event, int position) {
-        showDeleteConfirmationDialog(event, position);
+    private void onEventDeleteClick(Event event, int position) {
+        showEventDeleteConfirmationDialog(event, position);
     }
 
     /**
-     * Shows the delete confirmation dialog.
+     * Handles delete button click for a profile.
+     * Shows confirmation dialog before deleting.
+     *
+     * @param user the user profile to delete
+     * @param position the position in the list
+     */
+    private void onProfileDeleteClick(User user, int position) {
+        showProfileDeleteConfirmationDialog(user, position);
+    }
+
+    /**
+     * Shows the delete confirmation dialog for an event.
      *
      * @param event the event to delete
      * @param position the position in the list
      */
-    private void showDeleteConfirmationDialog(Event event, int position) {
+    private void showEventDeleteConfirmationDialog(Event event, int position) {
         Dialog dialog = AppDialogHelper.createDialog(this, R.layout.dialog_admin_delete_event, true);
         View dialogView = dialog.findViewById(android.R.id.content);
 
@@ -158,6 +352,31 @@ public class AdminActivity extends AppCompatActivity {
 
         cancelButton.setOnClickListener(view -> dialog.dismiss());
         deleteButton.setOnClickListener(view -> deleteEvent(event, position, dialog, cancelButton, deleteButton));
+
+        AppDialogHelper.show(dialog, UiHelper.dpToPx(this, 300), UiHelper.dpToPx(this, 200));
+    }
+
+    /**
+     * Shows the delete confirmation dialog for a profile.
+     *
+     * @param user the user profile to delete
+     * @param position the position in the list
+     */
+    private void showProfileDeleteConfirmationDialog(User user, int position) {
+        Dialog dialog = AppDialogHelper.createDialog(this, R.layout.dialog_admin_delete_profile, true);
+        View dialogView = dialog.findViewById(android.R.id.content);
+
+        TextView userNameText = dialogView.findViewById(R.id.userNameText);
+        Button cancelButton = dialogView.findViewById(R.id.cancelButton);
+        Button deleteButton = dialogView.findViewById(R.id.deleteProfileButton);
+
+        String displayName = (user.getFirstName() != null && !user.getFirstName().isEmpty())
+                ? user.getFirstName() + " " + (user.getLastName() != null ? user.getLastName() : "")
+                : user.getDeviceId();
+        userNameText.setText(displayName);
+
+        cancelButton.setOnClickListener(view -> dialog.dismiss());
+        deleteButton.setOnClickListener(view -> deleteProfile(user, position, dialog, cancelButton, deleteButton));
 
         AppDialogHelper.show(dialog, UiHelper.dpToPx(this, 300), UiHelper.dpToPx(this, 200));
     }
@@ -188,42 +407,47 @@ public class AdminActivity extends AppCompatActivity {
 
             // Remove from list
             eventsList.remove(position);
-            adapter.notifyItemRemoved(position);
+            eventsAdapter.notifyItemRemoved(position);
 
             // Show empty state if no events left
             if (eventsList.isEmpty()) {
-                showEmptyState(getString(R.string.admin_no_events));
+                setEventsEmptyState(getString(R.string.admin_no_events));
             }
         });
     }
 
     /**
-     * Shows the loading state.
-     */
-    private void showLoadingState() {
-        loadingLayout.setVisibility(View.VISIBLE);
-        eventsRecyclerView.setVisibility(View.GONE);
-        emptyStateText.setVisibility(View.GONE);
-    }
-
-    /**
-     * Shows the events list state.
-     */
-    private void showEventsState() {
-        loadingLayout.setVisibility(View.GONE);
-        eventsRecyclerView.setVisibility(View.VISIBLE);
-        emptyStateText.setVisibility(View.GONE);
-    }
-
-    /**
-     * Shows the empty state with a message.
+     * Deletes a profile after confirmation.
      *
-     * @param message the message to display
+     * @param user the user profile to delete
+     * @param position the position in the list
+     * @param dialog the confirmation dialog
+     * @param cancelButton the cancel button
+     * @param deleteButton the delete button
      */
-    private void showEmptyState(String message) {
-        loadingLayout.setVisibility(View.GONE);
-        eventsRecyclerView.setVisibility(View.GONE);
-        emptyStateText.setVisibility(View.VISIBLE);
-        emptyStateText.setText(message);
+    private void deleteProfile(User user, int position, Dialog dialog, Button cancelButton, Button deleteButton) {
+        cancelButton.setEnabled(false);
+        deleteButton.setEnabled(false);
+
+        adminProfileController.deleteProfile(user.getDeviceId(), (success, result) -> {
+            if (!success || !result) {
+                cancelButton.setEnabled(true);
+                deleteButton.setEnabled(true);
+                Toast.makeText(this, R.string.admin_error_deleting_profile, Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            dialog.dismiss();
+            Toast.makeText(this, R.string.admin_profile_deleted, Toast.LENGTH_SHORT).show();
+
+            // Remove from list
+            profilesList.remove(position);
+            profilesAdapter.notifyItemRemoved(position);
+
+            // Show empty state if no profiles left
+            if (profilesList.isEmpty()) {
+                setProfilesEmptyState(getString(R.string.admin_no_profiles));
+            }
+        });
     }
 }

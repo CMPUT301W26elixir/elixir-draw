@@ -1,6 +1,4 @@
 package com.example.allot.controller.event;
-
-import android.text.TextUtils;
 import com.example.allot.R;
 import com.example.allot.common.AppResult;
 import com.example.allot.common.OnCompleteListener;
@@ -21,24 +19,28 @@ public class EditEventController {
     private final EventFormService eventFormService;
     private final EventInputValidator eventInputValidator;
     private final LotteryDrawService lotteryDrawService;
+    private final EventLocationGeocodingService geocodingService;
 
-    public EditEventController() {
+    public EditEventController(android.content.Context context) {
         this(
                 new EventRepository(),
                 new EventFormService(),
                 new EventInputValidator(),
-                new LotteryDrawService()
+                new LotteryDrawService(),
+                new AndroidEventLocationGeocodingService(context)
         );
     }
 
     EditEventController(EventRepository eventRepository,
                         EventFormService eventFormService,
                         EventInputValidator eventInputValidator,
-                        LotteryDrawService lotteryDrawService) {
+                        LotteryDrawService lotteryDrawService,
+                        EventLocationGeocodingService geocodingService) {
         this.eventRepository = eventRepository;
         this.eventFormService = eventFormService;
         this.eventInputValidator = eventInputValidator;
         this.lotteryDrawService = lotteryDrawService;
+        this.geocodingService = geocodingService;
     }
 
     /**
@@ -154,7 +156,7 @@ public class EditEventController {
     public void saveChanges(String eventId,
                             EventFormData formData,
                             OnCompleteListener<AppResult<Event>> listener) {
-        if (TextUtils.isEmpty(eventId)) {
+        if (isBlank(eventId)) {
                 listener.onComplete(AppResult.failure(R.string.manage_event_not_found), false);
             return;
         }
@@ -183,6 +185,7 @@ public class EditEventController {
         updates.put("registrationOpen", input.getRegistrationStart());
         updates.put("registrationDeadline", input.getRegistrationEnd());
         updates.put("visibility", input.getVisibility());
+        applyResolvedCoordinates(updates, input.getLocation());
 
         eventRepository.updateEvent(eventId, updates, (updateResult, success) -> {
             if (!success || updateResult == null || !updateResult) {
@@ -335,6 +338,22 @@ public class EditEventController {
 
     private String safeValue(String value) {
         return value == null ? "" : value.trim();
+    }
+
+    private boolean isBlank(String value) {
+        return value == null || value.trim().isEmpty();
+    }
+
+    private void applyResolvedCoordinates(java.util.Map<String, Object> updates, String location) {
+        EventLocationCoordinates coordinates = geocodingService == null ? null : geocodingService.geocode(location);
+        if (coordinates == null) {
+            updates.put("eventLatitude", null);
+            updates.put("eventLongitude", null);
+            return;
+        }
+
+        updates.put("eventLatitude", coordinates.getLatitude());
+        updates.put("eventLongitude", coordinates.getLongitude());
     }
 }
 

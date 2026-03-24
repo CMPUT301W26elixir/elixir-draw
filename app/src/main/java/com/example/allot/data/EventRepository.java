@@ -3,6 +3,7 @@ package com.example.allot.data;
 import com.example.allot.common.OnCompleteListener;
 import com.example.allot.controller.event.EventOfferService;
 import com.example.allot.model.event.Event;
+import com.example.allot.model.event.WaitlistJoinLocation;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
@@ -11,6 +12,8 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.Transaction;
 import com.google.firebase.firestore.WriteBatch;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 /**
@@ -59,12 +62,20 @@ public class EventRepository {
      *
      * @param eventId the event ID
      * @param deviceId the user device ID
+     * @param latitude the temporary join latitude captured by the client
+     * @param longitude the temporary join longitude captured by the client
+     * @param joinedAt the temporary join timestamp captured by the client
      * @param listener the listener that receives the result
      */
-    public void joinWaitingList(String eventId, String deviceId, OnCompleteListener<Boolean> listener) {
+    public void joinWaitingList(String eventId,
+                                String deviceId,
+                                Double latitude,
+                                Double longitude,
+                                Date joinedAt,
+                                OnCompleteListener<Boolean> listener) {
         database.collection("events")
                 .document(eventId)
-                .update("waitingList.list", FieldValue.arrayUnion(deviceId))
+                .update(buildJoinWaitingListUpdates(deviceId, latitude, longitude, joinedAt))
                 .addOnSuccessListener(unused -> listener.onComplete(true, true))
                 .addOnFailureListener(exception -> listener.onComplete(false, false));
     }
@@ -79,9 +90,29 @@ public class EventRepository {
     public void leaveWaitingList(String eventId, String deviceId, OnCompleteListener<Boolean> listener) {
         database.collection("events")
                 .document(eventId)
-                .update("waitingList.list", FieldValue.arrayRemove(deviceId))
+                .update(buildLeaveWaitingListUpdates(deviceId))
                 .addOnSuccessListener(unused -> listener.onComplete(true, true))
                 .addOnFailureListener(exception -> listener.onComplete(false, false));
+    }
+
+    Map<String, Object> buildJoinWaitingListUpdates(String deviceId,
+                                                    Double latitude,
+                                                    Double longitude,
+                                                    Date joinedAt) {
+        Map<String, Object> updates = new HashMap<>();
+        updates.put("waitingList.list", FieldValue.arrayUnion(deviceId));
+        if (latitude != null && longitude != null) {
+            updates.put("waitingList.joinLocations." + deviceId,
+                    new WaitlistJoinLocation(latitude, longitude, joinedAt));
+        }
+        return updates;
+    }
+
+    Map<String, Object> buildLeaveWaitingListUpdates(String deviceId) {
+        Map<String, Object> updates = new HashMap<>();
+        updates.put("waitingList.list", FieldValue.arrayRemove(deviceId));
+        updates.put("waitingList.joinLocations." + deviceId, FieldValue.delete());
+        return updates;
     }
 
     /**

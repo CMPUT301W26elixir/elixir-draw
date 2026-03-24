@@ -25,6 +25,8 @@ public class Event {
     private String status;
     private String posterUrl;
     private String visibility;
+    private Double eventLatitude;
+    private Double eventLongitude;
 
     private int limit = -1;
     private WaitingList waitingList;
@@ -263,6 +265,20 @@ public class Event {
 
     public boolean isPrivate() {
         return VISIBILITY_PRIVATE.equalsIgnoreCase(getVisibility());
+    public Double getEventLatitude() {
+        return eventLatitude;
+    }
+
+    public void setEventLatitude(Double eventLatitude) {
+        this.eventLatitude = eventLatitude;
+    }
+
+    public Double getEventLongitude() {
+        return eventLongitude;
+    }
+
+    public void setEventLongitude(Double eventLongitude) {
+        this.eventLongitude = eventLongitude;
     }
 
     public int getLimit() {

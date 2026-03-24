@@ -92,6 +92,23 @@
                 android:textColor="@color/white"
                 android:textSize="16sp" />
 
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/viewEntrantMapButton"
+                android:layout_width="match_parent"
+                android:layout_height="45dp"
+                android:layout_marginTop="18dp"
+                android:fontFamily="@font/varela_round_regular"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
+                android:minHeight="0dp"
+                android:text="@string/manage_entrants_view_map"
+                android:textAllCaps="false"
+                android:textColor="#1D1D1D"
+                android:textSize="18sp"
+                android:visibility="gone"
+                app:backgroundTint="#F1F1F1"
+                app:cornerRadius="22dp" />
+
             <HorizontalScrollView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -228,5 +245,4 @@
         android:visibility="gone"
         app:backgroundTint="#F1F1F1"
         app:cornerRadius="22dp" />
-
 </LinearLayout>

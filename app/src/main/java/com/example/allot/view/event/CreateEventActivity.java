@@ -1,14 +1,20 @@
 package com.example.allot.view.event;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.TextUtils;
+import android.util.Log;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
+import com.example.allot.BuildConfig;
 import com.example.allot.R;
 import com.example.allot.common.AppResult;
 import com.example.allot.controller.event.CreateEventController;
@@ -16,22 +22,46 @@ import com.example.allot.model.event.Event;
 import com.example.allot.model.event.EventFormData;
 import com.example.allot.view.shared.EventDisplayFormatter;
 import com.example.allot.view.shared.EventFormUiHelper;
+import com.google.android.gms.common.api.Status;
+import com.google.android.libraries.places.api.Places;
+import com.google.android.libraries.places.api.model.AutocompletePrediction;
+import com.google.android.libraries.places.widget.PlaceAutocomplete;
+import com.google.android.libraries.places.widget.PlaceAutocompleteActivity;
+
 /**
  * Shows the form for creating a new event and forwards user actions to the controller.
  */
 public class CreateEventActivity extends AppCompatActivity {
+    private static final String TAG = "CreateEventActivity";
+
     private TextView nextButton;
+    private EditText locationInput;
 
     private CreateEventController createEventController;
     private EventFormUiHelper formUiHelper;
     private boolean isSaving;
+    private final ActivityResultLauncher<Intent> placeAutocompleteLauncher =
+            registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+                if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
+                    AutocompletePrediction prediction = PlaceAutocomplete.getPredictionFromIntent(result.getData());
+                    if (prediction != null) {
+                        String selectedAddress = prediction.getFullText(null).toString();
+                        locationInput.setText(selectedAddress);
+                        locationInput.setSelection(selectedAddress.length());
+                    }
+                    return;
+                }
 
-    /**
-     * Initializes the activity, binds views, sets up month spinners,
-     * configures the header, and registers event listeners.
-     *
-     * @param savedInstanceState the saved activity state
-     */
+                if (result.getResultCode() == PlaceAutocompleteActivity.RESULT_ERROR && result.getData() != null) {
+                    Status status = PlaceAutocomplete.getResultStatusFromIntent(result.getData());
+                    if (status != null) {
+                        Log.e(TAG, "Places autocomplete failed: code=" + status.getStatusCode()
+                                + ", message=" + status.getStatusMessage());
+                    }
+                    Toast.makeText(this, R.string.create_event_places_error, Toast.LENGTH_SHORT).show();
+                }
+            });
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -45,22 +75,17 @@ public class CreateEventActivity extends AppCompatActivity {
         setupListeners();
     }
 
-    /**
-     * Finishes the activity without transition animation.
-     */
     @Override
     public void finish() {
         super.finish();
         overridePendingTransition(0, 0);
     }
 
-    /**
-     * Binds all view references used by the activity.
-     */
     private void bindViews() {
         EditText eventNameInput = findViewById(R.id.eventNameInput);
         EditText locationInput = findViewById(R.id.locationInput);
         CheckBox privateEventCheckbox = findViewById(R.id.privateEventCheckbox);
+        locationInput = findViewById(R.id.locationInput);
         CheckBox geolocationCheckbox = findViewById(R.id.geolocationCheckbox);
         Spinner startMonthSpinner = findViewById(R.id.startMonthSpinner);
         EditText startDayInput = findViewById(R.id.startDayInput);
@@ -95,25 +120,44 @@ public class CreateEventActivity extends AppCompatActivity {
         );
     }
 
-    /**
-     * Sets up the header back button behavior.
-     */
     private void setupHeader() {
         ImageButton backButton = findViewById(R.id.backButton);
         backButton.setOnClickListener(view -> getOnBackPressedDispatcher().onBackPressed());
     }
 
-    /**
-     * Registers click listeners used by the activity.
-     */
     private void setupListeners() {
+        configureLocationPicker();
         nextButton.setOnClickListener(view -> submitEvent());
     }
 
-    /**
-     * Validates the entered event data, creates a new event,
-     * saves it, and opens the success screen if the save succeeds.
-     */
+    private void configureLocationPicker() {
+        locationInput.setKeyListener(null);
+        locationInput.setFocusable(false);
+        locationInput.setCursorVisible(false);
+        locationInput.setOnClickListener(view -> openPlaceAutocomplete());
+    }
+
+    private void openPlaceAutocomplete() {
+        if (!ensurePlacesInitialized()) {
+            Toast.makeText(this, R.string.create_event_places_unavailable, Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        Intent intent = new PlaceAutocomplete.IntentBuilder().build(this);
+        placeAutocompleteLauncher.launch(intent);
+    }
+
+    private boolean ensurePlacesInitialized() {
+        if (TextUtils.isEmpty(BuildConfig.PLACES_API_KEY)) {
+            return false;
+        }
+
+        if (!Places.isInitialized()) {
+            Places.initializeWithNewPlacesApiEnabled(getApplicationContext(), BuildConfig.PLACES_API_KEY);
+        }
+        return true;
+    }
+
     private void submitEvent() {
         if (isSaving) {
             return;
@@ -155,12 +199,3 @@ public class CreateEventActivity extends AppCompatActivity {
         return formUiHelper.readFormData();
     }
 }
-
-
-
-
-
-
-
-
-
