@@ -162,6 +162,9 @@ This action cannot be undone.</string>
     <string name="event_comment_post_success">Comment posted.</string>
     <string name="event_comment_post_failure">Could not post comment. Please try again.</string>
     <string name="event_comment_author_unknown">Unknown user</string>
+    <string name="event_comment_delete">Delete</string>
+    <string name="event_comment_delete_success">Comment removed.</string>
+    <string name="event_comment_delete_failure">Could not remove comment. Please try again.</string>
     <string name="event_offer_title">Your Offer</string>
     <string name="event_offer_body">You have been selected for this event. Accept to reserve your spot, or decline to release it back to the organizer for replacement selection.</string>
     <string name="event_offer_accept">Accept Offer</string>

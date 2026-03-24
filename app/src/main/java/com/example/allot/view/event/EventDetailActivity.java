@@ -54,6 +54,7 @@ public class EventDetailActivity extends AppCompatActivity {
     private Event currentEvent;
     private EventDetailData currentScreenState;
     private boolean shouldRefreshOnResume;
+    private boolean isOrganizer;
 
     private FrameLayout heroImageFrame;
     private TextView heroDeadlineText;
@@ -434,6 +435,10 @@ public class EventDetailActivity extends AppCompatActivity {
 
         currentScreenState = state;
         currentEvent = state.getCurrentEvent();
+        isOrganizer = currentEvent != null
+                && eventDetailController != null
+                && currentEvent.getOrganizerId() != null
+                && currentEvent.getOrganizerId().equals(eventDetailController.getCurrentDeviceId());
 
         if (state.getStatus() == EventDetailData.Status.ERROR) {
             showErrorState(state.getErrorMessage());
@@ -523,6 +528,7 @@ public class EventDetailActivity extends AppCompatActivity {
         TextView dateText = commentView.findViewById(R.id.commentDateText);
         TextView bodyText = commentView.findViewById(R.id.commentBodyText);
         TextView replyButton = commentView.findViewById(R.id.commentReplyButton);
+        TextView deleteButton = commentView.findViewById(R.id.commentDeleteButton);
         LinearLayout replyListContainer = commentView.findViewById(R.id.commentReplyListContainer);
         LinearLayout replyInputContainer = commentView.findViewById(R.id.commentReplyInputContainer);
 
@@ -531,6 +537,7 @@ public class EventDetailActivity extends AppCompatActivity {
         bodyText.setText(UiHelper.cleanText(comment.getText()));
 
         replyButton.setOnClickListener(view -> toggleReplyInput(replyInputContainer, comment));
+        bindDeleteButton(deleteButton, comment);
         container.addView(commentView);
 
         List<EventComment> replies = repliesByParent.get(comment.getCommentId());
@@ -542,6 +549,18 @@ public class EventDetailActivity extends AppCompatActivity {
         for (EventComment reply : replies) {
             renderCommentTree(reply, depth + 1, repliesByParent, replyListContainer);
         }
+    }
+
+    private void bindDeleteButton(TextView deleteButton, EventComment comment) {
+        if (deleteButton == null || comment == null || !isOrganizer) {
+            if (deleteButton != null) {
+                deleteButton.setVisibility(View.GONE);
+            }
+            return;
+        }
+
+        deleteButton.setVisibility(View.VISIBLE);
+        deleteButton.setOnClickListener(view -> deleteCommentThread(comment.getCommentId()));
     }
 
     private void toggleReplyInput(LinearLayout replyInputContainer, EventComment parentComment) {
@@ -613,6 +632,22 @@ public class EventDetailActivity extends AppCompatActivity {
             if (callback != null) {
                 callback.onSuccess();
             }
+            loadEventDetails();
+        });
+    }
+
+    private void deleteCommentThread(String commentId) {
+        if (TextUtils.isEmpty(currentEventId) || TextUtils.isEmpty(commentId)) {
+            return;
+        }
+
+        eventDetailController.deleteCommentThread(currentEventId, commentId, (result, success) -> {
+            if (result == null || !result.isSuccess()) {
+                Toast.makeText(this, R.string.event_comment_delete_failure, Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            Toast.makeText(this, result.getMessageResId(), Toast.LENGTH_SHORT).show();
             loadEventDetails();
         });
     }

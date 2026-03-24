@@ -13,7 +13,10 @@ import com.example.allot.model.profile.User;
 import com.example.allot.view.shared.EventDisplayFormatter;
 import com.example.allot.view.shared.UiHelper;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import java.util.UUID;
 /**
  * Builds and updates the data shown on the event detail screen.
@@ -180,6 +183,59 @@ public class EventDetailController {
     }
 
     /**
+     * Deletes a comment thread (comment + replies) for the given event.
+     *
+     * @param eventId the event ID
+     * @param commentId the comment to delete
+     * @param listener the callback that receives the action result
+     */
+    public void deleteCommentThread(String eventId,
+                                    String commentId,
+                                    OnCompleteListener<AppResult<Void>> listener) {
+        if (isBlank(eventId) || isBlank(commentId)) {
+            listener.onComplete(AppResult.failure(R.string.event_comment_delete_failure), false);
+            return;
+        }
+
+        eventRepository.getEventById(eventId, (event, success) -> {
+            if (!success || event == null) {
+                listener.onComplete(AppResult.failure(R.string.event_comment_delete_failure), false);
+                return;
+            }
+
+            List<EventComment> comments = event.getComments();
+            if (comments == null || comments.isEmpty()) {
+                listener.onComplete(AppResult.success(null, R.string.event_comment_delete_success), true);
+                return;
+            }
+
+            Set<String> deleteIds = collectThreadIds(comments, commentId);
+            if (deleteIds.isEmpty()) {
+                listener.onComplete(AppResult.success(null, R.string.event_comment_delete_success), true);
+                return;
+            }
+
+            List<EventComment> remaining = new java.util.ArrayList<>();
+            for (EventComment comment : comments) {
+                if (comment == null || deleteIds.contains(comment.getCommentId())) {
+                    continue;
+                }
+                remaining.add(comment);
+            }
+
+            java.util.Map<String, Object> updates = new java.util.HashMap<>();
+            updates.put("comments", remaining);
+            eventRepository.updateEvent(eventId, updates, (result, updateSuccess) -> {
+                if (!updateSuccess || result == null || !result) {
+                    listener.onComplete(AppResult.failure(R.string.event_comment_delete_failure), false);
+                    return;
+                }
+                listener.onComplete(AppResult.success(null, R.string.event_comment_delete_success), true);
+            });
+        });
+    }
+
+    /**
      * Accepts the user's current offer for the given event.
      *
      * @param eventId the event whose offer is being accepted
@@ -194,6 +250,13 @@ public class EventDetailController {
 
             listener.onComplete(AppResult.success(null, R.string.event_offer_accept_success), true);
         });
+    }
+
+    /**
+     * Returns the current device ID.
+     */
+    public String getCurrentDeviceId() {
+        return userController.getCurrentDeviceId();
     }
 
     /**
@@ -382,6 +445,31 @@ public class EventDetailController {
 
     private boolean isBlank(String value) {
         return value == null || value.trim().isEmpty();
+    }
+
+    private Set<String> collectThreadIds(List<EventComment> comments, String rootId) {
+        Set<String> deleteIds = new HashSet<>();
+        if (comments == null || comments.isEmpty() || isBlank(rootId)) {
+            return deleteIds;
+        }
+
+        deleteIds.add(rootId);
+        boolean added;
+        do {
+            added = false;
+            for (EventComment comment : comments) {
+                if (comment == null || isBlank(comment.getParentId())) {
+                    continue;
+                }
+                if (deleteIds.contains(comment.getParentId())
+                        && !deleteIds.contains(comment.getCommentId())) {
+                    deleteIds.add(comment.getCommentId());
+                    added = true;
+                }
+            }
+        } while (added);
+
+        return deleteIds;
     }
 }
 

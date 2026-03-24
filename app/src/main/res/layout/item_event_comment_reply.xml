@@ -43,6 +43,17 @@
         android:textColor="#7A7A7A"
         android:textSize="11sp" />
 
+    <TextView
+        android:id="@+id/commentDeleteButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:fontFamily="@font/varela_round_regular"
+        android:text="@string/event_comment_delete"
+        android:textColor="#C04B4B"
+        android:textSize="11sp"
+        android:visibility="gone" />
+
     <LinearLayout
         android:id="@+id/commentReplyListContainer"
         android:layout_width="match_parent"
