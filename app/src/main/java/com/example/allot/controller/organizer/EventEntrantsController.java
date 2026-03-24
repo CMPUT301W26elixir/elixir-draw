@@ -7,7 +7,6 @@ import com.example.allot.controller.shared.UserController;
 import com.example.allot.data.EventRepository;
 import com.example.allot.model.event.Event;
 import com.example.allot.model.lottery.LotteryEntrantItem;
-import com.example.allot.model.organizer.EntrantsExportResult;
 import com.example.allot.model.profile.User;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -68,31 +67,6 @@ public class EventEntrantsController {
         }
 
         buildTabItems(event, selectedTab, items -> listener.onComplete(items, true));
-    }
-
-    /**
-     * Returns true when the event currently has enrolled entrants.
-     */
-    public boolean hasEnrolledEntrants(Event event) {
-        return !getEnrolledEntrants(event).isEmpty();
-    }
-
-    /**
-     * Prepares the export file name and CSV content for enrolled entrants.
-     */
-    public void buildExportData(Event event, OnCompleteListener<EntrantsExportResult> listener) {
-        if (event == null) {
-            listener.onComplete(new EntrantsExportResult(false, R.string.manage_entrants_export_failure, null, null), false);
-            return;
-        }
-
-        List<String> enrolledEntrantIds = getEnrolledEntrants(event);
-        if (enrolledEntrantIds.isEmpty()) {
-            listener.onComplete(new EntrantsExportResult(false, R.string.manage_entrants_export_empty, null, null), false);
-            return;
-        }
-
-        loadExportNames(enrolledEntrantIds, 0, new ArrayList<>(), event, listener);
     }
 
     private void buildTabItems(Event event, Tab selectedTab, java.util.function.Consumer<List<LotteryEntrantItem>> consumer) {
@@ -218,70 +192,6 @@ public class EventEntrantsController {
             items.add(new LotteryEntrantItem(entrantId, displayName, subtitleRes));
             loadEntrantItems(entrantIds, index + 1, items, subtitleRes, consumer);
         });
-    }
-
-    private void loadExportNames(List<String> entrantIds,
-                                 int index,
-                                 List<String> exportedNames,
-                                 Event event,
-                                 OnCompleteListener<EntrantsExportResult> listener) {
-        if (index >= entrantIds.size()) {
-            listener.onComplete(
-                    new EntrantsExportResult(true, R.string.manage_entrants_export_success, buildExportFileName(event), buildCsvContent(exportedNames)),
-                    true
-            );
-            return;
-        }
-
-        String entrantId = entrantIds.get(index);
-        userController.getUserByDeviceId(entrantId, (User user, boolean success) -> {
-            exportedNames.add(buildExportName(entrantId, success ? user : null));
-            loadExportNames(entrantIds, index + 1, exportedNames, event, listener);
-        });
-    }
-
-    private String buildExportName(String entrantId, User user) {
-        if (user == null) {
-            return safeCsvValue(entrantId, entrantId);
-        }
-        return safeCsvValue(user.getName(), entrantId);
-    }
-
-    private String buildCsvContent(List<String> exportedNames) {
-        StringBuilder csvBuilder = new StringBuilder();
-        csvBuilder.append("Name\n");
-        for (String exportedName : exportedNames) {
-            csvBuilder.append(escapeCsv(exportedName)).append('\n');
-        }
-        return csvBuilder.toString();
-    }
-
-    private String buildExportFileName(Event event) {
-        String eventTitle = event == null || isBlank(event.getTitle()) ? "event" : event.getTitle();
-        String safeTitle = eventTitle.replaceAll("[^a-zA-Z0-9_-]+", "_").replaceAll("_+", "_");
-        if (safeTitle.startsWith("_")) {
-            safeTitle = safeTitle.substring(1);
-        }
-        if (safeTitle.endsWith("_")) {
-            safeTitle = safeTitle.substring(0, safeTitle.length() - 1);
-        }
-        if (isBlank(safeTitle)) {
-            safeTitle = "event";
-        }
-        return safeTitle + "_enrolled_entrants.csv";
-    }
-
-    private String escapeCsv(String value) {
-        String safeValue = value == null ? "" : value;
-        String escapedValue = safeValue.replace("\"", "\"\"");
-        return "\"" + escapedValue + "\"";
-    }
-
-    private String safeCsvValue(String value, String fallback) {
-        if (!isBlank(value)) {
-            return value.trim();
-        }
-        return fallback == null ? "" : fallback;
     }
 
     private boolean isBlank(String value) {

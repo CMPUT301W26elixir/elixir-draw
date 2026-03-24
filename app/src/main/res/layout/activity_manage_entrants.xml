@@ -228,5 +228,4 @@
         android:visibility="gone"
         app:backgroundTint="#F1F1F1"
         app:cornerRadius="22dp" />
-
 </LinearLayout>

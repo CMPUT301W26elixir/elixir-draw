@@ -23,6 +23,7 @@
     <string name="notifications_not_now">Not now</string>
     <string name="notifications_footer">Manage your notifications in Settings at any time</string>
     <string name="search_hint">Find events</string>
+    <string name="map_view_title">Map view</string>
     <string name="chip_nearby">Nearby</string>
     <string name="chip_sports">Sports</string>
     <string name="chip_arts">Arts &amp; Crafts</string>
@@ -128,11 +129,7 @@ This action cannot be undone.</string>
     <string name="manage_entrants_enrolled_subtitle">Enrollment confirmed</string>
     <string name="manage_entrants_all_subtitle">Entrant</string>
     <string name="manage_entrants_export_final_list">Export Final List</string>
-    <string name="manage_entrants_exporting">Exporting...</string>
-    <string name="manage_entrants_export_empty">No enrolled entrants to export.</string>
-    <string name="manage_entrants_export_success">Exported %1$s.</string>
-    <string name="manage_entrants_export_failure">Could not export the final list. Please try again.</string>
-    <string name="manage_entrants_open_csv">Open CSV</string>
+    <string name="manage_entrants_export_unavailable">CSV export is currently unavailable.</string>
     <string name="event_detail_waitlist_joined_message">You are on the waiting list for this event.</string>
     <string name="event_detail_offer">You have an offer</string>
     <string name="event_detail_enrolled">You are enrolled</string>
