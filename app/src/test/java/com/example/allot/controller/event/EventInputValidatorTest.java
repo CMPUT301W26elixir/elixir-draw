@@ -3,6 +3,7 @@ package com.example.allot.controller.event;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import com.example.allot.model.event.Event;
 import com.example.allot.model.event.EventSubmissionInput;
 import java.util.Date;
 import org.junit.Before;
@@ -33,7 +34,8 @@ public class EventInputValidatorTest {
                 10,
                 registrationStart,
                 registrationEnd,
-                "Sports"
+                "Sports",
+                Event.VISIBILITY_PUBLIC
         );
 
         assertTrue(validator.isValid(input));
@@ -51,7 +53,8 @@ public class EventInputValidatorTest {
                 10,
                 registrationStart,
                 registrationEnd,
-                "Sports"
+                "Sports",
+                Event.VISIBILITY_PUBLIC
         );
 
         assertFalse(validator.isValid(input));
@@ -69,7 +72,8 @@ public class EventInputValidatorTest {
                 10,
                 registrationStart,
                 registrationEnd,
-                null
+                null,
+                Event.VISIBILITY_PUBLIC
         );
 
         assertFalse(validator.isValid(input));
@@ -87,7 +91,8 @@ public class EventInputValidatorTest {
                 0,
                 registrationStart,
                 registrationEnd,
-                null
+                null,
+                Event.VISIBILITY_PUBLIC
         );
 
         assertFalse(validator.isValid(input));
@@ -105,7 +110,8 @@ public class EventInputValidatorTest {
                 10,
                 registrationStart,
                 registrationEnd,
-                null
+                null,
+                Event.VISIBILITY_PUBLIC
         );
 
         assertFalse(validator.isValid(input));

@@ -1,10 +1,13 @@
 package com.example.allot.view.event;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.CheckBox;
@@ -13,7 +16,10 @@ import android.widget.ImageButton;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
+import com.example.allot.BuildConfig;
 import com.example.allot.R;
 import com.example.allot.common.AppResult;
 import com.example.allot.controller.event.EditEventController;
@@ -22,13 +28,21 @@ import com.example.allot.model.event.EventFormData;
 import com.example.allot.model.event.EventFormSnapshot;
 import com.example.allot.view.lottery.RunLotteryActivity;
 import com.example.allot.view.organizer.EventEntrantsActivity;
+import com.example.allot.view.organizer.InviteCoOrganizerActivity;
 import com.example.allot.view.shared.EventFormUiHelper;
 import com.example.allot.view.shared.SimpleTextWatcher;
 import com.example.allot.view.shared.UiHelper;
+import com.google.android.gms.common.api.Status;
+import com.google.android.libraries.places.api.Places;
+import com.google.android.libraries.places.api.model.AutocompletePrediction;
+import com.google.android.libraries.places.widget.PlaceAutocomplete;
+import com.google.android.libraries.places.widget.PlaceAutocompleteActivity;
+
 /**
  * Shows the edit-event form and updates the screen as the user changes values.
  */
 public class EditEventActivity extends AppCompatActivity {
+    private static final String TAG = "EditEventActivity";
     private static final int SAVE_INACTIVE_COLOR = Color.parseColor("#A6A8A5");
     private static final int SAVE_ACTIVE_COLOR = Color.parseColor("#FFFFFF");
 
@@ -47,11 +61,14 @@ public class EditEventActivity extends AppCompatActivity {
 
     private View eventImageBackground;
     private TextView entrantsLotteryButton;
+    private TextView inviteEntrantsButton;
+    private TextView inviteCoOrganizerButton;
     private TextView summaryTitleText;
     private TextView summaryLocationText;
     private TextView summaryDateText;
     private EditText eventNameInput;
     private EditText locationInput;
+    private CheckBox privateEventCheckbox;
     private CheckBox geolocationCheckbox;
     private Spinner startMonthSpinner;
     private EditText startDayInput;
@@ -70,24 +87,39 @@ public class EditEventActivity extends AppCompatActivity {
     private String currentEventId;
     private Event currentEvent;
     private String currentCategory;
-    private EventFormSnapshot originalFormSnapshot = new EventFormSnapshot("", "", "", "", "", "", "", "", false);
+    private EventFormSnapshot originalFormSnapshot = new EventFormSnapshot("", "", "", "", "", "", "", "", false, false);
     private boolean isBindingEvent;
     private boolean isLoadingEvent;
     private boolean isSaving;
     private boolean shouldRefreshOnResume;
+    private final ActivityResultLauncher<Intent> placeAutocompleteLauncher =
+            registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+                if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
+                    AutocompletePrediction prediction = PlaceAutocomplete.getPredictionFromIntent(result.getData());
+                    if (prediction != null) {
+                        String selectedAddress = prediction.getFullText(null).toString();
+                        locationInput.setText(selectedAddress);
+                        locationInput.setSelection(selectedAddress.length());
+                    }
+                    return;
+                }
 
-    /**
-     * Initializes the activity, binds views, configures inputs,
-     * populates intent data, and loads the latest event from Firestore.
-     *
-     * @param savedInstanceState the saved activity state
-     */
+                if (result.getResultCode() == PlaceAutocompleteActivity.RESULT_ERROR && result.getData() != null) {
+                    Status status = PlaceAutocomplete.getResultStatusFromIntent(result.getData());
+                    if (status != null) {
+                        Log.e(TAG, "Places autocomplete failed: code=" + status.getStatusCode()
+                                + ", message=" + status.getStatusMessage());
+                    }
+                    Toast.makeText(this, R.string.create_event_places_error, Toast.LENGTH_SHORT).show();
+                }
+            });
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_manage_event);
 
-        manageEventController = new EditEventController();
+        manageEventController = new EditEventController(this);
         currentEventId = getIntent().getStringExtra(EXTRA_EVENT_ID);
 
         bindViews();
@@ -100,26 +132,23 @@ public class EditEventActivity extends AppCompatActivity {
         loadEventFromFirestore();
     }
 
-    /**
-     * Finishes the activity without transition animation.
-     */
     @Override
     public void finish() {
         super.finish();
         overridePendingTransition(0, 0);
     }
 
-    /**
-     * Binds all view references used by the activity.
-     */
     private void bindViews() {
         eventImageBackground = findViewById(R.id.eventImageBackground);
         entrantsLotteryButton = findViewById(R.id.entrantsLotteryButton);
+        inviteEntrantsButton = findViewById(R.id.inviteEntrantsButton);
+        inviteCoOrganizerButton = findViewById(R.id.inviteCoOrganizerButton);
         summaryTitleText = findViewById(R.id.summaryTitleText);
         summaryLocationText = findViewById(R.id.summaryLocationText);
         summaryDateText = findViewById(R.id.summaryDateText);
         eventNameInput = findViewById(R.id.eventNameInput);
         locationInput = findViewById(R.id.locationInput);
+        privateEventCheckbox = findViewById(R.id.privateEventCheckbox);
         geolocationCheckbox = findViewById(R.id.geolocationCheckbox);
         startMonthSpinner = findViewById(R.id.startMonthSpinner);
         startDayInput = findViewById(R.id.startDayInput);
@@ -137,6 +166,7 @@ public class EditEventActivity extends AppCompatActivity {
         formUiHelper = new EventFormUiHelper(
                 eventNameInput,
                 locationInput,
+                privateEventCheckbox,
                 geolocationCheckbox,
                 startMonthSpinner,
                 startDayInput,
@@ -153,17 +183,11 @@ public class EditEventActivity extends AppCompatActivity {
         );
     }
 
-    /**
-     * Sets up the header back button behavior.
-     */
     private void setupHeader() {
         ImageButton backButton = findViewById(R.id.backButton);
         backButton.setOnClickListener(view -> getOnBackPressedDispatcher().onBackPressed());
     }
 
-    /**
-     * Sets up text, checkbox, spinner, and button listeners used by the activity.
-     */
     private void setupListeners() {
         SimpleTextWatcher dirtyStateWatcher = new SimpleTextWatcher() {
             @Override
@@ -176,6 +200,7 @@ public class EditEventActivity extends AppCompatActivity {
 
         eventNameInput.addTextChangedListener(dirtyStateWatcher);
         locationInput.addTextChangedListener(dirtyStateWatcher);
+        configureLocationPicker();
         priceInput.addTextChangedListener(dirtyStateWatcher);
         descriptionInput.addTextChangedListener(dirtyStateWatcher);
         participantsInput.addTextChangedListener(dirtyStateWatcher);
@@ -190,6 +215,13 @@ public class EditEventActivity extends AppCompatActivity {
                 updateSaveButtonState();
             }
         });
+        if (privateEventCheckbox != null) {
+            privateEventCheckbox.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                if (!isBindingEvent) {
+                    updateSaveButtonState();
+                }
+            });
+        }
 
         AdapterView.OnItemSelectedListener dateSelectionListener = new AdapterView.OnItemSelectedListener() {
             @Override
@@ -209,12 +241,39 @@ public class EditEventActivity extends AppCompatActivity {
         registrationEndMonthSpinner.setOnItemSelectedListener(dateSelectionListener);
 
         entrantsLotteryButton.setOnClickListener(view -> openLotteryScreen());
+        inviteEntrantsButton.setOnClickListener(view -> openInviteScreen());
+        inviteCoOrganizerButton.setOnClickListener(view -> openInviteCoOrganizerScreen());
         saveChangesButton.setOnClickListener(view -> saveChanges());
     }
 
-    /**
-     * Populates the UI using values passed through the launching intent.
-     */
+    private void configureLocationPicker() {
+        locationInput.setKeyListener(null);
+        locationInput.setFocusable(false);
+        locationInput.setCursorVisible(false);
+        locationInput.setOnClickListener(view -> openPlaceAutocomplete());
+    }
+
+    private void openPlaceAutocomplete() {
+        if (!ensurePlacesInitialized()) {
+            Toast.makeText(this, R.string.create_event_places_unavailable, Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        Intent intent = new PlaceAutocomplete.IntentBuilder().build(this);
+        placeAutocompleteLauncher.launch(intent);
+    }
+
+    private boolean ensurePlacesInitialized() {
+        if (TextUtils.isEmpty(BuildConfig.PLACES_API_KEY)) {
+            return false;
+        }
+
+        if (!Places.isInitialized()) {
+            Places.initializeWithNewPlacesApiEnabled(getApplicationContext(), BuildConfig.PLACES_API_KEY);
+        }
+        return true;
+    }
+
     private void populateUiFromIntent() {
         currentCategory = UiHelper.cleanText(getIntent().getStringExtra(EXTRA_EVENT_CATEGORY));
         EventFormData fallbackViewModel = manageEventController.buildFallbackViewModel(
@@ -236,9 +295,6 @@ public class EditEventActivity extends AppCompatActivity {
         );
     }
 
-    /**
-     * Loads the latest event data from Firestore.
-     */
     private void loadEventFromFirestore() {
         if (TextUtils.isEmpty(currentEventId)) {
             Toast.makeText(this, R.string.manage_event_load_failure, Toast.LENGTH_SHORT).show();
@@ -271,6 +327,7 @@ public class EditEventActivity extends AppCompatActivity {
         EventFormData viewModel = manageEventController.buildViewModel(event);
         bindFormViewModel(viewModel);
         updateSummary(viewModel.getTitle(), viewModel.getLocation(), manageEventController.buildSummaryDate(readFormData()), currentCategory);
+        updateInviteButtonVisibility(event);
 
         originalFormSnapshot = manageEventController.buildSnapshot(readFormData());
 
@@ -278,9 +335,6 @@ public class EditEventActivity extends AppCompatActivity {
         updateSaveButtonState();
     }
 
-    /**
-     * Opens the appropriate lottery-related screen for the current event.
-     */
     private void openLotteryScreen() {
         if (TextUtils.isEmpty(currentEventId)) {
             Toast.makeText(this, R.string.manage_lottery_load_failure, Toast.LENGTH_SHORT).show();
@@ -296,6 +350,18 @@ public class EditEventActivity extends AppCompatActivity {
         overridePendingTransition(0, 0);
     }
 
+    private void openInviteCoOrganizerScreen() {
+        if (TextUtils.isEmpty(currentEventId)) {
+            Toast.makeText(this, R.string.manage_event_load_failure, Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        Intent intent = new Intent(this, InviteCoOrganizerActivity.class);
+        intent.putExtra(InviteCoOrganizerActivity.EXTRA_EVENT_ID, currentEventId);
+        startActivity(intent);
+        overridePendingTransition(0, 0);
+    }
+
     /**
      * Reloads the event when returning from a related screen that may have changed it.
      */
@@ -308,9 +374,6 @@ public class EditEventActivity extends AppCompatActivity {
         }
     }
 
-    /**
-     * Validates the current form and saves event changes to Firestore.
-     */
     private void saveChanges() {
         if (isSaving || isLoadingEvent || !hasUnsavedChanges()) {
             return;
@@ -341,34 +404,20 @@ public class EditEventActivity extends AppCompatActivity {
         });
     }
 
-    /**
-     * Reloads the event after a successful save so the UI reflects the latest values.
-     */
     private void reloadEventAfterSave(AppResult<Event> result) {
         bindEvent(result.getData());
         setResult(RESULT_OK);
         Toast.makeText(this, result.getMessageResId(), Toast.LENGTH_SHORT).show();
     }
 
-    /**
-     * Captures the current form state so unsaved changes can be detected.
-     */
     private void captureOriginalState() {
         originalFormSnapshot = manageEventController.buildSnapshot(readFormData());
     }
 
-    /**
-     * Checks whether the current form differs from the original loaded state.
-     *
-     * @return true if unsaved changes exist, otherwise false
-     */
     private boolean hasUnsavedChanges() {
         return !manageEventController.buildSnapshot(readFormData()).equals(originalFormSnapshot);
     }
 
-    /**
-     * Updates the save button color and enabled state based on form and loading state.
-     */
     private void updateSaveButtonState() {
         int color = manageEventController.isSaveEnabled(
                 readFormData(),
@@ -386,20 +435,10 @@ public class EditEventActivity extends AppCompatActivity {
         return formUiHelper.readFormData();
     }
 
-    /**
-     * Applies the summary card image based on the event category.
-     *
-     * @param category the event category
-     */
     private void applySummaryImage(String category) {
         eventImageBackground.setBackgroundResource(UiHelper.eventImageBackgroundRes(category));
     }
 
-    /**
-     * Binds the form values from the provided view model.
-     *
-     * @param viewModel the form values to display
-     */
     private void bindFormViewModel(EventFormData viewModel) {
         formUiHelper.bindForm(viewModel);
     }
@@ -410,13 +449,24 @@ public class EditEventActivity extends AppCompatActivity {
         summaryDateText.setText(UiHelper.defaultText(date, getString(R.string.default_date)));
         applySummaryImage(category);
     }
+
+    private void updateInviteButtonVisibility(Event event) {
+        if (inviteEntrantsButton != null) {
+            inviteEntrantsButton.setVisibility(event != null && event.isPrivate() ? View.VISIBLE : View.GONE);
+        }
+        if (inviteCoOrganizerButton != null) {
+            inviteCoOrganizerButton.setVisibility(event != null ? View.VISIBLE : View.GONE);
+        }
+    }
+
+    private void openInviteScreen() {
+        if (TextUtils.isEmpty(currentEventId)) {
+            Toast.makeText(this, R.string.manage_event_load_failure, Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        startActivity(new android.content.Intent(this, com.example.allot.view.organizer.InviteEntrantActivity.class)
+                .putExtra(com.example.allot.view.organizer.InviteEntrantActivity.EXTRA_EVENT_ID, currentEventId));
+        overridePendingTransition(0, 0);
+    }
 }
-
-
-
-
-
-
-
-
-

@@ -14,25 +14,33 @@ import java.util.List;
  */
 public class UserEventsController {
     public static class RegisteredEventGroups {
+        private final List<EventListItem> invitedItems;
         private final List<EventListItem> selectedItems;
         private final List<EventListItem> waitingItems;
         private final List<EventListItem> notSelectedItems;
         private final List<EventListItem> pastItems;
+        private final List<EventListItem> coOrganizerInviteItems;
 
-        RegisteredEventGroups(List<EventListItem> selectedItems,
+        RegisteredEventGroups(List<EventListItem> invitedItems,
+                              List<EventListItem> selectedItems,
                               List<EventListItem> waitingItems,
                               List<EventListItem> notSelectedItems,
-                              List<EventListItem> pastItems) {
+                              List<EventListItem> pastItems,
+                              List<EventListItem> coOrganizerInviteItems) {
+            this.invitedItems = copyItems(invitedItems);
             this.selectedItems = copyItems(selectedItems);
             this.waitingItems = copyItems(waitingItems);
             this.notSelectedItems = copyItems(notSelectedItems);
             this.pastItems = copyItems(pastItems);
+            this.coOrganizerInviteItems = copyItems(coOrganizerInviteItems);
         }
 
+        public List<EventListItem> getInvitedItems() { return copyItems(invitedItems); }
         public List<EventListItem> getSelectedItems() { return copyItems(selectedItems); }
         public List<EventListItem> getWaitingItems() { return copyItems(waitingItems); }
         public List<EventListItem> getNotSelectedItems() { return copyItems(notSelectedItems); }
         public List<EventListItem> getPastItems() { return copyItems(pastItems); }
+        public List<EventListItem> getCoOrganizerInviteItems() { return copyItems(coOrganizerInviteItems); }
     }
 
     public static class HostedEventGroups {
@@ -83,10 +91,12 @@ public class UserEventsController {
             );
 
             listener.onComplete(new RegisteredEventGroups(
+                    mapItems(sections.getInvitedEvents()),
                     mapItems(sections.getSelectedEvents()),
                     mapItems(sections.getWaitingEvents()),
                     mapItems(sections.getNotSelectedEvents()),
-                    mapItems(sections.getPastEvents())
+                    mapItems(sections.getPastEvents()),
+                    mapItems(sections.getCoOrganizerInvites())
             ), true);
         });
     }
@@ -95,7 +105,7 @@ public class UserEventsController {
      * Loads the hosting tab groups.
      */
     public void loadHostedGroups(OnCompleteListener<HostedEventGroups> listener) {
-        eventRepository.getHostedEvents(userController.getCurrentDeviceId(), (events, success) -> {
+        eventRepository.getManagedEvents(userController.getCurrentDeviceId(), (events, success) -> {
             if (!success || events == null) {
                 listener.onComplete(null, false);
                 return;
@@ -140,6 +150,20 @@ public class UserEventsController {
         }
 
         listener.onComplete(new ArrayList<>(), true);
+    }
+
+    /**
+     * Accepts a co-organizer invitation for the current user.
+     */
+    public void acceptCoOrganizerInvite(String eventId, OnCompleteListener<Boolean> listener) {
+        eventRepository.acceptCoOrganizerInvite(eventId, userController.getCurrentDeviceId(), listener);
+    }
+
+    /**
+     * Declines a co-organizer invitation for the current user.
+     */
+    public void declineCoOrganizerInvite(String eventId, OnCompleteListener<Boolean> listener) {
+        eventRepository.declineCoOrganizerInvite(eventId, userController.getCurrentDeviceId(), listener);
     }
 
     private List<EventListItem> mapItems(List<Event> events) {
@@ -202,7 +226,9 @@ public class UserEventsController {
                     || containsUser(event.getWaitingList() == null ? null : event.getWaitingList().chosen, deviceId)
                     || containsUser(event.getChosen(), deviceId)
                     || containsUser(event.getEnrolled(), deviceId)
-                    || containsUser(event.getNotEnrolled(), deviceId)) {
+                    || containsUser(event.getNotEnrolled(), deviceId)
+                    || event.isInvited(deviceId)
+                    || containsUser(event.getCoOrganizerInvites(), deviceId)) {
                 registeredEvents.add(event);
             }
         }

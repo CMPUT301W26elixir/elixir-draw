@@ -137,6 +137,30 @@ public class EventDetailViewService {
             );
         }
 
+        if (state.getActionType() == EventActionState.ActionType.INVITED) {
+            return new FooterState(
+                    false,
+                    true,
+                    R.string.event_detail_invite_response,
+                    R.drawable.bg_waitlist_button,
+                    R.color.black,
+                    state.getSubtext(),
+                    false
+            );
+        }
+
+        if (state.getActionType() == EventActionState.ActionType.INVITE_ONLY) {
+            return new FooterState(
+                    false,
+                    false,
+                    R.string.event_detail_invite_only,
+                    R.drawable.bg_event_detail_offer_grey,
+                    R.color.black,
+                    state.getSubtext(),
+                    false
+            );
+        }
+
         return new FooterState(
                 state.shouldShowWaitlistMessage(),
                 state.isButtonEnabled(),

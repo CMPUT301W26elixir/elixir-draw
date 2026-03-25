@@ -45,6 +45,24 @@ public class EventDetailControllerTest {
     }
 
     @Test
+    public void joinWaitingList_forwardsLocationAndReturnsSuccessMessageWhenRepositorySucceeds() {
+        eventRepository.joinWaitingListSuccess = true;
+        eventRepository.event = buildEvent();
+        Date joinedAt = new Date();
+
+        controller.joinWaitingList("event-1", 53.5232, -113.5263, joinedAt, (AppResult<Void> result, boolean success) -> {
+            assertTrue(success);
+            assertTrue(result.isSuccess());
+            assertEquals("event-1", eventRepository.joinEventId);
+            assertEquals("device-1", eventRepository.joinDeviceId);
+            assertEquals(Double.valueOf(53.5232), eventRepository.joinLatitude);
+            assertEquals(Double.valueOf(-113.5263), eventRepository.joinLongitude);
+            assertEquals(joinedAt, eventRepository.joinedAt);
+            assertEquals(Integer.valueOf(R.string.event_detail_join_success), result.getMessageResId());
+        });
+    }
+
+    @Test
     public void leaveWaitingList_returnsSuccessMessageWhenRepositorySucceeds() {
         eventRepository.leaveWaitingListSuccess = true;
 
@@ -101,12 +119,33 @@ public class EventDetailControllerTest {
         }
 
         private Event event;
+        private boolean joinWaitingListSuccess;
         private boolean leaveWaitingListSuccess;
         private boolean declineOfferSuccess;
+        private String joinEventId;
+        private String joinDeviceId;
+        private Double joinLatitude;
+        private Double joinLongitude;
+        private Date joinedAt;
 
         @Override
         public void getEventById(String eventId, com.example.allot.common.OnCompleteListener<Event> listener) {
             listener.onComplete(event, event != null);
+        }
+
+        @Override
+        public void joinWaitingList(String eventId,
+                                    String deviceId,
+                                    Double latitude,
+                                    Double longitude,
+                                    Date joinedAt,
+                                    com.example.allot.common.OnCompleteListener<Boolean> listener) {
+            joinEventId = eventId;
+            joinDeviceId = deviceId;
+            joinLatitude = latitude;
+            joinLongitude = longitude;
+            this.joinedAt = joinedAt;
+            listener.onComplete(joinWaitingListSuccess, joinWaitingListSuccess);
         }
 
         @Override

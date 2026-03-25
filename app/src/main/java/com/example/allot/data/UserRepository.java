@@ -291,6 +291,8 @@ public class UserRepository {
                         "enrolled", FieldValue.arrayRemove(deviceId),
                         "cancelled", FieldValue.arrayRemove(deviceId),
                         "notEnrolled", FieldValue.arrayRemove(deviceId),
+                        "coOrganizers", FieldValue.arrayRemove(deviceId),
+                        "coOrganizerInvites", FieldValue.arrayRemove(deviceId),
                         FieldPath.of("waitingList", "status", deviceId), FieldValue.delete());
                 return;
             }
@@ -334,6 +336,47 @@ public class UserRepository {
     }
 
     /**
+     * Searches users by name, email, or phone.
+     *
+     * @param query the query to match
+     * @param listener the listener that receives the results
+     */
+    public void searchUsers(String query, OnCompleteListener<List<User>> listener) {
+        String safeQuery = query == null ? "" : query.trim().toLowerCase();
+        if (safeQuery.isEmpty()) {
+            listener.onComplete(new ArrayList<>(), true);
+            return;
+        }
+
+        usersCollection.get().addOnCompleteListener(task -> {
+            if (!task.isSuccessful() || task.getResult() == null) {
+                listener.onComplete(new ArrayList<>(), false);
+                return;
+            }
+
+            List<User> results = new ArrayList<>();
+            for (QueryDocumentSnapshot document : task.getResult()) {
+                User user = document.toObject(User.class);
+                if (user == null) {
+                    continue;
+                }
+                if (isBlank(user.getDeviceId())) {
+                    user.setDeviceId(document.getId());
+                }
+
+                String name = safeString(user.getName());
+                String email = safeString(user.getEmail());
+                String phone = safeString(user.getPhone());
+                if (name.contains(safeQuery) || email.contains(safeQuery) || phone.contains(safeQuery)) {
+                    results.add(user);
+                }
+            }
+
+            listener.onComplete(results, true);
+        });
+    }
+
+    /**
      * Checks if a string is null or empty after trimming spaces.
      *
      * @param value the string to check
@@ -341,6 +384,10 @@ public class UserRepository {
      */
     private boolean isBlank(String value) {
         return TextHelper.isBlank(value);
+    }
+
+    private String safeString(String value) {
+        return value == null ? "" : value.trim().toLowerCase();
     }
 
     /**
@@ -352,6 +399,63 @@ public class UserRepository {
     private String normalizePhone(String phone) {
         // Keep the phone value safe for Firestore
         return phone == null ? "" : phone.trim();
+    }
+
+    /**
+     * Loads all users for admin browsing.
+     *
+     * @param listener the listener that receives the users list and success result
+     */
+    public void getAllUsers(OnCompleteListener<List<User>> listener) {
+        usersCollection.get().addOnCompleteListener(task -> {
+            if (!task.isSuccessful()) {
+                Log.d(TAG, "Failed to load all users", task.getException());
+                listener.onComplete(null, false);
+                return;
+            }
+
+            List<User> users = new ArrayList<>();
+            for (QueryDocumentSnapshot document : task.getResult()) {
+                User user = document.toObject(User.class);
+                if (user != null && isBlank(user.getDeviceId())) {
+                    user.setDeviceId(document.getId());
+                }
+                users.add(user);
+            }
+            listener.onComplete(users, true);
+        });
+    }
+
+    /**
+     * Deletes a user with admin privileges.
+     * Removes the user document and all references from event documents.
+     *
+     * @param deviceId the device ID of the user to delete
+     * @param listener the listener that receives the deletion success result
+     */
+    public void deleteUserAsAdmin(String deviceId, OnCompleteListener<Boolean> listener) {
+        FirebaseFirestore database = usersCollection.getFirestore();
+        database.collection("events")
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (!task.isSuccessful()) {
+                        Log.d(TAG, "Failed to load events for cleanup", task.getException());
+                        listener.onComplete(false, false);
+                        return;
+                    }
+
+                    List<EventCleanupTarget> cleanupTargets = new ArrayList<>();
+                    for (QueryDocumentSnapshot document : task.getResult()) {
+                        cleanupTargets.add(new EventCleanupTarget(
+                                document.getReference().getPath(),
+                                document.getString("organizerId")));
+                    }
+
+                    List<CleanupOperation> cleanupOperations = buildCleanupOperations(deviceId, cleanupTargets);
+                    cleanupOperations.add(CleanupOperation.deleteUser(deviceId));
+                    List<List<CleanupOperation>> batches = chunkCleanupOperations(cleanupOperations);
+                    commitCleanupOperations(database, batches, 0, listener);
+                });
     }
 }
 
