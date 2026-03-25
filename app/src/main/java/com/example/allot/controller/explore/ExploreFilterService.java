@@ -64,6 +64,10 @@ public class ExploreFilterService {
             return false;
         }
 
+        if (!event.isPublic()) {
+            return false;
+        }
+
         return event.getRegistrationDeadline() == null
                 || event.getRegistrationDeadline().getTime() > System.currentTimeMillis();
     }

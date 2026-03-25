@@ -50,6 +50,28 @@ public class EventActionStateFactory {
         }
 
         boolean isOnWaitingList = isCurrentUserOnWaitingList(event, deviceId);
+        if (event != null && event.isPrivate() && !isOnWaitingList) {
+            if (event.isInvited(deviceId)) {
+                return new EventActionState(
+                        event,
+                        EventActionState.ActionType.INVITED,
+                        false,
+                        true,
+                        false,
+                        "You have been invited to this private event."
+                );
+            }
+
+            return new EventActionState(
+                    event,
+                    EventActionState.ActionType.INVITE_ONLY,
+                    false,
+                    false,
+                    false,
+                    "This is a private event. You need an invite to join."
+            );
+        }
+
         return new EventActionState(
                 event,
                 isOnWaitingList ? EventActionState.ActionType.LEAVE_WAITLIST : EventActionState.ActionType.JOIN_WAITLIST,
@@ -153,7 +175,13 @@ public class EventActionStateFactory {
         if (event == null) {
             return false;
         }
-        return !isBlank(deviceId) && deviceId.equals(event.getOrganizerId());
+        if (isBlank(deviceId)) {
+            return false;
+        }
+        if (deviceId.equals(event.getOrganizerId())) {
+            return true;
+        }
+        return event.getCoOrganizers() != null && event.getCoOrganizers().contains(deviceId);
     }
 
     /**
