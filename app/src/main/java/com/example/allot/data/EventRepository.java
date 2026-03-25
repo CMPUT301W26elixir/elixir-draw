@@ -117,6 +117,17 @@ public class EventRepository {
     }
 
     /**
+     * Adds a comment or reply to the given event.
+     *
+     * @param eventId the event ID
+     * @param comment the comment to add
+     * @param listener the listener that receives the result
+     */
+    public void addComment(String eventId, EventComment comment, OnCompleteListener<Boolean> listener) {
+        database.collection("events")
+                .document(eventId)
+                .update("comments", FieldValue.arrayUnion(comment));
+    }
      * Invites a user to a private event and adds it to their My Events list.
      *
      * @param eventId the event ID
@@ -207,21 +218,6 @@ public class EventRepository {
         batch.update(eventRef, "invited", FieldValue.arrayRemove(deviceId));
         batch.update(userRef, "myEvents", FieldValue.arrayRemove(eventId));
         batch.commit()
-                .addOnSuccessListener(unused -> listener.onComplete(true, true))
-                .addOnFailureListener(exception -> listener.onComplete(false, false));
-    }
-
-    /**
-     * Adds a comment or reply to the given event.
-     *
-     * @param eventId the event ID
-     * @param comment the comment to add
-     * @param listener the listener that receives the result
-     */
-    public void addComment(String eventId, EventComment comment, OnCompleteListener<Boolean> listener) {
-        database.collection("events")
-                .document(eventId)
-                .update("comments", FieldValue.arrayUnion(comment))
                 .addOnSuccessListener(unused -> listener.onComplete(true, true))
                 .addOnFailureListener(exception -> listener.onComplete(false, false));
     }
