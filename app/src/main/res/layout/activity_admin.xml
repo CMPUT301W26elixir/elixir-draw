@@ -33,56 +33,153 @@
             android:layout_marginEnd="24dp" />
     </LinearLayout>
 
+    <!-- Tabs -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="8dp">
+
+        <TextView
+            android:id="@+id/eventsTabText"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/admin_view_events"
+            android:textColor="@color/text_primary"
+            android:textSize="16sp"
+            android:fontFamily="@font/varela_round_regular"
+            android:gravity="center"
+            android:paddingVertical="8dp" />
+
+        <TextView
+            android:id="@+id/profilesTabText"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/admin_view_profiles"
+            android:textColor="@color/my_events_tab_inactive"
+            android:textSize="16sp"
+            android:fontFamily="@font/varela_round_regular"
+            android:gravity="center"
+            android:paddingVertical="8dp" />
+    </LinearLayout>
+
     <!-- Content Area -->
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1">
 
-        <!-- RecyclerView for events -->
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/eventsRecyclerView"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:padding="16dp"
-            android:clipToPadding="false"
-            android:visibility="gone" />
-
-        <!-- Loading State -->
+        <!-- Events Container -->
         <LinearLayout
-            android:id="@+id/loadingLayout"
+            android:id="@+id/eventsContainer"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical"
-            android:gravity="center"
             android:visibility="visible">
 
-            <ProgressBar
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:indeterminateTint="@color/white" />
+            <!-- RecyclerView for events -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/eventsRecyclerView"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:padding="16dp"
+                android:clipToPadding="false"
+                android:visibility="gone" />
 
+            <!-- Loading State for Events -->
+            <LinearLayout
+                android:id="@+id/eventsLoadingLayout"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:visibility="visible">
+
+                <ProgressBar
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:indeterminateTint="@color/white" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/admin_loading_events"
+                    android:textColor="@color/white"
+                    android:textSize="16sp"
+                    android:fontFamily="@font/varela_round_regular"
+                    android:layout_marginTop="16dp" />
+            </LinearLayout>
+
+            <!-- Empty State for Events -->
             <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/admin_loading_events"
+                android:id="@+id/eventsEmptyStateText"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:text="@string/admin_no_events"
                 android:textColor="@color/white"
                 android:textSize="16sp"
                 android:fontFamily="@font/varela_round_regular"
-                android:layout_marginTop="16dp" />
+                android:visibility="gone" />
         </LinearLayout>
 
-        <!-- Empty State -->
-        <TextView
-            android:id="@+id/emptyStateText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:text="@string/admin_no_events"
-            android:textColor="@color/white"
-            android:textSize="16sp"
-            android:fontFamily="@font/varela_round_regular"
-            android:visibility="gone" />
+        <!-- Profiles Container -->
+        <LinearLayout
+            android:id="@+id/profilesContainer"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <!-- RecyclerView for profiles -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/profilesRecyclerView"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:padding="16dp"
+                android:clipToPadding="false"
+                android:visibility="gone" />
+
+            <!-- Loading State for Profiles -->
+            <LinearLayout
+                android:id="@+id/profilesLoadingLayout"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:visibility="visible">
+
+                <ProgressBar
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:indeterminateTint="@color/white" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/admin_loading_profiles"
+                    android:textColor="@color/white"
+                    android:textSize="16sp"
+                    android:fontFamily="@font/varela_round_regular"
+                    android:layout_marginTop="16dp" />
+            </LinearLayout>
+
+            <!-- Empty State for Profiles -->
+            <TextView
+                android:id="@+id/profilesEmptyStateText"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:text="@string/admin_no_profiles"
+                android:textColor="@color/white"
+                android:textSize="16sp"
+                android:fontFamily="@font/varela_round_regular"
+                android:visibility="gone" />
+        </LinearLayout>
 
     </FrameLayout>
 

@@ -21,6 +21,8 @@ public class Event {
     private Date registrationDeadline;
     private String status;
     private String posterUrl;
+    private Double eventLatitude;
+    private Double eventLongitude;
 
     private int limit = -1;
     private WaitingList waitingList;
@@ -234,6 +236,22 @@ public class Event {
 
     public void setPosterUrl(String posterUrl) {
         this.posterUrl = posterUrl;
+    }
+
+    public Double getEventLatitude() {
+        return eventLatitude;
+    }
+
+    public void setEventLatitude(Double eventLatitude) {
+        this.eventLatitude = eventLatitude;
+    }
+
+    public Double getEventLongitude() {
+        return eventLongitude;
+    }
+
+    public void setEventLongitude(Double eventLongitude) {
+        this.eventLongitude = eventLongitude;
     }
 
     public int getLimit() {

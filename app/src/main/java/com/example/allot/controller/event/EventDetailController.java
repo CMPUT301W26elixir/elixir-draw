@@ -113,8 +113,12 @@ public class EventDetailController {
     /**
      * Joins the waiting list for the current event.
      */
-    public void joinWaitingList(String eventId, OnCompleteListener<AppResult<Void>> listener) {
-        eventRepository.joinWaitingList(eventId, userController.getCurrentDeviceId(), (result, success) -> {
+    public void joinWaitingList(String eventId,
+                                Double latitude,
+                                Double longitude,
+                                Date joinedAt,
+                                OnCompleteListener<AppResult<Void>> listener) {
+        eventRepository.joinWaitingList(eventId, userController.getCurrentDeviceId(), latitude, longitude, joinedAt, (result, success) -> {
             if (!success || result == null || !result) {
                 listener.onComplete(AppResult.failure(R.string.event_detail_join_failure), false);
                 return;
