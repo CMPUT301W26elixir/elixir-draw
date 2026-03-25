@@ -126,7 +126,98 @@ public class EventRepository {
     public void addComment(String eventId, EventComment comment, OnCompleteListener<Boolean> listener) {
         database.collection("events")
                 .document(eventId)
-                .update("comments", FieldValue.arrayUnion(comment))
+                .update("comments", FieldValue.arrayUnion(comment));
+    }
+     * Invites a user to a private event and adds it to their My Events list.
+     *
+     * @param eventId the event ID
+     * @param deviceId the user device ID to invite
+     * @param listener the listener that receives the result
+     */
+    public void inviteUserToEvent(String eventId, String deviceId, OnCompleteListener<Boolean> listener) {
+        if (isBlank(eventId) || isBlank(deviceId)) {
+            listener.onComplete(false, false);
+            return;
+        }
+
+        getEventById(eventId, (event, success) -> {
+            if (!success || event == null) {
+                listener.onComplete(false, false);
+                return;
+            }
+
+            if (!event.isPrivate()) {
+                listener.onComplete(false, true);
+                return;
+            }
+
+            WriteBatch batch = database.batch();
+            DocumentReference eventRef = database.collection("events").document(eventId);
+            DocumentReference userRef = database.collection("users").document(deviceId);
+            batch.update(eventRef, "invited", FieldValue.arrayUnion(deviceId));
+            batch.update(userRef, "myEvents", FieldValue.arrayUnion(eventId));
+            batch.commit()
+                    .addOnSuccessListener(unused -> listener.onComplete(true, true))
+                    .addOnFailureListener(exception -> listener.onComplete(false, false));
+        });
+    }
+
+    /**
+     * Accepts a private event invite and joins the waiting list.
+     *
+     * @param eventId the event ID
+     * @param deviceId the user device ID accepting the invite
+     * @param listener the listener that receives the result
+     */
+    public void acceptInvite(String eventId, String deviceId, OnCompleteListener<Boolean> listener) {
+        if (isBlank(eventId) || isBlank(deviceId)) {
+            listener.onComplete(false, false);
+            return;
+        }
+
+        getEventById(eventId, (event, success) -> {
+            if (!success || event == null) {
+                listener.onComplete(false, false);
+                return;
+            }
+
+            if (!event.isPrivate() || !event.isInvited(deviceId)) {
+                listener.onComplete(false, true);
+                return;
+            }
+
+            WriteBatch batch = database.batch();
+            DocumentReference eventRef = database.collection("events").document(eventId);
+            DocumentReference userRef = database.collection("users").document(deviceId);
+            batch.update(eventRef,
+                    "invited", FieldValue.arrayRemove(deviceId),
+                    "waitingList.list", FieldValue.arrayUnion(deviceId));
+            batch.update(userRef, "myEvents", FieldValue.arrayUnion(eventId));
+            batch.commit()
+                    .addOnSuccessListener(unused -> listener.onComplete(true, true))
+                    .addOnFailureListener(exception -> listener.onComplete(false, false));
+        });
+    }
+
+    /**
+     * Declines a private event invite and removes it from the user's My Events list.
+     *
+     * @param eventId the event ID
+     * @param deviceId the user device ID declining the invite
+     * @param listener the listener that receives the result
+     */
+    public void declineInvite(String eventId, String deviceId, OnCompleteListener<Boolean> listener) {
+        if (isBlank(eventId) || isBlank(deviceId)) {
+            listener.onComplete(false, false);
+            return;
+        }
+
+        WriteBatch batch = database.batch();
+        DocumentReference eventRef = database.collection("events").document(eventId);
+        DocumentReference userRef = database.collection("users").document(deviceId);
+        batch.update(eventRef, "invited", FieldValue.arrayRemove(deviceId));
+        batch.update(userRef, "myEvents", FieldValue.arrayRemove(eventId));
+        batch.commit()
                 .addOnSuccessListener(unused -> listener.onComplete(true, true))
                 .addOnFailureListener(exception -> listener.onComplete(false, false));
     }
@@ -246,6 +337,82 @@ public class EventRepository {
                     }
                     listener.onComplete(events, true);
                 });
+    }
+
+    /**
+     * Loads all events managed by the given organizer or co-organizer.
+     *
+     * @param deviceId the organizer or co-organizer device ID
+     * @param listener the listener that receives the events
+     */
+    public void getManagedEvents(String deviceId, OnCompleteListener<List<Event>> listener) {
+        getAllEvents((events, success) -> {
+            if (!success || events == null) {
+                listener.onComplete(null, false);
+                return;
+            }
+
+            List<Event> managedEvents = new ArrayList<>();
+            for (Event event : events) {
+                if (event == null) {
+                    continue;
+                }
+                if (deviceId != null
+                        && (deviceId.equals(event.getOrganizerId())
+                        || (event.getCoOrganizers() != null && event.getCoOrganizers().contains(deviceId)))) {
+                    managedEvents.add(event);
+                }
+            }
+            listener.onComplete(managedEvents, true);
+        });
+    }
+
+    /**
+     * Invites a user to co-organize an event.
+     *
+     * @param eventId the event ID
+     * @param deviceId the user device ID to invite
+     * @param listener the listener that receives the result
+     */
+    public void inviteCoOrganizer(String eventId, String deviceId, OnCompleteListener<Boolean> listener) {
+        database.collection("events")
+                .document(eventId)
+                .update("coOrganizerInvites", FieldValue.arrayUnion(deviceId))
+                .addOnSuccessListener(unused -> listener.onComplete(true, true))
+                .addOnFailureListener(exception -> listener.onComplete(false, false));
+    }
+
+    /**
+     * Accepts a co-organizer invitation.
+     *
+     * @param eventId the event ID
+     * @param deviceId the user device ID accepting
+     * @param listener the listener that receives the result
+     */
+    public void acceptCoOrganizerInvite(String eventId, String deviceId, OnCompleteListener<Boolean> listener) {
+        database.collection("events")
+                .document(eventId)
+                .update(
+                        "coOrganizerInvites", FieldValue.arrayRemove(deviceId),
+                        "coOrganizers", FieldValue.arrayUnion(deviceId)
+                )
+                .addOnSuccessListener(unused -> listener.onComplete(true, true))
+                .addOnFailureListener(exception -> listener.onComplete(false, false));
+    }
+
+    /**
+     * Declines a co-organizer invitation.
+     *
+     * @param eventId the event ID
+     * @param deviceId the user device ID declining
+     * @param listener the listener that receives the result
+     */
+    public void declineCoOrganizerInvite(String eventId, String deviceId, OnCompleteListener<Boolean> listener) {
+        database.collection("events")
+                .document(eventId)
+                .update("coOrganizerInvites", FieldValue.arrayRemove(deviceId))
+                .addOnSuccessListener(unused -> listener.onComplete(true, true))
+                .addOnFailureListener(exception -> listener.onComplete(false, false));
     }
 
     /**
@@ -461,6 +628,10 @@ public class EventRepository {
         String getUserId() {
             return userId;
         }
+    }
+
+    private boolean isBlank(String value) {
+        return value == null || value.trim().isEmpty();
     }
 
 }

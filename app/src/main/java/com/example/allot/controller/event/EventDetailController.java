@@ -118,13 +118,26 @@ public class EventDetailController {
                                 Double longitude,
                                 Date joinedAt,
                                 OnCompleteListener<AppResult<Void>> listener) {
-        eventRepository.joinWaitingList(eventId, userController.getCurrentDeviceId(), latitude, longitude, joinedAt, (result, success) -> {
-            if (!success || result == null || !result) {
+        String deviceId = userController.getCurrentDeviceId();
+        eventRepository.getEventById(eventId, (event, success) -> {
+            if (!success || event == null) {
                 listener.onComplete(AppResult.failure(R.string.event_detail_join_failure), false);
                 return;
             }
 
-            listener.onComplete(AppResult.success(null, R.string.event_detail_join_success), true);
+            if (event.isPrivate() && !event.isInvited(deviceId)) {
+                listener.onComplete(AppResult.failure(R.string.event_detail_invite_only), false);
+                return;
+            }
+
+            eventRepository.joinWaitingList(eventId, deviceId, latitude, longitude, joinedAt, (result, joinSuccess) -> {
+                if (!joinSuccess || result == null || !result) {
+                    listener.onComplete(AppResult.failure(R.string.event_detail_join_failure), false);
+                    return;
+                }
+
+                listener.onComplete(AppResult.success(null, R.string.event_detail_join_success), true);
+            });
         });
     }
 
@@ -280,6 +293,34 @@ public class EventDetailController {
     }
 
     /**
+     * Accepts an invite to a private event.
+     */
+    public void acceptInvite(String eventId, OnCompleteListener<AppResult<Void>> listener) {
+        eventRepository.acceptInvite(eventId, userController.getCurrentDeviceId(), (result, success) -> {
+            if (!success || result == null || !result) {
+                listener.onComplete(AppResult.failure(R.string.event_invite_action_failure), false);
+                return;
+            }
+
+            listener.onComplete(AppResult.success(null, R.string.event_invite_accept_success), true);
+        });
+    }
+
+    /**
+     * Declines an invite to a private event.
+     */
+    public void declineInvite(String eventId, OnCompleteListener<AppResult<Void>> listener) {
+        eventRepository.declineInvite(eventId, userController.getCurrentDeviceId(), (result, success) -> {
+            if (!success || result == null || !result) {
+                listener.onComplete(AppResult.failure(R.string.event_invite_action_failure), false);
+                return;
+            }
+
+            listener.onComplete(AppResult.success(null, R.string.event_invite_decline_success), true);
+        });
+    }
+
+    /**
      * Builds the eligibility text shown in the join dialog.
      */
     public String buildEligibilityCriteriaText(Event event) {
@@ -408,6 +449,12 @@ public class EventDetailController {
         }
         if (eventDetailViewService.hasActiveOffer(detailState)) {
             return EventDetailData.NextAction.NAVIGATE_OFFER;
+        }
+        if (detailState != null && detailState.getActionType() == EventActionState.ActionType.INVITED) {
+            return EventDetailData.NextAction.SHOW_INVITE_DIALOG;
+        }
+        if (detailState != null && detailState.getActionType() == EventActionState.ActionType.INVITE_ONLY) {
+            return EventDetailData.NextAction.NONE;
         }
         if (eventDetailViewService.isOnWaitingList(detailState)) {
             return EventDetailData.NextAction.LEAVE_WAITLIST;

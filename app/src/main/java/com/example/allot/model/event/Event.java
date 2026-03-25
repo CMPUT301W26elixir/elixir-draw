@@ -7,6 +7,9 @@ import java.util.HashMap;
  * Holds an event and all of the saved data tied to it.
  */
 public class Event {
+    public static final String VISIBILITY_PUBLIC = "public";
+    public static final String VISIBILITY_PRIVATE = "private";
+
     private String eventId;
     private String organizerId;
     private String title;
@@ -21,6 +24,7 @@ public class Event {
     private Date registrationDeadline;
     private String status;
     private String posterUrl;
+    private String visibility;
     private Double eventLatitude;
     private Double eventLongitude;
 
@@ -30,9 +34,12 @@ public class Event {
     private ArrayList<String> enrolled;
     private ArrayList<String> cancelled;
     private ArrayList<String> notEnrolled;
+    private ArrayList<String> coOrganizers;
+    private ArrayList<String> coOrganizerInvites;
 
     private ArrayList<String> galleryUrls;
     private ArrayList<EventComment> comments;
+    private ArrayList<String> invited;
 
     private Boolean geoloc;
 
@@ -46,6 +53,10 @@ public class Event {
         this.cancelled = new ArrayList<>();
         this.notEnrolled = new ArrayList<>();
         this.comments = new ArrayList<>();
+        this.invited = new ArrayList<>();
+        this.visibility = VISIBILITY_PUBLIC;
+        this.coOrganizers = new ArrayList<>();
+        this.coOrganizerInvites = new ArrayList<>();
     }
 
     /**
@@ -67,8 +78,12 @@ public class Event {
         this.cancelled = new ArrayList<>();
         this.notEnrolled = new ArrayList<>();
         this.comments = new ArrayList<>();
+        this.invited = new ArrayList<>();
+        this.coOrganizers = new ArrayList<>();
+        this.coOrganizerInvites = new ArrayList<>();
         this.limit = limit;
         this.waitingList = new WaitingList(limit);
+        this.visibility = VISIBILITY_PUBLIC;
     }
 
     /**
@@ -238,6 +253,23 @@ public class Event {
         this.posterUrl = posterUrl;
     }
 
+    public String getVisibility() {
+        String normalized = normalizeVisibility(visibility);
+        return normalized == null ? VISIBILITY_PUBLIC : normalized;
+    }
+
+    public void setVisibility(String visibility) {
+        this.visibility = normalizeVisibility(visibility);
+    }
+
+    public boolean isPublic() {
+        return VISIBILITY_PUBLIC.equalsIgnoreCase(getVisibility());
+    }
+
+    public boolean isPrivate() {
+        return VISIBILITY_PRIVATE.equalsIgnoreCase(getVisibility());
+    }
+
     public Double getEventLatitude() {
         return eventLatitude;
     }
@@ -310,6 +342,28 @@ public class Event {
         this.notEnrolled = notEnrolled;
     }
 
+    public ArrayList<String> getCoOrganizers() {
+        if (coOrganizers == null) {
+            coOrganizers = new ArrayList<>();
+        }
+        return coOrganizers;
+    }
+
+    public void setCoOrganizers(ArrayList<String> coOrganizers) {
+        this.coOrganizers = coOrganizers;
+    }
+
+    public ArrayList<String> getCoOrganizerInvites() {
+        if (coOrganizerInvites == null) {
+            coOrganizerInvites = new ArrayList<>();
+        }
+        return coOrganizerInvites;
+    }
+
+    public void setCoOrganizerInvites(ArrayList<String> coOrganizerInvites) {
+        this.coOrganizerInvites = coOrganizerInvites;
+    }
+
     public ArrayList<String> getGalleryUrls() {
         if (galleryUrls == null) {
             galleryUrls = new ArrayList<>();
@@ -330,6 +384,19 @@ public class Event {
 
     public void setComments(ArrayList<EventComment> comments) {
         this.comments = comments;
+    public ArrayList<String> getInvited() {
+        if (invited == null) {
+            invited = new ArrayList<>();
+        }
+        return invited;
+    }
+
+    public void setInvited(ArrayList<String> invited) {
+        this.invited = invited;
+    }
+
+    public boolean isInvited(String deviceId) {
+        return deviceId != null && getInvited().contains(deviceId);
     }
 
     public Boolean getGeoloc() {
@@ -338,6 +405,20 @@ public class Event {
 
     public void setGeoloc(Boolean geoloc) {
         this.geoloc = geoloc;
+    }
+
+    private String normalizeVisibility(String value) {
+        if (value == null) {
+            return null;
+        }
+        String trimmed = value.trim().toLowerCase();
+        if (VISIBILITY_PUBLIC.equals(trimmed)) {
+            return VISIBILITY_PUBLIC;
+        }
+        if (VISIBILITY_PRIVATE.equals(trimmed)) {
+            return VISIBILITY_PRIVATE;
+        }
+        return VISIBILITY_PUBLIC;
     }
 }
 

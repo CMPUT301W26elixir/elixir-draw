@@ -20,7 +20,8 @@ public class EventDetailData {
         NAVIGATE_MANAGE,
         NAVIGATE_OFFER,
         SHOW_JOIN_DIALOG,
-        LEAVE_WAITLIST
+        LEAVE_WAITLIST,
+        SHOW_INVITE_DIALOG
     }
 
     private final Status status;

@@ -61,6 +61,7 @@ public class CreateEventControllerTest {
                 "Sample Event",
                 "University of Alberta",
                 true,
+                false,
                 "Jan",
                 "5",
                 "2027",
