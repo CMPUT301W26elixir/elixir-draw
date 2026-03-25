@@ -128,7 +128,7 @@ public class EventRepository {
                 .document(eventId)
                 .update("comments", FieldValue.arrayUnion(comment));
     }
-     * Invites a user to a private event and adds it to their My Events list.
+     /* Invites a user to a private event and adds it to their My Events list.
      *
      * @param eventId the event ID
      * @param deviceId the user device ID to invite
