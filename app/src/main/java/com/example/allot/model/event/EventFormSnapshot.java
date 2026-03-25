@@ -15,6 +15,7 @@ public class EventFormSnapshot {
     private final String registrationStart;
     private final String registrationEnd;
     private final boolean geolocationEnabled;
+    private final boolean privateEvent;
 
     /**
      * Creates a snapshot of the event form values.
@@ -37,7 +38,8 @@ public class EventFormSnapshot {
                              String eventDate,
                              String registrationStart,
                              String registrationEnd,
-                             boolean geolocationEnabled) {
+                             boolean geolocationEnabled,
+                             boolean privateEvent) {
         this.title = title;
         this.location = location;
         this.price = price;
@@ -47,6 +49,7 @@ public class EventFormSnapshot {
         this.registrationStart = registrationStart;
         this.registrationEnd = registrationEnd;
         this.geolocationEnabled = geolocationEnabled;
+        this.privateEvent = privateEvent;
     }
 
     /**
@@ -65,6 +68,7 @@ public class EventFormSnapshot {
         }
         EventFormSnapshot that = (EventFormSnapshot) other;
         return geolocationEnabled == that.geolocationEnabled
+                && privateEvent == that.privateEvent
                 && Objects.equals(title, that.title)
                 && Objects.equals(location, that.location)
                 && Objects.equals(price, that.price)
@@ -83,7 +87,7 @@ public class EventFormSnapshot {
     @Override
     public int hashCode() {
         return Objects.hash(title, location, price, description, participants, eventDate,
-                registrationStart, registrationEnd, geolocationEnabled);
+                registrationStart, registrationEnd, geolocationEnabled, privateEvent);
     }
 }
 

@@ -8,6 +8,8 @@ public class EventActionState {
         OFFER,
         JOIN_WAITLIST,
         LEAVE_WAITLIST,
+        INVITED,
+        INVITE_ONLY,
         ENROLLED,
         NOT_SELECTED_REPLACEMENT,
         NOT_SELECTED_FINAL

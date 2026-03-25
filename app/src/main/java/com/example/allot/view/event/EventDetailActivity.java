@@ -222,6 +222,9 @@ public class EventDetailActivity extends AppCompatActivity {
             case SHOW_JOIN_DIALOG:
                 showLotteryCriteriaDialog();
                 return;
+            case SHOW_INVITE_DIALOG:
+                showInviteResponseDialog();
+                return;
             case NONE:
             default:
                 break;
@@ -317,6 +320,28 @@ public class EventDetailActivity extends AppCompatActivity {
     }
 
     /**
+     * Shows the invite response dialog for private events.
+     */
+    private void showInviteResponseDialog() {
+        if (TextUtils.isEmpty(currentEventId) || isJoiningWaitlist || isLeavingWaitlist) {
+            return;
+        }
+
+        Dialog dialog = AppDialogHelper.createDialog(this, R.layout.dialog_invite_response, true);
+        View dialogView = dialog.findViewById(android.R.id.content);
+
+        ImageView closeButton = dialogView.findViewById(R.id.closeInviteDialogButton);
+        MaterialButton acceptButton = dialogView.findViewById(R.id.acceptInviteButton);
+        MaterialButton declineButton = dialogView.findViewById(R.id.declineInviteButton);
+
+        closeButton.setOnClickListener(view -> dialog.dismiss());
+        acceptButton.setOnClickListener(view -> acceptInvite(dialog, acceptButton, declineButton));
+        declineButton.setOnClickListener(view -> declineInvite(dialog, acceptButton, declineButton));
+
+        AppDialogHelper.showWrapContent(dialog, UiHelper.dpToPx(this, 320));
+    }
+
+    /**
      * Attempts to join the current event's waiting list.
      *
      * @param dialog the dialog that initiated the join action
@@ -343,6 +368,70 @@ public class EventDetailActivity extends AppCompatActivity {
                 new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                 LOCATION_PERMISSION_REQUEST
         );
+    }
+
+    private void acceptInvite(Dialog dialog, MaterialButton acceptButton, MaterialButton declineButton) {
+        if (isJoiningWaitlist || TextUtils.isEmpty(currentEventId)) {
+            return;
+        }
+
+        isJoiningWaitlist = true;
+        acceptButton.setEnabled(false);
+        declineButton.setEnabled(false);
+        joinWaitingListButton.setEnabled(false);
+
+        eventDetailController.acceptInvite(currentEventId, (AppResult<Void> result, boolean success) -> {
+            isJoiningWaitlist = false;
+            acceptButton.setEnabled(true);
+            declineButton.setEnabled(true);
+            joinWaitingListButton.setEnabled(true);
+
+            if (result == null) {
+                Toast.makeText(this, R.string.event_invite_action_failure, Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            if (!result.isSuccess()) {
+                Toast.makeText(this, result.getMessageResId(), Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            dialog.dismiss();
+            Toast.makeText(this, result.getMessageResId(), Toast.LENGTH_SHORT).show();
+            loadEventDetails();
+        });
+    }
+
+    private void declineInvite(Dialog dialog, MaterialButton acceptButton, MaterialButton declineButton) {
+        if (isLeavingWaitlist || TextUtils.isEmpty(currentEventId)) {
+            return;
+        }
+
+        isLeavingWaitlist = true;
+        acceptButton.setEnabled(false);
+        declineButton.setEnabled(false);
+        joinWaitingListButton.setEnabled(false);
+
+        eventDetailController.declineInvite(currentEventId, (AppResult<Void> result, boolean success) -> {
+            isLeavingWaitlist = false;
+            acceptButton.setEnabled(true);
+            declineButton.setEnabled(true);
+            joinWaitingListButton.setEnabled(true);
+
+            if (result == null) {
+                Toast.makeText(this, R.string.event_invite_action_failure, Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            if (!result.isSuccess()) {
+                Toast.makeText(this, result.getMessageResId(), Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            dialog.dismiss();
+            Toast.makeText(this, result.getMessageResId(), Toast.LENGTH_SHORT).show();
+            finish();
+        });
     }
 
     /**

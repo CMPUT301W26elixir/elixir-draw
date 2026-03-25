@@ -47,6 +47,7 @@ public class EventDetailControllerTest {
     @Test
     public void joinWaitingList_forwardsLocationAndReturnsSuccessMessageWhenRepositorySucceeds() {
         eventRepository.joinWaitingListSuccess = true;
+        eventRepository.event = buildEvent();
         Date joinedAt = new Date();
 
         controller.joinWaitingList("event-1", 53.5232, -113.5263, joinedAt, (AppResult<Void> result, boolean success) -> {

@@ -28,6 +28,7 @@ import com.example.allot.model.event.EventFormData;
 import com.example.allot.model.event.EventFormSnapshot;
 import com.example.allot.view.lottery.RunLotteryActivity;
 import com.example.allot.view.organizer.EventEntrantsActivity;
+import com.example.allot.view.organizer.InviteCoOrganizerActivity;
 import com.example.allot.view.shared.EventFormUiHelper;
 import com.example.allot.view.shared.SimpleTextWatcher;
 import com.example.allot.view.shared.UiHelper;
@@ -60,11 +61,14 @@ public class EditEventActivity extends AppCompatActivity {
 
     private View eventImageBackground;
     private TextView entrantsLotteryButton;
+    private TextView inviteEntrantsButton;
+    private TextView inviteCoOrganizerButton;
     private TextView summaryTitleText;
     private TextView summaryLocationText;
     private TextView summaryDateText;
     private EditText eventNameInput;
     private EditText locationInput;
+    private CheckBox privateEventCheckbox;
     private CheckBox geolocationCheckbox;
     private Spinner startMonthSpinner;
     private EditText startDayInput;
@@ -83,7 +87,7 @@ public class EditEventActivity extends AppCompatActivity {
     private String currentEventId;
     private Event currentEvent;
     private String currentCategory;
-    private EventFormSnapshot originalFormSnapshot = new EventFormSnapshot("", "", "", "", "", "", "", "", false);
+    private EventFormSnapshot originalFormSnapshot = new EventFormSnapshot("", "", "", "", "", "", "", "", false, false);
     private boolean isBindingEvent;
     private boolean isLoadingEvent;
     private boolean isSaving;
@@ -137,11 +141,14 @@ public class EditEventActivity extends AppCompatActivity {
     private void bindViews() {
         eventImageBackground = findViewById(R.id.eventImageBackground);
         entrantsLotteryButton = findViewById(R.id.entrantsLotteryButton);
+        inviteEntrantsButton = findViewById(R.id.inviteEntrantsButton);
+        inviteCoOrganizerButton = findViewById(R.id.inviteCoOrganizerButton);
         summaryTitleText = findViewById(R.id.summaryTitleText);
         summaryLocationText = findViewById(R.id.summaryLocationText);
         summaryDateText = findViewById(R.id.summaryDateText);
         eventNameInput = findViewById(R.id.eventNameInput);
         locationInput = findViewById(R.id.locationInput);
+        privateEventCheckbox = findViewById(R.id.privateEventCheckbox);
         geolocationCheckbox = findViewById(R.id.geolocationCheckbox);
         startMonthSpinner = findViewById(R.id.startMonthSpinner);
         startDayInput = findViewById(R.id.startDayInput);
@@ -159,6 +166,7 @@ public class EditEventActivity extends AppCompatActivity {
         formUiHelper = new EventFormUiHelper(
                 eventNameInput,
                 locationInput,
+                privateEventCheckbox,
                 geolocationCheckbox,
                 startMonthSpinner,
                 startDayInput,
@@ -207,6 +215,13 @@ public class EditEventActivity extends AppCompatActivity {
                 updateSaveButtonState();
             }
         });
+        if (privateEventCheckbox != null) {
+            privateEventCheckbox.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                if (!isBindingEvent) {
+                    updateSaveButtonState();
+                }
+            });
+        }
 
         AdapterView.OnItemSelectedListener dateSelectionListener = new AdapterView.OnItemSelectedListener() {
             @Override
@@ -226,6 +241,8 @@ public class EditEventActivity extends AppCompatActivity {
         registrationEndMonthSpinner.setOnItemSelectedListener(dateSelectionListener);
 
         entrantsLotteryButton.setOnClickListener(view -> openLotteryScreen());
+        inviteEntrantsButton.setOnClickListener(view -> openInviteScreen());
+        inviteCoOrganizerButton.setOnClickListener(view -> openInviteCoOrganizerScreen());
         saveChangesButton.setOnClickListener(view -> saveChanges());
     }
 
@@ -310,6 +327,7 @@ public class EditEventActivity extends AppCompatActivity {
         EventFormData viewModel = manageEventController.buildViewModel(event);
         bindFormViewModel(viewModel);
         updateSummary(viewModel.getTitle(), viewModel.getLocation(), manageEventController.buildSummaryDate(readFormData()), currentCategory);
+        updateInviteButtonVisibility(event);
 
         originalFormSnapshot = manageEventController.buildSnapshot(readFormData());
 
@@ -332,6 +350,21 @@ public class EditEventActivity extends AppCompatActivity {
         overridePendingTransition(0, 0);
     }
 
+    private void openInviteCoOrganizerScreen() {
+        if (TextUtils.isEmpty(currentEventId)) {
+            Toast.makeText(this, R.string.manage_event_load_failure, Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        Intent intent = new Intent(this, InviteCoOrganizerActivity.class);
+        intent.putExtra(InviteCoOrganizerActivity.EXTRA_EVENT_ID, currentEventId);
+        startActivity(intent);
+        overridePendingTransition(0, 0);
+    }
+
+    /**
+     * Reloads the event when returning from a related screen that may have changed it.
+     */
     @Override
     protected void onResume() {
         super.onResume();
@@ -415,5 +448,25 @@ public class EditEventActivity extends AppCompatActivity {
         summaryLocationText.setText(UiHelper.defaultText(location, getString(R.string.default_street_name)));
         summaryDateText.setText(UiHelper.defaultText(date, getString(R.string.default_date)));
         applySummaryImage(category);
+    }
+
+    private void updateInviteButtonVisibility(Event event) {
+        if (inviteEntrantsButton != null) {
+            inviteEntrantsButton.setVisibility(event != null && event.isPrivate() ? View.VISIBLE : View.GONE);
+        }
+        if (inviteCoOrganizerButton != null) {
+            inviteCoOrganizerButton.setVisibility(event != null ? View.VISIBLE : View.GONE);
+        }
+    }
+
+    private void openInviteScreen() {
+        if (TextUtils.isEmpty(currentEventId)) {
+            Toast.makeText(this, R.string.manage_event_load_failure, Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        startActivity(new android.content.Intent(this, com.example.allot.view.organizer.InviteEntrantActivity.class)
+                .putExtra(com.example.allot.view.organizer.InviteEntrantActivity.EXTRA_EVENT_ID, currentEventId));
+        overridePendingTransition(0, 0);
     }
 }

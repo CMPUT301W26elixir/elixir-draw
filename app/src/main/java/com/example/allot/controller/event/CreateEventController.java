@@ -74,6 +74,7 @@ public class CreateEventController {
         event.setRegistrationDeadline(input.getRegistrationEnd());
         event.setStatus("open");
         event.setCategory(normalizeNullable(input.getCategory()));
+        event.setVisibility(input.getVisibility());
         applyResolvedCoordinates(event, input.getLocation());
 
         eventRepository.createNewEventForUser(event, deviceSessionManager.getCurrentDeviceId(), (resultValue, success) -> {

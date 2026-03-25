@@ -51,6 +51,9 @@
             android:name=".view.organizer.EventQrCodeActivity"
             android:exported="false" />
         <activity
+            android:name=".view.organizer.InviteCoOrganizerActivity"
+            android:exported="false" />
+        <activity
             android:name=".view.event.EventDetailActivity"
             android:exported="false" />
         <activity
@@ -64,6 +67,9 @@
             android:exported="false" />
         <activity
             android:name=".view.organizer.EventEntrantsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".view.organizer.InviteEntrantActivity"
             android:exported="false" />
         <activity
             android:name=".view.profile.ProfileActivity"

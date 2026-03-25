@@ -6,6 +6,7 @@ package com.example.allot.model.event;
 public class EventFormData {
     private final String title;
     private final String location;
+    private final boolean privateEvent;
     private final boolean geolocationEnabled;
     private final String eventMonth;
     private final String eventDay;
@@ -25,6 +26,7 @@ public class EventFormData {
      *
      * @param title the event title field
      * @param location the event location field
+     * @param privateEvent whether the event is private
      * @param geolocationEnabled whether geolocation is enabled
      * @param eventMonth the selected event month
      * @param eventDay the entered event day
@@ -41,6 +43,7 @@ public class EventFormData {
      */
     public EventFormData(String title,
                          String location,
+                         boolean privateEvent,
                          boolean geolocationEnabled,
                          String eventMonth,
                          String eventDay,
@@ -56,6 +59,7 @@ public class EventFormData {
                          String registrationEndYear) {
         this.title = title;
         this.location = location;
+        this.privateEvent = privateEvent;
         this.geolocationEnabled = geolocationEnabled;
         this.eventMonth = eventMonth;
         this.eventDay = eventDay;
@@ -76,6 +80,7 @@ public class EventFormData {
      *
      * @param title the event title field
      * @param location the event location field
+     * @param privateEvent whether the event is private
      * @param geolocationEnabled whether geolocation is enabled
      * @param eventMonth the selected event month
      * @param eventDay the entered event day
@@ -93,6 +98,7 @@ public class EventFormData {
      */
     public static EventFormData forBinding(String title,
                                            String location,
+                                           boolean privateEvent,
                                            boolean geolocationEnabled,
                                            String eventMonth,
                                            String eventDay,
@@ -109,6 +115,7 @@ public class EventFormData {
         return new EventFormData(
                 safeValue(title),
                 safeValue(location),
+                privateEvent,
                 geolocationEnabled,
                 safeValue(eventMonth),
                 safeValue(eventDay),
@@ -137,6 +144,13 @@ public class EventFormData {
      */
     public String getLocation() {
         return location;
+    }
+
+    /**
+     * @return true when the event is private
+     */
+    public boolean isPrivateEvent() {
+        return privateEvent;
     }
 
     /**

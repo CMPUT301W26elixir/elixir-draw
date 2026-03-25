@@ -291,6 +291,8 @@ public class UserRepository {
                         "enrolled", FieldValue.arrayRemove(deviceId),
                         "cancelled", FieldValue.arrayRemove(deviceId),
                         "notEnrolled", FieldValue.arrayRemove(deviceId),
+                        "coOrganizers", FieldValue.arrayRemove(deviceId),
+                        "coOrganizerInvites", FieldValue.arrayRemove(deviceId),
                         FieldPath.of("waitingList", "status", deviceId), FieldValue.delete());
                 return;
             }
@@ -334,6 +336,47 @@ public class UserRepository {
     }
 
     /**
+     * Searches users by name, email, or phone.
+     *
+     * @param query the query to match
+     * @param listener the listener that receives the results
+     */
+    public void searchUsers(String query, OnCompleteListener<List<User>> listener) {
+        String safeQuery = query == null ? "" : query.trim().toLowerCase();
+        if (safeQuery.isEmpty()) {
+            listener.onComplete(new ArrayList<>(), true);
+            return;
+        }
+
+        usersCollection.get().addOnCompleteListener(task -> {
+            if (!task.isSuccessful() || task.getResult() == null) {
+                listener.onComplete(new ArrayList<>(), false);
+                return;
+            }
+
+            List<User> results = new ArrayList<>();
+            for (QueryDocumentSnapshot document : task.getResult()) {
+                User user = document.toObject(User.class);
+                if (user == null) {
+                    continue;
+                }
+                if (isBlank(user.getDeviceId())) {
+                    user.setDeviceId(document.getId());
+                }
+
+                String name = safeString(user.getName());
+                String email = safeString(user.getEmail());
+                String phone = safeString(user.getPhone());
+                if (name.contains(safeQuery) || email.contains(safeQuery) || phone.contains(safeQuery)) {
+                    results.add(user);
+                }
+            }
+
+            listener.onComplete(results, true);
+        });
+    }
+
+    /**
      * Checks if a string is null or empty after trimming spaces.
      *
      * @param value the string to check
@@ -341,6 +384,10 @@ public class UserRepository {
      */
     private boolean isBlank(String value) {
         return TextHelper.isBlank(value);
+    }
+
+    private String safeString(String value) {
+        return value == null ? "" : value.trim().toLowerCase();
     }
 
     /**
