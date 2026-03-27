@@ -83,9 +83,8 @@ public class CreateEventActivity extends AppCompatActivity {
 
     private void bindViews() {
         EditText eventNameInput = findViewById(R.id.eventNameInput);
-        EditText locationInput = findViewById(R.id.locationInput);
-        CheckBox privateEventCheckbox = findViewById(R.id.privateEventCheckbox);
         locationInput = findViewById(R.id.locationInput);
+        CheckBox privateEventCheckbox = findViewById(R.id.privateEventCheckbox);
         CheckBox geolocationCheckbox = findViewById(R.id.geolocationCheckbox);
         Spinner startMonthSpinner = findViewById(R.id.startMonthSpinner);
         EditText startDayInput = findViewById(R.id.startDayInput);
