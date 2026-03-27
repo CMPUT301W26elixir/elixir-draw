@@ -97,6 +97,8 @@
         <activity
             android:name=".view.admin.AdminActivity"
             android:exported="false" />
+        <activity
+            android:name=".view.event.SearchEventActivity" />
     </application>
 
 </manifest>

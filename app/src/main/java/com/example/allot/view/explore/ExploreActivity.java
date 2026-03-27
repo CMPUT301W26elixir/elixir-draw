@@ -17,6 +17,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.allot.R;
 import com.example.allot.controller.explore.ExploreController;
 import com.example.allot.view.event.EventDetailActivity;
+import com.example.allot.view.event.SearchEventActivity;
 import com.example.allot.view.events.EventListModeFragment;
 import com.example.allot.view.shared.AppNavigator;
 import com.example.allot.view.shared.BottomNavBarView;
@@ -68,6 +69,14 @@ public class ExploreActivity extends AppCompatActivity {
         exploreContainer = findViewById(R.id.exploreContainer);
         browseController = new ExploreController(this);
 
+        // Make search bar open SearchEventActivity
+        searchInput.setFocusable(false);
+        searchInput.setClickable(true);
+        searchInput.setOnClickListener(v -> {
+            Intent intent = new Intent(this, SearchEventActivity.class);
+            startActivity(intent);
+        });
+
         // Set up the chips before loading events
         chipFortnite = findViewById(R.id.chipFortnite);
         chipSports = findViewById(R.id.chipSports);
@@ -96,7 +105,6 @@ public class ExploreActivity extends AppCompatActivity {
 
         recyclerView.setAdapter(eventListAdapter);
         setupBottomNavigation();
-        setupSearchInput();
 
         browseController.loadSavedEventIds((savedEventIds, success) -> {
             if (success) {
@@ -105,7 +113,7 @@ public class ExploreActivity extends AppCompatActivity {
                 if ("saved".equals(getIntent().getStringExtra("navigate_to"))) {
                     openSavedTab();
                 } else {
-                    loadBrowseEvents(searchInput.getText().toString());
+                    loadBrowseEvents("");
                 }
             } else {
                 Log.e(TAG, "Failed to load user.");
@@ -125,7 +133,7 @@ public class ExploreActivity extends AppCompatActivity {
 
             updateChipUI();
             // Load the list again with the new chip filter
-            loadBrowseEvents(searchInput.getText().toString());
+            loadBrowseEvents("");
         };
 
         chipFortnite.setOnClickListener(chipClickListener);
@@ -183,7 +191,7 @@ public class ExploreActivity extends AppCompatActivity {
         bottomNavBar.setSelectedTab(BottomNavBarView.Tab.EXPLORE);
         if (fragmentContainer != null) fragmentContainer.setVisibility(View.GONE);
         if (exploreContainer != null) exploreContainer.setVisibility(View.VISIBLE);
-        loadBrowseEvents(searchInput.getText().toString());
+        loadBrowseEvents("");
     }
 
     /**
@@ -239,18 +247,6 @@ public class ExploreActivity extends AppCompatActivity {
         intent.putExtra(EventDetailActivity.EXTRA_EVENT_DEADLINE, eventItem.daysLeft);
         intent.putExtra(EventDetailActivity.EXTRA_EVENT_CATEGORY, eventItem.category);
         startActivity(intent);
-    }
-
-    /**
-     * Adds a text watcher to the search input so the event list updates
-     * whenever the search text changes.
-     */
-    private void setupSearchInput() {
-        searchInput.addTextChangedListener(new TextWatcher() {
-            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
-            @Override public void afterTextChanged(Editable editable) { loadBrowseEvents(editable.toString()); }
-        });
     }
 
     /**
@@ -330,12 +326,3 @@ public class ExploreActivity extends AppCompatActivity {
         return value == null ? "" : value.trim();
     }
 }
-
-
-
-
-
-
-
-
-
