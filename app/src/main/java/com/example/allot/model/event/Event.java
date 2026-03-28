@@ -39,6 +39,7 @@ public class Event {
 
     private ArrayList<String> galleryUrls;
     private ArrayList<String> invited;
+    private ArrayList<EventComment> comments;
 
     private Boolean geoloc;
 
@@ -55,6 +56,7 @@ public class Event {
         this.visibility = VISIBILITY_PUBLIC;
         this.coOrganizers = new ArrayList<>();
         this.coOrganizerInvites = new ArrayList<>();
+        this.comments = new ArrayList<>();
     }
 
     /**
@@ -78,6 +80,7 @@ public class Event {
         this.invited = new ArrayList<>();
         this.coOrganizers = new ArrayList<>();
         this.coOrganizerInvites = new ArrayList<>();
+        this.comments = new ArrayList<>();
         this.limit = limit;
         this.waitingList = new WaitingList(limit);
         this.visibility = VISIBILITY_PUBLIC;
@@ -385,6 +388,17 @@ public class Event {
 
     public boolean isInvited(String deviceId) {
         return deviceId != null && getInvited().contains(deviceId);
+    }
+
+    public ArrayList<EventComment> getComments() {
+        if (comments == null) {
+            comments = new ArrayList<>();
+        }
+        return comments;
+    }
+
+    public void setComments(ArrayList<EventComment> comments) {
+        this.comments = comments;
     }
 
     public Boolean getGeoloc() {

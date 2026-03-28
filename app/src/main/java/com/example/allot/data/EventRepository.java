@@ -3,6 +3,7 @@ package com.example.allot.data;
 import com.example.allot.common.OnCompleteListener;
 import com.example.allot.controller.event.EventOfferService;
 import com.example.allot.model.event.Event;
+import com.example.allot.model.event.EventComment;
 import com.example.allot.model.event.WaitlistJoinLocation;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -116,7 +117,18 @@ public class EventRepository {
     }
 
     /**
-     * Invites a user to a private event and adds it to their My Events list.
+     * Adds a comment or reply to the given event.
+     *
+     * @param eventId the event ID
+     * @param comment the comment to add
+     * @param listener the listener that receives the result
+     */
+    public void addComment(String eventId, EventComment comment, OnCompleteListener<Boolean> listener) {
+        database.collection("events")
+                .document(eventId)
+                .update("comments", FieldValue.arrayUnion(comment));
+    }
+     /* Invites a user to a private event and adds it to their My Events list.
      *
      * @param eventId the event ID
      * @param deviceId the user device ID to invite
