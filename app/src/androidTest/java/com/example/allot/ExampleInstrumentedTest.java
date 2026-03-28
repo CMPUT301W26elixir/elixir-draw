@@ -7,15 +7,18 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.example.allot.controller.organizer.EventQrCodeService;
+import com.example.allot.controller.organizer.ScanDecoderService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 @RunWith(AndroidJUnit4.class)
 public class ExampleInstrumentedTest {
     private final EventQrCodeService qrCodeService = new EventQrCodeService();
+    private final ScanDecoderService scanDecoderService = new ScanDecoderService();
 
     @Test
     public void useAppContext() {
@@ -40,5 +43,19 @@ public class ExampleInstrumentedTest {
     @Test(expected = IllegalArgumentException.class)
     public void generateQr_rejectsInvalidSize() {
         qrCodeService.generate("event-123", 0);
+    }
+
+    @Test
+    public void decodeBitmap_returnsEventIdFromGeneratedQr() {
+        Bitmap bitmap = qrCodeService.generate("event-123", 256);
+
+        assertEquals("event-123", scanDecoderService.decodeBitmap(bitmap));
+    }
+
+    @Test
+    public void decodeBitmap_returnsNullWhenNoQrIsPresent() {
+        Bitmap bitmap = Bitmap.createBitmap(32, 32, Bitmap.Config.ARGB_8888);
+
+        assertNull(scanDecoderService.decodeBitmap(bitmap));
     }
 }

@@ -44,6 +44,15 @@
     <string name="nav_my_events">My Events</string>
     <string name="nav_scan">Scan</string>
     <string name="nav_profile">Profile</string>
+    <string name="scan_title">Scan event QR code</string>
+    <string name="scan_description">Use your camera to scan an official event QR code. You will be directed to the event page.</string>
+    <string name="scan_upload_image">Upload Image</string>
+    <string name="scan_error_permission">Camera permission is required to scan live QR codes. You can still upload an image below.</string>
+    <string name="scan_error_invalid_qr">This QR code is not a valid event code.</string>
+    <string name="scan_error_event_not_found">This event is no longer available.</string>
+    <string name="scan_error_load">Could not open this event right now. Please try again.</string>
+    <string name="scan_error_no_qr_found">No event QR code was found in that image.</string>
+    <string name="scan_error_camera_start">Could not start the camera scanner right now.</string>
     <string name="profile_title">Profile</string>
     <string name="profile_first_name_label">First name *</string>
     <string name="profile_last_name_label">Last name *</string>
