@@ -12,6 +12,10 @@ public class EventComment {
     private String text;
     private Date createdAt;
     private String parentId;
+    private int upvotes;
+    private int downvotes;
+    private java.util.ArrayList<String> upvoterIds;
+    private java.util.ArrayList<String> downvoterIds;
 
     /**
      * Creates an empty comment for Firestore deserialization.
@@ -30,6 +34,10 @@ public class EventComment {
         this.text = text;
         this.createdAt = createdAt;
         this.parentId = parentId;
+        this.upvotes = 0;
+        this.downvotes = 0;
+        this.upvoterIds = new java.util.ArrayList<>();
+        this.downvoterIds = new java.util.ArrayList<>();
     }
 
     public String getCommentId() {
@@ -78,5 +86,43 @@ public class EventComment {
 
     public void setParentId(String parentId) {
         this.parentId = parentId;
+    }
+
+    public int getUpvotes() {
+        return upvotes;
+    }
+
+    public void setUpvotes(int upvotes) {
+        this.upvotes = upvotes;
+    }
+
+    public int getDownvotes() {
+        return downvotes;
+    }
+
+    public void setDownvotes(int downvotes) {
+        this.downvotes = downvotes;
+    }
+
+    public java.util.ArrayList<String> getUpvoterIds() {
+        if (upvoterIds == null) {
+            upvoterIds = new java.util.ArrayList<>();
+        }
+        return upvoterIds;
+    }
+
+    public void setUpvoterIds(java.util.ArrayList<String> upvoterIds) {
+        this.upvoterIds = upvoterIds;
+    }
+
+    public java.util.ArrayList<String> getDownvoterIds() {
+        if (downvoterIds == null) {
+            downvoterIds = new java.util.ArrayList<>();
+        }
+        return downvoterIds;
+    }
+
+    public void setDownvoterIds(java.util.ArrayList<String> downvoterIds) {
+        this.downvoterIds = downvoterIds;
     }
 }

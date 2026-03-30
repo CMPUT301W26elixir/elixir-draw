@@ -14,6 +14,7 @@ import android.widget.ImageView;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
@@ -64,10 +65,12 @@ public class EventDetailActivity extends AppCompatActivity {
     private boolean isJoiningWaitlist;
     private boolean isLeavingWaitlist;
     private boolean isPostingComment;
+    private boolean isVotingComment;
     private Event currentEvent;
     private EventDetailData currentScreenState;
     private boolean shouldRefreshOnResume;
     private boolean isOrganizer;
+    private CommentSortMode commentSortMode = CommentSortMode.NEWEST;
 
     private FrameLayout heroImageFrame;
     private TextView heroDeadlineText;
@@ -89,6 +92,7 @@ public class EventDetailActivity extends AppCompatActivity {
     private TextView commentEmptyText;
     private EditText commentInputText;
     private TextView commentSubmitButton;
+    private Spinner commentSortSpinner;
     private Dialog pendingJoinDialog;
     private MaterialButton pendingJoinConfirmButton;
 
@@ -137,6 +141,7 @@ public class EventDetailActivity extends AppCompatActivity {
         commentEmptyText = findViewById(R.id.commentEmptyText);
         commentInputText = findViewById(R.id.commentInputText);
         commentSubmitButton = findViewById(R.id.commentSubmitButton);
+        commentSortSpinner = findViewById(R.id.commentSortSpinner);
     }
 
     /**
@@ -147,6 +152,20 @@ public class EventDetailActivity extends AppCompatActivity {
         backButton.setOnClickListener(view -> getOnBackPressedDispatcher().onBackPressed());
         joinWaitingListButton.setOnClickListener(view -> onWaitlistButtonPressed());
         commentSubmitButton.setOnClickListener(view -> postComment(null, null));
+
+        if (commentSortSpinner != null) {
+            commentSortSpinner.setOnItemSelectedListener(new android.widget.AdapterView.OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(android.widget.AdapterView<?> parent, View view, int position, long id) {
+                    commentSortMode = CommentSortMode.fromPosition(position);
+                    renderComments(currentEvent);
+                }
+
+                @Override
+                public void onNothingSelected(android.widget.AdapterView<?> parent) {
+                }
+            });
+        }
     }
 
     /**
@@ -729,7 +748,7 @@ public class EventDetailActivity extends AppCompatActivity {
                     .add(comment);
         }
 
-        rootComments.sort(commentComparator());
+        rootComments.sort(commentComparator(commentSortMode));
         for (EventComment root : rootComments) {
             renderCommentTree(root, 0, repliesByParent, commentsContainer);
         }
@@ -748,6 +767,8 @@ public class EventDetailActivity extends AppCompatActivity {
         TextView authorText = commentView.findViewById(R.id.commentAuthorText);
         TextView dateText = commentView.findViewById(R.id.commentDateText);
         TextView bodyText = commentView.findViewById(R.id.commentBodyText);
+        TextView upvoteButton = commentView.findViewById(R.id.commentUpvoteButton);
+        TextView downvoteButton = commentView.findViewById(R.id.commentDownvoteButton);
         TextView replyButton = commentView.findViewById(R.id.commentReplyButton);
         TextView deleteButton = commentView.findViewById(R.id.commentDeleteButton);
         LinearLayout replyListContainer = commentView.findViewById(R.id.commentReplyListContainer);
@@ -757,6 +778,7 @@ public class EventDetailActivity extends AppCompatActivity {
         dateText.setText(formatCommentDate(comment.getCreatedAt()));
         bodyText.setText(UiHelper.cleanText(comment.getText()));
 
+        bindVoteButtons(upvoteButton, downvoteButton, comment);
         replyButton.setOnClickListener(view -> toggleReplyInput(replyInputContainer, comment));
         bindDeleteButton(deleteButton, comment);
         container.addView(commentView);
@@ -766,7 +788,7 @@ public class EventDetailActivity extends AppCompatActivity {
             return;
         }
 
-        replies.sort(commentComparator());
+        replies.sort(commentComparator(commentSortMode));
         for (EventComment reply : replies) {
             renderCommentTree(reply, depth + 1, repliesByParent, replyListContainer);
         }
@@ -857,6 +879,41 @@ public class EventDetailActivity extends AppCompatActivity {
         });
     }
 
+    private void bindVoteButtons(TextView upvoteButton, TextView downvoteButton, EventComment comment) {
+        if (upvoteButton == null || downvoteButton == null || comment == null) {
+            return;
+        }
+
+        updateVoteButtonText(upvoteButton, downvoteButton, comment);
+
+        upvoteButton.setOnClickListener(view -> voteOnComment(comment, true));
+        downvoteButton.setOnClickListener(view -> voteOnComment(comment, false));
+    }
+
+    private void updateVoteButtonText(TextView upvoteButton, TextView downvoteButton, EventComment comment) {
+        String upvoteLabel = getString(R.string.event_comment_upvote) + " " + Math.max(0, comment.getUpvotes());
+        String downvoteLabel = getString(R.string.event_comment_downvote) + " " + Math.max(0, comment.getDownvotes());
+        upvoteButton.setText(upvoteLabel);
+        downvoteButton.setText(downvoteLabel);
+    }
+
+    private void voteOnComment(EventComment comment, boolean isUpvote) {
+        if (isVotingComment || comment == null || TextUtils.isEmpty(currentEventId)) {
+            return;
+        }
+
+        isVotingComment = true;
+        eventDetailController.voteOnComment(currentEventId, comment.getCommentId(), isUpvote, (result, success) -> {
+            isVotingComment = false;
+            if (result == null || !result.isSuccess()) {
+                int messageRes = result == null ? R.string.event_comment_post_failure : result.getMessageResId();
+                Toast.makeText(this, messageRes, Toast.LENGTH_SHORT).show();
+                return;
+            }
+            loadEventDetails();
+        });
+    }
+
     private void deleteCommentThread(String commentId) {
         if (TextUtils.isEmpty(currentEventId) || TextUtils.isEmpty(commentId)) {
             return;
@@ -888,21 +945,53 @@ public class EventDetailActivity extends AppCompatActivity {
         return formatter.format(date);
     }
 
-    private Comparator<EventComment> commentComparator() {
+    private Comparator<EventComment> commentComparator(CommentSortMode mode) {
         return (first, second) -> {
+            if (mode == CommentSortMode.MOST_UPVOTED) {
+                int firstVotes = first == null ? 0 : first.getUpvotes();
+                int secondVotes = second == null ? 0 : second.getUpvotes();
+                int voteCompare = Integer.compare(secondVotes, firstVotes);
+                if (voteCompare != 0) {
+                    return voteCompare;
+                }
+            } else if (mode == CommentSortMode.MOST_DOWNVOTED) {
+                int firstVotes = first == null ? 0 : first.getDownvotes();
+                int secondVotes = second == null ? 0 : second.getDownvotes();
+                int voteCompare = Integer.compare(secondVotes, firstVotes);
+                if (voteCompare != 0) {
+                    return voteCompare;
+                }
+            }
+
             Date firstDate = first == null ? null : first.getCreatedAt();
             Date secondDate = second == null ? null : second.getCreatedAt();
             if (firstDate == null && secondDate == null) {
                 return 0;
             }
             if (firstDate == null) {
-                return -1;
-            }
-            if (secondDate == null) {
                 return 1;
             }
-            return firstDate.compareTo(secondDate);
+            if (secondDate == null) {
+                return -1;
+            }
+            return secondDate.compareTo(firstDate);
         };
+    }
+
+    private enum CommentSortMode {
+        NEWEST,
+        MOST_UPVOTED,
+        MOST_DOWNVOTED;
+
+        static CommentSortMode fromPosition(int position) {
+            if (position == 1) {
+                return MOST_UPVOTED;
+            }
+            if (position == 2) {
+                return MOST_DOWNVOTED;
+            }
+            return NEWEST;
+        }
     }
 
     private interface CommentPostCallback {

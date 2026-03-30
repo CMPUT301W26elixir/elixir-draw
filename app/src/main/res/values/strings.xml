@@ -194,10 +194,19 @@ This action cannot be undone.</string>
     <string name="event_comment_send_reply">Send</string>
     <string name="event_comment_post_success">Comment posted.</string>
     <string name="event_comment_post_failure">Could not post comment. Please try again.</string>
+    <string name="event_comment_vote_once">You already voted on this comment.</string>
     <string name="event_comment_author_unknown">Unknown user</string>
     <string name="event_comment_delete">Delete</string>
     <string name="event_comment_delete_success">Comment removed.</string>
     <string name="event_comment_delete_failure">Could not remove comment. Please try again.</string>
+    <string name="event_comment_upvote">Upvote</string>
+    <string name="event_comment_downvote">Downvote</string>
+    <string name="event_comment_sort_label">Sort by</string>
+    <string-array name="event_comment_sort_options">
+        <item>Newest</item>
+        <item>Most upvoted</item>
+        <item>Most downvoted</item>
+    </string-array>
     <string name="event_invite_title">Event invitation</string>
     <string name="event_invite_body">You have been invited to this private event. Accept to join the waiting list or decline to remove it from your events.</string>
     <string name="event_invite_accept">Accept invite</string>
