@@ -28,7 +28,9 @@ import com.example.allot.model.event.EventFormData;
 import com.example.allot.model.event.EventFormSnapshot;
 import com.example.allot.view.lottery.RunLotteryActivity;
 import com.example.allot.view.organizer.EventEntrantsActivity;
+import com.example.allot.view.organizer.EventQrCodeActivity;
 import com.example.allot.view.organizer.InviteCoOrganizerActivity;
+import com.example.allot.view.shared.EventDisplayFormatter;
 import com.example.allot.view.shared.EventFormUiHelper;
 import com.example.allot.view.shared.SimpleTextWatcher;
 import com.example.allot.view.shared.UiHelper;
@@ -63,6 +65,7 @@ public class EditEventActivity extends AppCompatActivity {
     private TextView entrantsLotteryButton;
     private TextView inviteEntrantsButton;
     private TextView inviteCoOrganizerButton;
+    private TextView viewQrCodeButton;
     private TextView summaryTitleText;
     private TextView summaryLocationText;
     private TextView summaryDateText;
@@ -143,6 +146,7 @@ public class EditEventActivity extends AppCompatActivity {
         entrantsLotteryButton = findViewById(R.id.entrantsLotteryButton);
         inviteEntrantsButton = findViewById(R.id.inviteEntrantsButton);
         inviteCoOrganizerButton = findViewById(R.id.inviteCoOrganizerButton);
+        viewQrCodeButton = findViewById(R.id.viewQrCodeButton);
         summaryTitleText = findViewById(R.id.summaryTitleText);
         summaryLocationText = findViewById(R.id.summaryLocationText);
         summaryDateText = findViewById(R.id.summaryDateText);
@@ -243,6 +247,7 @@ public class EditEventActivity extends AppCompatActivity {
         entrantsLotteryButton.setOnClickListener(view -> openLotteryScreen());
         inviteEntrantsButton.setOnClickListener(view -> openInviteScreen());
         inviteCoOrganizerButton.setOnClickListener(view -> openInviteCoOrganizerScreen());
+        viewQrCodeButton.setOnClickListener(view -> openQrCodeScreen());
         saveChangesButton.setOnClickListener(view -> saveChanges());
     }
 
@@ -358,6 +363,29 @@ public class EditEventActivity extends AppCompatActivity {
 
         Intent intent = new Intent(this, InviteCoOrganizerActivity.class);
         intent.putExtra(InviteCoOrganizerActivity.EXTRA_EVENT_ID, currentEventId);
+        startActivity(intent);
+        overridePendingTransition(0, 0);
+    }
+
+    private void openQrCodeScreen() {
+        if (TextUtils.isEmpty(currentEventId)) {
+            Toast.makeText(this, R.string.event_qr_generation_failure, Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        Intent intent = new Intent(this, EventQrCodeActivity.class);
+        intent.putExtra(EventCreatedActivity.EXTRA_EVENT_ID, currentEventId);
+        intent.putExtra(EventCreatedActivity.EXTRA_EVENT_TITLE, summaryTitleText.getText().toString());
+        intent.putExtra(EventCreatedActivity.EXTRA_EVENT_LOCATION, summaryLocationText.getText().toString());
+        intent.putExtra(EventCreatedActivity.EXTRA_EVENT_DATE, summaryDateText.getText().toString());
+        intent.putExtra(EventCreatedActivity.EXTRA_EVENT_PRICE, priceInput.getText().toString());
+        intent.putExtra(
+                EventCreatedActivity.EXTRA_EVENT_DEADLINE,
+                currentEvent != null
+                        ? EventDisplayFormatter.deadline(currentEvent)
+                        : getIntent().getStringExtra(EXTRA_REGISTRATION_END)
+        );
+        intent.putExtra(EventCreatedActivity.EXTRA_EVENT_CATEGORY, currentCategory);
         startActivity(intent);
         overridePendingTransition(0, 0);
     }
