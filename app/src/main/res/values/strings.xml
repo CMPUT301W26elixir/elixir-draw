@@ -52,6 +52,7 @@
     <string name="profile_phone_label">Phone number</string>
     <string name="profile_notification_preferences">Notification Preferences</string>
     <string name="profile_receive_event_updates">Receive event updates</string>
+    <string name="profile_view_notifications">View Notifications</string>
     <string name="profile_delete">Delete profile</string>
     <string name="profile_save_changes">Save Changes</string>
     <string name="admin_panel_button">Admin Panel</string>
@@ -161,6 +162,21 @@ This action cannot be undone.</string>
     <string name="manage_entrants_export_final_list">Export Final List</string>
     <string name="manage_entrants_export_unavailable">CSV export is currently unavailable.</string>
     <string name="manage_entrants_view_map">View entrant map</string>
+    <string name="manage_entrants_remove_entrant">Remove entrant from event</string>
+    <string name="manage_entrants_draw_replacement">Draw Replacement</string>
+    <string name="manage_entrants_cancel_dialog_title">Remove Entrant?</string>
+    <string name="manage_entrants_cancel_dialog_message">Are you sure you want to remove this entrant? This action cannot be undone.</string>
+    <string name="manage_entrants_replacement_dialog_title">Draw a Replacement?</string>
+    <string name="manage_entrants_replacement_dialog_message">Are you sure you want to Draw a Replacement? Replacements will be drawn from the application pool and will draw all available selected vacancies who cancelled or rejected your invitation.</string>
+    <string name="manage_entrants_cancel_success">Entrant removed.</string>
+    <string name="manage_entrants_cancel_failure">Could not remove entrant.</string>
+    <string name="manage_entrants_replacement_success">Replacement draw completed.</string>
+    <string name="manage_entrants_replacement_failure">Could not draw replacement.</string>
+    <string name="notification_cancel_title">Offer Cancelled</string>
+    <string name="notification_cancel_body">Your offer for \"%1$s\" has been cancelled by the organizer.</string>
+    <string name="notification_replacement_title">You have an Offer!</string>
+    <string name="notification_replacement_body">You have been selected as a replacement entrant for \"%1$s\". Check your events for details.</string>
+
     <string name="event_detail_waitlist_joined_message">You are on the waiting list for this event.</string>
     <string name="event_detail_offer">You have an offer</string>
     <string name="event_detail_enrolled">You are enrolled</string>
@@ -326,9 +342,3 @@ This action cannot be undone.</string>
     <string name="event_qr_generation_failure">Could not generate this QR code right now.</string>
     <string name="event_qr_image_description">QR code for this event</string>
 </resources>
-
-
-
-
-
-

@@ -1,17 +1,24 @@
 package com.example.allot.controller.organizer;
 
+import android.content.Context;
 import com.example.allot.R;
 import com.example.allot.common.OnCompleteListener;
 import com.example.allot.common.TextHelper;
 import com.example.allot.controller.shared.UserController;
 import com.example.allot.data.EventRepository;
+import com.example.allot.data.NotificationRepository;
+import com.example.allot.model.Notification;
 import com.example.allot.model.event.Event;
 import com.example.allot.model.lottery.LotteryEntrantItem;
 import com.example.allot.model.profile.User;
+import com.google.firebase.firestore.FirebaseFirestore;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
+
 /**
  * Loads entrant data and actions for the event entrants screen.
  */
@@ -26,16 +33,22 @@ public class EventEntrantsController {
 
     private final EventRepository eventRepository;
     private final UserController userController;
+    private final NotificationRepository notificationRepository;
     private final Map<String, String> userNameCache = new HashMap<>();
+    private final Context context;
 
-    public EventEntrantsController(android.content.Context context) {
-        this(new EventRepository(), new UserController(context));
+    public EventEntrantsController(Context context) {
+        this(context, new EventRepository(), new UserController(context), new NotificationRepository());
     }
 
-    EventEntrantsController(EventRepository eventRepository,
-                            UserController userController) {
+    EventEntrantsController(Context context,
+                            EventRepository eventRepository,
+                            UserController userController,
+                            NotificationRepository notificationRepository) {
+        this.context = context;
         this.eventRepository = eventRepository;
         this.userController = userController;
+        this.notificationRepository = notificationRepository;
     }
 
     /**
@@ -194,16 +207,122 @@ public class EventEntrantsController {
         });
     }
 
+    /**
+     * Cancels an entrant and removes them from the event's selected pool.
+     *
+     * @param eventId   the event ID
+     * @param entrantId the device ID of the entrant to cancel
+     * @param listener  the listener that receives the result
+     */
+    public void cancelEntrant(String eventId, String entrantId, OnCompleteListener<Void> listener) {
+        eventRepository.getEventById(eventId, (event, success) -> {
+            if (!success || event == null) {
+                listener.onComplete(null, false);
+                return;
+            }
+
+            // Update lists
+            event.getChosen().remove(entrantId);
+            event.getWaitingList().chosen.remove(entrantId);
+            event.getWaitingList().status.remove(entrantId);
+            if (!event.getCancelled().contains(entrantId)) {
+                event.getCancelled().add(entrantId);
+            }
+
+            // Create update map for Firestore
+            Map<String, Object> updates = new HashMap<>();
+            updates.put("chosen", event.getChosen());
+            updates.put("cancelled", event.getCancelled());
+            updates.put("waitingList.chosen", event.getWaitingList().chosen);
+            updates.put("waitingList.status." + entrantId, com.google.firebase.firestore.FieldValue.delete());
+
+            eventRepository.updateEvent(eventId, updates, (updateResult, updateSuccess) -> {
+                if (updateSuccess) {
+                    sendNotification(entrantId,
+                            context.getString(R.string.notification_cancel_title),
+                            context.getString(R.string.notification_cancel_body, event.getTitle()),
+                            eventId);
+                }
+                listener.onComplete(null, updateSuccess);
+            });
+        });
+    }
+
+    /**
+     * Draws a replacement for any vacant spots in the event.
+     *
+     * @param eventId  the event ID
+     * @param listener the listener that receives the result
+     */
+    public void drawReplacement(String eventId, OnCompleteListener<Void> listener) {
+        eventRepository.getEventById(eventId, (event, success) -> {
+            if (!success || event == null) {
+                listener.onComplete(null, false);
+                return;
+            }
+
+            int limit = event.getLimit() > 0 ? event.getLimit() : event.getCapacity();
+            int currentChosenCount = event.getChosen().size();
+            int vacancies = limit - currentChosenCount;
+
+            if (vacancies <= 0) {
+                listener.onComplete(null, true);
+                return;
+            }
+
+            // Pool = waitingList.list - (chosen + enrolled + cancelled)
+            List<String> pool = new ArrayList<>(event.getWaitingList().list);
+            pool.removeAll(event.getChosen());
+            pool.removeAll(event.getEnrolled());
+            pool.removeAll(event.getCancelled());
+
+            if (pool.isEmpty()) {
+                listener.onComplete(null, true);
+                return;
+            }
+
+            Random rand = new Random();
+            List<String> newWinners = new ArrayList<>();
+            for (int i = 0; i < vacancies && !pool.isEmpty(); i++) {
+                int index = rand.nextInt(pool.size());
+                String winnerId = pool.remove(index);
+                newWinners.add(winnerId);
+                event.getChosen().add(winnerId);
+                event.getWaitingList().chosen.add(winnerId);
+                event.getWaitingList().status.put(winnerId, false);
+            }
+
+            Map<String, Object> updates = new HashMap<>();
+            updates.put("chosen", event.getChosen());
+            updates.put("waitingList.chosen", event.getWaitingList().chosen);
+            updates.put("waitingList.status", event.getWaitingList().status);
+
+            eventRepository.updateEvent(eventId, updates, (updateResult, updateSuccess) -> {
+                if (updateSuccess) {
+                    for (String winnerId : newWinners) {
+                        sendNotification(winnerId,
+                                context.getString(R.string.notification_replacement_title),
+                                context.getString(R.string.notification_replacement_body, event.getTitle()),
+                                eventId);
+                    }
+                }
+                listener.onComplete(null, updateSuccess);
+            });
+        });
+    }
+
+    private void sendNotification(String userId, String title, String body, String eventId) {
+        Notification notification = new Notification(
+                null, // ID will be auto-generated by Firestore add()
+                title,
+                body,
+                new Date(),
+                eventId
+        );
+        notificationRepository.sendNotification(userId, notification, null);
+    }
+
     private boolean isBlank(String value) {
         return TextHelper.isBlank(value);
     }
 }
-
-
-
-
-
-
-
-
-

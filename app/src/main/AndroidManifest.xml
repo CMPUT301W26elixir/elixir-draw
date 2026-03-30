@@ -89,6 +89,9 @@
         <activity
             android:name=".view.events.NotificationsActivity"
             android:exported="false" />
+        <activity
+            android:name=".view.events.UserNotificationsActivity"
+            android:exported="false" />
 
         <activity
             android:name=".view.organizer.ScanActivity"

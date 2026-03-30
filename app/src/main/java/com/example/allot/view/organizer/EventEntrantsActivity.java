@@ -11,6 +11,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import androidx.core.content.ContextCompat;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AlertDialog;
 import com.example.allot.R;
 import com.example.allot.controller.organizer.EventEntrantsController;
 import com.example.allot.model.event.Event;
@@ -20,6 +21,7 @@ import com.google.android.material.button.MaterialButton;
 import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Locale;
+
 /**
  * Shows entrant lists and organizer actions for a specific event.
  */
@@ -49,6 +51,7 @@ public class EventEntrantsActivity extends AppCompatActivity {
     private LinearLayout entrantsContainer;
     private MaterialButton viewEntrantMapButton;
     private MaterialButton exportFinalListButton;
+    private MaterialButton drawReplacementButton;
 
     private String currentEventId;
     private Event currentEvent;
@@ -98,6 +101,7 @@ public class EventEntrantsActivity extends AppCompatActivity {
         entrantsContainer = findViewById(R.id.entrantsContainer);
         viewEntrantMapButton = findViewById(R.id.viewEntrantMapButton);
         exportFinalListButton = findViewById(R.id.exportFinalListButton);
+        drawReplacementButton = findViewById(R.id.drawReplacementButton);
     }
 
     /**
@@ -109,7 +113,7 @@ public class EventEntrantsActivity extends AppCompatActivity {
     }
 
     /**
-     * Sets up tab click behavior and the export placeholder button.
+     * Sets up tab click behavior and action buttons.
      */
     private void setupTabs() {
         selectedTabText.setOnClickListener(view -> showTab(Tab.SELECTED));
@@ -121,6 +125,7 @@ public class EventEntrantsActivity extends AppCompatActivity {
         exportFinalListButton.setOnClickListener(view ->
                 Toast.makeText(this, R.string.manage_entrants_export_unavailable, Toast.LENGTH_SHORT).show()
         );
+        drawReplacementButton.setOnClickListener(view -> showDrawReplacementDialog());
         updateTabState();
     }
 
@@ -178,7 +183,7 @@ public class EventEntrantsActivity extends AppCompatActivity {
     }
 
     /**
-     * Updates the visual selected state of the tabs and export button.
+     * Updates the visual selected state of the tabs and action buttons.
      */
     private void updateTabState() {
         applyTabStyle(selectedTabText, selectedTab == Tab.SELECTED);
@@ -187,6 +192,7 @@ public class EventEntrantsActivity extends AppCompatActivity {
         applyTabStyle(enrolledTabText, selectedTab == Tab.ENROLLED);
         applyTabStyle(allEntrantsTabText, selectedTab == Tab.ALL);
         exportFinalListButton.setVisibility(selectedTab == Tab.ENROLLED ? View.VISIBLE : View.GONE);
+        drawReplacementButton.setVisibility(selectedTab == Tab.CANCELLED ? View.VISIBLE : View.GONE);
     }
 
     /**
@@ -221,11 +227,57 @@ public class EventEntrantsActivity extends AppCompatActivity {
             View itemView = inflater.inflate(R.layout.item_lottery_entrant, entrantsContainer, false);
             TextView nameText = itemView.findViewById(R.id.entrantNameText);
             TextView timeText = itemView.findViewById(R.id.entrantTimeText);
+            ImageButton removeButton = itemView.findViewById(R.id.removeEntrantButton);
 
             nameText.setText(entrantItem.getDisplayName());
             timeText.setText(entrantItem.getSubtitleRes());
+
+            // Only show remove button in Selected tab
+            if (selectedTab == Tab.SELECTED) {
+                removeButton.setVisibility(View.VISIBLE);
+                removeButton.setOnClickListener(v -> showRemoveEntrantDialog(entrantItem));
+            } else {
+                removeButton.setVisibility(View.GONE);
+            }
+
             entrantsContainer.addView(itemView);
         }
+    }
+
+    private void showRemoveEntrantDialog(LotteryEntrantItem entrantItem) {
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.manage_entrants_cancel_dialog_title)
+                .setMessage(R.string.manage_entrants_cancel_dialog_message)
+                .setPositiveButton(R.string.admin_delete, (dialog, which) -> {
+                    entrantsController.cancelEntrant(currentEventId, entrantItem.getEntrantId(), (result, success) -> {
+                        if (success) {
+                            Toast.makeText(this, R.string.manage_entrants_cancel_success, Toast.LENGTH_SHORT).show();
+                            loadEvent();
+                        } else {
+                            Toast.makeText(this, R.string.manage_entrants_cancel_failure, Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                })
+                .setNegativeButton(R.string.admin_cancel, null)
+                .show();
+    }
+
+    private void showDrawReplacementDialog() {
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.manage_entrants_replacement_dialog_title)
+                .setMessage(R.string.manage_entrants_replacement_dialog_message)
+                .setPositiveButton(R.string.manage_lottery_force_start, (dialog, which) -> {
+                    entrantsController.drawReplacement(currentEventId, (result, success) -> {
+                        if (success) {
+                            Toast.makeText(this, R.string.manage_entrants_replacement_success, Toast.LENGTH_SHORT).show();
+                            loadEvent();
+                        } else {
+                            Toast.makeText(this, R.string.manage_entrants_replacement_failure, Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                })
+                .setNegativeButton(R.string.admin_cancel, null)
+                .show();
     }
 
     private EventEntrantsController.Tab mapTab(Tab tab) {
@@ -291,12 +343,3 @@ public class EventEntrantsActivity extends AppCompatActivity {
         overridePendingTransition(0, 0);
     }
 }
-
-
-
-
-
-
-
-
-

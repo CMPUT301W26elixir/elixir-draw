@@ -1,0 +1,1 @@
+packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html"},{"l":"com.example.allot.common"},{"l":"com.example.allot.controller"},{"l":"com.example.allot.model"},{"l":"com.example.allot.qr"},{"l":"com.example.allot.view"}];updateSearchResults();

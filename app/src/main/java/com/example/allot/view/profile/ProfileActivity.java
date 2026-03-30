@@ -20,6 +20,7 @@ import com.example.allot.model.profile.ProfileActionResult;
 import com.example.allot.model.profile.ProfileFormSnapshot;
 import com.example.allot.model.profile.User;
 import com.example.allot.view.SplashActivity;
+import com.example.allot.view.events.UserNotificationsActivity;
 import com.example.allot.view.shared.AppDialogHelper;
 import com.example.allot.view.shared.AppNavigator;
 import com.example.allot.view.shared.BottomNavBarView;
@@ -47,6 +48,7 @@ public class ProfileActivity extends AppCompatActivity {
     private EditText emailInput;
     private EditText phoneInput;
     private CheckBox eventUpdatesCheckbox;
+    private TextView viewNotificationsButton;
     private Button saveChangesButton;
     private TextView adminPanelButton;
     private TextView deleteProfileText;
@@ -96,6 +98,7 @@ public class ProfileActivity extends AppCompatActivity {
         emailInput = findViewById(R.id.emailInput);
         phoneInput = findViewById(R.id.phoneInput);
         eventUpdatesCheckbox = findViewById(R.id.eventUpdatesCheckbox);
+        viewNotificationsButton = findViewById(R.id.viewNotificationsButton);
         saveChangesButton = findViewById(R.id.saveChangesButton);
         adminPanelButton = findViewById(R.id.adminPanelButton);
         deleteProfileText = findViewById(R.id.deleteProfileText);
@@ -141,6 +144,11 @@ public class ProfileActivity extends AppCompatActivity {
             if (!isBindingProfile) {
                 updateSaveButtonState();
             }
+        });
+
+        viewNotificationsButton.setOnClickListener(view -> {
+            Intent intent = new Intent(this, UserNotificationsActivity.class);
+            startActivity(intent);
         });
 
         saveChangesButton.setOnClickListener(view -> saveProfile());
@@ -390,12 +398,3 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
 }
-
-
-
-
-
-
-
-
-

@@ -1,25 +1,48 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginBottom="12dp"
-    android:orientation="vertical">
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:paddingEnd="4dp"
+    tools:ignore="RtlSymmetry">
 
-    <TextView
-        android:id="@+id/entrantNameText"
-        android:layout_width="match_parent"
+    <LinearLayout
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:fontFamily="@font/varela_round_regular"
-        android:textColor="@color/text_primary"
-        android:textSize="16sp" />
+        android:layout_weight="1"
+        android:orientation="vertical">
 
-    <TextView
-        android:id="@+id/entrantTimeText"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="2dp"
-        android:fontFamily="@font/varela_round_regular"
-        android:textColor="@color/text_secondary"
-        android:textSize="14sp" />
+        <TextView
+            android:id="@+id/entrantNameText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/varela_round_regular"
+            android:textColor="@color/text_primary"
+            android:textSize="16sp"
+            tools:text="John Doe" />
+
+        <TextView
+            android:id="@+id/entrantTimeText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:fontFamily="@font/varela_round_regular"
+            android:textColor="@color/text_secondary"
+            android:textSize="14sp"
+            tools:text="Joined 2 hours ago" />
+    </LinearLayout>
+
+    <ImageButton
+        android:id="@+id/removeEntrantButton"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="@string/manage_entrants_remove_entrant"
+        android:src="@drawable/ic_remove_red"
+        android:visibility="gone"
+        tools:visibility="visible" />
 
 </LinearLayout>
