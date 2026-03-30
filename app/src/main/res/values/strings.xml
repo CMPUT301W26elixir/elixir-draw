@@ -44,6 +44,15 @@
     <string name="nav_my_events">My Events</string>
     <string name="nav_scan">Scan</string>
     <string name="nav_profile">Profile</string>
+    <string name="scan_title">Scan event QR code</string>
+    <string name="scan_description">Use your camera to scan an official event QR code. You will be directed to the event page.</string>
+    <string name="scan_upload_image">Upload Image</string>
+    <string name="scan_error_permission">Camera permission is required to scan live QR codes. You can still upload an image below.</string>
+    <string name="scan_error_invalid_qr">This QR code is not a valid event code.</string>
+    <string name="scan_error_event_not_found">This event is no longer available.</string>
+    <string name="scan_error_load">Could not open this event right now. Please try again.</string>
+    <string name="scan_error_no_qr_found">No event QR code was found in that image.</string>
+    <string name="scan_error_camera_start">Could not start the camera scanner right now.</string>
     <string name="profile_title">Profile</string>
     <string name="profile_first_name_label">First name *</string>
     <string name="profile_last_name_label">Last name *</string>
@@ -118,6 +127,7 @@ This action cannot be undone.</string>
     <string name="manage_event_banner_placeholder">Banner upload coming soon</string>
     <string name="manage_event_save_changes">Save Changes</string>
     <string name="manage_event_invite_coorganizer">Invite co-organizers</string>
+    <string name="manage_event_view_qr_code">View QR Code</string>
     <string name="manage_event_load_failure">Could not load this event. Please try again.</string>
     <string name="manage_event_not_found">This event is no longer available.</string>
     <string name="manage_event_save_success">Event updated.</string>
@@ -334,6 +344,9 @@ This action cannot be undone.</string>
     <string name="event_qr_title">Share your event through this QR code!</string>
     <string name="event_qr_generation_failure">Could not generate this QR code right now.</string>
     <string name="event_qr_image_description">QR code for this event</string>
+    <string name="event_qr_save_button">Save QR Code</string>
+    <string name="event_qr_save_success">QR code saved to Pictures.</string>
+    <string name="event_qr_save_failure">Could not save this QR code right now.</string>
 </resources>
 
 
