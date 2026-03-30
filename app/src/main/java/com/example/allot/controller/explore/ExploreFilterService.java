@@ -3,6 +3,7 @@ package com.example.allot.controller.explore;
 import com.example.allot.model.BrowseFilter;
 import com.example.allot.model.event.Event;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
@@ -85,9 +86,21 @@ public class ExploreFilterService {
         }
 
         // Let the chip match the category or other event text
-        return normalize(event.getCategory()).equals(normalizedCategory)
+        if (normalize(event.getCategory()).equals(normalizedCategory)
                 || containsNormalized(event.getTitle(), normalizedCategory)
-                || containsNormalized(event.getDescription(), normalizedCategory);
+                || containsNormalized(event.getDescription(), normalizedCategory)) {
+            return true;
+        }
+
+        for (String keyword : categoryKeywords(normalizedCategory)) {
+            if (containsNormalized(event.getTitle(), keyword)
+                    || containsNormalized(event.getDescription(), keyword)
+                    || containsNormalized(event.getCategory(), keyword)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -117,6 +130,30 @@ public class ExploreFilterService {
      */
     private boolean containsNormalized(String value, String normalizedSearchTerm) {
         return normalize(value).contains(normalizedSearchTerm);
+    }
+
+    private List<String> categoryKeywords(String normalizedCategory) {
+        if (normalizedCategory.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        switch (normalizedCategory) {
+            case "fortnite":
+                return Arrays.asList("fortnite", "battle royale", "epic");
+            case "sports":
+                return Arrays.asList("sports", "soccer", "football", "basketball", "tennis",
+                        "hockey", "baseball", "golf", "running", "marathon");
+            case "arts & crafts":
+            case "arts and crafts":
+            case "arts":
+                return Arrays.asList("art", "arts", "craft", "crafts", "painting", "drawing",
+                        "pottery", "sculpture", "illustration", "ceramics");
+            case "science":
+                return Arrays.asList("science", "stem", "robotics", "chemistry", "physics",
+                        "biology", "astronomy", "engineering");
+            default:
+                return new ArrayList<>();
+        }
     }
 
     /**
