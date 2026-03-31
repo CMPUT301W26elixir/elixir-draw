@@ -169,7 +169,9 @@ This action cannot be undone.</string>
     <string name="manage_entrants_enrolled_subtitle">Enrollment confirmed</string>
     <string name="manage_entrants_all_subtitle">Entrant</string>
     <string name="manage_entrants_export_final_list">Export Final List</string>
-    <string name="manage_entrants_export_unavailable">CSV export is currently unavailable.</string>
+    <string name="manage_entrants_export_saving">Saving CSV...</string>
+    <string name="manage_entrants_export_success">Final list saved to Downloads.</string>
+    <string name="manage_entrants_export_failure">Could not export the final list. Please try again.</string>
     <string name="manage_entrants_view_map">View entrant map</string>
     <string name="event_detail_waitlist_joined_message">You are on the waiting list for this event.</string>
     <string name="event_detail_offer">You have an offer</string>
