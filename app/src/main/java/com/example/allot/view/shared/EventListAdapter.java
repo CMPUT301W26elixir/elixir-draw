@@ -7,6 +7,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.allot.R;
 import java.util.ArrayList;
@@ -96,10 +97,10 @@ public class EventListAdapter extends RecyclerView.Adapter<EventListAdapter.Even
         // Show the right heart icon for this item
         if (event.isSaved) {
             holder.heartIcon.setImageResource(R.drawable.ic_heart_filled);
-            holder.heartIcon.setColorFilter(holder.itemView.getContext().getResources().getColor(R.color.bottom_nav_selected));
+            holder.heartIcon.setColorFilter(ContextCompat.getColor(holder.itemView.getContext(), R.color.favorite_active));
         } else {
             holder.heartIcon.setImageResource(R.drawable.ic_heart_outline);
-            holder.heartIcon.setColorFilter(holder.itemView.getContext().getResources().getColor(R.color.white));
+            holder.heartIcon.setColorFilter(ContextCompat.getColor(holder.itemView.getContext(), R.color.white));
         }
 
         holder.heartIcon.setOnClickListener(v -> {
