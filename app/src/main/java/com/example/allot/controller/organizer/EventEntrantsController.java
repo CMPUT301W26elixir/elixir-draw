@@ -221,10 +221,15 @@ public class EventEntrantsController {
                 return;
             }
 
+            boolean wasChosen = event.getChosen().contains(entrantId) || (event.getWaitingList() != null && event.getWaitingList().chosen.contains(entrantId));
+
             // Update lists
             event.getChosen().remove(entrantId);
-            event.getWaitingList().chosen.remove(entrantId);
-            event.getWaitingList().status.remove(entrantId);
+            if (event.getWaitingList() != null) {
+                event.getWaitingList().list.remove(entrantId);
+                event.getWaitingList().chosen.remove(entrantId);
+                event.getWaitingList().status.remove(entrantId);
+            }
             if (!event.getCancelled().contains(entrantId)) {
                 event.getCancelled().add(entrantId);
             }
@@ -233,14 +238,18 @@ public class EventEntrantsController {
             Map<String, Object> updates = new HashMap<>();
             updates.put("chosen", event.getChosen());
             updates.put("cancelled", event.getCancelled());
+            updates.put("waitingList.list", event.getWaitingList().list);
             updates.put("waitingList.chosen", event.getWaitingList().chosen);
             updates.put("waitingList.status." + entrantId, com.google.firebase.firestore.FieldValue.delete());
 
             eventRepository.updateEvent(eventId, updates, (updateResult, updateSuccess) -> {
                 if (updateSuccess) {
+                    int titleRes = wasChosen ? R.string.notification_cancel_title : R.string.notification_waitlist_remove_title;
+                    int bodyRes = wasChosen ? R.string.notification_cancel_body : R.string.notification_waitlist_remove_body;
+
                     sendNotification(entrantId,
-                            context.getString(R.string.notification_cancel_title),
-                            context.getString(R.string.notification_cancel_body, event.getTitle()),
+                            context.getString(titleRes),
+                            context.getString(bodyRes, event.getTitle()),
                             eventId);
                 }
                 listener.onComplete(null, updateSuccess);

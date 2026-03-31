@@ -232,8 +232,8 @@ public class EventEntrantsActivity extends AppCompatActivity {
             nameText.setText(entrantItem.getDisplayName());
             timeText.setText(entrantItem.getSubtitleRes());
 
-            // Only show remove button in Selected tab
-            if (selectedTab == Tab.SELECTED) {
+            // Show remove button in Selected and All Entrants tabs
+            if (selectedTab == Tab.SELECTED || selectedTab == Tab.ALL) {
                 removeButton.setVisibility(View.VISIBLE);
                 removeButton.setOnClickListener(v -> showRemoveEntrantDialog(entrantItem));
             } else {

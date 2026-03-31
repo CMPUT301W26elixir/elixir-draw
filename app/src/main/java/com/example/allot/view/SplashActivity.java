@@ -7,33 +7,31 @@ import android.os.Handler;
 import android.os.Looper;
 import androidx.appcompat.app.AppCompatActivity;
 import com.example.allot.R;
+import com.example.allot.common.NotificationHelper;
 import com.example.allot.common.TextHelper;
 import com.example.allot.controller.shared.UserController;
 import com.example.allot.model.profile.User;
 import com.example.allot.view.explore.ExploreActivity;
+import com.google.firebase.firestore.DocumentChange;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
+
+import java.util.Date;
+
 @SuppressLint("CustomSplashScreen")
 /**
  * Decides the first screen to show after the splash delay finishes.
+ * Also initializes background notification listeners.
  */
 public class SplashActivity extends AppCompatActivity {
 
-    /**
-     * The minimum amount of time, in milliseconds, that the splash screen
-     * should remain visible.
-     */
     private static final long MIN_SPLASH_DURATION_MS = 900L;
 
     private final Handler handler = new Handler(Looper.getMainLooper());
     private long startedAtMs;
     private boolean navigated;
+    private static boolean notificationListenerStarted = false;
 
-    /**
-     * Initializes the splash screen, records the start time, checks whether
-     * the device is new, and determines whether the user should be sent to
-     * profile setup or the main app screen.
-     *
-     * @param savedInstanceState the previously saved activity state, if one exists
-     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -48,20 +46,52 @@ public class SplashActivity extends AppCompatActivity {
         }
 
         userController.loadOrCreateUser((user, success) -> {
+            if (success && user != null) {
+                startNotificationListener(user.getDeviceId());
+            }
             boolean requiresProfileSetup = !success || requiresProfileSetup(user);
             navigateAfterDelay(requiresProfileSetup);
         });
     }
 
     /**
-     * Delays navigation until the minimum splash duration has elapsed.
+     * Starts a real-time listener for new notifications in Firestore.
+     * Triggers a system pop-up using NotificationHelper.
      *
-     * <p>If navigation has already occurred, this method returns immediately.
-     *
-     * @param requiresProfileSetup true if the next screen should be the
-     *                             profile setup flow; false if the main screen
-     *                             should be opened instead
+     * @param deviceId the current user's device ID
      */
+    private void startNotificationListener(String deviceId) {
+        if (notificationListenerStarted || deviceId == null) {
+            return;
+        }
+        notificationListenerStarted = true;
+
+        NotificationHelper notificationHelper = new NotificationHelper(getApplicationContext());
+        long appStartTime = System.currentTimeMillis();
+
+        FirebaseFirestore.getInstance()
+                .collection("users")
+                .document(deviceId)
+                .collection("notifications")
+                .orderBy("timestamp", Query.Direction.DESCENDING)
+                .limit(1)
+                .addSnapshotListener((snapshots, e) -> {
+                    if (e != null || snapshots == null) return;
+
+                    for (DocumentChange dc : snapshots.getDocumentChanges()) {
+                        if (dc.getType() == DocumentChange.Type.ADDED) {
+                            Date timestamp = dc.getDocument().getDate("timestamp");
+                            // Only show pop-up if the notification was created after the app started
+                            if (timestamp != null && timestamp.getTime() > appStartTime) {
+                                String title = dc.getDocument().getString("title");
+                                String body = dc.getDocument().getString("body");
+                                notificationHelper.showNotification(title, body);
+                            }
+                        }
+                    }
+                });
+    }
+
     private void navigateAfterDelay(boolean requiresProfileSetup) {
         if (navigated) {
             return;
@@ -72,16 +102,6 @@ public class SplashActivity extends AppCompatActivity {
         handler.postDelayed(() -> openNextScreen(requiresProfileSetup), remainingMs);
     }
 
-    /**
-     * Opens the next screen after the splash screen.
-     *
-     * <p>If profile setup is required, this method opens {@link WelcomeActivity}.
-     * Otherwise, it opens {@link ExploreActivity}. Navigation only occurs once,
-     * and it is skipped if the activity is already finishing.
-     *
-     * @param requiresProfileSetup true if the user should be sent to the
-     *                             welcome/profile setup screen; false otherwise
-     */
     private void openNextScreen(boolean requiresProfileSetup) {
         if (navigated || isFinishing()) {
             return;
@@ -96,15 +116,6 @@ public class SplashActivity extends AppCompatActivity {
         finish();
     }
 
-    /**
-     * Determines whether the given user still needs to complete profile setup.
-     *
-     * <p>A profile is considered incomplete if the user is null or is missing
-     * a first name, last name, or email address.
-     *
-     * @param user the user to evaluate
-     * @return true if profile setup is still required; false otherwise
-     */
     private boolean requiresProfileSetup(User user) {
         if (user == null) {
             return true;
@@ -115,22 +126,7 @@ public class SplashActivity extends AppCompatActivity {
                 || isBlank(user.getEmail());
     }
 
-    /**
-     * Determines whether a string is null, empty, or only contains whitespace.
-     *
-     * @param value the string to check
-     * @return true if the string is blank; false otherwise
-     */
     private boolean isBlank(String value) {
         return TextHelper.isBlank(value);
     }
 }
-
-
-
-
-
-
-
-
-
