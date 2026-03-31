@@ -200,6 +200,93 @@ public class EventDetailController {
     }
 
     /**
+     * Applies an upvote or downvote to a comment.
+     *
+     * @param eventId the event ID
+     * @param commentId the comment ID
+     * @param isUpvote true for upvote, false for downvote
+     * @param listener the callback that receives the action result
+     */
+    public void voteOnComment(String eventId,
+                              String commentId,
+                              boolean isUpvote,
+                              OnCompleteListener<AppResult<Void>> listener) {
+        if (isBlank(eventId) || isBlank(commentId)) {
+            listener.onComplete(AppResult.failure(R.string.event_comment_post_failure), false);
+            return;
+        }
+
+        String deviceId = userController.getCurrentDeviceId();
+        eventRepository.getEventById(eventId, (event, success) -> {
+            if (!success || event == null) {
+                listener.onComplete(AppResult.failure(R.string.event_comment_post_failure), false);
+                return;
+            }
+
+            List<EventComment> comments = event.getComments();
+            if (comments == null || comments.isEmpty()) {
+                listener.onComplete(AppResult.failure(R.string.event_comment_post_failure), false);
+                return;
+            }
+
+            boolean updated = false;
+            for (EventComment comment : comments) {
+                if (comment == null || !commentId.equals(comment.getCommentId())) {
+                    continue;
+                }
+                java.util.List<String> upvoters = comment.getUpvoterIds();
+                java.util.List<String> downvoters = comment.getDownvoterIds();
+                int upvotes = Math.max(0, comment.getUpvotes());
+                int downvotes = Math.max(0, comment.getDownvotes());
+                if (isUpvote) {
+                    if (upvoters.contains(deviceId)) {
+                        upvoters.remove(deviceId);
+                        upvotes = Math.max(0, upvotes - 1);
+                    } else {
+                        if (downvoters.contains(deviceId)) {
+                            downvoters.remove(deviceId);
+                            downvotes = Math.max(0, downvotes - 1);
+                        }
+                        upvoters.add(deviceId);
+                        upvotes += 1;
+                    }
+                } else {
+                    if (downvoters.contains(deviceId)) {
+                        downvoters.remove(deviceId);
+                        downvotes = Math.max(0, downvotes - 1);
+                    } else {
+                        if (upvoters.contains(deviceId)) {
+                            upvoters.remove(deviceId);
+                            upvotes = Math.max(0, upvotes - 1);
+                        }
+                        downvoters.add(deviceId);
+                        downvotes += 1;
+                    }
+                }
+                comment.setUpvotes(upvotes);
+                comment.setDownvotes(downvotes);
+                updated = true;
+                break;
+            }
+
+            if (!updated) {
+                listener.onComplete(AppResult.failure(R.string.event_comment_post_failure), false);
+                return;
+            }
+
+            java.util.Map<String, Object> updates = new java.util.HashMap<>();
+            updates.put("comments", comments);
+            eventRepository.updateEvent(eventId, updates, (result, updateSuccess) -> {
+                if (!updateSuccess || result == null || !result) {
+                    listener.onComplete(AppResult.failure(R.string.event_comment_post_failure), false);
+                    return;
+                }
+                listener.onComplete(AppResult.success(null, R.string.event_comment_post_success), true);
+            });
+        });
+    }
+
+    /**
      * Deletes a comment thread (comment + replies) for the given event.
      *
      * @param eventId the event ID

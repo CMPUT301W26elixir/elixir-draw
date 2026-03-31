@@ -33,6 +33,33 @@
         android:textColor="@color/text_primary"
         android:textSize="13sp" />
 
+    <LinearLayout
+        android:id="@+id/commentVoteRow"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/commentUpvoteButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/varela_round_regular"
+            android:text="@string/event_comment_upvote"
+            android:textColor="#7A7A7A"
+            android:textSize="11sp" />
+
+        <TextView
+            android:id="@+id/commentDownvoteButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:fontFamily="@font/varela_round_regular"
+            android:text="@string/event_comment_downvote"
+            android:textColor="#7A7A7A"
+            android:textSize="11sp" />
+    </LinearLayout>
+
     <TextView
         android:id="@+id/commentReplyButton"
         android:layout_width="wrap_content"

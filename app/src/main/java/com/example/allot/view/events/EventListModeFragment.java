@@ -1,5 +1,6 @@
 package com.example.allot.view.events;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,7 +12,9 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.allot.R;
+import com.example.allot.controller.explore.ExploreController;
 import com.example.allot.controller.events.UserEventsController;
+import com.example.allot.view.event.EventDetailActivity;
 import com.example.allot.view.shared.EventListAdapter;
 import com.example.allot.view.shared.EventListAdapter.OnEventClickListener;
 import com.example.allot.view.shared.EventListItem;
@@ -32,6 +35,8 @@ public class EventListModeFragment extends Fragment {
     private TextView emptyStateText;
     private EventListAdapter adapter;
     private UserEventsController userEventsController;
+    private ExploreController exploreController;
+    private ArrayList<String> userSavedIds = new ArrayList<>();
 
     /**
      * Creates a fragment configured to show the user's own events.
@@ -82,18 +87,51 @@ public class EventListModeFragment extends Fragment {
         adapter = new EventListAdapter(new ArrayList<>(), new EventListAdapter.OnEventClickListener() {
             @Override
             public void onEventClick(EventListItem event) {
+                openEventDetail(event);
             }
 
             @Override
             public void onHeartClick(EventListItem event, int position) {
+                if (event == null || event.getEventId() == null) {
+                    return;
+                }
+
+                boolean isSaving = event.isSaved;
+                exploreController.toggleSavedEvent(userSavedIds, event.getEventId(), isSaving, (savedEventIds, success) -> {
+                    userSavedIds = new ArrayList<>(savedEventIds == null ? new ArrayList<>() : savedEventIds);
+                    event.isSaved = success == isSaving;
+
+                    if (MODE_SAVED_EVENTS.equals(getMode())) {
+                        loadItems();
+                        return;
+                    }
+
+                    adapter.notifyItemChanged(position);
+                });
             }
         });
         recyclerView.setAdapter(adapter);
 
         userEventsController = new UserEventsController(requireContext());
+        exploreController = new ExploreController(requireContext());
         emptyStateText.setText(getEmptyMessage());
-        loadItems();
+        refreshSavedIdsAndLoad();
         return view;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (isAdded()) {
+            refreshSavedIdsAndLoad();
+        }
+    }
+
+    private void refreshSavedIdsAndLoad() {
+        exploreController.loadSavedEventIds((savedEventIds, success) -> {
+            userSavedIds = new ArrayList<>(savedEventIds == null ? new ArrayList<>() : savedEventIds);
+            loadItems();
+        });
     }
 
     /**
@@ -105,15 +143,7 @@ public class EventListModeFragment extends Fragment {
             return;
         }
 
-        ArrayList<String> savedIds = new ArrayList<>();
-        Bundle args = getArguments();
-        if (args != null) {
-            ArrayList<String> argSavedIds = args.getStringArrayList(ARG_SAVED_IDS);
-            if (argSavedIds != null) {
-                savedIds = argSavedIds;
-            }
-        }
-        userEventsController.loadSavedEvents(savedIds, (items, success) -> updateUi(items));
+        userEventsController.loadSavedEvents(userSavedIds, (items, success) -> updateUi(items));
     }
 
     /**
@@ -153,5 +183,21 @@ public class EventListModeFragment extends Fragment {
         return MODE_SAVED_EVENTS.equals(getMode())
                 ? "You haven't saved any events yet."
                 : "You have no events.";
+    }
+
+    private void openEventDetail(EventListItem event) {
+        if (event == null || event.getEventId() == null || event.getEventId().trim().isEmpty() || getContext() == null) {
+            return;
+        }
+
+        Intent intent = new Intent(getContext(), EventDetailActivity.class);
+        intent.putExtra(EventDetailActivity.EXTRA_EVENT_ID, event.getEventId());
+        intent.putExtra(EventDetailActivity.EXTRA_EVENT_TITLE, event.getTitle());
+        intent.putExtra(EventDetailActivity.EXTRA_EVENT_LOCATION, event.street);
+        intent.putExtra(EventDetailActivity.EXTRA_EVENT_DATE, event.date);
+        intent.putExtra(EventDetailActivity.EXTRA_EVENT_PRICE, event.price);
+        intent.putExtra(EventDetailActivity.EXTRA_EVENT_DEADLINE, event.daysLeft);
+        intent.putExtra(EventDetailActivity.EXTRA_EVENT_CATEGORY, event.category);
+        startActivity(intent);
     }
 }

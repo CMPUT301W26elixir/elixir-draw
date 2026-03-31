@@ -17,6 +17,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.allot.R;
 import com.example.allot.controller.explore.ExploreController;
 import com.example.allot.view.event.EventDetailActivity;
+import com.example.allot.view.event.SearchEventActivity;
 import com.example.allot.view.events.EventListModeFragment;
 import com.example.allot.view.shared.AppNavigator;
 import com.example.allot.view.shared.BottomNavBarView;
@@ -38,6 +39,7 @@ public class ExploreActivity extends AppCompatActivity {
     private ProgressBar loadingIndicator;
     private TextView stateText;
     private BottomNavBarView bottomNavBar;
+    private BottomNavBarView.Tab currentHomeTab = BottomNavBarView.Tab.EXPLORE;
 
     private FrameLayout fragmentContainer;
     private LinearLayout exploreContainer;
@@ -68,12 +70,21 @@ public class ExploreActivity extends AppCompatActivity {
         exploreContainer = findViewById(R.id.exploreContainer);
         browseController = new ExploreController(this);
 
+        // Make search bar open SearchEventActivity
+        searchInput.setFocusable(false);
+        searchInput.setClickable(true);
+        searchInput.setOnClickListener(v -> {
+            Intent intent = new Intent(this, SearchEventActivity.class);
+            startActivity(intent);
+        });
+
         // Set up the chips before loading events
         chipFortnite = findViewById(R.id.chipFortnite);
         chipSports = findViewById(R.id.chipSports);
         chipArts = findViewById(R.id.chipArts);
         chipScience = findViewById(R.id.chipScience);
         setupFilterChips();
+        currentHomeTab = resolveInitialTab(getIntent());
 
         eventListAdapter = new EventListAdapter(new ArrayList<>(), new EventListAdapter.OnEventClickListener() {
             @Override
@@ -96,21 +107,7 @@ public class ExploreActivity extends AppCompatActivity {
 
         recyclerView.setAdapter(eventListAdapter);
         setupBottomNavigation();
-        setupSearchInput();
-
-        browseController.loadSavedEventIds((savedEventIds, success) -> {
-            if (success) {
-                userSavedEvents = new ArrayList<>(savedEventIds);
-
-                if ("saved".equals(getIntent().getStringExtra("navigate_to"))) {
-                    openSavedTab();
-                } else {
-                    loadBrowseEvents(searchInput.getText().toString());
-                }
-            } else {
-                Log.e(TAG, "Failed to load user.");
-            }
-        });
+        refreshSavedEventsAndVisibleContent();
     }
 
     /**
@@ -125,7 +122,7 @@ public class ExploreActivity extends AppCompatActivity {
 
             updateChipUI();
             // Load the list again with the new chip filter
-            loadBrowseEvents(searchInput.getText().toString());
+            loadBrowseEvents("");
         };
 
         chipFortnite.setOnClickListener(chipClickListener);
@@ -158,17 +155,22 @@ public class ExploreActivity extends AppCompatActivity {
         super.onNewIntent(intent);
         setIntent(intent);
         if ("saved".equals(intent.getStringExtra("navigate_to"))) {
-            openSavedTab();
-        } else {
-            showExploreTab();
+            currentHomeTab = BottomNavBarView.Tab.SAVED;
         }
+        refreshSavedEventsAndVisibleContent();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        refreshSavedEventsAndVisibleContent();
     }
 
     /**
      * Configures the bottom navigation bar and assigns tab actions.
      */
     private void setupBottomNavigation() {
-        bottomNavBar.setSelectedTab(BottomNavBarView.Tab.EXPLORE);
+        bottomNavBar.setSelectedTab(currentHomeTab);
         bottomNavBar.setOnTabClickListener(BottomNavBarView.Tab.EXPLORE, v -> showExploreTab());
         bottomNavBar.setOnTabClickListener(BottomNavBarView.Tab.SAVED, v -> openSavedTab());
         bottomNavBar.setOnTabClickListener(BottomNavBarView.Tab.MY_EVENTS, v -> openMyEventsScreen());
@@ -180,16 +182,18 @@ public class ExploreActivity extends AppCompatActivity {
      * Shows the explore tab and reloads the browse event list.
      */
     private void showExploreTab() {
+        currentHomeTab = BottomNavBarView.Tab.EXPLORE;
         bottomNavBar.setSelectedTab(BottomNavBarView.Tab.EXPLORE);
         if (fragmentContainer != null) fragmentContainer.setVisibility(View.GONE);
         if (exploreContainer != null) exploreContainer.setVisibility(View.VISIBLE);
-        loadBrowseEvents(searchInput.getText().toString());
+        loadBrowseEvents("");
     }
 
     /**
      * Opens the saved events tab by displaying the shared saved-events fragment.
      */
     private void openSavedTab() {
+        currentHomeTab = BottomNavBarView.Tab.SAVED;
         bottomNavBar.setSelectedTab(BottomNavBarView.Tab.SAVED);
         EventListModeFragment fragment = EventListModeFragment.newSavedEventsInstance(new ArrayList<>(userSavedEvents));
 
@@ -200,6 +204,29 @@ public class ExploreActivity extends AppCompatActivity {
                     .replace(R.id.fragment_container, fragment)
                     .commit();
         }
+    }
+
+    private void refreshSavedEventsAndVisibleContent() {
+        browseController.loadSavedEventIds((savedEventIds, success) -> {
+            if (!success) {
+                Log.e(TAG, "Failed to refresh saved events.");
+                return;
+            }
+
+            userSavedEvents = new ArrayList<>(savedEventIds == null ? new ArrayList<>() : savedEventIds);
+            if (currentHomeTab == BottomNavBarView.Tab.SAVED) {
+                openSavedTab();
+                return;
+            }
+
+            loadBrowseEvents("");
+        });
+    }
+
+    private BottomNavBarView.Tab resolveInitialTab(Intent intent) {
+        return intent != null && "saved".equals(intent.getStringExtra("navigate_to"))
+                ? BottomNavBarView.Tab.SAVED
+                : BottomNavBarView.Tab.EXPLORE;
     }
 
     /**
@@ -239,18 +266,6 @@ public class ExploreActivity extends AppCompatActivity {
         intent.putExtra(EventDetailActivity.EXTRA_EVENT_DEADLINE, eventItem.daysLeft);
         intent.putExtra(EventDetailActivity.EXTRA_EVENT_CATEGORY, eventItem.category);
         startActivity(intent);
-    }
-
-    /**
-     * Adds a text watcher to the search input so the event list updates
-     * whenever the search text changes.
-     */
-    private void setupSearchInput() {
-        searchInput.addTextChangedListener(new TextWatcher() {
-            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
-            @Override public void afterTextChanged(Editable editable) { loadBrowseEvents(editable.toString()); }
-        });
     }
 
     /**
@@ -330,12 +345,3 @@ public class ExploreActivity extends AppCompatActivity {
         return value == null ? "" : value.trim();
     }
 }
-
-
-
-
-
-
-
-
-

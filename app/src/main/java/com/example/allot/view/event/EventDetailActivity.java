@@ -14,6 +14,7 @@ import android.widget.ImageView;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
@@ -25,6 +26,7 @@ import com.example.allot.R;
 import com.example.allot.common.AppResult;
 import com.example.allot.controller.event.EventDetailController;
 import com.example.allot.controller.event.EventJoinDistanceValidator;
+import com.example.allot.controller.explore.ExploreController;
 import com.example.allot.model.event.Event;
 import com.example.allot.model.event.EventComment;
 import com.example.allot.model.event.EventDetailData;
@@ -58,6 +60,7 @@ public class EventDetailActivity extends AppCompatActivity {
     private static final int LOCATION_PERMISSION_REQUEST = 1002;
 
     private EventDetailController eventDetailController;
+    private ExploreController exploreController;
     private FusedLocationProviderClient fusedLocationProviderClient;
     private final EventJoinDistanceValidator eventJoinDistanceValidator = new EventJoinDistanceValidator();
 
@@ -65,6 +68,7 @@ public class EventDetailActivity extends AppCompatActivity {
     private boolean isJoiningWaitlist;
     private boolean isLeavingWaitlist;
     private boolean isPostingComment;
+    private boolean isVotingComment;
     private Event currentEvent;
     private EventDetailData currentScreenState;
     private boolean shouldRefreshOnResume;
@@ -73,6 +77,14 @@ public class EventDetailActivity extends AppCompatActivity {
 
     private FrameLayout heroImageFrame;
     private ImageView heroPosterImage;
+    private CommentSortMode commentSortMode = CommentSortMode.NEWEST;
+    private List<String> userSavedEventIds = new ArrayList<>();
+    private boolean isFavoriteSaved;
+    private boolean isFavoriteLoading = true;
+    private boolean isFavoriteUpdating;
+
+    private FrameLayout heroImageFrame;
+    private ImageView favoriteButton;
     private TextView heroDeadlineText;
     private TextView titleText;
     private TextView priceText;
@@ -92,6 +104,7 @@ public class EventDetailActivity extends AppCompatActivity {
     private TextView commentEmptyText;
     private EditText commentInputText;
     private TextView commentSubmitButton;
+    private Spinner commentSortSpinner;
     private Dialog pendingJoinDialog;
     private MaterialButton pendingJoinConfirmButton;
 
@@ -107,6 +120,7 @@ public class EventDetailActivity extends AppCompatActivity {
         setContentView(R.layout.activity_event_detail);
 
         eventDetailController = new EventDetailController(this);
+        exploreController = new ExploreController(this);
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
         currentEventId = getIntent().getStringExtra(EXTRA_EVENT_ID);
 
@@ -132,6 +146,7 @@ public class EventDetailActivity extends AppCompatActivity {
     private void bindViews() {
         heroImageFrame = findViewById(R.id.heroImageFrame);
         heroPosterImage = findViewById(R.id.heroPosterImage);
+        favoriteButton = findViewById(R.id.favoriteButton);
         heroDeadlineText = findViewById(R.id.heroDeadlineText);
         titleText = findViewById(R.id.eventTitleText);
         priceText = findViewById(R.id.eventPriceText);
@@ -151,6 +166,7 @@ public class EventDetailActivity extends AppCompatActivity {
         commentEmptyText = findViewById(R.id.commentEmptyText);
         commentInputText = findViewById(R.id.commentInputText);
         commentSubmitButton = findViewById(R.id.commentSubmitButton);
+        commentSortSpinner = findViewById(R.id.commentSortSpinner);
     }
 
     /**
@@ -159,8 +175,23 @@ public class EventDetailActivity extends AppCompatActivity {
     private void setupListeners() {
         ImageButton backButton = findViewById(R.id.backButton);
         backButton.setOnClickListener(view -> getOnBackPressedDispatcher().onBackPressed());
+        favoriteButton.setOnClickListener(view -> onFavoritePressed());
         joinWaitingListButton.setOnClickListener(view -> onWaitlistButtonPressed());
         commentSubmitButton.setOnClickListener(view -> postComment(null, null));
+
+        if (commentSortSpinner != null) {
+            commentSortSpinner.setOnItemSelectedListener(new android.widget.AdapterView.OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(android.widget.AdapterView<?> parent, View view, int position, long id) {
+                    commentSortMode = CommentSortMode.fromPosition(position);
+                    renderComments(currentEvent);
+                }
+
+                @Override
+                public void onNothingSelected(android.widget.AdapterView<?> parent) {
+                }
+            });
+        }
     }
 
     /**
@@ -176,6 +207,7 @@ public class EventDetailActivity extends AppCompatActivity {
                 getIntent().getStringExtra(EXTRA_EVENT_DEADLINE),
                 getIntent().getStringExtra(EXTRA_EVENT_CATEGORY)
         ));
+        updateFavoriteUi();
     }
 
     /**
@@ -189,6 +221,7 @@ public class EventDetailActivity extends AppCompatActivity {
         }
 
         setLoading(true);
+        loadFavoriteState();
         eventDetailController.loadEventActionState(currentEventId, (state, success) -> {
             setLoading(false);
             if (!success || state == null) {
@@ -324,10 +357,64 @@ public class EventDetailActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        if (shouldRefreshOnResume && !TextUtils.isEmpty(currentEventId)) {
+        if (TextUtils.isEmpty(currentEventId)) {
+            return;
+        }
+
+        if (shouldRefreshOnResume) {
             shouldRefreshOnResume = false;
             loadEventDetails();
+            return;
         }
+
+        loadFavoriteState();
+    }
+
+    private void loadFavoriteState() {
+        isFavoriteLoading = true;
+        updateFavoriteUi();
+        exploreController.loadSavedEventIds((savedEventIds, success) -> {
+            userSavedEventIds = new ArrayList<>(savedEventIds == null ? new ArrayList<>() : savedEventIds);
+            isFavoriteSaved = success && !TextUtils.isEmpty(currentEventId) && userSavedEventIds.contains(currentEventId);
+            isFavoriteLoading = false;
+            updateFavoriteUi();
+        });
+    }
+
+    private void onFavoritePressed() {
+        if (favoriteButton == null || isFavoriteLoading || isFavoriteUpdating || TextUtils.isEmpty(currentEventId)) {
+            return;
+        }
+
+        isFavoriteUpdating = true;
+        isFavoriteSaved = !isFavoriteSaved;
+        boolean isSaving = isFavoriteSaved;
+        updateFavoriteUi();
+
+        exploreController.toggleSavedEvent(userSavedEventIds, currentEventId, isSaving, (savedEventIds, success) -> {
+            isFavoriteUpdating = false;
+            userSavedEventIds = new ArrayList<>(savedEventIds == null ? new ArrayList<>() : savedEventIds);
+            isFavoriteSaved = success == isSaving;
+            updateFavoriteUi();
+            if (!success) {
+                Toast.makeText(this, R.string.event_detail_save_failure, Toast.LENGTH_SHORT).show();
+            }
+            loadFavoriteState();
+        });
+    }
+
+    private void updateFavoriteUi() {
+        if (favoriteButton == null) {
+            return;
+        }
+
+        favoriteButton.setEnabled(!isFavoriteLoading && !isFavoriteUpdating);
+        favoriteButton.setAlpha((isFavoriteLoading || isFavoriteUpdating) ? 0.6f : 1f);
+        favoriteButton.setImageResource(isFavoriteSaved ? R.drawable.ic_heart_filled : R.drawable.ic_heart_outline);
+        favoriteButton.setColorFilter(ContextCompat.getColor(
+                this,
+                isFavoriteSaved ? R.color.favorite_active : R.color.white
+        ));
     }
 
     /**
@@ -759,7 +846,7 @@ public class EventDetailActivity extends AppCompatActivity {
                     .add(comment);
         }
 
-        rootComments.sort(commentComparator());
+        rootComments.sort(commentComparator(commentSortMode));
         for (EventComment root : rootComments) {
             renderCommentTree(root, 0, repliesByParent, commentsContainer);
         }
@@ -778,6 +865,8 @@ public class EventDetailActivity extends AppCompatActivity {
         TextView authorText = commentView.findViewById(R.id.commentAuthorText);
         TextView dateText = commentView.findViewById(R.id.commentDateText);
         TextView bodyText = commentView.findViewById(R.id.commentBodyText);
+        TextView upvoteButton = commentView.findViewById(R.id.commentUpvoteButton);
+        TextView downvoteButton = commentView.findViewById(R.id.commentDownvoteButton);
         TextView replyButton = commentView.findViewById(R.id.commentReplyButton);
         TextView deleteButton = commentView.findViewById(R.id.commentDeleteButton);
         LinearLayout replyListContainer = commentView.findViewById(R.id.commentReplyListContainer);
@@ -787,6 +876,7 @@ public class EventDetailActivity extends AppCompatActivity {
         dateText.setText(formatCommentDate(comment.getCreatedAt()));
         bodyText.setText(UiHelper.cleanText(comment.getText()));
 
+        bindVoteButtons(upvoteButton, downvoteButton, comment);
         replyButton.setOnClickListener(view -> toggleReplyInput(replyInputContainer, comment));
         bindDeleteButton(deleteButton, comment);
         container.addView(commentView);
@@ -796,7 +886,7 @@ public class EventDetailActivity extends AppCompatActivity {
             return;
         }
 
-        replies.sort(commentComparator());
+        replies.sort(commentComparator(commentSortMode));
         for (EventComment reply : replies) {
             renderCommentTree(reply, depth + 1, repliesByParent, replyListContainer);
         }
@@ -887,6 +977,41 @@ public class EventDetailActivity extends AppCompatActivity {
         });
     }
 
+    private void bindVoteButtons(TextView upvoteButton, TextView downvoteButton, EventComment comment) {
+        if (upvoteButton == null || downvoteButton == null || comment == null) {
+            return;
+        }
+
+        updateVoteButtonText(upvoteButton, downvoteButton, comment);
+
+        upvoteButton.setOnClickListener(view -> voteOnComment(comment, true));
+        downvoteButton.setOnClickListener(view -> voteOnComment(comment, false));
+    }
+
+    private void updateVoteButtonText(TextView upvoteButton, TextView downvoteButton, EventComment comment) {
+        String upvoteLabel = getString(R.string.event_comment_upvote) + " " + Math.max(0, comment.getUpvotes());
+        String downvoteLabel = getString(R.string.event_comment_downvote) + " " + Math.max(0, comment.getDownvotes());
+        upvoteButton.setText(upvoteLabel);
+        downvoteButton.setText(downvoteLabel);
+    }
+
+    private void voteOnComment(EventComment comment, boolean isUpvote) {
+        if (isVotingComment || comment == null || TextUtils.isEmpty(currentEventId)) {
+            return;
+        }
+
+        isVotingComment = true;
+        eventDetailController.voteOnComment(currentEventId, comment.getCommentId(), isUpvote, (result, success) -> {
+            isVotingComment = false;
+            if (result == null || !result.isSuccess()) {
+                int messageRes = result == null ? R.string.event_comment_post_failure : result.getMessageResId();
+                Toast.makeText(this, messageRes, Toast.LENGTH_SHORT).show();
+                return;
+            }
+            loadEventDetails();
+        });
+    }
+
     private void deleteCommentThread(String commentId) {
         if (TextUtils.isEmpty(currentEventId) || TextUtils.isEmpty(commentId)) {
             return;
@@ -918,21 +1043,53 @@ public class EventDetailActivity extends AppCompatActivity {
         return formatter.format(date);
     }
 
-    private Comparator<EventComment> commentComparator() {
+    private Comparator<EventComment> commentComparator(CommentSortMode mode) {
         return (first, second) -> {
+            if (mode == CommentSortMode.MOST_UPVOTED) {
+                int firstVotes = first == null ? 0 : first.getUpvotes();
+                int secondVotes = second == null ? 0 : second.getUpvotes();
+                int voteCompare = Integer.compare(secondVotes, firstVotes);
+                if (voteCompare != 0) {
+                    return voteCompare;
+                }
+            } else if (mode == CommentSortMode.MOST_DOWNVOTED) {
+                int firstVotes = first == null ? 0 : first.getDownvotes();
+                int secondVotes = second == null ? 0 : second.getDownvotes();
+                int voteCompare = Integer.compare(secondVotes, firstVotes);
+                if (voteCompare != 0) {
+                    return voteCompare;
+                }
+            }
+
             Date firstDate = first == null ? null : first.getCreatedAt();
             Date secondDate = second == null ? null : second.getCreatedAt();
             if (firstDate == null && secondDate == null) {
                 return 0;
             }
             if (firstDate == null) {
-                return -1;
-            }
-            if (secondDate == null) {
                 return 1;
             }
-            return firstDate.compareTo(secondDate);
+            if (secondDate == null) {
+                return -1;
+            }
+            return secondDate.compareTo(firstDate);
         };
+    }
+
+    private enum CommentSortMode {
+        NEWEST,
+        MOST_UPVOTED,
+        MOST_DOWNVOTED;
+
+        static CommentSortMode fromPosition(int position) {
+            if (position == 1) {
+                return MOST_UPVOTED;
+            }
+            if (position == 2) {
+                return MOST_DOWNVOTED;
+            }
+            return NEWEST;
+        }
     }
 
     private interface CommentPostCallback {
