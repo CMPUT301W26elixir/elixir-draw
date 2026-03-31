@@ -1,6 +1,7 @@
 package com.example.allot.controller.organizer;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import com.example.allot.controller.shared.UserController;
@@ -8,6 +9,7 @@ import com.example.allot.data.DeviceSessionManager;
 import com.example.allot.data.EventRepository;
 import com.example.allot.model.event.Event;
 import com.example.allot.model.event.WaitingList;
+import com.example.allot.model.organizer.EntrantExportRow;
 import java.util.Date;
 import org.junit.Before;
 import org.junit.Test;
@@ -36,6 +38,92 @@ public class EventEntrantsControllerTest {
         });
     }
 
+    @Test
+    public void loadEnrolledExportRows_returnsFailureWhenEventIsNull() {
+        controller.loadEnrolledExportRows(null, (rows, success) -> {
+            assertFalse(success);
+            assertTrue(rows.isEmpty());
+        });
+    }
+
+    @Test
+    public void loadEnrolledExportRows_returnsEmptySuccessWhenNoEnrolledEntrantsExist() {
+        Event event = buildEvent();
+
+        controller.loadEnrolledExportRows(event, (rows, success) -> {
+            assertTrue(success);
+            assertTrue(rows.isEmpty());
+        });
+    }
+
+    @Test
+    public void loadEnrolledExportRows_exportsExplicitEnrolledEntrantsInOrder() {
+        Event event = buildEvent();
+        event.getEnrolled().add("user-2");
+        event.getEnrolled().add("user-1");
+        userController.addUser("user-1", buildUser("Alice", "Example", "alice@example.com", "111"));
+        userController.addUser("user-2", buildUser("Bob", "Example", "bob@example.com", "222"));
+
+        controller.loadEnrolledExportRows(event, (rows, success) -> {
+            assertTrue(success);
+            assertEquals(2, rows.size());
+            assertEquals("Bob Example", rows.get(0).getName());
+            assertEquals("bob@example.com", rows.get(0).getEmail());
+            assertEquals("222", rows.get(0).getPhone());
+            assertEquals("Alice Example", rows.get(1).getName());
+            assertEquals("alice@example.com", rows.get(1).getEmail());
+            assertEquals("111", rows.get(1).getPhone());
+        });
+    }
+
+    @Test
+    public void loadEnrolledExportRows_fallsBackToWaitingListChosenStatusWhenEnrolledListIsEmpty() {
+        Event event = buildEvent();
+        event.getWaitingList().chosen.add("user-1");
+        event.getWaitingList().chosen.add("user-2");
+        event.getWaitingList().status.put("user-1", true);
+        event.getWaitingList().status.put("user-2", false);
+        userController.addUser("user-1", buildUser("Alice", "Example", "alice@example.com", "111"));
+
+        controller.loadEnrolledExportRows(event, (rows, success) -> {
+            assertTrue(success);
+            assertEquals(1, rows.size());
+            assertEquals("Alice Example", rows.get(0).getName());
+            assertEquals("alice@example.com", rows.get(0).getEmail());
+            assertEquals("111", rows.get(0).getPhone());
+        });
+    }
+
+    @Test
+    public void loadEnrolledExportRows_usesFallbackRowWhenUserLookupFails() {
+        Event event = buildEvent();
+        event.getEnrolled().add("missing-user");
+
+        controller.loadEnrolledExportRows(event, (rows, success) -> {
+            assertTrue(success);
+            assertEquals(1, rows.size());
+            EntrantExportRow row = rows.get(0);
+            assertEquals("missing-user", row.getName());
+            assertEquals("", row.getEmail());
+            assertEquals("", row.getPhone());
+        });
+    }
+
+    @Test
+    public void loadEnrolledExportRows_keepsBlankContactFieldsBlank() {
+        Event event = buildEvent();
+        event.getEnrolled().add("user-1");
+        userController.addUser("user-1", buildUser("Alice", "Example", "", null));
+
+        controller.loadEnrolledExportRows(event, (rows, success) -> {
+            assertTrue(success);
+            assertEquals(1, rows.size());
+            assertEquals("Alice Example", rows.get(0).getName());
+            assertEquals("", rows.get(0).getEmail());
+            assertEquals("", rows.get(0).getPhone());
+        });
+    }
+
     private Event buildEvent() {
         Event event = new Event();
         event.setTitle("Event");
@@ -47,6 +135,24 @@ public class EventEntrantsControllerTest {
         event.setCancelled(new java.util.ArrayList<>());
         event.setNotEnrolled(new java.util.ArrayList<>());
         return event;
+    }
+
+    private com.example.allot.model.profile.User buildUser(String firstName,
+                                                           String lastName,
+                                                           String email,
+                                                           String phone) {
+        com.example.allot.model.profile.User user = new com.example.allot.model.profile.User();
+        user.setFirstName(firstName);
+        user.setLastName(lastName);
+        user.setPhone(phone);
+        try {
+            java.lang.reflect.Field emailField = com.example.allot.model.profile.User.class.getDeclaredField("email");
+            emailField.setAccessible(true);
+            emailField.set(user, email);
+        } catch (ReflectiveOperationException exception) {
+            throw new RuntimeException(exception);
+        }
+        return user;
     }
 
     private static class FakeEventRepository extends EventRepository {
@@ -63,16 +169,20 @@ public class EventEntrantsControllerTest {
     }
 
     private static class FakeUserController extends UserController {
+        private final java.util.Map<String, com.example.allot.model.profile.User> users = new java.util.HashMap<>();
+
         private FakeUserController() {
             super(null, new DeviceSessionManager(new FakeDeviceSessionStore("device-1")));
         }
 
+        private void addUser(String deviceId, com.example.allot.model.profile.User user) {
+            users.put(deviceId, user);
+        }
+
         @Override
         public void getUserByDeviceId(String deviceId, com.example.allot.common.OnCompleteListener<com.example.allot.model.profile.User> listener) {
-            com.example.allot.model.profile.User user = new com.example.allot.model.profile.User();
-            user.setFirstName("Test");
-            user.setLastName("User");
-            listener.onComplete(user, true);
+            com.example.allot.model.profile.User user = users.get(deviceId);
+            listener.onComplete(user, user != null);
         }
     }
 
