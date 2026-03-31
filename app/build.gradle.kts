@@ -50,7 +50,7 @@ android {
 
 dependencies {
     implementation(platform("com.google.firebase:firebase-bom:34.11.0"))
-    ximplementation("com.google.firebase:firebase-storage")
+    implementation("com.google.firebase:firebase-storage")
     implementation(libs.appcompat)
     implementation(libs.material)
     implementation(libs.activity)
