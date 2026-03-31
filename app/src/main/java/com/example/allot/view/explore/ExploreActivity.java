@@ -105,20 +105,7 @@ public class ExploreActivity extends AppCompatActivity {
 
         recyclerView.setAdapter(eventListAdapter);
         setupBottomNavigation();
-
-        browseController.loadSavedEventIds((savedEventIds, success) -> {
-            if (success) {
-                userSavedEvents = new ArrayList<>(savedEventIds);
-
-                if ("saved".equals(getIntent().getStringExtra("navigate_to"))) {
-                    openSavedTab();
-                } else {
-                    loadBrowseEvents("");
-                }
-            } else {
-                Log.e(TAG, "Failed to load user.");
-            }
-        });
+        refreshSavedEventsAndVisibleContent();
     }
 
     /**
@@ -165,11 +152,13 @@ public class ExploreActivity extends AppCompatActivity {
     protected void onNewIntent(@NonNull Intent intent) {
         super.onNewIntent(intent);
         setIntent(intent);
-        if ("saved".equals(intent.getStringExtra("navigate_to"))) {
-            openSavedTab();
-        } else {
-            showExploreTab();
-        }
+        refreshSavedEventsAndVisibleContent();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        refreshSavedEventsAndVisibleContent();
     }
 
     /**
@@ -208,6 +197,33 @@ public class ExploreActivity extends AppCompatActivity {
                     .replace(R.id.fragment_container, fragment)
                     .commit();
         }
+    }
+
+    private void refreshSavedEventsAndVisibleContent() {
+        browseController.loadSavedEventIds((savedEventIds, success) -> {
+            if (!success) {
+                Log.e(TAG, "Failed to refresh saved events.");
+                return;
+            }
+
+            userSavedEvents = new ArrayList<>(savedEventIds == null ? new ArrayList<>() : savedEventIds);
+            if (shouldShowSavedTab()) {
+                openSavedTab();
+                return;
+            }
+
+            loadBrowseEvents("");
+        });
+    }
+
+    private boolean shouldShowSavedTab() {
+        if ("saved".equals(getIntent().getStringExtra("navigate_to"))) {
+            return true;
+        }
+
+        return fragmentContainer != null
+                && fragmentContainer.getVisibility() == View.VISIBLE
+                && (exploreContainer == null || exploreContainer.getVisibility() != View.VISIBLE);
     }
 
     /**
