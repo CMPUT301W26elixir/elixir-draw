@@ -83,7 +83,6 @@ public class EventDetailActivity extends AppCompatActivity {
     private boolean isFavoriteLoading = true;
     private boolean isFavoriteUpdating;
 
-    private FrameLayout heroImageFrame;
     private ImageView favoriteButton;
     private TextView heroDeadlineText;
     private TextView titleText;
