@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.allot.R;
 import com.example.allot.controller.admin.AdminEventController;
 import com.example.allot.controller.admin.AdminProfileController;
+import com.example.allot.controller.event.EventPosterController;
 import com.example.allot.model.event.Event;
 import com.example.allot.model.profile.User;
 import com.example.allot.view.shared.AppDialogHelper;
@@ -31,13 +32,15 @@ import java.util.List;
 public class AdminActivity extends AppCompatActivity {
     private enum AdminTab {
         EVENTS,
-        PROFILES
+        PROFILES,
+        POSTERS
     }
 
     private BottomNavBarView bottomNavBar;
     private ImageView backButton;
     private TextView eventsTabText;
     private TextView profilesTabText;
+    private TextView postersTabText;
 
     // Event management
     private AdminEventController adminEventController;
@@ -57,6 +60,15 @@ public class AdminActivity extends AppCompatActivity {
     private View profilesLoadingLayout;
     private TextView profilesEmptyStateText;
 
+    // Poster management
+    private EventPosterController eventPosterController;
+    private RecyclerView postersRecyclerView;
+    private AdminPosterListAdapter postersAdapter;
+    private List<Event> posterEventsList;
+    private View postersContainer;
+    private View postersLoadingLayout;
+    private TextView postersEmptyStateText;
+
     private AdminTab currentTab = AdminTab.EVENTS;
 
     /**
@@ -72,8 +84,10 @@ public class AdminActivity extends AppCompatActivity {
 
         adminEventController = new AdminEventController(this);
         adminProfileController = new AdminProfileController(this);
+        eventPosterController = new EventPosterController();
         eventsList = new ArrayList<>();
         profilesList = new ArrayList<>();
+        posterEventsList = new ArrayList<>();
 
         bindViews();
         setupBottomNav();
@@ -100,6 +114,7 @@ public class AdminActivity extends AppCompatActivity {
         backButton = findViewById(R.id.backButton);
         eventsTabText = findViewById(R.id.eventsTabText);
         profilesTabText = findViewById(R.id.profilesTabText);
+        postersTabText = findViewById(R.id.postersTabText);
 
         // Events
         eventsContainer = findViewById(R.id.eventsContainer);
@@ -112,6 +127,12 @@ public class AdminActivity extends AppCompatActivity {
         profilesRecyclerView = findViewById(R.id.profilesRecyclerView);
         profilesLoadingLayout = findViewById(R.id.profilesLoadingLayout);
         profilesEmptyStateText = findViewById(R.id.profilesEmptyStateText);
+
+        // Posters
+        postersContainer = findViewById(R.id.postersContainer);
+        postersRecyclerView = findViewById(R.id.postersRecyclerView);
+        postersLoadingLayout = findViewById(R.id.postersLoadingLayout);
+        postersEmptyStateText = findViewById(R.id.postersEmptyStateText);
     }
 
     /**
@@ -132,6 +153,7 @@ public class AdminActivity extends AppCompatActivity {
     private void setupTabButtons() {
         eventsTabText.setOnClickListener(view -> showEventsTab());
         profilesTabText.setOnClickListener(view -> showProfilesTab());
+        postersTabText.setOnClickListener(view -> showPostersTab());
         updateTabStyles();
     }
 
@@ -144,6 +166,7 @@ public class AdminActivity extends AppCompatActivity {
 
         eventsTabText.setTextColor(currentTab == AdminTab.EVENTS ? activeColor : inactiveColor);
         profilesTabText.setTextColor(currentTab == AdminTab.PROFILES ? activeColor : inactiveColor);
+        postersTabText.setTextColor(currentTab == AdminTab.POSTERS ? activeColor : inactiveColor);
     }
 
     /**
@@ -159,6 +182,11 @@ public class AdminActivity extends AppCompatActivity {
         profilesAdapter = new AdminProfileListAdapter(profilesList, this::onProfileDeleteClick);
         profilesRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         profilesRecyclerView.setAdapter(profilesAdapter);
+
+        // Posters RecyclerView
+        postersAdapter = new AdminPosterListAdapter(posterEventsList, this::onPosterDeleteClick);
+        postersRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        postersRecyclerView.setAdapter(postersAdapter);
     }
 
     /**
@@ -176,6 +204,7 @@ public class AdminActivity extends AppCompatActivity {
         updateTabStyles();
         eventsContainer.setVisibility(View.VISIBLE);
         profilesContainer.setVisibility(View.GONE);
+        postersContainer.setVisibility(View.GONE);
 
         if (eventsList.isEmpty()) {
             loadEvents();
@@ -190,9 +219,25 @@ public class AdminActivity extends AppCompatActivity {
         updateTabStyles();
         eventsContainer.setVisibility(View.GONE);
         profilesContainer.setVisibility(View.VISIBLE);
+        postersContainer.setVisibility(View.GONE);
 
         if (profilesList.isEmpty()) {
             loadProfiles();
+        }
+    }
+
+    /**
+     * Shows the posters tab and loads poster list if not already loaded.
+     */
+    private void showPostersTab() {
+        currentTab = AdminTab.POSTERS;
+        updateTabStyles();
+        eventsContainer.setVisibility(View.GONE);
+        profilesContainer.setVisibility(View.GONE);
+        postersContainer.setVisibility(View.VISIBLE);
+
+        if (posterEventsList.isEmpty()) {
+            loadPosters();
         }
     }
 
@@ -243,6 +288,36 @@ public class AdminActivity extends AppCompatActivity {
             profilesList.addAll(profiles);
             setProfilesVisibleState();
             profilesAdapter.notifyDataSetChanged();
+        });
+    }
+
+    /**
+     * Loads all events with poster URLs for admin poster moderation.
+     */
+    private void loadPosters() {
+        setPostersLoadingState();
+        adminEventController.loadAllEvents((events, success) -> {
+            if (!success || events == null) {
+                setPostersEmptyState(getString(R.string.admin_error_loading_posters));
+                Toast.makeText(this, R.string.admin_error_loading_posters, Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            posterEventsList.clear();
+            for (Event event : events) {
+                if (event == null || UiHelper.isBlank(event.getPosterUrl())) {
+                    continue;
+                }
+                posterEventsList.add(event);
+            }
+
+            if (posterEventsList.isEmpty()) {
+                setPostersEmptyState(getString(R.string.admin_no_posters));
+                return;
+            }
+
+            setPostersVisibleState();
+            postersAdapter.notifyDataSetChanged();
         });
     }
 
@@ -310,6 +385,36 @@ public class AdminActivity extends AppCompatActivity {
         profilesEmptyStateText.setText(message);
     }
 
+    // ============== Poster state management ==============
+
+    /**
+     * Shows the posters loading state.
+     */
+    private void setPostersLoadingState() {
+        postersRecyclerView.setVisibility(View.GONE);
+        postersLoadingLayout.setVisibility(View.VISIBLE);
+        postersEmptyStateText.setVisibility(View.GONE);
+    }
+
+    /**
+     * Shows the posters visible state.
+     */
+    private void setPostersVisibleState() {
+        postersRecyclerView.setVisibility(View.VISIBLE);
+        postersLoadingLayout.setVisibility(View.GONE);
+        postersEmptyStateText.setVisibility(View.GONE);
+    }
+
+    /**
+     * Shows the posters empty state.
+     */
+    private void setPostersEmptyState(String message) {
+        postersRecyclerView.setVisibility(View.GONE);
+        postersLoadingLayout.setVisibility(View.GONE);
+        postersEmptyStateText.setVisibility(View.VISIBLE);
+        postersEmptyStateText.setText(message);
+    }
+
     // ============== Delete handlers ==============
 
     /**
@@ -332,6 +437,30 @@ public class AdminActivity extends AppCompatActivity {
      */
     private void onProfileDeleteClick(User user, int position) {
         showProfileDeleteConfirmationDialog(user, position);
+    }
+
+    /**
+     * Handles delete button click for a poster.
+     */
+    private void onPosterDeleteClick(Event event, int position) {
+        if (event == null) {
+            return;
+        }
+
+        eventPosterController.deletePoster(event.getEventId(), event.getPosterUrl(), (result, success) -> {
+            if (!success || result == null || !result) {
+                Toast.makeText(this, R.string.admin_error_deleting_poster, Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            Toast.makeText(this, R.string.admin_poster_deleted, Toast.LENGTH_SHORT).show();
+            posterEventsList.remove(position);
+            postersAdapter.notifyItemRemoved(position);
+
+            if (posterEventsList.isEmpty()) {
+                setPostersEmptyState(getString(R.string.admin_no_posters));
+            }
+        });
     }
 
     /**

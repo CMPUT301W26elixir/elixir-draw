@@ -201,12 +201,24 @@
                 android:textSize="16sp" />
 
             <FrameLayout
+                android:id="@+id/posterUploadCard"
                 android:layout_width="match_parent"
                 android:layout_height="92dp"
                 android:layout_marginTop="8dp"
-                android:background="@drawable/bg_profile_input">
+                android:background="@drawable/bg_profile_input"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?android:attr/selectableItemBackground">
+
+                <ImageView
+                    android:id="@+id/posterPreviewImage"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="centerCrop"
+                    android:visibility="gone" />
 
                 <LinearLayout
+                    android:id="@+id/posterUploadPlaceholder"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:gravity="center"
@@ -219,6 +231,7 @@
                         android:tint="@color/text_secondary" />
 
                     <TextView
+                        android:id="@+id/posterUploadHintText"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
@@ -228,6 +241,17 @@
                         android:textSize="14sp" />
                 </LinearLayout>
             </FrameLayout>
+
+            <TextView
+                android:id="@+id/posterRemoveButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:fontFamily="@font/varela_round_regular"
+                android:text="@string/manage_event_banner_remove"
+                android:textColor="@color/text_secondary"
+                android:textSize="13sp"
+                android:visibility="gone" />
 
             <TextView
                 android:layout_width="wrap_content"

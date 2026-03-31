@@ -2,22 +2,26 @@ package com.example.allot.view.event;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
+import com.bumptech.glide.Glide;
 import com.example.allot.BuildConfig;
 import com.example.allot.R;
 import com.example.allot.common.AppResult;
 import com.example.allot.controller.event.CreateEventController;
+import com.example.allot.controller.event.EventPosterController;
 import com.example.allot.model.event.Event;
 import com.example.allot.model.event.EventFormData;
 import com.example.allot.view.shared.EventDisplayFormatter;
@@ -36,8 +40,15 @@ public class CreateEventActivity extends AppCompatActivity {
 
     private TextView nextButton;
     private EditText locationInput;
+    private ImageView posterPreviewImage;
+    private android.view.View posterUploadCard;
+    private android.view.View posterUploadPlaceholder;
+    private TextView posterUploadHintText;
+    private TextView posterRemoveButton;
+    private Uri selectedPosterUri;
 
     private CreateEventController createEventController;
+    private EventPosterController eventPosterController;
     private EventFormUiHelper formUiHelper;
     private boolean isSaving;
     private final ActivityResultLauncher<Intent> placeAutocompleteLauncher =
@@ -61,6 +72,15 @@ public class CreateEventActivity extends AppCompatActivity {
                     Toast.makeText(this, R.string.create_event_places_error, Toast.LENGTH_SHORT).show();
                 }
             });
+    private final ActivityResultLauncher<String> posterPickerLauncher =
+            registerForActivityResult(new ActivityResultContracts.GetContent(), uri -> {
+                if (uri == null) {
+                    return;
+                }
+
+                selectedPosterUri = uri;
+                renderPosterSelection();
+            });
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,6 +88,7 @@ public class CreateEventActivity extends AppCompatActivity {
         setContentView(R.layout.activity_create_event);
 
         createEventController = new CreateEventController(this);
+        eventPosterController = new EventPosterController();
 
         bindViews();
         formUiHelper.setupMonthSpinners(this);
@@ -99,6 +120,11 @@ public class CreateEventActivity extends AppCompatActivity {
         EditText registrationEndDayInput = findViewById(R.id.registrationEndDayInput);
         EditText registrationEndYearInput = findViewById(R.id.registrationEndYearInput);
         nextButton = findViewById(R.id.createEventNextButton);
+        posterUploadCard = findViewById(R.id.posterUploadCard);
+        posterPreviewImage = findViewById(R.id.posterPreviewImage);
+        posterUploadPlaceholder = findViewById(R.id.posterUploadPlaceholder);
+        posterUploadHintText = findViewById(R.id.posterUploadHintText);
+        posterRemoveButton = findViewById(R.id.posterRemoveButton);
         formUiHelper = new EventFormUiHelper(
                 eventNameInput,
                 locationInput,
@@ -126,7 +152,13 @@ public class CreateEventActivity extends AppCompatActivity {
 
     private void setupListeners() {
         configureLocationPicker();
+        posterUploadCard.setOnClickListener(view -> posterPickerLauncher.launch("image/*"));
+        posterRemoveButton.setOnClickListener(view -> {
+            selectedPosterUri = null;
+            renderPosterSelection();
+        });
         nextButton.setOnClickListener(view -> submitEvent());
+        renderPosterSelection();
     }
 
     private void configureLocationPicker() {
@@ -166,20 +198,67 @@ public class CreateEventActivity extends AppCompatActivity {
         nextButton.setEnabled(false);
 
         createEventController.submitEvent(readFormData(), (AppResult<Event> result, boolean success) -> {
-            isSaving = false;
-            nextButton.setEnabled(true);
-
             if (result == null) {
+                isSaving = false;
+                nextButton.setEnabled(true);
                 Toast.makeText(this, R.string.create_event_save_failure, Toast.LENGTH_SHORT).show();
                 return;
             }
 
-            Toast.makeText(this, result.getMessageResId(), Toast.LENGTH_SHORT).show();
             if (!result.isSuccess() || result.getData() == null) {
+                isSaving = false;
+                nextButton.setEnabled(true);
+                Toast.makeText(this, result.getMessageResId(), Toast.LENGTH_SHORT).show();
                 return;
             }
 
             Event event = result.getData();
+            if (selectedPosterUri == null) {
+                isSaving = false;
+                nextButton.setEnabled(true);
+                Toast.makeText(this, result.getMessageResId(), Toast.LENGTH_SHORT).show();
+                openEventCreatedScreen(event);
+                return;
+            }
+
+            eventPosterController.uploadPoster(event.getEventId(), selectedPosterUri, (posterUrl, posterSuccess) -> {
+                isSaving = false;
+                nextButton.setEnabled(true);
+
+                Toast.makeText(this, result.getMessageResId(), Toast.LENGTH_SHORT).show();
+                if (!posterSuccess) {
+                    Toast.makeText(this, R.string.event_poster_upload_failure, Toast.LENGTH_SHORT).show();
+                } else {
+                    event.setPosterUrl(posterUrl);
+                    Toast.makeText(this, R.string.event_poster_upload_success, Toast.LENGTH_SHORT).show();
+                }
+
+                openEventCreatedScreen(event);
+            });
+        });
+    }
+
+    private void renderPosterSelection() {
+        boolean hasPoster = selectedPosterUri != null;
+        posterPreviewImage.setVisibility(hasPoster ? android.view.View.VISIBLE : android.view.View.GONE);
+        posterUploadPlaceholder.setVisibility(hasPoster ? android.view.View.GONE : android.view.View.VISIBLE);
+        posterRemoveButton.setVisibility(hasPoster ? android.view.View.VISIBLE : android.view.View.GONE);
+        posterUploadHintText.setText(hasPoster
+                ? R.string.create_event_poster_change
+                : R.string.create_event_poster_placeholder);
+
+        if (hasPoster) {
+            Glide.with(this).load(selectedPosterUri).into(posterPreviewImage);
+        } else {
+            posterPreviewImage.setImageDrawable(null);
+        }
+    }
+
+    private void openEventCreatedScreen(Event event) {
+        if (event == null) {
+            return;
+        }
+
             Intent intent = new Intent(this, EventCreatedActivity.class);
             intent.putExtra(EventCreatedActivity.EXTRA_EVENT_ID, event.getEventId());
             intent.putExtra(EventCreatedActivity.EXTRA_EVENT_TITLE, event.getTitle());
@@ -191,7 +270,6 @@ public class CreateEventActivity extends AppCompatActivity {
             startActivity(intent);
             overridePendingTransition(0, 0);
             finish();
-        });
     }
 
     private EventFormData readFormData() {

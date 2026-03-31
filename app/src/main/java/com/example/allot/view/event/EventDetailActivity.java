@@ -21,6 +21,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import com.bumptech.glide.Glide;
 import com.example.allot.R;
 import com.example.allot.common.AppResult;
 import com.example.allot.controller.event.EventDetailController;
@@ -72,13 +73,16 @@ public class EventDetailActivity extends AppCompatActivity {
     private EventDetailData currentScreenState;
     private boolean shouldRefreshOnResume;
     private boolean isOrganizer;
+    private boolean isAdmin;
+
+    private FrameLayout heroImageFrame;
+    private ImageView heroPosterImage;
     private CommentSortMode commentSortMode = CommentSortMode.NEWEST;
     private List<String> userSavedEventIds = new ArrayList<>();
     private boolean isFavoriteSaved;
     private boolean isFavoriteLoading = true;
     private boolean isFavoriteUpdating;
 
-    private FrameLayout heroImageFrame;
     private ImageView favoriteButton;
     private TextView heroDeadlineText;
     private TextView titleText;
@@ -122,7 +126,17 @@ public class EventDetailActivity extends AppCompatActivity {
         bindViews();
         bindFallbackContent();
         setupListeners();
+        loadAdminStatus();
         loadEventDetails();
+    }
+
+    private void loadAdminStatus() {
+        eventDetailController.isCurrentUserAdmin((adminValue, success) -> {
+            isAdmin = success && Boolean.TRUE.equals(adminValue);
+            if (currentEvent != null) {
+                renderComments(currentEvent);
+            }
+        });
     }
 
     /**
@@ -130,6 +144,7 @@ public class EventDetailActivity extends AppCompatActivity {
      */
     private void bindViews() {
         heroImageFrame = findViewById(R.id.heroImageFrame);
+        heroPosterImage = findViewById(R.id.heroPosterImage);
         favoriteButton = findViewById(R.id.favoriteButton);
         heroDeadlineText = findViewById(R.id.heroDeadlineText);
         titleText = findViewById(R.id.eventTitleText);
@@ -765,6 +780,7 @@ public class EventDetailActivity extends AppCompatActivity {
         bindOptionalText(registrationOpenText, state.getRegistrationOpenText());
         bindOptionalText(registrationDeadlineText, state.getRegistrationDeadlineText());
         heroImageFrame.setBackgroundResource(state.getHeroBackgroundRes());
+        renderHeroPoster(state.getCurrentEvent());
 
         entrantCountText.setVisibility(state.shouldShowEntrantCount() ? View.VISIBLE : View.GONE);
         entrantCountText.setText(getResources().getQuantityString(
@@ -784,6 +800,21 @@ public class EventDetailActivity extends AppCompatActivity {
         );
 
         renderComments(state.getCurrentEvent());
+    }
+
+    private void renderHeroPoster(Event event) {
+        String posterUrl = event == null ? null : event.getPosterUrl();
+        if (TextUtils.isEmpty(posterUrl)) {
+            heroPosterImage.setVisibility(View.GONE);
+            heroPosterImage.setImageDrawable(null);
+            return;
+        }
+
+        heroPosterImage.setVisibility(View.VISIBLE);
+        Glide.with(this)
+                .load(posterUrl)
+                .centerCrop()
+                .into(heroPosterImage);
     }
 
     private void renderComments(Event event) {
@@ -861,7 +892,7 @@ public class EventDetailActivity extends AppCompatActivity {
     }
 
     private void bindDeleteButton(TextView deleteButton, EventComment comment) {
-        if (deleteButton == null || comment == null || !isOrganizer) {
+        if (deleteButton == null || comment == null || (!isOrganizer && !isAdmin)) {
             if (deleteButton != null) {
                 deleteButton.setVisibility(View.GONE);
             }
