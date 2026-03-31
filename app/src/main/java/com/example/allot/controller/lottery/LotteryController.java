@@ -38,11 +38,19 @@ public class LotteryController {
                       UserController userController,
                       LotteryDrawService lotteryDrawService,
                       LotteryInputValidator lotteryInputValidator) {
+        this(eventRepository, userController, lotteryDrawService, lotteryInputValidator, new NotificationController());
+    }
+
+    LotteryController(EventRepository eventRepository,
+                      UserController userController,
+                      LotteryDrawService lotteryDrawService,
+                      LotteryInputValidator lotteryInputValidator,
+                      NotificationController notificationController) {
         this.eventRepository = eventRepository;
         this.userController = userController;
         this.lotteryDrawService = lotteryDrawService;
         this.lotteryInputValidator = lotteryInputValidator;
-        this.notificationController = new NotificationController();
+        this.notificationController = notificationController;
         drawDateFormat.setLenient(false);
     }
 
