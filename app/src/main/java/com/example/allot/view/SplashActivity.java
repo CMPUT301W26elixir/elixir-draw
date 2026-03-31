@@ -1,11 +1,17 @@
 package com.example.allot.view;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import com.example.allot.R;
 import com.example.allot.common.NotificationHelper;
 import com.example.allot.common.TextHelper;
@@ -21,7 +27,7 @@ import java.util.Date;
 @SuppressLint("CustomSplashScreen")
 /**
  * Decides the first screen to show after the splash delay finishes.
- * Also initializes background notification listeners.
+ * Also handles notification permissions and background listeners.
  */
 public class SplashActivity extends AppCompatActivity {
 
@@ -32,12 +38,19 @@ public class SplashActivity extends AppCompatActivity {
     private boolean navigated;
     private static boolean notificationListenerStarted = false;
 
+    private final ActivityResultLauncher<String> requestPermissionLauncher =
+            registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
+                // Permission handled, continue with app flow
+            });
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash);
 
         startedAtMs = System.currentTimeMillis();
+
+        askNotificationPermission();
 
         UserController userController = new UserController(this);
         if (userController.isNewDeviceId()) {
@@ -52,6 +65,18 @@ public class SplashActivity extends AppCompatActivity {
             boolean requiresProfileSetup = !success || requiresProfileSetup(user);
             navigateAfterDelay(requiresProfileSetup);
         });
+    }
+
+    /**
+     * Requests notification permission for Android 13+.
+     */
+    private void askNotificationPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) !=
+                    PackageManager.PERMISSION_GRANTED) {
+                requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS);
+            }
+        }
     }
 
     /**
@@ -81,7 +106,6 @@ public class SplashActivity extends AppCompatActivity {
                     for (DocumentChange dc : snapshots.getDocumentChanges()) {
                         if (dc.getType() == DocumentChange.Type.ADDED) {
                             Date timestamp = dc.getDocument().getDate("timestamp");
-                            // Only show pop-up if the notification was created after the app started
                             if (timestamp != null && timestamp.getTime() > appStartTime) {
                                 String title = dc.getDocument().getString("title");
                                 String body = dc.getDocument().getString("body");
