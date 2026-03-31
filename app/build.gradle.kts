@@ -49,6 +49,8 @@ android {
 }
 
 dependencies {
+    implementation(platform("com.google.firebase:firebase-bom:34.11.0"))
+    ximplementation("com.google.firebase:firebase-storage")
     implementation(libs.appcompat)
     implementation(libs.material)
     implementation(libs.activity)
@@ -56,6 +58,7 @@ dependencies {
     implementation("androidx.recyclerview:recyclerview:1.3.2")
     implementation("com.google.zxing:core:3.5.3")
     implementation("com.google.firebase:firebase-storage")
+    implementation("com.github.bumptech.glide:glide:4.16.0")
 
     implementation(platform("com.google.firebase:firebase-bom:33.9.0"))
     implementation("com.google.firebase:firebase-firestore")

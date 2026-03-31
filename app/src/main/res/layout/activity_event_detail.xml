@@ -12,6 +12,13 @@
         android:layout_height="233dp"
         android:background="@drawable/bg_event_image_one">
 
+        <ImageView
+            android:id="@+id/heroPosterImage"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop"
+            android:visibility="gone" />
+
         <View
             android:layout_width="match_parent"
             android:layout_height="match_parent"

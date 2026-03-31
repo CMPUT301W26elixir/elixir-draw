@@ -220,35 +220,56 @@ public class EventDetailController {
                 return;
             }
 
-            List<EventComment> comments = event.getComments();
-            if (comments == null || comments.isEmpty()) {
-                listener.onComplete(AppResult.success(null, R.string.event_comment_delete_success), true);
+            String currentDeviceId = userController.getCurrentDeviceId();
+            boolean isOrganizer = currentDeviceId != null && currentDeviceId.equals(event.getOrganizerId());
+            if (isOrganizer) {
+                deleteCommentThreadInternal(eventId, commentId, event, listener);
                 return;
             }
 
-            Set<String> deleteIds = collectThreadIds(comments, commentId);
-            if (deleteIds.isEmpty()) {
-                listener.onComplete(AppResult.success(null, R.string.event_comment_delete_success), true);
-                return;
-            }
-
-            List<EventComment> remaining = new java.util.ArrayList<>();
-            for (EventComment comment : comments) {
-                if (comment == null || deleteIds.contains(comment.getCommentId())) {
-                    continue;
-                }
-                remaining.add(comment);
-            }
-
-            java.util.Map<String, Object> updates = new java.util.HashMap<>();
-            updates.put("comments", remaining);
-            eventRepository.updateEvent(eventId, updates, (result, updateSuccess) -> {
-                if (!updateSuccess || result == null || !result) {
+            userController.isCurrentUserAdmin((isAdmin, adminCheckSuccess) -> {
+                if (!adminCheckSuccess || !isAdmin) {
                     listener.onComplete(AppResult.failure(R.string.event_comment_delete_failure), false);
                     return;
                 }
-                listener.onComplete(AppResult.success(null, R.string.event_comment_delete_success), true);
+
+                deleteCommentThreadInternal(eventId, commentId, event, listener);
             });
+        });
+    }
+
+    private void deleteCommentThreadInternal(String eventId,
+                                             String commentId,
+                                             Event event,
+                                             OnCompleteListener<AppResult<Void>> listener) {
+        List<EventComment> comments = event.getComments();
+        if (comments == null || comments.isEmpty()) {
+            listener.onComplete(AppResult.success(null, R.string.event_comment_delete_success), true);
+            return;
+        }
+
+        Set<String> deleteIds = collectThreadIds(comments, commentId);
+        if (deleteIds.isEmpty()) {
+            listener.onComplete(AppResult.success(null, R.string.event_comment_delete_success), true);
+            return;
+        }
+
+        List<EventComment> remaining = new java.util.ArrayList<>();
+        for (EventComment comment : comments) {
+            if (comment == null || deleteIds.contains(comment.getCommentId())) {
+                continue;
+            }
+            remaining.add(comment);
+        }
+
+        java.util.Map<String, Object> updates = new java.util.HashMap<>();
+        updates.put("comments", remaining);
+        eventRepository.updateEvent(eventId, updates, (result, updateSuccess) -> {
+            if (!updateSuccess || result == null || !result) {
+                listener.onComplete(AppResult.failure(R.string.event_comment_delete_failure), false);
+                return;
+            }
+            listener.onComplete(AppResult.success(null, R.string.event_comment_delete_success), true);
         });
     }
 
@@ -274,6 +295,13 @@ public class EventDetailController {
      */
     public String getCurrentDeviceId() {
         return userController.getCurrentDeviceId();
+    }
+
+    /**
+     * Returns whether the current user has admin privileges.
+     */
+    public void isCurrentUserAdmin(OnCompleteListener<Boolean> listener) {
+        userController.isCurrentUserAdmin(listener);
     }
 
     /**
