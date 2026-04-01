@@ -39,6 +39,7 @@ public class ExploreActivity extends AppCompatActivity {
     private ProgressBar loadingIndicator;
     private TextView stateText;
     private BottomNavBarView bottomNavBar;
+    private BottomNavBarView.Tab currentHomeTab = BottomNavBarView.Tab.EXPLORE;
 
     private FrameLayout fragmentContainer;
     private LinearLayout exploreContainer;
@@ -83,6 +84,7 @@ public class ExploreActivity extends AppCompatActivity {
         chipArts = findViewById(R.id.chipArts);
         chipScience = findViewById(R.id.chipScience);
         setupFilterChips();
+        currentHomeTab = resolveInitialTab(getIntent());
 
         eventListAdapter = new EventListAdapter(new ArrayList<>(), new EventListAdapter.OnEventClickListener() {
             @Override
@@ -105,20 +107,7 @@ public class ExploreActivity extends AppCompatActivity {
 
         recyclerView.setAdapter(eventListAdapter);
         setupBottomNavigation();
-
-        browseController.loadSavedEventIds((savedEventIds, success) -> {
-            if (success) {
-                userSavedEvents = new ArrayList<>(savedEventIds);
-
-                if ("saved".equals(getIntent().getStringExtra("navigate_to"))) {
-                    openSavedTab();
-                } else {
-                    loadBrowseEvents("");
-                }
-            } else {
-                Log.e(TAG, "Failed to load user.");
-            }
-        });
+        refreshSavedEventsAndVisibleContent();
     }
 
     /**
@@ -166,17 +155,22 @@ public class ExploreActivity extends AppCompatActivity {
         super.onNewIntent(intent);
         setIntent(intent);
         if ("saved".equals(intent.getStringExtra("navigate_to"))) {
-            openSavedTab();
-        } else {
-            showExploreTab();
+            currentHomeTab = BottomNavBarView.Tab.SAVED;
         }
+        refreshSavedEventsAndVisibleContent();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        refreshSavedEventsAndVisibleContent();
     }
 
     /**
      * Configures the bottom navigation bar and assigns tab actions.
      */
     private void setupBottomNavigation() {
-        bottomNavBar.setSelectedTab(BottomNavBarView.Tab.EXPLORE);
+        bottomNavBar.setSelectedTab(currentHomeTab);
         bottomNavBar.setOnTabClickListener(BottomNavBarView.Tab.EXPLORE, v -> showExploreTab());
         bottomNavBar.setOnTabClickListener(BottomNavBarView.Tab.SAVED, v -> openSavedTab());
         bottomNavBar.setOnTabClickListener(BottomNavBarView.Tab.MY_EVENTS, v -> openMyEventsScreen());
@@ -188,6 +182,7 @@ public class ExploreActivity extends AppCompatActivity {
      * Shows the explore tab and reloads the browse event list.
      */
     private void showExploreTab() {
+        currentHomeTab = BottomNavBarView.Tab.EXPLORE;
         bottomNavBar.setSelectedTab(BottomNavBarView.Tab.EXPLORE);
         if (fragmentContainer != null) fragmentContainer.setVisibility(View.GONE);
         if (exploreContainer != null) exploreContainer.setVisibility(View.VISIBLE);
@@ -198,6 +193,7 @@ public class ExploreActivity extends AppCompatActivity {
      * Opens the saved events tab by displaying the shared saved-events fragment.
      */
     private void openSavedTab() {
+        currentHomeTab = BottomNavBarView.Tab.SAVED;
         bottomNavBar.setSelectedTab(BottomNavBarView.Tab.SAVED);
         EventListModeFragment fragment = EventListModeFragment.newSavedEventsInstance(new ArrayList<>(userSavedEvents));
 
@@ -208,6 +204,29 @@ public class ExploreActivity extends AppCompatActivity {
                     .replace(R.id.fragment_container, fragment)
                     .commit();
         }
+    }
+
+    private void refreshSavedEventsAndVisibleContent() {
+        browseController.loadSavedEventIds((savedEventIds, success) -> {
+            if (!success) {
+                Log.e(TAG, "Failed to refresh saved events.");
+                return;
+            }
+
+            userSavedEvents = new ArrayList<>(savedEventIds == null ? new ArrayList<>() : savedEventIds);
+            if (currentHomeTab == BottomNavBarView.Tab.SAVED) {
+                openSavedTab();
+                return;
+            }
+
+            loadBrowseEvents("");
+        });
+    }
+
+    private BottomNavBarView.Tab resolveInitialTab(Intent intent) {
+        return intent != null && "saved".equals(intent.getStringExtra("navigate_to"))
+                ? BottomNavBarView.Tab.SAVED
+                : BottomNavBarView.Tab.EXPLORE;
     }
 
     /**

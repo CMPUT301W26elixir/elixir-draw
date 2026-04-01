@@ -14,6 +14,7 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.WriteBatch;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 /**
  * Handles Firestore reads and writes for users.
  */
@@ -133,6 +134,26 @@ public class UserRepository {
                 listener.onComplete(null, false);
             }
         });
+    }
+
+    /**
+     * Updates arbitrary user fields using a Firestore update map.
+     *
+     * @param deviceId the user device ID
+     * @param updates the fields to update
+     * @param listener the listener that receives update result
+     */
+    public void updateUserFields(String deviceId,
+                                 Map<String, Object> updates,
+                                 OnCompleteListener<Boolean> listener) {
+        if (isBlank(deviceId) || updates == null || updates.isEmpty()) {
+            listener.onComplete(false, false);
+            return;
+        }
+
+        usersCollection.document(deviceId)
+                .update(updates)
+                .addOnCompleteListener(task -> listener.onComplete(task.isSuccessful(), task.isSuccessful()));
     }
 
     /**

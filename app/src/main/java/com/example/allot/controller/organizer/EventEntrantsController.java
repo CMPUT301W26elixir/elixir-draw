@@ -7,6 +7,7 @@ import com.example.allot.controller.shared.UserController;
 import com.example.allot.data.EventRepository;
 import com.example.allot.model.event.Event;
 import com.example.allot.model.lottery.LotteryEntrantItem;
+import com.example.allot.model.organizer.EntrantExportRow;
 import com.example.allot.model.profile.User;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -67,6 +68,24 @@ public class EventEntrantsController {
         }
 
         buildTabItems(event, selectedTab, items -> listener.onComplete(items, true));
+    }
+
+    /**
+     * Loads export-ready rows for enrolled entrants only.
+     */
+    public void loadEnrolledExportRows(Event event, OnCompleteListener<List<EntrantExportRow>> listener) {
+        if (event == null) {
+            listener.onComplete(new ArrayList<>(), false);
+            return;
+        }
+
+        List<String> entrantIds = getEnrolledEntrants(event);
+        if (entrantIds.isEmpty()) {
+            listener.onComplete(new ArrayList<>(), true);
+            return;
+        }
+
+        loadExportRows(entrantIds, 0, new ArrayList<>(), listener);
     }
 
     private void buildTabItems(Event event, Tab selectedTab, java.util.function.Consumer<List<LotteryEntrantItem>> consumer) {
@@ -192,6 +211,43 @@ public class EventEntrantsController {
             items.add(new LotteryEntrantItem(entrantId, displayName, subtitleRes));
             loadEntrantItems(entrantIds, index + 1, items, subtitleRes, consumer);
         });
+    }
+
+    private void loadExportRows(List<String> entrantIds,
+                                int index,
+                                List<EntrantExportRow> rows,
+                                OnCompleteListener<List<EntrantExportRow>> listener) {
+        if (index >= entrantIds.size()) {
+            listener.onComplete(rows, true);
+            return;
+        }
+
+        String entrantId = entrantIds.get(index);
+        userController.getUserByDeviceId(entrantId, (User user, boolean success) -> {
+            rows.add(buildExportRow(entrantId, success ? user : null));
+            loadExportRows(entrantIds, index + 1, rows, listener);
+        });
+    }
+
+    private EntrantExportRow buildExportRow(String entrantId, User user) {
+        String fallbackName = isBlank(entrantId) ? "" : entrantId;
+        String name = fallbackName;
+        String email = "";
+        String phone = "";
+
+        if (user != null) {
+            if (!isBlank(user.getName())) {
+                name = user.getName();
+            }
+            if (!isBlank(user.getEmail())) {
+                email = user.getEmail();
+            }
+            if (!isBlank(user.getPhone())) {
+                phone = user.getPhone();
+            }
+        }
+
+        return new EntrantExportRow(name, email, phone);
     }
 
     private boolean isBlank(String value) {

@@ -4,17 +4,24 @@ import android.app.Dialog;
 import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.Editable;
+import android.text.TextUtils;
+import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
+import com.bumptech.glide.Glide;
 import com.example.allot.R;
 import com.example.allot.controller.profile.ProfileController;
+import com.example.allot.controller.profile.ProfilePhotoController;
 import com.example.allot.controller.shared.UserController;
 import com.example.allot.model.profile.ProfileActionResult;
 import com.example.allot.model.profile.ProfileFormSnapshot;
@@ -42,10 +49,14 @@ public class ProfileActivity extends AppCompatActivity {
     private BottomNavBarView bottomNavBar;
     private ProfileController profileController;
     private UserController userController;
+    private ProfilePhotoController profilePhotoController;
     private EditText firstNameInput;
     private EditText lastNameInput;
     private EditText emailInput;
     private EditText phoneInput;
+    private View profileAvatarContainer;
+    private View profileAvatarPlaceholder;
+    private ImageView profileAvatarImage;
     private CheckBox eventUpdatesCheckbox;
     private Button saveChangesButton;
     private TextView adminPanelButton;
@@ -55,6 +66,16 @@ public class ProfileActivity extends AppCompatActivity {
     private boolean isBindingProfile;
     private boolean isSaving;
     private boolean isDeleting;
+    private boolean isUploadingPhoto;
+    private String currentProfilePhotoUrl;
+
+    private final ActivityResultLauncher<String> profilePhotoPickerLauncher =
+            registerForActivityResult(new ActivityResultContracts.GetContent(), uri -> {
+                if (uri == null) {
+                    return;
+                }
+                uploadProfilePhoto(uri);
+            });
 
     /**
      * Initializes the activity, binds views, sets up listeners and navigation,
@@ -69,12 +90,15 @@ public class ProfileActivity extends AppCompatActivity {
 
         profileController = new ProfileController(this);
         userController = new UserController(this);
+        profilePhotoController = new ProfilePhotoController();
         bindViews();
         setupBottomNav();
         setupFormListeners();
+        setupProfilePhotoPicker();
         updateSaveButtonState();
         checkAdminStatus();
         loadProfile();
+        loadProfilePhoto();
     }
 
     /**
@@ -95,10 +119,22 @@ public class ProfileActivity extends AppCompatActivity {
         lastNameInput = findViewById(R.id.lastNameInput);
         emailInput = findViewById(R.id.emailInput);
         phoneInput = findViewById(R.id.phoneInput);
+        profileAvatarContainer = findViewById(R.id.profileAvatarContainer);
+        profileAvatarPlaceholder = findViewById(R.id.profileAvatarPlaceholder);
+        profileAvatarImage = findViewById(R.id.profileAvatarImage);
         eventUpdatesCheckbox = findViewById(R.id.eventUpdatesCheckbox);
         saveChangesButton = findViewById(R.id.saveChangesButton);
         adminPanelButton = findViewById(R.id.adminPanelButton);
         deleteProfileText = findViewById(R.id.deleteProfileText);
+    }
+
+    private void setupProfilePhotoPicker() {
+        profileAvatarContainer.setOnClickListener(view -> {
+            if (isDeleting || isUploadingPhoto) {
+                return;
+            }
+            profilePhotoPickerLauncher.launch("image/*");
+        });
     }
 
     /**
@@ -168,6 +204,54 @@ public class ProfileActivity extends AppCompatActivity {
 
             bindProfileState(snapshot);
         });
+    }
+
+    private void loadProfilePhoto() {
+        userController.loadOrCreateUser((user, success) -> {
+            if (!success || user == null) {
+                renderProfilePhoto(null);
+                return;
+            }
+
+            currentProfilePhotoUrl = user.getProfilePhotoUrl();
+            renderProfilePhoto(currentProfilePhotoUrl);
+        });
+    }
+
+    private void uploadProfilePhoto(Uri photoUri) {
+        if (photoUri == null || isUploadingPhoto) {
+            return;
+        }
+
+        isUploadingPhoto = true;
+        String deviceId = userController.getCurrentDeviceId();
+        profilePhotoController.uploadPhoto(deviceId, photoUri, (photoUrl, success) -> {
+            isUploadingPhoto = false;
+            if (!success || TextUtils.isEmpty(photoUrl)) {
+                Toast.makeText(this, R.string.profile_photo_upload_failure, Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            currentProfilePhotoUrl = photoUrl;
+            renderProfilePhoto(photoUrl);
+            Toast.makeText(this, R.string.profile_photo_upload_success, Toast.LENGTH_SHORT).show();
+        });
+    }
+
+    private void renderProfilePhoto(String profilePhotoUrl) {
+        if (TextUtils.isEmpty(profilePhotoUrl)) {
+            profileAvatarPlaceholder.setVisibility(View.VISIBLE);
+            profileAvatarImage.setVisibility(View.GONE);
+            profileAvatarImage.setImageDrawable(null);
+            return;
+        }
+
+        profileAvatarPlaceholder.setVisibility(View.GONE);
+        profileAvatarImage.setVisibility(View.VISIBLE);
+        Glide.with(this)
+                .load(profilePhotoUrl)
+                .centerCrop()
+                .into(profileAvatarImage);
     }
 
     /**

@@ -63,6 +63,18 @@
             android:fontFamily="@font/varela_round_regular"
             android:gravity="center"
             android:paddingVertical="8dp" />
+
+        <TextView
+            android:id="@+id/postersTabText"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/admin_view_posters"
+            android:textColor="@color/my_events_tab_inactive"
+            android:textSize="16sp"
+            android:fontFamily="@font/varela_round_regular"
+            android:gravity="center"
+            android:paddingVertical="8dp" />
     </LinearLayout>
 
     <!-- Content Area -->
@@ -175,6 +187,58 @@
                 android:layout_height="match_parent"
                 android:gravity="center"
                 android:text="@string/admin_no_profiles"
+                android:textColor="@color/white"
+                android:textSize="16sp"
+                android:fontFamily="@font/varela_round_regular"
+                android:visibility="gone" />
+        </LinearLayout>
+
+        <!-- Posters Container -->
+        <LinearLayout
+            android:id="@+id/postersContainer"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/postersRecyclerView"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:padding="16dp"
+                android:clipToPadding="false"
+                android:visibility="gone" />
+
+            <LinearLayout
+                android:id="@+id/postersLoadingLayout"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:visibility="visible">
+
+                <ProgressBar
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:indeterminateTint="@color/white" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/admin_loading_posters"
+                    android:textColor="@color/white"
+                    android:textSize="16sp"
+                    android:fontFamily="@font/varela_round_regular"
+                    android:layout_marginTop="16dp" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/postersEmptyStateText"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:text="@string/admin_no_posters"
                 android:textColor="@color/white"
                 android:textSize="16sp"
                 android:fontFamily="@font/varela_round_regular"
