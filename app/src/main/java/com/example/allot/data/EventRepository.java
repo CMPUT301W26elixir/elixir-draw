@@ -126,7 +126,9 @@ public class EventRepository {
     public void addComment(String eventId, EventComment comment, OnCompleteListener<Boolean> listener) {
         database.collection("events")
                 .document(eventId)
-                .update("comments", FieldValue.arrayUnion(comment));
+                .update("comments", FieldValue.arrayUnion(comment))
+                .addOnSuccessListener(unused -> listener.onComplete(true, true))
+                .addOnFailureListener(exception -> listener.onComplete(false, false));
     }
      /* Invites a user to a private event and adds it to their My Events list.
      *
