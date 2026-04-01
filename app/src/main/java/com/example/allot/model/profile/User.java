@@ -10,6 +10,7 @@ public class User {
     private String lastName;
     private String email;
     private String phone;
+    private String profilePhotoUrl;
     private boolean notiEnabled;
     private String role;
 
@@ -158,6 +159,24 @@ public class User {
      */
     public void setPhone(String phone) {
         this.phone = phone;
+    }
+
+    /**
+     * Returns the profile photo URL for this user.
+     *
+     * @return the profile photo URL
+     */
+    public String getProfilePhotoUrl() {
+        return profilePhotoUrl;
+    }
+
+    /**
+     * Sets the profile photo URL for this user.
+     *
+     * @param profilePhotoUrl the profile photo URL to assign
+     */
+    public void setProfilePhotoUrl(String profilePhotoUrl) {
+        this.profilePhotoUrl = profilePhotoUrl;
     }
 
     /**

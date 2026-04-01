@@ -21,10 +21,12 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import com.bumptech.glide.Glide;
 import com.example.allot.R;
 import com.example.allot.common.AppResult;
 import com.example.allot.controller.event.EventDetailController;
 import com.example.allot.controller.event.EventJoinDistanceValidator;
+import com.example.allot.controller.explore.ExploreController;
 import com.example.allot.model.event.Event;
 import com.example.allot.model.event.EventComment;
 import com.example.allot.model.event.EventDetailData;
@@ -58,6 +60,7 @@ public class EventDetailActivity extends AppCompatActivity {
     private static final int LOCATION_PERMISSION_REQUEST = 1002;
 
     private EventDetailController eventDetailController;
+    private ExploreController exploreController;
     private FusedLocationProviderClient fusedLocationProviderClient;
     private final EventJoinDistanceValidator eventJoinDistanceValidator = new EventJoinDistanceValidator();
 
@@ -70,9 +73,17 @@ public class EventDetailActivity extends AppCompatActivity {
     private EventDetailData currentScreenState;
     private boolean shouldRefreshOnResume;
     private boolean isOrganizer;
-    private CommentSortMode commentSortMode = CommentSortMode.NEWEST;
+    private boolean isAdmin;
 
     private FrameLayout heroImageFrame;
+    private ImageView heroPosterImage;
+    private CommentSortMode commentSortMode = CommentSortMode.NEWEST;
+    private List<String> userSavedEventIds = new ArrayList<>();
+    private boolean isFavoriteSaved;
+    private boolean isFavoriteLoading = true;
+    private boolean isFavoriteUpdating;
+
+    private ImageView favoriteButton;
     private TextView heroDeadlineText;
     private TextView titleText;
     private TextView priceText;
@@ -108,13 +119,24 @@ public class EventDetailActivity extends AppCompatActivity {
         setContentView(R.layout.activity_event_detail);
 
         eventDetailController = new EventDetailController(this);
+        exploreController = new ExploreController(this);
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
         currentEventId = getIntent().getStringExtra(EXTRA_EVENT_ID);
 
         bindViews();
         bindFallbackContent();
         setupListeners();
+        loadAdminStatus();
         loadEventDetails();
+    }
+
+    private void loadAdminStatus() {
+        eventDetailController.isCurrentUserAdmin((adminValue, success) -> {
+            isAdmin = success && Boolean.TRUE.equals(adminValue);
+            if (currentEvent != null) {
+                renderComments(currentEvent);
+            }
+        });
     }
 
     /**
@@ -122,6 +144,8 @@ public class EventDetailActivity extends AppCompatActivity {
      */
     private void bindViews() {
         heroImageFrame = findViewById(R.id.heroImageFrame);
+        heroPosterImage = findViewById(R.id.heroPosterImage);
+        favoriteButton = findViewById(R.id.favoriteButton);
         heroDeadlineText = findViewById(R.id.heroDeadlineText);
         titleText = findViewById(R.id.eventTitleText);
         priceText = findViewById(R.id.eventPriceText);
@@ -150,6 +174,7 @@ public class EventDetailActivity extends AppCompatActivity {
     private void setupListeners() {
         ImageButton backButton = findViewById(R.id.backButton);
         backButton.setOnClickListener(view -> getOnBackPressedDispatcher().onBackPressed());
+        favoriteButton.setOnClickListener(view -> onFavoritePressed());
         joinWaitingListButton.setOnClickListener(view -> onWaitlistButtonPressed());
         commentSubmitButton.setOnClickListener(view -> postComment(null, null));
 
@@ -181,6 +206,7 @@ public class EventDetailActivity extends AppCompatActivity {
                 getIntent().getStringExtra(EXTRA_EVENT_DEADLINE),
                 getIntent().getStringExtra(EXTRA_EVENT_CATEGORY)
         ));
+        updateFavoriteUi();
     }
 
     /**
@@ -194,6 +220,7 @@ public class EventDetailActivity extends AppCompatActivity {
         }
 
         setLoading(true);
+        loadFavoriteState();
         eventDetailController.loadEventActionState(currentEventId, (state, success) -> {
             setLoading(false);
             if (!success || state == null) {
@@ -329,10 +356,64 @@ public class EventDetailActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        if (shouldRefreshOnResume && !TextUtils.isEmpty(currentEventId)) {
+        if (TextUtils.isEmpty(currentEventId)) {
+            return;
+        }
+
+        if (shouldRefreshOnResume) {
             shouldRefreshOnResume = false;
             loadEventDetails();
+            return;
         }
+
+        loadFavoriteState();
+    }
+
+    private void loadFavoriteState() {
+        isFavoriteLoading = true;
+        updateFavoriteUi();
+        exploreController.loadSavedEventIds((savedEventIds, success) -> {
+            userSavedEventIds = new ArrayList<>(savedEventIds == null ? new ArrayList<>() : savedEventIds);
+            isFavoriteSaved = success && !TextUtils.isEmpty(currentEventId) && userSavedEventIds.contains(currentEventId);
+            isFavoriteLoading = false;
+            updateFavoriteUi();
+        });
+    }
+
+    private void onFavoritePressed() {
+        if (favoriteButton == null || isFavoriteLoading || isFavoriteUpdating || TextUtils.isEmpty(currentEventId)) {
+            return;
+        }
+
+        isFavoriteUpdating = true;
+        isFavoriteSaved = !isFavoriteSaved;
+        boolean isSaving = isFavoriteSaved;
+        updateFavoriteUi();
+
+        exploreController.toggleSavedEvent(userSavedEventIds, currentEventId, isSaving, (savedEventIds, success) -> {
+            isFavoriteUpdating = false;
+            userSavedEventIds = new ArrayList<>(savedEventIds == null ? new ArrayList<>() : savedEventIds);
+            isFavoriteSaved = success == isSaving;
+            updateFavoriteUi();
+            if (!success) {
+                Toast.makeText(this, R.string.event_detail_save_failure, Toast.LENGTH_SHORT).show();
+            }
+            loadFavoriteState();
+        });
+    }
+
+    private void updateFavoriteUi() {
+        if (favoriteButton == null) {
+            return;
+        }
+
+        favoriteButton.setEnabled(!isFavoriteLoading && !isFavoriteUpdating);
+        favoriteButton.setAlpha((isFavoriteLoading || isFavoriteUpdating) ? 0.6f : 1f);
+        favoriteButton.setImageResource(isFavoriteSaved ? R.drawable.ic_heart_filled : R.drawable.ic_heart_outline);
+        favoriteButton.setColorFilter(ContextCompat.getColor(
+                this,
+                isFavoriteSaved ? R.color.favorite_active : R.color.white
+        ));
     }
 
     /**
@@ -699,6 +780,7 @@ public class EventDetailActivity extends AppCompatActivity {
         bindOptionalText(registrationOpenText, state.getRegistrationOpenText());
         bindOptionalText(registrationDeadlineText, state.getRegistrationDeadlineText());
         heroImageFrame.setBackgroundResource(state.getHeroBackgroundRes());
+        renderHeroPoster(state.getCurrentEvent());
 
         entrantCountText.setVisibility(state.shouldShowEntrantCount() ? View.VISIBLE : View.GONE);
         entrantCountText.setText(getResources().getQuantityString(
@@ -718,6 +800,21 @@ public class EventDetailActivity extends AppCompatActivity {
         );
 
         renderComments(state.getCurrentEvent());
+    }
+
+    private void renderHeroPoster(Event event) {
+        String posterUrl = event == null ? null : event.getPosterUrl();
+        if (TextUtils.isEmpty(posterUrl)) {
+            heroPosterImage.setVisibility(View.GONE);
+            heroPosterImage.setImageDrawable(null);
+            return;
+        }
+
+        heroPosterImage.setVisibility(View.VISIBLE);
+        Glide.with(this)
+                .load(posterUrl)
+                .centerCrop()
+                .into(heroPosterImage);
     }
 
     private void renderComments(Event event) {
@@ -795,7 +892,7 @@ public class EventDetailActivity extends AppCompatActivity {
     }
 
     private void bindDeleteButton(TextView deleteButton, EventComment comment) {
-        if (deleteButton == null || comment == null || !isOrganizer) {
+        if (deleteButton == null || comment == null || (!isOrganizer && !isAdmin)) {
             if (deleteButton != null) {
                 deleteButton.setVisibility(View.GONE);
             }

@@ -13,10 +13,14 @@ import androidx.core.content.ContextCompat;
 import androidx.appcompat.app.AppCompatActivity;
 import com.example.allot.R;
 import com.example.allot.controller.organizer.EventEntrantsController;
+import com.example.allot.controller.organizer.EventEntrantsCsvFormatter;
+import com.example.allot.controller.organizer.EventEntrantsCsvSaveService;
 import com.example.allot.model.event.Event;
 import com.example.allot.model.lottery.LotteryEntrantItem;
+import com.example.allot.model.organizer.EntrantExportRow;
 import com.example.allot.view.explore.MapViewActivity;
 import com.google.android.material.button.MaterialButton;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Locale;
@@ -38,6 +42,8 @@ public class EventEntrantsActivity extends AppCompatActivity {
     }
 
     private EventEntrantsController entrantsController;
+    private EventEntrantsCsvFormatter csvFormatter;
+    private EventEntrantsCsvSaveService csvSaveService;
     private TextView drawDateValueText;
     private TextView attendeesValueText;
     private TextView selectedTabText;
@@ -53,6 +59,7 @@ public class EventEntrantsActivity extends AppCompatActivity {
     private String currentEventId;
     private Event currentEvent;
     private Tab selectedTab = Tab.SELECTED;
+    private boolean isExporting;
 
     /**
      * Initializes the activity, binds views, sets up the header and tabs,
@@ -66,6 +73,8 @@ public class EventEntrantsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_manage_entrants);
 
         entrantsController = new EventEntrantsController(this);
+        csvFormatter = new EventEntrantsCsvFormatter();
+        csvSaveService = new EventEntrantsCsvSaveService();
         currentEventId = getIntent().getStringExtra(EXTRA_EVENT_ID);
 
         bindViews();
@@ -109,7 +118,7 @@ public class EventEntrantsActivity extends AppCompatActivity {
     }
 
     /**
-     * Sets up tab click behavior and the export placeholder button.
+     * Sets up tab click behavior and the export action.
      */
     private void setupTabs() {
         selectedTabText.setOnClickListener(view -> showTab(Tab.SELECTED));
@@ -118,9 +127,7 @@ public class EventEntrantsActivity extends AppCompatActivity {
         enrolledTabText.setOnClickListener(view -> showTab(Tab.ENROLLED));
         allEntrantsTabText.setOnClickListener(view -> showTab(Tab.ALL));
         viewEntrantMapButton.setOnClickListener(view -> openEntrantMap());
-        exportFinalListButton.setOnClickListener(view ->
-                Toast.makeText(this, R.string.manage_entrants_export_unavailable, Toast.LENGTH_SHORT).show()
-        );
+        exportFinalListButton.setOnClickListener(view -> exportFinalList());
         updateTabState();
     }
 
@@ -187,6 +194,10 @@ public class EventEntrantsActivity extends AppCompatActivity {
         applyTabStyle(enrolledTabText, selectedTab == Tab.ENROLLED);
         applyTabStyle(allEntrantsTabText, selectedTab == Tab.ALL);
         exportFinalListButton.setVisibility(selectedTab == Tab.ENROLLED ? View.VISIBLE : View.GONE);
+        exportFinalListButton.setEnabled(!isExporting);
+        exportFinalListButton.setText(isExporting
+                ? R.string.manage_entrants_export_saving
+                : R.string.manage_entrants_export_final_list);
     }
 
     /**
@@ -289,6 +300,44 @@ public class EventEntrantsActivity extends AppCompatActivity {
         startActivity(new android.content.Intent(this, MapViewActivity.class)
                 .putExtra(MapViewActivity.EXTRA_EVENT_ID, currentEventId));
         overridePendingTransition(0, 0);
+    }
+
+    private void exportFinalList() {
+        if (isExporting) {
+            return;
+        }
+        if (selectedTab != Tab.ENROLLED || currentEvent == null || TextUtils.isEmpty(currentEventId)) {
+            Toast.makeText(this, R.string.manage_entrants_export_failure, Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        setExporting(true);
+        entrantsController.loadEnrolledExportRows(currentEvent, (rows, success) -> {
+            if (!success) {
+                setExporting(false);
+                Toast.makeText(this, R.string.manage_entrants_export_failure, Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            saveExportRows(rows);
+        });
+    }
+
+    private void saveExportRows(List<EntrantExportRow> rows) {
+        try {
+            String csvContent = csvFormatter.format(rows);
+            csvSaveService.saveToDownloads(this, csvContent, currentEvent.getTitle(), currentEventId);
+            Toast.makeText(this, R.string.manage_entrants_export_success, Toast.LENGTH_SHORT).show();
+        } catch (IOException | SecurityException | IllegalArgumentException exception) {
+            Toast.makeText(this, R.string.manage_entrants_export_failure, Toast.LENGTH_SHORT).show();
+        } finally {
+            setExporting(false);
+        }
+    }
+
+    private void setExporting(boolean exporting) {
+        isExporting = exporting;
+        updateTabState();
     }
 }
 
