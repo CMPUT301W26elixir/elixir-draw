@@ -2,6 +2,7 @@ package com.example.allot.controller.explore;
 
 import com.example.allot.model.BrowseFilter;
 import com.example.allot.model.event.Event;
+import android.location.Location;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -40,6 +41,21 @@ public class ExploreFilterService {
             }
 
             if (!matchesSearch(event, normalizedSearchTerm)) {
+                continue;
+            }
+
+            if (!matchesKeywords(event, filter == null ? null : filter.getKeywords())) {
+                continue;
+            }
+
+            if (!matchesStartDate(event, filter == null ? null : filter.getStartDate())) {
+                continue;
+            }
+
+            if (!matchesDistance(event,
+                    filter == null ? null : filter.getLatitude(),
+                    filter == null ? null : filter.getLongitude(),
+                    filter == null ? null : filter.getDistanceKm())) {
                 continue;
             }
 
@@ -130,6 +146,75 @@ public class ExploreFilterService {
      */
     private boolean containsNormalized(String value, String normalizedSearchTerm) {
         return normalize(value).contains(normalizedSearchTerm);
+    }
+
+    private boolean matchesKeywords(Event event, String keywords) {
+        String normalizedKeywords = normalize(keywords);
+        if (normalizedKeywords.isEmpty()) {
+            return true;
+        }
+
+        List<String> tokens = splitKeywords(normalizedKeywords);
+        if (tokens.isEmpty()) {
+            return true;
+        }
+
+        for (String token : tokens) {
+            if (!containsNormalized(event.getTitle(), token)
+                    && !containsNormalized(event.getDescription(), token)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private List<String> splitKeywords(String normalizedKeywords) {
+        List<String> tokens = new ArrayList<>();
+        if (normalizedKeywords.isEmpty()) {
+            return tokens;
+        }
+
+        String[] parts = normalizedKeywords.split("[,\\s]+");
+        for (String part : parts) {
+            if (!part.trim().isEmpty()) {
+                tokens.add(part.trim());
+            }
+        }
+        return tokens;
+    }
+
+    private boolean matchesStartDate(Event event, java.util.Date startDate) {
+        if (startDate == null) {
+            return true;
+        }
+
+        if (event == null || event.getEventDate() == null) {
+            return false;
+        }
+
+        return !event.getEventDate().before(startDate);
+    }
+
+    private boolean matchesDistance(Event event, Double latitude, Double longitude, Double distanceKm) {
+        if (latitude == null || longitude == null || distanceKm == null || distanceKm <= 0) {
+            return true;
+        }
+
+        if (event == null || event.getEventLatitude() == null || event.getEventLongitude() == null) {
+            return false;
+        }
+
+        float[] results = new float[1];
+        Location.distanceBetween(
+                latitude,
+                longitude,
+                event.getEventLatitude(),
+                event.getEventLongitude(),
+                results
+        );
+        float distanceMeters = results[0];
+        return distanceMeters <= (distanceKm * 1000.0);
     }
 
     private List<String> categoryKeywords(String normalizedCategory) {
