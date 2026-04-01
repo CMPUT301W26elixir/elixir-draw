@@ -972,7 +972,7 @@ public class EventDetailActivity extends AppCompatActivity {
             if (callback != null) {
                 callback.onSuccess();
             }
-            loadEventDetails();
+            refreshCommentsOnly();
         });
     }
 
@@ -1007,7 +1007,7 @@ public class EventDetailActivity extends AppCompatActivity {
                 Toast.makeText(this, messageRes, Toast.LENGTH_SHORT).show();
                 return;
             }
-            loadEventDetails();
+            refreshCommentsOnly();
         });
     }
 
@@ -1023,7 +1023,21 @@ public class EventDetailActivity extends AppCompatActivity {
             }
 
             Toast.makeText(this, result.getMessageResId(), Toast.LENGTH_SHORT).show();
-            loadEventDetails();
+            refreshCommentsOnly();
+        });
+    }
+
+    private void refreshCommentsOnly() {
+        if (TextUtils.isEmpty(currentEventId)) {
+            return;
+        }
+
+        eventDetailController.loadEventComments(currentEventId, (event, success) -> {
+            if (!success || event == null) {
+                return;
+            }
+            currentEvent = event;
+            renderComments(event);
         });
     }
 
