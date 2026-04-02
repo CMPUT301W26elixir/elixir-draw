@@ -15,7 +15,7 @@ public class NotificationController {
         this.notificationRepository = new NotificationRepository();
     }
 
-    NotificationController(NotificationRepository notificationRepository) {
+    public NotificationController(NotificationRepository notificationRepository) {
         this.notificationRepository = notificationRepository;
     }
 

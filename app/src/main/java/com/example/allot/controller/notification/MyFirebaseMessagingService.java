@@ -20,6 +20,7 @@ import com.google.firebase.messaging.RemoteMessage;
 
 /**
  * Handles incoming FCM messages and token refreshes.
+ * Respects the user's notification preferences stored in Firestore.
  */
 public class MyFirebaseMessagingService extends FirebaseMessagingService {
     private static final String TAG = "MyFirebaseMessaging";
@@ -29,18 +30,29 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     public void onMessageReceived(@NonNull RemoteMessage remoteMessage) {
         super.onMessageReceived(remoteMessage);
         
-        // Handle data payload if present
-        if (remoteMessage.getData().size() > 0) {
-            String title = remoteMessage.getData().get("title");
-            String body = remoteMessage.getData().get("body");
-            showNotification(title, body);
-        }
+        // Fetch user preferences before showing the notification
+        DeviceSessionManager sessionManager = new DeviceSessionManager(this);
+        String deviceId = sessionManager.getCurrentDeviceId();
+        
+        new UserRepository().getUserByDeviceId(deviceId, (user, success) -> {
+            if (success && user != null && !user.isNotiEnabled()) {
+                Log.d(TAG, "Notifications are disabled for this user. Skipping.");
+                return;
+            }
 
-        // Handle notification payload if present
-        if (remoteMessage.getNotification() != null) {
-            showNotification(remoteMessage.getNotification().getTitle(), 
-                           remoteMessage.getNotification().getBody());
-        }
+            // Handle data payload if present
+            if (remoteMessage.getData().size() > 0) {
+                String title = remoteMessage.getData().get("title");
+                String body = remoteMessage.getData().get("body");
+                showNotification(title, body);
+            }
+
+            // Handle notification payload if present
+            if (remoteMessage.getNotification() != null) {
+                showNotification(remoteMessage.getNotification().getTitle(), 
+                               remoteMessage.getNotification().getBody());
+            }
+        });
     }
 
     @Override
@@ -48,7 +60,6 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         super.onNewToken(token);
         Log.d(TAG, "Refreshed token: " + token);
         
-        // Save the token to the user profile in Firestore
         DeviceSessionManager sessionManager = new DeviceSessionManager(this);
         String deviceId = sessionManager.getCurrentDeviceId();
         if (deviceId != null) {
@@ -63,7 +74,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             NotificationChannel channel = new NotificationChannel(
                     CHANNEL_ID,
                     "Allot Notifications",
-                    NotificationManager.IMPORTANCE_DEFAULT
+                    NotificationManager.IMPORTANCE_HIGH
             );
             notificationManager.createNotificationChannel(channel);
         }
@@ -78,8 +89,9 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                 .setContentTitle(title)
                 .setContentText(body)
                 .setAutoCancel(true)
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setContentIntent(pendingIntent);
 
-        notificationManager.notify(0, notificationBuilder.build());
+        notificationManager.notify((int) System.currentTimeMillis(), notificationBuilder.build());
     }
 }
