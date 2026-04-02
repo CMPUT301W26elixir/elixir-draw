@@ -10,6 +10,7 @@ import com.example.allot.controller.notification.NotificationController;
 import com.example.allot.controller.shared.UserController;
 import com.example.allot.data.DeviceSessionManager;
 import com.example.allot.data.EventRepository;
+import com.example.allot.data.NotificationRepository;
 import com.example.allot.model.event.Event;
 import com.example.allot.model.event.WaitingList;
 import com.example.allot.model.lottery.RunLotteryData;
@@ -99,6 +100,10 @@ public class LotteryControllerTest {
     }
 
     private static class FakeNotificationController extends NotificationController {
+        FakeNotificationController() {
+            super((NotificationRepository) null);
+        }
+
         @Override
         public void notifySelectedEntrants(List<String> entrantIds, String eventId, String eventName, OnCompleteListener<Boolean> listener) {
             listener.onComplete(true, true);
