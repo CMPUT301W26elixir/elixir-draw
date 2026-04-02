@@ -13,6 +13,7 @@ public class User {
     private String profilePhotoUrl;
     private boolean notiEnabled;
     private String role;
+    private String fcmToken;
 
     private ArrayList<String> history;
     private ArrayList<String> myEvents;
@@ -45,6 +46,7 @@ public class User {
         this.phone = phone;
         this.notiEnabled = true;
         this.role = role;
+        this.fcmToken = null;
         this.history = new ArrayList<>();
         this.myEvents = new ArrayList<>();
         this.savedEvents = new ArrayList<>();
@@ -219,6 +221,24 @@ public class User {
     }
 
     /**
+     * Returns the user's FCM token.
+     *
+     * @return the user's FCM token
+     */
+    public String getFcmToken() {
+        return fcmToken;
+    }
+
+    /**
+     * Sets the user's FCM token.
+     *
+     * @param fcmToken the token to assign
+     */
+    public void setFcmToken(String fcmToken) {
+        this.fcmToken = fcmToken;
+    }
+
+    /**
      * Returns the user's event history.
      *
      * @return the list of event IDs in the user's history
@@ -264,11 +284,3 @@ public class User {
         this.savedEvents = savedEvents;
     }
 }
-
-
-
-
-
-
-
-

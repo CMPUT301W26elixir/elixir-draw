@@ -5,26 +5,38 @@ import static org.junit.Assert.assertTrue;
 
 import com.example.allot.R;
 import com.example.allot.common.AppResult;
+import com.example.allot.common.OnCompleteListener;
+import com.example.allot.controller.notification.NotificationController;
 import com.example.allot.controller.shared.UserController;
 import com.example.allot.data.DeviceSessionManager;
 import com.example.allot.data.EventRepository;
+import com.example.allot.data.NotificationRepository;
 import com.example.allot.model.event.Event;
 import com.example.allot.model.event.WaitingList;
 import com.example.allot.model.lottery.RunLotteryData;
-import com.example.allot.model.profile.User;
 import java.util.Date;
+import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
+
 public class LotteryControllerTest {
     private FakeEventRepository eventRepository;
     private FakeUserController userController;
     private LotteryController controller;
+    private FakeNotificationController notificationController;
 
     @Before
     public void setUp() {
         eventRepository = new FakeEventRepository();
         userController = new FakeUserController();
-        controller = new LotteryController(eventRepository, userController, new LotteryDrawService(), new LotteryInputValidator());
+        notificationController = new FakeNotificationController();
+        controller = new LotteryController(
+                eventRepository,
+                userController,
+                new LotteryDrawService(),
+                new LotteryInputValidator(),
+                notificationController
+        );
     }
 
     @Test
@@ -69,7 +81,7 @@ public class LotteryControllerTest {
         private Event event;
 
         @Override
-        public void getEventById(String eventId, com.example.allot.common.OnCompleteListener<Event> listener) {
+        public void getEventById(String eventId, OnCompleteListener<Event> listener) {
             listener.onComplete(event, event != null);
         }
     }
@@ -80,10 +92,26 @@ public class LotteryControllerTest {
         }
 
         @Override
-        public void getUserByDeviceId(String deviceId, com.example.allot.common.OnCompleteListener<com.example.allot.model.profile.User> listener) {
+        public void getUserByDeviceId(String deviceId, OnCompleteListener<com.example.allot.model.profile.User> listener) {
             com.example.allot.model.profile.User user = new com.example.allot.model.profile.User();
             user.setFirstName("Entrant");
             listener.onComplete(user, true);
+        }
+    }
+
+    private static class FakeNotificationController extends NotificationController {
+        FakeNotificationController() {
+            super((NotificationRepository) null);
+        }
+
+        @Override
+        public void notifySelectedEntrants(List<String> entrantIds, String eventId, String eventName, OnCompleteListener<Boolean> listener) {
+            listener.onComplete(true, true);
+        }
+
+        @Override
+        public void notifyNotSelectedEntrants(List<String> entrantIds, String eventId, String eventName, OnCompleteListener<Boolean> listener) {
+            listener.onComplete(true, true);
         }
     }
 
@@ -100,14 +128,4 @@ public class LotteryControllerTest {
         @Override
         public void saveDeviceId(String deviceId) { }
     }
-
 }
-
-
-
-
-
-
-
-
-
