@@ -48,18 +48,14 @@
                 android:textColorHint="#A9ABA8"
                 android:textSize="16sp" />
 
-            <FrameLayout
+            <ImageButton
+                android:id="@+id/filterMenuButton"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
-                android:background="@drawable/bg_filter_circle">
-
-                <ImageView
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:layout_gravity="center"
-                    android:src="@android:drawable/ic_menu_sort_by_size"
-                    app:tint="#A9ABA8" />
-            </FrameLayout>
+                android:background="@drawable/bg_filter_circle"
+                android:contentDescription="@string/filter_menu"
+                android:src="@drawable/ic_more_vert"
+                app:tint="#A9ABA8" />
         </LinearLayout>
 
         <HorizontalScrollView

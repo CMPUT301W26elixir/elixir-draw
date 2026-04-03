@@ -46,7 +46,7 @@ public class ExploreActivity extends AppCompatActivity {
 
     private NotificationService notificationService;
 
-    // Filter chips
+    // These chips help filter the event list
     private TextView chipFortnite, chipSports, chipArts, chipScience;
     private String selectedChipFilter = "";
 
@@ -57,15 +57,14 @@ public class ExploreActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        browseController = new ExploreController(this);
+        notificationService = new NotificationService(this);
+        notificationService.startListening();
+
         bindViews();
-        initControllers();
         setupSearch();
         setupFilterChips();
         setupBottomNavigation();
-        
-        // Start real-time push notification listener
-        notificationService = new NotificationService(this);
-        notificationService.startListening();
 
         currentHomeTab = resolveInitialTab(getIntent());
         refreshSavedEventsAndVisibleContent();
@@ -79,15 +78,12 @@ public class ExploreActivity extends AppCompatActivity {
         bottomNavBar = findViewById(R.id.bottomNavBar);
         fragmentContainer = findViewById(R.id.fragment_container);
         exploreContainer = findViewById(R.id.exploreContainer);
-        
+
         chipFortnite = findViewById(R.id.chipFortnite);
         chipSports = findViewById(R.id.chipSports);
         chipArts = findViewById(R.id.chipArts);
         chipScience = findViewById(R.id.chipScience);
-    }
 
-    private void initControllers() {
-        browseController = new ExploreController(this);
         eventListAdapter = new EventListAdapter(new ArrayList<>(), new EventListAdapter.OnEventClickListener() {
             @Override
             public void onEventClick(EventListItem event) {
@@ -96,7 +92,14 @@ public class ExploreActivity extends AppCompatActivity {
 
             @Override
             public void onHeartClick(EventListItem event, int position) {
-                toggleEventSaved(event, position);
+                boolean isSaving = event.isSaved();
+                browseController.toggleSavedEvent(userSavedEvents, event.getEventId(), !isSaving, (savedEventIds, success) -> {
+                    if (success) {
+                        userSavedEvents = new ArrayList<>(savedEventIds == null ? new ArrayList<>() : savedEventIds);
+                        event.isSaved = !isSaving;
+                        eventListAdapter.notifyItemChanged(position);
+                    }
+                });
             }
         });
         recyclerView.setAdapter(eventListAdapter);
@@ -116,6 +119,7 @@ public class ExploreActivity extends AppCompatActivity {
             TextView clickedChip = (TextView) view;
             String clickedText = clickedChip.getText().toString();
             selectedChipFilter = toggleChipFilter(selectedChipFilter, clickedText);
+
             updateChipUI();
             loadBrowseEvents("");
         };
@@ -165,7 +169,7 @@ public class ExploreActivity extends AppCompatActivity {
         bottomNavBar.setOnTabClickListener(BottomNavBarView.Tab.SAVED, v -> openSavedTab());
         bottomNavBar.setOnTabClickListener(BottomNavBarView.Tab.MY_EVENTS, v -> AppNavigator.openMyEvents(this, false));
         bottomNavBar.setOnTabClickListener(BottomNavBarView.Tab.PROFILE, v -> AppNavigator.openProfile(this, false));
-        bottomNavBar.setOnTabClickListener(BottomNavBarView.Tab.SCAN, v -> AppNavigator.openScan(this, false));
+        bottomNavBar.setOnTabClickListener(BottomNavBarView.Tab.SCAN, view -> AppNavigator.openScan(this, false));
     }
 
     private void showExploreTab() {
@@ -190,17 +194,6 @@ public class ExploreActivity extends AppCompatActivity {
         }
     }
 
-    private void toggleEventSaved(EventListItem event, int position) {
-        boolean isCurrentlySaved = event.isSaved;
-        browseController.toggleSavedEvent(userSavedEvents, event.getEventId(), isCurrentlySaved, (savedEventIds, success) -> {
-            if (success) {
-                userSavedEvents = new ArrayList<>(savedEventIds == null ? new ArrayList<>() : savedEventIds);
-                event.isSaved = !isCurrentlySaved;
-                eventListAdapter.notifyItemChanged(position);
-            }
-        });
-    }
-
     private void refreshSavedEventsAndVisibleContent() {
         browseController.loadSavedEventIds((savedEventIds, success) -> {
             if (success) {
@@ -214,28 +207,10 @@ public class ExploreActivity extends AppCompatActivity {
         });
     }
 
-    private void loadBrowseEvents(String searchTerm) {
-        recyclerView.setVisibility(View.GONE);
-        loadingIndicator.setVisibility(View.VISIBLE);
-        stateText.setVisibility(View.VISIBLE);
-        stateText.setText(R.string.browse_state_loading);
-
-        browseController.loadBrowseEvents(searchTerm, selectedChipFilter, userSavedEvents, (items, success) -> {
-            loadingIndicator.setVisibility(View.GONE);
-            if (!success) {
-                stateText.setText(R.string.browse_state_error);
-                return;
-            }
-
-            if (items == null || items.isEmpty()) {
-                stateText.setText(buildEmptyStateMessage(searchTerm, selectedChipFilter));
-                return;
-            }
-
-            stateText.setVisibility(View.GONE);
-            recyclerView.setVisibility(View.VISIBLE);
-            eventListAdapter.updateEvents(items);
-        });
+    private BottomNavBarView.Tab resolveInitialTab(Intent intent) {
+        return intent != null && "saved".equals(intent.getStringExtra("navigate_to"))
+                ? BottomNavBarView.Tab.SAVED
+                : BottomNavBarView.Tab.EXPLORE;
     }
 
     private void openEventDetailScreen(EventListItem eventItem) {
@@ -246,22 +221,70 @@ public class ExploreActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
+    private void loadBrowseEvents(String searchTerm) {
+        showBrowseLoadingState();
+        // Updated call to match 9-parameter signature in ExploreController
+        browseController.loadBrowseEvents(
+                searchTerm,
+                selectedChipFilter,
+                null, // keywords
+                null, // startDate
+                null, // latitude
+                null, // longitude
+                null, // distanceKm
+                userSavedEvents,
+                (items, success) -> {
+                    loadingIndicator.setVisibility(View.GONE);
+                    if (!success) {
+                        showBrowseMessageState(getString(R.string.browse_state_error));
+                        return;
+                    }
+
+                    if (items == null || items.isEmpty()) {
+                        showBrowseMessageState(buildEmptyStateMessage(searchTerm, selectedChipFilter));
+                        return;
+                    }
+
+                    stateText.setVisibility(View.GONE);
+                    recyclerView.setVisibility(View.VISIBLE);
+                    eventListAdapter.updateEvents(items);
+                }
+        );
+    }
+
+    private void showBrowseLoadingState() {
+        recyclerView.setVisibility(View.GONE);
+        loadingIndicator.setVisibility(View.VISIBLE);
+        stateText.setVisibility(View.VISIBLE);
+        stateText.setText(R.string.browse_state_loading);
+    }
+
+    private void showBrowseMessageState(String message) {
+        eventListAdapter.updateEvents(new ArrayList<>());
+        recyclerView.setVisibility(View.GONE);
+        loadingIndicator.setVisibility(View.GONE);
+        stateText.setVisibility(View.VISIBLE);
+        stateText.setText(message);
+    }
+
     private String toggleChipFilter(String currentFilter, String clickedChipText) {
         String clicked = clickedChipText.trim();
         return currentFilter.equals(clicked) ? "" : clicked;
     }
 
     private int getChipBackground(String currentFilter, String chipText) {
-        return currentFilter.equals(chipText.trim()) ? R.drawable.bg_chip_selected : R.drawable.bg_chip_unselected;
+        return currentFilter.equals(chipText.trim())
+                ? R.drawable.bg_chip_selected
+                : R.drawable.bg_chip_unselected;
     }
 
     private String buildEmptyStateMessage(String searchTerm, String chipFilter) {
-        if (!searchTerm.isEmpty()) return String.format(Locale.getDefault(), "No events match \"%s\".", searchTerm);
-        if (!chipFilter.isEmpty()) return String.format(Locale.getDefault(), "No %s events found.", chipFilter);
+        if (!searchTerm.isEmpty()) {
+            return String.format(Locale.getDefault(), "No events match \"%s\".", searchTerm);
+        }
+        if (!chipFilter.isEmpty()) {
+            return String.format(Locale.getDefault(), "No %s events found.", chipFilter);
+        }
         return getString(R.string.browse_state_empty);
-    }
-
-    private BottomNavBarView.Tab resolveInitialTab(Intent intent) {
-        return (intent != null && "saved".equals(intent.getStringExtra("navigate_to"))) ? BottomNavBarView.Tab.SAVED : BottomNavBarView.Tab.EXPLORE;
     }
 }
