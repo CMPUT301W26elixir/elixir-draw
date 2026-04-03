@@ -40,7 +40,7 @@ import java.util.Locale;
 public class ExploreActivity extends AppCompatActivity {
     private static final String TAG = "Allot_Logic";
     private static final int FILTER_REQUEST_CODE = 4102;
-    private static final int SEARCH_DEBOUNCE_MS = 350;
+    private static final int SEARCH_DEBOUNCE_MS = 150;
 
     private ExploreController browseController;
     private EventListAdapter eventListAdapter;
@@ -70,6 +70,7 @@ public class ExploreActivity extends AppCompatActivity {
     private final SimpleDateFormat pillDateFormatter = new SimpleDateFormat("MMM d", Locale.getDefault());
 
     private List<String> userSavedEvents = new ArrayList<>();
+    private boolean isInitialBrowseLoadComplete;
 
     /**
      * Initializes the activity, binds views, configures filters and navigation,
@@ -139,7 +140,7 @@ public class ExploreActivity extends AppCompatActivity {
                 if (searchRunnable != null) {
                     searchHandler.removeCallbacks(searchRunnable);
                 }
-                searchRunnable = () -> loadBrowseEvents(query);
+                searchRunnable = () -> applyBrowseFilters(query);
                 searchHandler.postDelayed(searchRunnable, SEARCH_DEBOUNCE_MS);
             }
 
@@ -212,7 +213,7 @@ public class ExploreActivity extends AppCompatActivity {
         if (fragmentContainer != null) fragmentContainer.setVisibility(View.GONE);
         if (exploreContainer != null) exploreContainer.setVisibility(View.VISIBLE);
         rebuildFilterPills();
-        loadBrowseEvents(searchInput.getText() == null ? "" : searchInput.getText().toString());
+        refreshBrowseEvents(false);
     }
 
     /**
@@ -246,7 +247,7 @@ public class ExploreActivity extends AppCompatActivity {
             }
 
             rebuildFilterPills();
-            loadBrowseEvents(searchInput.getText() == null ? "" : searchInput.getText().toString());
+            refreshBrowseEvents(!browseController.hasCachedOpenEvents());
         });
     }
 
@@ -301,9 +302,26 @@ public class ExploreActivity extends AppCompatActivity {
      *
      * @param searchTerm the text used to search events
      */
-    private void loadBrowseEvents(String searchTerm) {
-        showBrowseLoadingState();
-        browseController.loadBrowseEvents(
+    private void refreshBrowseEvents(boolean showLoadingState) {
+        if (showLoadingState) {
+            showBrowseLoadingState();
+        }
+
+        browseController.refreshOpenEvents((events, success) -> {
+            if (!success) {
+                if (!isInitialBrowseLoadComplete) {
+                    showBrowseMessageState(getString(R.string.browse_state_error));
+                }
+                return;
+            }
+
+            isInitialBrowseLoadComplete = true;
+            applyBrowseFilters(searchInput.getText() == null ? "" : searchInput.getText().toString());
+        });
+    }
+
+    private void applyBrowseFilters(String searchTerm) {
+        browseController.filterCachedBrowseEvents(
                 searchTerm,
                 "",
                 filterKeywords,
@@ -315,7 +333,9 @@ public class ExploreActivity extends AppCompatActivity {
                 (items, success) -> {
             List<EventListItem> safeItems = items == null ? new ArrayList<>() : items;
             if (!success) {
-                showBrowseMessageState(getString(R.string.browse_state_error));
+                if (!isInitialBrowseLoadComplete) {
+                    showBrowseMessageState(getString(R.string.browse_state_error));
+                }
                 return;
             }
 
@@ -387,7 +407,7 @@ public class ExploreActivity extends AppCompatActivity {
                 : null;
 
         rebuildFilterPills();
-        loadBrowseEvents(searchInput.getText() == null ? "" : searchInput.getText().toString());
+        applyBrowseFilters(searchInput.getText() == null ? "" : searchInput.getText().toString());
     }
 
     private void rebuildFilterPills() {
@@ -439,13 +459,13 @@ public class ExploreActivity extends AppCompatActivity {
     private void clearDateFilter() {
         filterDateText = "";
         rebuildFilterPills();
-        loadBrowseEvents(searchInput.getText() == null ? "" : searchInput.getText().toString());
+        applyBrowseFilters(searchInput.getText() == null ? "" : searchInput.getText().toString());
     }
 
     private void clearDistanceFilter() {
         filterDistanceKm = null;
         rebuildFilterPills();
-        loadBrowseEvents(searchInput.getText() == null ? "" : searchInput.getText().toString());
+        applyBrowseFilters(searchInput.getText() == null ? "" : searchInput.getText().toString());
     }
 
     private void removeKeywordFilter(String keywordToRemove) {
@@ -457,7 +477,7 @@ public class ExploreActivity extends AppCompatActivity {
         }
         filterKeywords = String.join(" ", remainingKeywords);
         rebuildFilterPills();
-        loadBrowseEvents(searchInput.getText() == null ? "" : searchInput.getText().toString());
+        applyBrowseFilters(searchInput.getText() == null ? "" : searchInput.getText().toString());
     }
 
     private String buildDatePillLabel() {
