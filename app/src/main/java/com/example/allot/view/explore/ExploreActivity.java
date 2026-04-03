@@ -6,15 +6,19 @@ import android.os.Handler;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.FrameLayout;
+import android.widget.HorizontalScrollView;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
+import androidx.core.content.res.ResourcesCompat;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.allot.R;
 import com.example.allot.controller.explore.ExploreController;
@@ -24,7 +28,10 @@ import com.example.allot.view.shared.AppNavigator;
 import com.example.allot.view.shared.BottomNavBarView;
 import com.example.allot.view.shared.EventListAdapter;
 import com.example.allot.view.shared.EventListItem;
+import com.example.allot.view.shared.UiHelper;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 /**
@@ -44,6 +51,8 @@ public class ExploreActivity extends AppCompatActivity {
     private TextView stateText;
     private BottomNavBarView bottomNavBar;
     private BottomNavBarView.Tab currentHomeTab = BottomNavBarView.Tab.EXPLORE;
+    private HorizontalScrollView filterPillsScrollView;
+    private LinearLayout filterPillsContainer;
 
     private FrameLayout fragmentContainer;
     private LinearLayout exploreContainer;
@@ -57,6 +66,8 @@ public class ExploreActivity extends AppCompatActivity {
 
     private final Handler searchHandler = new Handler();
     private Runnable searchRunnable;
+    private final SimpleDateFormat pillDateParser = new SimpleDateFormat("MMM d, yyyy", Locale.getDefault());
+    private final SimpleDateFormat pillDateFormatter = new SimpleDateFormat("MMM d", Locale.getDefault());
 
     private List<String> userSavedEvents = new ArrayList<>();
 
@@ -77,9 +88,12 @@ public class ExploreActivity extends AppCompatActivity {
         loadingIndicator = findViewById(R.id.loadingIndicator);
         stateText = findViewById(R.id.stateText);
         bottomNavBar = findViewById(R.id.bottomNavBar);
+        filterPillsScrollView = findViewById(R.id.filterPillsScrollView);
+        filterPillsContainer = findViewById(R.id.filterPillsContainer);
         fragmentContainer = findViewById(R.id.fragment_container);
         exploreContainer = findViewById(R.id.exploreContainer);
         browseController = new ExploreController(this);
+        pillDateParser.setLenient(false);
 
         setupSearchInput();
         setupFilterMenu();
@@ -197,6 +211,7 @@ public class ExploreActivity extends AppCompatActivity {
         bottomNavBar.setSelectedTab(BottomNavBarView.Tab.EXPLORE);
         if (fragmentContainer != null) fragmentContainer.setVisibility(View.GONE);
         if (exploreContainer != null) exploreContainer.setVisibility(View.VISIBLE);
+        rebuildFilterPills();
         loadBrowseEvents(searchInput.getText() == null ? "" : searchInput.getText().toString());
     }
 
@@ -230,6 +245,7 @@ public class ExploreActivity extends AppCompatActivity {
                 return;
             }
 
+            rebuildFilterPills();
             loadBrowseEvents(searchInput.getText() == null ? "" : searchInput.getText().toString());
         });
     }
@@ -370,7 +386,115 @@ public class ExploreActivity extends AppCompatActivity {
                 ? data.getDoubleExtra(EventFilterActivity.EXTRA_DISTANCE_KM, 0)
                 : null;
 
+        rebuildFilterPills();
         loadBrowseEvents(searchInput.getText() == null ? "" : searchInput.getText().toString());
+    }
+
+    private void rebuildFilterPills() {
+        if (filterPillsContainer == null || filterPillsScrollView == null) {
+            return;
+        }
+
+        filterPillsContainer.removeAllViews();
+        addFilterPill(buildDatePillLabel(), this::clearDateFilter);
+        addFilterPill(buildDistancePillLabel(), this::clearDistanceFilter);
+
+        for (String keyword : splitKeywords(filterKeywords)) {
+            addFilterPill(keyword, () -> removeKeywordFilter(keyword));
+        }
+
+        filterPillsScrollView.setVisibility(filterPillsContainer.getChildCount() > 0 ? View.VISIBLE : View.GONE);
+    }
+
+    private void addFilterPill(String label, Runnable onClick) {
+        if (UiHelper.isBlank(label) || filterPillsContainer == null) {
+            return;
+        }
+
+        TextView pillView = new TextView(this);
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                UiHelper.dpToPx(this, 40)
+        );
+        params.setMarginEnd(UiHelper.dpToPx(this, 10));
+        pillView.setLayoutParams(params);
+        pillView.setBackgroundResource(R.drawable.bg_chip_selected);
+        pillView.setClickable(true);
+        pillView.setFocusable(true);
+        pillView.setGravity(android.view.Gravity.CENTER);
+        pillView.setPadding(
+                UiHelper.dpToPx(this, 18),
+                0,
+                UiHelper.dpToPx(this, 18),
+                0
+        );
+        pillView.setText(label);
+        pillView.setTextColor(ContextCompat.getColor(this, R.color.text_primary));
+        pillView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
+        pillView.setTypeface(ResourcesCompat.getFont(this, R.font.varela_round_regular));
+        pillView.setOnClickListener(view -> onClick.run());
+        filterPillsContainer.addView(pillView);
+    }
+
+    private void clearDateFilter() {
+        filterDateText = "";
+        rebuildFilterPills();
+        loadBrowseEvents(searchInput.getText() == null ? "" : searchInput.getText().toString());
+    }
+
+    private void clearDistanceFilter() {
+        filterDistanceKm = null;
+        rebuildFilterPills();
+        loadBrowseEvents(searchInput.getText() == null ? "" : searchInput.getText().toString());
+    }
+
+    private void removeKeywordFilter(String keywordToRemove) {
+        List<String> remainingKeywords = new ArrayList<>();
+        for (String keyword : splitKeywords(filterKeywords)) {
+            if (!keyword.equalsIgnoreCase(keywordToRemove)) {
+                remainingKeywords.add(keyword);
+            }
+        }
+        filterKeywords = String.join(" ", remainingKeywords);
+        rebuildFilterPills();
+        loadBrowseEvents(searchInput.getText() == null ? "" : searchInput.getText().toString());
+    }
+
+    private String buildDatePillLabel() {
+        if (UiHelper.isBlank(filterDateText)) {
+            return "";
+        }
+        try {
+            return pillDateFormatter.format(pillDateParser.parse(filterDateText.trim()));
+        } catch (Exception e) {
+            return filterDateText.trim();
+        }
+    }
+
+    private String buildDistancePillLabel() {
+        if (filterDistanceKm == null || filterDistanceKm <= 0) {
+            return "";
+        }
+        if (Math.abs(filterDistanceKm - Math.rint(filterDistanceKm)) < 0.0001d) {
+            return String.format(Locale.getDefault(), "%.0f km", filterDistanceKm);
+        }
+        return String.format(Locale.getDefault(), "%.1f km", filterDistanceKm);
+    }
+
+    private List<String> splitKeywords(String rawKeywords) {
+        String normalizedKeywords = normalize(rawKeywords);
+        if (normalizedKeywords.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        List<String> tokens = new ArrayList<>();
+        for (String token : Arrays.asList(normalizedKeywords.split("[,\\s]+"))) {
+            String trimmed = normalize(token);
+            if (!trimmed.isEmpty()) {
+                tokens.add(trimmed);
+            }
+        }
+        return tokens;
     }
 
     private java.util.Date parseFilterDate(String rawDate) {
