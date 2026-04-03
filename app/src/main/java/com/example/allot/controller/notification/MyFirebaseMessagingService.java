@@ -30,28 +30,47 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     public void onMessageReceived(@NonNull RemoteMessage remoteMessage) {
         super.onMessageReceived(remoteMessage);
         
+        Log.d(TAG, "From: " + remoteMessage.getFrom());
+
+        // Extract data payload
+        String title = null;
+        String body = null;
+        String eventId = null;
+        String eventTitle = null;
+
+        if (remoteMessage.getData().size() > 0) {
+            Log.d(TAG, "Message data payload: " + remoteMessage.getData());
+            title = remoteMessage.getData().get("title");
+            body = remoteMessage.getData().get("body");
+            eventId = remoteMessage.getData().get("event_id");
+            eventTitle = remoteMessage.getData().get("event_title");
+        }
+
+        if (remoteMessage.getNotification() != null) {
+            Log.d(TAG, "Message Notification Body: " + remoteMessage.getNotification().getBody());
+            if (title == null) title = remoteMessage.getNotification().getTitle();
+            if (body == null) body = remoteMessage.getNotification().getBody();
+        }
+
+        final String finalTitle = title;
+        final String finalBody = body;
+        final String finalEventId = eventId;
+        final String finalEventTitle = eventTitle;
+
+        if (finalTitle == null || finalBody == null) return;
+
         // Fetch user preferences before showing the notification
         DeviceSessionManager sessionManager = new DeviceSessionManager(this);
         String deviceId = sessionManager.getCurrentDeviceId();
         
         new UserRepository().getUserByDeviceId(deviceId, (user, success) -> {
+            // Default to showing if user fetch fails (to ensure critical notifications arrive)
             if (success && user != null && !user.isNotiEnabled()) {
                 Log.d(TAG, "Notifications are disabled for this user. Skipping.");
                 return;
             }
 
-            // Handle data payload if present
-            if (remoteMessage.getData().size() > 0) {
-                String title = remoteMessage.getData().get("title");
-                String body = remoteMessage.getData().get("body");
-                showNotification(title, body);
-            }
-
-            // Handle notification payload if present
-            if (remoteMessage.getNotification() != null) {
-                showNotification(remoteMessage.getNotification().getTitle(), 
-                               remoteMessage.getNotification().getBody());
-            }
+            showNotification(finalTitle, finalBody, finalEventId, finalEventTitle);
         });
     }
 
@@ -67,7 +86,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         }
     }
 
-    private void showNotification(String title, String body) {
+    private void showNotification(String title, String body, String eventId, String eventTitle) {
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -76,12 +95,22 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                     "Allot Notifications",
                     NotificationManager.IMPORTANCE_HIGH
             );
+            channel.setDescription("Notifications for event selections and updates");
+            channel.enableLights(true);
+            channel.enableVibration(true);
             notificationManager.createNotificationChannel(channel);
         }
 
         Intent intent = new Intent(this, SplashActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent,
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        
+        if (eventId != null) {
+            intent.putExtra("redirect_to", "offer");
+            intent.putExtra("event_id", eventId);
+            intent.putExtra("event_title", eventTitle);
+        }
+
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, (int) System.currentTimeMillis(), intent,
                 PendingIntent.FLAG_ONE_SHOT | PendingIntent.FLAG_IMMUTABLE);
 
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, CHANNEL_ID)
@@ -90,6 +119,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                 .setContentText(body)
                 .setAutoCancel(true)
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setDefaults(NotificationCompat.DEFAULT_ALL)
                 .setContentIntent(pendingIntent);
 
         notificationManager.notify((int) System.currentTimeMillis(), notificationBuilder.build());

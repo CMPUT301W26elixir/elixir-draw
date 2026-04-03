@@ -2,8 +2,6 @@ package com.example.allot.view.explore;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
@@ -16,6 +14,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.allot.R;
 import com.example.allot.controller.explore.ExploreController;
+import com.example.allot.controller.notification.NotificationService;
 import com.example.allot.view.event.EventDetailActivity;
 import com.example.allot.view.event.SearchEventActivity;
 import com.example.allot.view.events.EventListModeFragment;
@@ -44,6 +43,8 @@ public class ExploreActivity extends AppCompatActivity {
     private FrameLayout fragmentContainer;
     private LinearLayout exploreContainer;
 
+    private NotificationService notificationService;
+
     // These chips help filter the event list
     private TextView chipFortnite, chipSports, chipArts, chipScience;
     private String selectedChipFilter = "";
@@ -69,6 +70,9 @@ public class ExploreActivity extends AppCompatActivity {
         fragmentContainer = findViewById(R.id.fragment_container);
         exploreContainer = findViewById(R.id.exploreContainer);
         browseController = new ExploreController(this);
+
+        notificationService = new NotificationService(this);
+        notificationService.startListening();
 
         // Make search bar open SearchEventActivity
         searchInput.setFocusable(false);
@@ -164,6 +168,14 @@ public class ExploreActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         refreshSavedEventsAndVisibleContent();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (notificationService != null) {
+            notificationService.stopListening();
+        }
     }
 
     /**
