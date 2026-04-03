@@ -26,6 +26,7 @@ import com.example.allot.model.event.Event;
 import com.example.allot.model.event.EventFormData;
 import com.example.allot.view.shared.EventDisplayFormatter;
 import com.example.allot.view.shared.EventFormUiHelper;
+import com.example.allot.view.shared.RegistrationRangePickerView;
 import com.google.android.gms.common.api.Status;
 import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.model.AutocompletePrediction;
@@ -113,12 +114,7 @@ public class CreateEventActivity extends AppCompatActivity {
         EditText priceInput = findViewById(R.id.priceInput);
         EditText descriptionInput = findViewById(R.id.descriptionInput);
         EditText participantsInput = findViewById(R.id.participantsInput);
-        Spinner registrationStartMonthSpinner = findViewById(R.id.registrationStartMonthSpinner);
-        EditText registrationStartDayInput = findViewById(R.id.registrationStartDayInput);
-        EditText registrationStartYearInput = findViewById(R.id.registrationStartYearInput);
-        Spinner registrationEndMonthSpinner = findViewById(R.id.registrationEndMonthSpinner);
-        EditText registrationEndDayInput = findViewById(R.id.registrationEndDayInput);
-        EditText registrationEndYearInput = findViewById(R.id.registrationEndYearInput);
+        RegistrationRangePickerView registrationRangePickerView = findViewById(R.id.registrationRangePickerView);
         nextButton = findViewById(R.id.createEventNextButton);
         posterUploadCard = findViewById(R.id.posterUploadCard);
         posterPreviewImage = findViewById(R.id.posterPreviewImage);
@@ -136,12 +132,7 @@ public class CreateEventActivity extends AppCompatActivity {
                 priceInput,
                 descriptionInput,
                 participantsInput,
-                registrationStartMonthSpinner,
-                registrationStartDayInput,
-                registrationStartYearInput,
-                registrationEndMonthSpinner,
-                registrationEndDayInput,
-                registrationEndYearInput
+                registrationRangePickerView
         );
     }
 

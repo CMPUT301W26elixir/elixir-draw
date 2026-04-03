@@ -352,6 +352,16 @@ This action cannot be undone.</string>
     <string name="create_event_registration_start_hint"></string>
     <string name="create_event_registration_end_label">Registration end *</string>
     <string name="create_event_registration_end_hint"></string>
+    <string name="create_event_registration_period_label">Registration Period *</string>
+    <string name="registration_calendar_previous_month">Previous month</string>
+    <string name="registration_calendar_next_month">Next month</string>
+    <string name="registration_calendar_sun">Su</string>
+    <string name="registration_calendar_mon">Mo</string>
+    <string name="registration_calendar_tue">Tu</string>
+    <string name="registration_calendar_wed">We</string>
+    <string name="registration_calendar_thu">Th</string>
+    <string name="registration_calendar_fri">Fr</string>
+    <string name="registration_calendar_sat">Sa</string>
     <string name="create_event_day_hint">Day</string>
     <string name="create_event_year_hint">Year</string>
     <string name="create_event_month_prompt">Month</string>
