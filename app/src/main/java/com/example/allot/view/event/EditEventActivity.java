@@ -35,6 +35,7 @@ import com.example.allot.view.organizer.EventQrCodeActivity;
 import com.example.allot.view.organizer.InviteCoOrganizerActivity;
 import com.example.allot.view.shared.EventDisplayFormatter;
 import com.example.allot.view.shared.EventFormUiHelper;
+import com.example.allot.view.shared.RegistrationRangePickerView;
 import com.example.allot.view.shared.SimpleTextWatcher;
 import com.example.allot.view.shared.UiHelper;
 import com.google.android.gms.common.api.Status;
@@ -87,12 +88,7 @@ public class EditEventActivity extends AppCompatActivity {
     private EditText priceInput;
     private EditText descriptionInput;
     private EditText participantsInput;
-    private Spinner registrationStartMonthSpinner;
-    private EditText registrationStartDayInput;
-    private EditText registrationStartYearInput;
-    private Spinner registrationEndMonthSpinner;
-    private EditText registrationEndDayInput;
-    private EditText registrationEndYearInput;
+    private RegistrationRangePickerView registrationRangePickerView;
     private TextView saveChangesButton;
     private EventFormUiHelper formUiHelper;
     private String currentEventId;
@@ -188,12 +184,7 @@ public class EditEventActivity extends AppCompatActivity {
         priceInput = findViewById(R.id.priceInput);
         descriptionInput = findViewById(R.id.descriptionInput);
         participantsInput = findViewById(R.id.participantsInput);
-        registrationStartMonthSpinner = findViewById(R.id.registrationStartMonthSpinner);
-        registrationStartDayInput = findViewById(R.id.registrationStartDayInput);
-        registrationStartYearInput = findViewById(R.id.registrationStartYearInput);
-        registrationEndMonthSpinner = findViewById(R.id.registrationEndMonthSpinner);
-        registrationEndDayInput = findViewById(R.id.registrationEndDayInput);
-        registrationEndYearInput = findViewById(R.id.registrationEndYearInput);
+        registrationRangePickerView = findViewById(R.id.registrationRangePickerView);
         saveChangesButton = findViewById(R.id.saveChangesButton);
         formUiHelper = new EventFormUiHelper(
                 eventNameInput,
@@ -206,12 +197,7 @@ public class EditEventActivity extends AppCompatActivity {
                 priceInput,
                 descriptionInput,
                 participantsInput,
-                registrationStartMonthSpinner,
-                registrationStartDayInput,
-                registrationStartYearInput,
-                registrationEndMonthSpinner,
-                registrationEndDayInput,
-                registrationEndYearInput
+                registrationRangePickerView
         );
     }
 
@@ -238,10 +224,6 @@ public class EditEventActivity extends AppCompatActivity {
         participantsInput.addTextChangedListener(dirtyStateWatcher);
         startDayInput.addTextChangedListener(dirtyStateWatcher);
         startYearInput.addTextChangedListener(dirtyStateWatcher);
-        registrationStartDayInput.addTextChangedListener(dirtyStateWatcher);
-        registrationStartYearInput.addTextChangedListener(dirtyStateWatcher);
-        registrationEndDayInput.addTextChangedListener(dirtyStateWatcher);
-        registrationEndYearInput.addTextChangedListener(dirtyStateWatcher);
         geolocationCheckbox.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (!isBindingEvent) {
                 updateSaveButtonState();
@@ -269,8 +251,13 @@ public class EditEventActivity extends AppCompatActivity {
         };
 
         startMonthSpinner.setOnItemSelectedListener(dateSelectionListener);
-        registrationStartMonthSpinner.setOnItemSelectedListener(dateSelectionListener);
-        registrationEndMonthSpinner.setOnItemSelectedListener(dateSelectionListener);
+        if (registrationRangePickerView != null) {
+            registrationRangePickerView.setOnRangeChangedListener((startDate, endDate) -> {
+                if (!isBindingEvent) {
+                    updateSaveButtonState();
+                }
+            });
+        }
 
         entrantsLotteryButton.setOnClickListener(view -> openLotteryScreen());
         inviteEntrantsButton.setOnClickListener(view -> openInviteScreen());

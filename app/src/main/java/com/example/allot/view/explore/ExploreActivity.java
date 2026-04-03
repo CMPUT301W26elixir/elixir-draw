@@ -1,22 +1,31 @@
 package com.example.allot.view.explore;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.FrameLayout;
+import android.widget.HorizontalScrollView;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.core.content.res.ResourcesCompat;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.allot.R;
+import com.example.allot.controller.event.AndroidEventLocationGeocodingService;
 import com.example.allot.controller.explore.ExploreController;
 import com.example.allot.view.event.EventDetailActivity;
 import com.example.allot.view.events.EventListModeFragment;
@@ -24,7 +33,14 @@ import com.example.allot.view.shared.AppNavigator;
 import com.example.allot.view.shared.BottomNavBarView;
 import com.example.allot.view.shared.EventListAdapter;
 import com.example.allot.view.shared.EventListItem;
+import com.example.allot.view.shared.UiHelper;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.Priority;
+import com.google.android.gms.tasks.CancellationTokenSource;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 /**
@@ -33,7 +49,9 @@ import java.util.Locale;
 public class ExploreActivity extends AppCompatActivity {
     private static final String TAG = "Allot_Logic";
     private static final int FILTER_REQUEST_CODE = 4102;
-    private static final int SEARCH_DEBOUNCE_MS = 350;
+    private static final int LOCATION_PERMISSION_REQUEST = 4103;
+    private static final int SEARCH_DEBOUNCE_MS = 150;
+    private static final double DEFAULT_DISTANCE_KM = 50d;
 
     private ExploreController browseController;
     private EventListAdapter eventListAdapter;
@@ -44,6 +62,8 @@ public class ExploreActivity extends AppCompatActivity {
     private TextView stateText;
     private BottomNavBarView bottomNavBar;
     private BottomNavBarView.Tab currentHomeTab = BottomNavBarView.Tab.EXPLORE;
+    private HorizontalScrollView filterPillsScrollView;
+    private LinearLayout filterPillsContainer;
 
     private FrameLayout fragmentContainer;
     private LinearLayout exploreContainer;
@@ -57,8 +77,14 @@ public class ExploreActivity extends AppCompatActivity {
 
     private final Handler searchHandler = new Handler();
     private Runnable searchRunnable;
+    private final SimpleDateFormat pillDateParser = new SimpleDateFormat("MMM d, yyyy", Locale.getDefault());
+    private final SimpleDateFormat pillDateFormatter = new SimpleDateFormat("MMM d", Locale.getDefault());
+    private FusedLocationProviderClient fusedLocationProviderClient;
 
     private List<String> userSavedEvents = new ArrayList<>();
+    private boolean isInitialBrowseLoadComplete;
+    private boolean hasInitializedDefaultLocationFilter;
+    private boolean isInitializingDefaultLocationFilter;
 
     /**
      * Initializes the activity, binds views, configures filters and navigation,
@@ -77,9 +103,13 @@ public class ExploreActivity extends AppCompatActivity {
         loadingIndicator = findViewById(R.id.loadingIndicator);
         stateText = findViewById(R.id.stateText);
         bottomNavBar = findViewById(R.id.bottomNavBar);
+        filterPillsScrollView = findViewById(R.id.filterPillsScrollView);
+        filterPillsContainer = findViewById(R.id.filterPillsContainer);
         fragmentContainer = findViewById(R.id.fragment_container);
         exploreContainer = findViewById(R.id.exploreContainer);
         browseController = new ExploreController(this);
+        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
+        pillDateParser.setLenient(false);
 
         setupSearchInput();
         setupFilterMenu();
@@ -106,6 +136,7 @@ public class ExploreActivity extends AppCompatActivity {
 
         recyclerView.setAdapter(eventListAdapter);
         setupBottomNavigation();
+        maybeInitializeDefaultLocationFilter();
         refreshSavedEventsAndVisibleContent();
     }
 
@@ -125,7 +156,7 @@ public class ExploreActivity extends AppCompatActivity {
                 if (searchRunnable != null) {
                     searchHandler.removeCallbacks(searchRunnable);
                 }
-                searchRunnable = () -> loadBrowseEvents(query);
+                searchRunnable = () -> applyBrowseFilters(query);
                 searchHandler.postDelayed(searchRunnable, SEARCH_DEBOUNCE_MS);
             }
 
@@ -174,6 +205,7 @@ public class ExploreActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        maybeInitializeDefaultLocationFilter();
         refreshSavedEventsAndVisibleContent();
     }
 
@@ -197,7 +229,8 @@ public class ExploreActivity extends AppCompatActivity {
         bottomNavBar.setSelectedTab(BottomNavBarView.Tab.EXPLORE);
         if (fragmentContainer != null) fragmentContainer.setVisibility(View.GONE);
         if (exploreContainer != null) exploreContainer.setVisibility(View.VISIBLE);
-        loadBrowseEvents(searchInput.getText() == null ? "" : searchInput.getText().toString());
+        rebuildFilterPills();
+        refreshBrowseEvents(false);
     }
 
     /**
@@ -230,8 +263,101 @@ public class ExploreActivity extends AppCompatActivity {
                 return;
             }
 
-            loadBrowseEvents(searchInput.getText() == null ? "" : searchInput.getText().toString());
+            if (shouldDeferExploreRefreshForDefaultLocation()) {
+                showBrowseLoadingState();
+                return;
+            }
+
+            rebuildFilterPills();
+            refreshBrowseEvents(!browseController.hasCachedOpenEvents());
         });
+    }
+
+    private boolean shouldDeferExploreRefreshForDefaultLocation() {
+        return currentHomeTab == BottomNavBarView.Tab.EXPLORE
+                && !hasInitializedDefaultLocationFilter
+                && isInitializingDefaultLocationFilter;
+    }
+
+    private void maybeInitializeDefaultLocationFilter() {
+        if (hasInitializedDefaultLocationFilter || isInitializingDefaultLocationFilter) {
+            return;
+        }
+
+        if (!UiHelper.isBlank(filterAddress) || filterLatitude != null || filterLongitude != null || filterDistanceKm != null) {
+            hasInitializedDefaultLocationFilter = true;
+            return;
+        }
+
+        if (!hasLocationPermission()) {
+            isInitializingDefaultLocationFilter = true;
+            ActivityCompat.requestPermissions(
+                    this,
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                    LOCATION_PERMISSION_REQUEST
+            );
+            return;
+        }
+
+        initializeDefaultLocationFilter();
+    }
+
+    private boolean hasLocationPermission() {
+        return ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED;
+    }
+
+    private void initializeDefaultLocationFilter() {
+        isInitializingDefaultLocationFilter = true;
+        CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+        fusedLocationProviderClient
+                .getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, cancellationTokenSource.getToken())
+                .addOnSuccessListener(this, location -> {
+                    if (location == null) {
+                        finishDefaultLocationInitialization();
+                        return;
+                    }
+
+                    reverseGeocodeDefaultLocation(location);
+                })
+                .addOnFailureListener(this, exception -> finishDefaultLocationInitialization());
+    }
+
+    private void reverseGeocodeDefaultLocation(Location location) {
+        new Thread(() -> {
+            AndroidEventLocationGeocodingService geocodingService = new AndroidEventLocationGeocodingService(this);
+            String resolvedAddress = geocodingService.reverseGeocode(
+                    location.getLatitude(),
+                    location.getLongitude()
+            );
+            runOnUiThread(() -> {
+                if (!isFinishing()
+                        && !isDestroyed()
+                        && UiHelper.isBlank(filterAddress)
+                        && filterLatitude == null
+                        && filterLongitude == null
+                        && filterDistanceKm == null
+                        && !UiHelper.isBlank(resolvedAddress)) {
+                    filterAddress = resolvedAddress;
+                    filterLatitude = location.getLatitude();
+                    filterLongitude = location.getLongitude();
+                    filterDistanceKm = DEFAULT_DISTANCE_KM;
+                    rebuildFilterPills();
+                    if (currentHomeTab == BottomNavBarView.Tab.EXPLORE && isInitialBrowseLoadComplete) {
+                        applyBrowseFilters(searchInput.getText() == null ? "" : searchInput.getText().toString());
+                    }
+                }
+                finishDefaultLocationInitialization();
+            });
+        }).start();
+    }
+
+    private void finishDefaultLocationInitialization() {
+        isInitializingDefaultLocationFilter = false;
+        hasInitializedDefaultLocationFilter = true;
+        if (currentHomeTab == BottomNavBarView.Tab.EXPLORE) {
+            refreshSavedEventsAndVisibleContent();
+        }
     }
 
     private BottomNavBarView.Tab resolveInitialTab(Intent intent) {
@@ -285,9 +411,26 @@ public class ExploreActivity extends AppCompatActivity {
      *
      * @param searchTerm the text used to search events
      */
-    private void loadBrowseEvents(String searchTerm) {
-        showBrowseLoadingState();
-        browseController.loadBrowseEvents(
+    private void refreshBrowseEvents(boolean showLoadingState) {
+        if (showLoadingState) {
+            showBrowseLoadingState();
+        }
+
+        browseController.refreshOpenEvents((events, success) -> {
+            if (!success) {
+                if (!isInitialBrowseLoadComplete) {
+                    showBrowseMessageState(getString(R.string.browse_state_error));
+                }
+                return;
+            }
+
+            isInitialBrowseLoadComplete = true;
+            applyBrowseFilters(searchInput.getText() == null ? "" : searchInput.getText().toString());
+        });
+    }
+
+    private void applyBrowseFilters(String searchTerm) {
+        browseController.filterCachedBrowseEvents(
                 searchTerm,
                 "",
                 filterKeywords,
@@ -299,7 +442,9 @@ public class ExploreActivity extends AppCompatActivity {
                 (items, success) -> {
             List<EventListItem> safeItems = items == null ? new ArrayList<>() : items;
             if (!success) {
-                showBrowseMessageState(getString(R.string.browse_state_error));
+                if (!isInitialBrowseLoadComplete) {
+                    showBrowseMessageState(getString(R.string.browse_state_error));
+                }
                 return;
             }
 
@@ -370,7 +515,132 @@ public class ExploreActivity extends AppCompatActivity {
                 ? data.getDoubleExtra(EventFilterActivity.EXTRA_DISTANCE_KM, 0)
                 : null;
 
-        loadBrowseEvents(searchInput.getText() == null ? "" : searchInput.getText().toString());
+        rebuildFilterPills();
+        applyBrowseFilters(searchInput.getText() == null ? "" : searchInput.getText().toString());
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode != LOCATION_PERMISSION_REQUEST) {
+            return;
+        }
+
+        isInitializingDefaultLocationFilter = false;
+        if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            initializeDefaultLocationFilter();
+            return;
+        }
+
+        hasInitializedDefaultLocationFilter = true;
+        refreshSavedEventsAndVisibleContent();
+    }
+
+    private void rebuildFilterPills() {
+        if (filterPillsContainer == null || filterPillsScrollView == null) {
+            return;
+        }
+
+        filterPillsContainer.removeAllViews();
+        addFilterPill(buildDatePillLabel(), this::clearDateFilter);
+        addFilterPill(buildDistancePillLabel(), this::clearDistanceFilter);
+
+        for (String keyword : splitKeywords(filterKeywords)) {
+            addFilterPill(keyword, () -> removeKeywordFilter(keyword));
+        }
+
+        filterPillsScrollView.setVisibility(filterPillsContainer.getChildCount() > 0 ? View.VISIBLE : View.GONE);
+    }
+
+    private void addFilterPill(String label, Runnable onClick) {
+        if (UiHelper.isBlank(label) || filterPillsContainer == null) {
+            return;
+        }
+
+        TextView pillView = new TextView(this);
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                UiHelper.dpToPx(this, 40)
+        );
+        params.setMarginEnd(UiHelper.dpToPx(this, 10));
+        pillView.setLayoutParams(params);
+        pillView.setBackgroundResource(R.drawable.bg_chip_selected);
+        pillView.setClickable(true);
+        pillView.setFocusable(true);
+        pillView.setGravity(android.view.Gravity.CENTER);
+        pillView.setPadding(
+                UiHelper.dpToPx(this, 18),
+                0,
+                UiHelper.dpToPx(this, 18),
+                0
+        );
+        pillView.setText(label);
+        pillView.setTextColor(ContextCompat.getColor(this, R.color.text_primary));
+        pillView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
+        pillView.setTypeface(ResourcesCompat.getFont(this, R.font.varela_round_regular));
+        pillView.setOnClickListener(view -> onClick.run());
+        filterPillsContainer.addView(pillView);
+    }
+
+    private void clearDateFilter() {
+        filterDateText = "";
+        rebuildFilterPills();
+        applyBrowseFilters(searchInput.getText() == null ? "" : searchInput.getText().toString());
+    }
+
+    private void clearDistanceFilter() {
+        filterDistanceKm = null;
+        rebuildFilterPills();
+        applyBrowseFilters(searchInput.getText() == null ? "" : searchInput.getText().toString());
+    }
+
+    private void removeKeywordFilter(String keywordToRemove) {
+        List<String> remainingKeywords = new ArrayList<>();
+        for (String keyword : splitKeywords(filterKeywords)) {
+            if (!keyword.equalsIgnoreCase(keywordToRemove)) {
+                remainingKeywords.add(keyword);
+            }
+        }
+        filterKeywords = String.join(" ", remainingKeywords);
+        rebuildFilterPills();
+        applyBrowseFilters(searchInput.getText() == null ? "" : searchInput.getText().toString());
+    }
+
+    private String buildDatePillLabel() {
+        if (UiHelper.isBlank(filterDateText)) {
+            return "";
+        }
+        try {
+            return pillDateFormatter.format(pillDateParser.parse(filterDateText.trim()));
+        } catch (Exception e) {
+            return filterDateText.trim();
+        }
+    }
+
+    private String buildDistancePillLabel() {
+        if (filterDistanceKm == null || filterDistanceKm <= 0) {
+            return "";
+        }
+        if (Math.abs(filterDistanceKm - Math.rint(filterDistanceKm)) < 0.0001d) {
+            return String.format(Locale.getDefault(), "%.0f km", filterDistanceKm);
+        }
+        return String.format(Locale.getDefault(), "%.1f km", filterDistanceKm);
+    }
+
+    private List<String> splitKeywords(String rawKeywords) {
+        String normalizedKeywords = normalize(rawKeywords);
+        if (normalizedKeywords.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        List<String> tokens = new ArrayList<>();
+        for (String token : Arrays.asList(normalizedKeywords.split("[,\\s]+"))) {
+            String trimmed = normalize(token);
+            if (!trimmed.isEmpty()) {
+                tokens.add(trimmed);
+            }
+        }
+        return tokens;
     }
 
     private java.util.Date parseFilterDate(String rawDate) {

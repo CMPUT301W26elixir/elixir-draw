@@ -5,12 +5,14 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
+import com.bumptech.glide.Glide;
 import com.example.allot.R;
 import com.example.allot.common.OnCompleteListener;
 import com.example.allot.controller.events.UserEventsController;
@@ -337,7 +339,7 @@ public class UserEventsActivity extends AppCompatActivity {
      * @param eventItem the event item whose information should be displayed
      */
     private void bindCard(View cardView, EventListItem eventItem) {
-        View imageBackground = cardView.findViewById(R.id.imageBackground);
+        ImageView posterImage = cardView.findViewById(R.id.eventPosterImage);
         TextView titleText = cardView.findViewById(R.id.titleText);
         TextView locationText = cardView.findViewById(R.id.locationText);
         TextView dateText = cardView.findViewById(R.id.dateText);
@@ -346,9 +348,16 @@ public class UserEventsActivity extends AppCompatActivity {
         locationText.setText(eventItem == null ? null : eventItem.street);
         dateText.setText(eventItem == null ? null : eventItem.date);
 
-        imageBackground.setBackgroundResource(UiHelper.eventImageBackgroundRes(
-                eventItem == null ? null : eventItem.category
-        ));
+        Glide.with(cardView.getContext()).clear(posterImage);
+        posterImage.setImageResource(R.drawable.no_image);
+        if (eventItem != null && !TextUtils.isEmpty(eventItem.getPosterUrl())) {
+            Glide.with(cardView.getContext())
+                    .load(eventItem.getPosterUrl())
+                    .centerCrop()
+                    .placeholder(R.drawable.no_image)
+                    .error(R.drawable.no_image)
+                    .into(posterImage);
+        }
 
         cardView.setOnClickListener(view -> openEventDetailScreen(eventItem));
     }
