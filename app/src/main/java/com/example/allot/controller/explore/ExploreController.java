@@ -35,6 +35,13 @@ public class ExploreController {
     }
 
     /**
+     * @return the current device ID
+     */
+    public String getCurrentDeviceId() {
+        return userController.getCurrentDeviceId();
+    }
+
+    /**
      * Loads the current user's saved event IDs.
      *
      * @param listener the listener that receives the saved event IDs
@@ -112,12 +119,3 @@ public class ExploreController {
         });
     }
 }
-
-
-
-
-
-
-
-
-

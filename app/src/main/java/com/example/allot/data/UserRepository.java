@@ -136,6 +136,21 @@ public class UserRepository {
     }
 
     /**
+     * Updates the user's FCM registration token for push notifications.
+     *
+     * @param deviceId the current user device ID
+     * @param token    the FCM registration token
+     */
+    public void updateFcmToken(String deviceId, String token) {
+        if (isBlank(deviceId) || isBlank(token)) return;
+
+        usersCollection.document(deviceId)
+                .update("fcmToken", token)
+                .addOnSuccessListener(unused -> Log.d(TAG, "FCM token updated for user: " + deviceId))
+                .addOnFailureListener(e -> Log.e(TAG, "Failed to update FCM token", e));
+    }
+
+    /**
      * Adds or removes an event ID from the user's saved events.
      *
      * @param deviceId the current user device ID
@@ -458,11 +473,3 @@ public class UserRepository {
                 });
     }
 }
-
-
-
-
-
-
-
-

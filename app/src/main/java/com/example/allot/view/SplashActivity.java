@@ -8,39 +8,38 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import com.example.allot.R;
-import com.example.allot.common.NotificationHelper;
 import com.example.allot.common.TextHelper;
 import com.example.allot.controller.shared.UserController;
+import com.example.allot.data.UserRepository;
 import com.example.allot.model.profile.User;
 import com.example.allot.view.explore.ExploreActivity;
-import com.google.firebase.firestore.DocumentChange;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.Query;
-
-import java.util.Date;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GoogleApiAvailability;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 @SuppressLint("CustomSplashScreen")
 /**
  * Decides the first screen to show after the splash delay finishes.
- * Also handles notification permissions and background listeners.
+ * Also handles notification permissions and FCM token registration.
  */
 public class SplashActivity extends AppCompatActivity {
 
+    private static final String TAG = "SplashActivity";
     private static final long MIN_SPLASH_DURATION_MS = 900L;
 
     private final Handler handler = new Handler(Looper.getMainLooper());
     private long startedAtMs;
     private boolean navigated;
-    private static boolean notificationListenerStarted = false;
 
     private final ActivityResultLauncher<String> requestPermissionLauncher =
             registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
-                // Permission handled, continue with app flow
+                // Permission handled
             });
 
     @Override
@@ -50,8 +49,13 @@ public class SplashActivity extends AppCompatActivity {
 
         startedAtMs = System.currentTimeMillis();
 
-        askNotificationPermission();
+        if (checkPlayServices()) {
+            askNotificationPermission();
+            initApp();
+        }
+    }
 
+    private void initApp() {
         UserController userController = new UserController(this);
         if (userController.isNewDeviceId()) {
             navigateAfterDelay(true);
@@ -60,16 +64,48 @@ public class SplashActivity extends AppCompatActivity {
 
         userController.loadOrCreateUser((user, success) -> {
             if (success && user != null) {
-                startNotificationListener(user.getDeviceId());
+                registerFcmToken(user.getDeviceId());
             }
             boolean requiresProfileSetup = !success || requiresProfileSetup(user);
             navigateAfterDelay(requiresProfileSetup);
         });
     }
 
-    /**
-     * Requests notification permission for Android 13+.
-     */
+    private boolean checkPlayServices() {
+        GoogleApiAvailability apiAvailability = GoogleApiAvailability.getInstance();
+        int resultCode = apiAvailability.isGooglePlayServicesAvailable(this);
+        if (resultCode != ConnectionResult.SUCCESS) {
+            if (apiAvailability.isUserResolvableError(resultCode)) {
+                apiAvailability.getErrorDialog(this, resultCode, 9000).show();
+            } else {
+                Log.i(TAG, "This device is not supported.");
+                finish();
+            }
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        checkPlayServices();
+    }
+
+    private void registerFcmToken(String deviceId) {
+        FirebaseMessaging.getInstance().getToken().addOnCompleteListener(task -> {
+            if (!task.isSuccessful()) {
+                Log.w(TAG, "Fetching FCM registration token failed", task.getException());
+                return;
+            }
+
+            String token = task.getResult();
+            Log.d(TAG, "FCM Token: " + token);
+            
+            new UserRepository().updateFcmToken(deviceId, token);
+        });
+    }
+
     private void askNotificationPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) !=
@@ -77,43 +113,6 @@ public class SplashActivity extends AppCompatActivity {
                 requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS);
             }
         }
-    }
-
-    /**
-     * Starts a real-time listener for new notifications in Firestore.
-     * Triggers a system pop-up using NotificationHelper.
-     *
-     * @param deviceId the current user's device ID
-     */
-    private void startNotificationListener(String deviceId) {
-        if (notificationListenerStarted || deviceId == null) {
-            return;
-        }
-        notificationListenerStarted = true;
-
-        NotificationHelper notificationHelper = new NotificationHelper(getApplicationContext());
-        long appStartTime = System.currentTimeMillis();
-
-        FirebaseFirestore.getInstance()
-                .collection("users")
-                .document(deviceId)
-                .collection("notifications")
-                .orderBy("timestamp", Query.Direction.DESCENDING)
-                .limit(1)
-                .addSnapshotListener((snapshots, e) -> {
-                    if (e != null || snapshots == null) return;
-
-                    for (DocumentChange dc : snapshots.getDocumentChanges()) {
-                        if (dc.getType() == DocumentChange.Type.ADDED) {
-                            Date timestamp = dc.getDocument().getDate("timestamp");
-                            if (timestamp != null && timestamp.getTime() > appStartTime) {
-                                String title = dc.getDocument().getString("title");
-                                String body = dc.getDocument().getString("body");
-                                notificationHelper.showNotification(title, body);
-                            }
-                        }
-                    }
-                });
     }
 
     private void navigateAfterDelay(boolean requiresProfileSetup) {

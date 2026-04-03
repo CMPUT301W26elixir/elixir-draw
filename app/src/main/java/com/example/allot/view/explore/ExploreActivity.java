@@ -16,6 +16,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.allot.R;
 import com.example.allot.controller.explore.ExploreController;
+import com.example.allot.controller.shared.NotificationController;
 import com.example.allot.view.event.EventDetailActivity;
 import com.example.allot.view.events.EventListModeFragment;
 import com.example.allot.view.shared.AppNavigator;
@@ -32,6 +33,7 @@ public class ExploreActivity extends AppCompatActivity {
     private static final String TAG = "Allot_Logic";
 
     private ExploreController browseController;
+    private NotificationController notificationController;
     private EventListAdapter eventListAdapter;
     private RecyclerView recyclerView;
     private EditText searchInput;
@@ -67,6 +69,10 @@ public class ExploreActivity extends AppCompatActivity {
         fragmentContainer = findViewById(R.id.fragment_container);
         exploreContainer = findViewById(R.id.exploreContainer);
         browseController = new ExploreController(this);
+        notificationController = new NotificationController(this);
+
+        // Start background notification listening
+        notificationController.startListening(browseController.getCurrentDeviceId());
 
         // Set up the chips before loading events
         chipFortnite = findViewById(R.id.chipFortnite);
@@ -330,12 +336,3 @@ public class ExploreActivity extends AppCompatActivity {
         return value == null ? "" : value.trim();
     }
 }
-
-
-
-
-
-
-
-
-
