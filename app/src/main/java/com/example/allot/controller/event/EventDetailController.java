@@ -104,6 +104,27 @@ public class EventDetailController {
     }
 
     /**
+     * Loads just the event data so comments can be refreshed without full screen loading state.
+     *
+     * @param eventId the event ID
+     * @param listener the listener that receives the event
+     */
+    public void loadEventComments(String eventId, OnCompleteListener<Event> listener) {
+        if (isBlank(eventId)) {
+            listener.onComplete(null, false);
+            return;
+        }
+
+        eventRepository.getEventById(eventId, (event, success) -> {
+            if (!success || event == null) {
+                listener.onComplete(null, false);
+                return;
+            }
+            listener.onComplete(event, true);
+        });
+    }
+
+    /**
      * Returns the next action the view should take when the primary button is pressed.
      */
     public EventDetailData.NextAction resolveNextAction(EventDetailData state) {

@@ -6,6 +6,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.FrameLayout;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -16,7 +17,6 @@ import com.example.allot.R;
 import com.example.allot.controller.explore.ExploreController;
 import com.example.allot.controller.notification.NotificationService;
 import com.example.allot.view.event.EventDetailActivity;
-import com.example.allot.view.event.SearchEventActivity;
 import com.example.allot.view.events.EventListModeFragment;
 import com.example.allot.view.shared.AppNavigator;
 import com.example.allot.view.shared.BottomNavBarView;
@@ -30,11 +30,14 @@ import java.util.Locale;
  */
 public class ExploreActivity extends AppCompatActivity {
     private static final String TAG = "Allot_Logic";
+    private static final int FILTER_REQUEST_CODE = 4102;
+    private static final int SEARCH_DEBOUNCE_MS = 350;
 
     private ExploreController browseController;
     private EventListAdapter eventListAdapter;
     private RecyclerView recyclerView;
     private EditText searchInput;
+    private ImageButton filterMenuButton;
     private ProgressBar loadingIndicator;
     private TextView stateText;
     private BottomNavBarView bottomNavBar;
@@ -64,6 +67,7 @@ public class ExploreActivity extends AppCompatActivity {
 
         recyclerView = findViewById(R.id.eventsRecyclerView);
         searchInput = findViewById(R.id.searchInput);
+        filterMenuButton = findViewById(R.id.filterMenuButton);
         loadingIndicator = findViewById(R.id.loadingIndicator);
         stateText = findViewById(R.id.stateText);
         bottomNavBar = findViewById(R.id.bottomNavBar);
@@ -115,37 +119,49 @@ public class ExploreActivity extends AppCompatActivity {
     }
 
     /**
-     * Sets up click listeners for all filter chips and updates the chip UI.
-     * Clicking an already-selected chip removes the filter.
+     * Sets up the search input to filter on this screen.
      */
-    private void setupFilterChips() {
-        View.OnClickListener chipClickListener = view -> {
-            TextView clickedChip = (TextView) view;
-            String clickedText = clickedChip.getText().toString();
-            selectedChipFilter = toggleChipFilter(selectedChipFilter, clickedText);
+    private void setupSearchInput() {
+        searchInput.setFocusable(true);
+        searchInput.setFocusableInTouchMode(true);
+        searchInput.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
 
-            updateChipUI();
-            // Load the list again with the new chip filter
-            loadBrowseEvents("");
-        };
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                String query = s == null ? "" : s.toString().trim();
+                if (searchRunnable != null) {
+                    searchHandler.removeCallbacks(searchRunnable);
+                }
+                searchRunnable = () -> loadBrowseEvents(query);
+                searchHandler.postDelayed(searchRunnable, SEARCH_DEBOUNCE_MS);
+            }
 
-        chipFortnite.setOnClickListener(chipClickListener);
-        chipSports.setOnClickListener(chipClickListener);
-        chipArts.setOnClickListener(chipClickListener);
-        chipScience.setOnClickListener(chipClickListener);
-
-        // Show the starting chip look
-        updateChipUI();
+            @Override
+            public void afterTextChanged(Editable s) {}
+        });
     }
 
-    /**
-     * Updates the visual state of each filter chip based on the selected filter.
-     */
-    private void updateChipUI() {
-        chipFortnite.setBackgroundResource(getChipBackground(selectedChipFilter, chipFortnite.getText().toString()));
-        chipSports.setBackgroundResource(getChipBackground(selectedChipFilter, chipSports.getText().toString()));
-        chipArts.setBackgroundResource(getChipBackground(selectedChipFilter, chipArts.getText().toString()));
-        chipScience.setBackgroundResource(getChipBackground(selectedChipFilter, chipScience.getText().toString()));
+    private void setupFilterMenu() {
+        if (filterMenuButton == null) {
+            return;
+        }
+
+        filterMenuButton.setOnClickListener(view -> {
+            Intent intent = new Intent(this, EventFilterActivity.class);
+            intent.putExtra(EventFilterActivity.EXTRA_DATE_BEGIN, filterDateText);
+            intent.putExtra(EventFilterActivity.EXTRA_ADDRESS, filterAddress);
+            if (filterDistanceKm != null) {
+                intent.putExtra(EventFilterActivity.EXTRA_DISTANCE_KM, filterDistanceKm);
+            }
+            if (filterLatitude != null && filterLongitude != null) {
+                intent.putExtra(EventFilterActivity.EXTRA_LATITUDE, filterLatitude);
+                intent.putExtra(EventFilterActivity.EXTRA_LONGITUDE, filterLongitude);
+            }
+            intent.putExtra(EventFilterActivity.EXTRA_KEYWORDS, filterKeywords);
+            startActivityForResult(intent, FILTER_REQUEST_CODE);
+        });
     }
 
     /**
@@ -198,7 +214,7 @@ public class ExploreActivity extends AppCompatActivity {
         bottomNavBar.setSelectedTab(BottomNavBarView.Tab.EXPLORE);
         if (fragmentContainer != null) fragmentContainer.setVisibility(View.GONE);
         if (exploreContainer != null) exploreContainer.setVisibility(View.VISIBLE);
-        loadBrowseEvents("");
+        loadBrowseEvents(searchInput.getText() == null ? "" : searchInput.getText().toString());
     }
 
     /**
@@ -231,7 +247,7 @@ public class ExploreActivity extends AppCompatActivity {
                 return;
             }
 
-            loadBrowseEvents("");
+            loadBrowseEvents(searchInput.getText() == null ? "" : searchInput.getText().toString());
         });
     }
 
@@ -288,7 +304,16 @@ public class ExploreActivity extends AppCompatActivity {
      */
     private void loadBrowseEvents(String searchTerm) {
         showBrowseLoadingState();
-        browseController.loadBrowseEvents(searchTerm, selectedChipFilter, userSavedEvents, (items, success) -> {
+        browseController.loadBrowseEvents(
+                searchTerm,
+                "",
+                filterKeywords,
+                parseFilterDate(filterDateText),
+                filterLatitude,
+                filterLongitude,
+                filterDistanceKm,
+                userSavedEvents,
+                (items, success) -> {
             List<EventListItem> safeItems = items == null ? new ArrayList<>() : items;
             if (!success) {
                 showBrowseMessageState(getString(R.string.browse_state_error));
@@ -296,7 +321,7 @@ public class ExploreActivity extends AppCompatActivity {
             }
 
             if (safeItems.isEmpty()) {
-                showBrowseMessageState(buildEmptyStateMessage(searchTerm, selectedChipFilter));
+                showBrowseMessageState(buildEmptyStateMessage(searchTerm, ""));
                 return;
             }
 
@@ -322,18 +347,6 @@ public class ExploreActivity extends AppCompatActivity {
         stateText.setText(message);
     }
 
-    private String toggleChipFilter(String currentFilter, String clickedChipText) {
-        String safeCurrentFilter = normalize(currentFilter);
-        String safeClickedChip = normalize(clickedChipText);
-        return safeCurrentFilter.equals(safeClickedChip) ? "" : safeClickedChip;
-    }
-
-    private int getChipBackground(String currentFilter, String chipText) {
-        return normalize(currentFilter).equals(normalize(chipText))
-                ? R.drawable.bg_chip_selected
-                : R.drawable.bg_chip_unselected;
-    }
-
     private String buildEmptyStateMessage(String searchTerm, String chipFilter) {
         String trimmedSearch = normalize(searchTerm);
         String trimmedFilter = normalize(chipFilter);
@@ -353,7 +366,56 @@ public class ExploreActivity extends AppCompatActivity {
         return getString(R.string.browse_state_empty);
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode != FILTER_REQUEST_CODE || resultCode != RESULT_OK || data == null) {
+            return;
+        }
+
+        filterDateText = safeString(data.getStringExtra(EventFilterActivity.EXTRA_DATE_BEGIN));
+        filterAddress = safeString(data.getStringExtra(EventFilterActivity.EXTRA_ADDRESS));
+        filterKeywords = safeString(data.getStringExtra(EventFilterActivity.EXTRA_KEYWORDS));
+
+        filterLatitude = data.hasExtra(EventFilterActivity.EXTRA_LATITUDE)
+                ? data.getDoubleExtra(EventFilterActivity.EXTRA_LATITUDE, 0)
+                : null;
+        filterLongitude = data.hasExtra(EventFilterActivity.EXTRA_LONGITUDE)
+                ? data.getDoubleExtra(EventFilterActivity.EXTRA_LONGITUDE, 0)
+                : null;
+        filterDistanceKm = data.hasExtra(EventFilterActivity.EXTRA_DISTANCE_KM)
+                ? data.getDoubleExtra(EventFilterActivity.EXTRA_DISTANCE_KM, 0)
+                : null;
+
+        loadBrowseEvents(searchInput.getText() == null ? "" : searchInput.getText().toString());
+    }
+
+    private java.util.Date parseFilterDate(String rawDate) {
+        if (rawDate == null || rawDate.trim().isEmpty()) {
+            return null;
+        }
+        try {
+            java.text.SimpleDateFormat formatter = new java.text.SimpleDateFormat("MMM d, yyyy", Locale.getDefault());
+            formatter.setLenient(false);
+            return formatter.parse(rawDate.trim());
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
     private String normalize(String value) {
         return value == null ? "" : value.trim();
+    }
+
+    private String safeString(String value) {
+        return value == null ? "" : value.trim();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (searchRunnable != null) {
+            searchHandler.removeCallbacks(searchRunnable);
+        }
     }
 }
