@@ -82,9 +82,7 @@ public final class UiHelper {
      * @return the drawable resource for the event background
      */
     public static int eventImageBackgroundRes(String category) {
-        return Math.abs(cleanText(category).hashCode()) % 2 == 0
-                ? R.drawable.bg_event_image_one
-                : R.drawable.bg_event_image_two;
+        return R.drawable.no_image;
     }
 
     /**
