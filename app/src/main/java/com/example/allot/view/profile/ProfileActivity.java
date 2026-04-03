@@ -74,7 +74,22 @@ public class ProfileActivity extends AppCompatActivity {
                 if (uri == null) {
                     return;
                 }
-                uploadProfilePhoto(uri);
+                openProfilePhotoCropper(uri);
+            });
+
+    private final ActivityResultLauncher<Intent> profilePhotoCropLauncher =
+            registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+                if (result.getResultCode() != RESULT_OK || result.getData() == null) {
+                    return;
+                }
+
+                String outputUriValue = result.getData().getStringExtra(ProfilePhotoCropActivity.EXTRA_OUTPUT_URI);
+                if (TextUtils.isEmpty(outputUriValue)) {
+                    Toast.makeText(this, R.string.profile_photo_crop_save_failure, Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                uploadProfilePhoto(Uri.parse(outputUriValue));
             });
 
     /**
@@ -135,6 +150,17 @@ public class ProfileActivity extends AppCompatActivity {
             }
             profilePhotoPickerLauncher.launch("image/*");
         });
+    }
+
+    private void openProfilePhotoCropper(Uri sourceUri) {
+        if (sourceUri == null) {
+            return;
+        }
+
+        Intent intent = new Intent(this, ProfilePhotoCropActivity.class);
+        intent.putExtra(ProfilePhotoCropActivity.EXTRA_INPUT_URI, sourceUri.toString());
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        profilePhotoCropLauncher.launch(intent);
     }
 
     /**

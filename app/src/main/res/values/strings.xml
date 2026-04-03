@@ -73,6 +73,12 @@
     <string name="profile_photo_content_description">Profile photo</string>
     <string name="profile_photo_upload_success">Profile photo updated.</string>
     <string name="profile_photo_upload_failure">Could not update profile photo. Please try again.</string>
+    <string name="profile_photo_crop_title">Adjust Profile Photo</string>
+    <string name="profile_photo_crop_subtitle">Move and zoom your photo to frame it the way you want.</string>
+    <string name="profile_photo_crop_cancel">Cancel</string>
+    <string name="profile_photo_crop_use">Use Photo</string>
+    <string name="profile_photo_crop_load_failure">Could not load that photo. Please try another image.</string>
+    <string name="profile_photo_crop_save_failure">Could not prepare that photo. Please try again.</string>
     <string name="profile_first_name_label">First name *</string>
     <string name="profile_last_name_label">Last name *</string>
     <string name="profile_contact_information">Contact Information:</string>
