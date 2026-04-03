@@ -1,5 +1,8 @@
 package com.example.allot.view.explore;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
+import android.location.Location;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
@@ -8,10 +11,17 @@ import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
+import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.appcompat.app.AppCompatActivity;
 import com.example.allot.R;
 import com.example.allot.controller.event.AndroidEventLocationGeocodingService;
 import com.example.allot.controller.event.EventLocationCoordinates;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.Priority;
+import com.google.android.gms.tasks.CancellationTokenSource;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
 
@@ -19,6 +29,8 @@ import java.util.Locale;
  * Collects optional filters for browsing events.
  */
 public class EventFilterActivity extends AppCompatActivity {
+    private static final int LOCATION_PERMISSION_REQUEST = 3001;
+
     public static final String EXTRA_DATE_BEGIN = "extra_date_begin";
     public static final String EXTRA_ADDRESS = "extra_address";
     public static final String EXTRA_DISTANCE_KM = "extra_distance_km";
@@ -32,6 +44,8 @@ public class EventFilterActivity extends AppCompatActivity {
     private EditText keywordsInput;
     private TextView saveButton;
     private ProgressBar loadingIndicator;
+    private FusedLocationProviderClient fusedLocationProviderClient;
+    private boolean isAutoFillingAddress;
 
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("MMM d, yyyy", Locale.getDefault());
 
@@ -41,10 +55,12 @@ public class EventFilterActivity extends AppCompatActivity {
         setContentView(R.layout.activity_event_filters);
 
         dateFormat.setLenient(false);
+        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
 
         bindViews();
         bindInitialValues();
         setupListeners();
+        maybeAutoFillCurrentLocationAddress();
     }
 
     private void bindViews() {
@@ -72,6 +88,23 @@ public class EventFilterActivity extends AppCompatActivity {
         backButton.setOnClickListener(view -> getOnBackPressedDispatcher().onBackPressed());
 
         saveButton.setOnClickListener(view -> saveFilters());
+    }
+
+    private void maybeAutoFillCurrentLocationAddress() {
+        if (!safeString(addressInput.getText()).isEmpty() || isAutoFillingAddress) {
+            return;
+        }
+
+        if (!hasLocationPermission()) {
+            ActivityCompat.requestPermissions(
+                    this,
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                    LOCATION_PERMISSION_REQUEST
+            );
+            return;
+        }
+
+        loadCurrentLocationAddress();
     }
 
     private void saveFilters() {
@@ -120,6 +153,51 @@ public class EventFilterActivity extends AppCompatActivity {
         }).start();
     }
 
+    private boolean hasLocationPermission() {
+        return ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED;
+    }
+
+    private void loadCurrentLocationAddress() {
+        isAutoFillingAddress = true;
+        setLoading(true);
+
+        CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+        fusedLocationProviderClient
+                .getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, cancellationTokenSource.getToken())
+                .addOnSuccessListener(this, location -> {
+                    if (location == null) {
+                        finishAutoFill();
+                        return;
+                    }
+
+                    reverseGeocodeCurrentLocation(location);
+                })
+                .addOnFailureListener(this, exception -> finishAutoFill());
+    }
+
+    private void reverseGeocodeCurrentLocation(Location location) {
+        new Thread(() -> {
+            AndroidEventLocationGeocodingService geocodingService = new AndroidEventLocationGeocodingService(this);
+            String resolvedAddress = geocodingService.reverseGeocode(
+                    location.getLatitude(),
+                    location.getLongitude()
+            );
+            runOnUiThread(() -> {
+                if (!isFinishing() && !isDestroyed() && safeString(addressInput.getText()).isEmpty()
+                        && !TextUtils.isEmpty(resolvedAddress)) {
+                    addressInput.setText(resolvedAddress);
+                }
+                finishAutoFill();
+            });
+        }).start();
+    }
+
+    private void finishAutoFill() {
+        isAutoFillingAddress = false;
+        setLoading(false);
+    }
+
     private void finishWithResults(String rawDate,
                                    String address,
                                    Double distanceKm,
@@ -165,6 +243,18 @@ public class EventFilterActivity extends AppCompatActivity {
     private void setLoading(boolean isLoading) {
         loadingIndicator.setVisibility(isLoading ? View.VISIBLE : View.GONE);
         saveButton.setEnabled(!isLoading);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode != LOCATION_PERMISSION_REQUEST) {
+            return;
+        }
+
+        if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            loadCurrentLocationAddress();
+        }
     }
 
     private String safeString(CharSequence value) {

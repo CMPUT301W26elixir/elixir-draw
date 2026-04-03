@@ -40,6 +40,8 @@
                 android:layout_height="95dp"
                 android:layout_gravity="center_horizontal"
                 android:layout_marginTop="18dp"
+                android:background="@drawable/bg_profile_avatar_placeholder"
+                android:clipToOutline="true"
                 android:clickable="true"
                 android:focusable="true">
 

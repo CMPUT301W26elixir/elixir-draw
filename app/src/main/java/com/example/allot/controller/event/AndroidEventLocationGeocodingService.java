@@ -37,4 +37,45 @@ public class AndroidEventLocationGeocodingService implements EventLocationGeocod
             return null;
         }
     }
+
+    public String reverseGeocode(double latitude, double longitude) {
+        if (context == null || !Geocoder.isPresent()) {
+            return null;
+        }
+
+        Geocoder geocoder = new Geocoder(context, Locale.getDefault());
+        try {
+            List<Address> addresses = geocoder.getFromLocation(latitude, longitude, 1);
+            if (addresses == null || addresses.isEmpty()) {
+                return null;
+            }
+
+            Address address = addresses.get(0);
+            String addressLine = address.getAddressLine(0);
+            if (!TextHelper.isBlank(addressLine)) {
+                return addressLine.trim();
+            }
+
+            StringBuilder builder = new StringBuilder();
+            appendAddressPart(builder, address.getFeatureName());
+            appendAddressPart(builder, address.getThoroughfare());
+            appendAddressPart(builder, address.getLocality());
+            appendAddressPart(builder, address.getAdminArea());
+            appendAddressPart(builder, address.getPostalCode());
+            return builder.length() == 0 ? null : builder.toString();
+        } catch (IOException | IllegalArgumentException exception) {
+            return null;
+        }
+    }
+
+    private void appendAddressPart(StringBuilder builder, String value) {
+        if (TextHelper.isBlank(value)) {
+            return;
+        }
+
+        if (builder.length() > 0) {
+            builder.append(", ");
+        }
+        builder.append(value.trim());
+    }
 }

@@ -26,12 +26,7 @@ public class EventFormUiHelper {
     private final EditText priceInput;
     private final EditText descriptionInput;
     private final EditText participantsInput;
-    private final Spinner registrationStartMonthSpinner;
-    private final EditText registrationStartDayInput;
-    private final EditText registrationStartYearInput;
-    private final Spinner registrationEndMonthSpinner;
-    private final EditText registrationEndDayInput;
-    private final EditText registrationEndYearInput;
+    private final RegistrationRangePickerView registrationRangePickerView;
 
     /**
      * Creates a helper around the event form widgets.
@@ -46,12 +41,7 @@ public class EventFormUiHelper {
      * @param priceInput the price field
      * @param descriptionInput the description field
      * @param participantsInput the participant field
-     * @param registrationStartMonthSpinner the registration start month spinner
-     * @param registrationStartDayInput the registration start day field
-     * @param registrationStartYearInput the registration start year field
-     * @param registrationEndMonthSpinner the registration end month spinner
-     * @param registrationEndDayInput the registration end day field
-     * @param registrationEndYearInput the registration end year field
+     * @param registrationRangePickerView the registration range picker
      */
     public EventFormUiHelper(EditText titleInput,
                              EditText locationInput,
@@ -63,12 +53,7 @@ public class EventFormUiHelper {
                              EditText priceInput,
                              EditText descriptionInput,
                              EditText participantsInput,
-                             Spinner registrationStartMonthSpinner,
-                             EditText registrationStartDayInput,
-                             EditText registrationStartYearInput,
-                             Spinner registrationEndMonthSpinner,
-                             EditText registrationEndDayInput,
-                             EditText registrationEndYearInput) {
+                             RegistrationRangePickerView registrationRangePickerView) {
         this.titleInput = titleInput;
         this.locationInput = locationInput;
         this.privateEventCheckbox = privateEventCheckbox;
@@ -79,12 +64,7 @@ public class EventFormUiHelper {
         this.priceInput = priceInput;
         this.descriptionInput = descriptionInput;
         this.participantsInput = participantsInput;
-        this.registrationStartMonthSpinner = registrationStartMonthSpinner;
-        this.registrationStartDayInput = registrationStartDayInput;
-        this.registrationStartYearInput = registrationStartYearInput;
-        this.registrationEndMonthSpinner = registrationEndMonthSpinner;
-        this.registrationEndDayInput = registrationEndDayInput;
-        this.registrationEndYearInput = registrationEndYearInput;
+        this.registrationRangePickerView = registrationRangePickerView;
     }
 
     /**
@@ -94,8 +74,6 @@ public class EventFormUiHelper {
      */
     public void setupMonthSpinners(Context context) {
         setupMonthSpinner(context, eventMonthSpinner);
-        setupMonthSpinner(context, registrationStartMonthSpinner);
-        setupMonthSpinner(context, registrationEndMonthSpinner);
     }
 
     /**
@@ -115,12 +93,12 @@ public class EventFormUiHelper {
                 readText(priceInput),
                 readText(descriptionInput),
                 readText(participantsInput),
-                readMonth(registrationStartMonthSpinner),
-                readText(registrationStartDayInput),
-                readText(registrationStartYearInput),
-                readMonth(registrationEndMonthSpinner),
-                readText(registrationEndDayInput),
-                readText(registrationEndYearInput)
+                registrationRangePickerView == null ? "" : registrationRangePickerView.getStartMonth(),
+                registrationRangePickerView == null ? "" : registrationRangePickerView.getStartDay(),
+                registrationRangePickerView == null ? "" : registrationRangePickerView.getStartYear(),
+                registrationRangePickerView == null ? "" : registrationRangePickerView.getEndMonth(),
+                registrationRangePickerView == null ? "" : registrationRangePickerView.getEndDay(),
+                registrationRangePickerView == null ? "" : registrationRangePickerView.getEndYear()
         );
     }
 
@@ -146,14 +124,16 @@ public class EventFormUiHelper {
 
         bindDate(eventMonthSpinner, eventDayInput, eventYearInput,
                 formData.getEventMonth(), formData.getEventDay(), formData.getEventYear());
-        bindDate(registrationStartMonthSpinner, registrationStartDayInput, registrationStartYearInput,
-                formData.getRegistrationStartMonth(),
-                formData.getRegistrationStartDay(),
-                formData.getRegistrationStartYear());
-        bindDate(registrationEndMonthSpinner, registrationEndDayInput, registrationEndYearInput,
-                formData.getRegistrationEndMonth(),
-                formData.getRegistrationEndDay(),
-                formData.getRegistrationEndYear());
+        if (registrationRangePickerView != null) {
+            registrationRangePickerView.bindRange(
+                    formData.getRegistrationStartMonth(),
+                    formData.getRegistrationStartDay(),
+                    formData.getRegistrationStartYear(),
+                    formData.getRegistrationEndMonth(),
+                    formData.getRegistrationEndDay(),
+                    formData.getRegistrationEndYear()
+            );
+        }
     }
 
     /**
