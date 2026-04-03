@@ -3,6 +3,7 @@ package com.example.allot.controller.lottery;
 import com.example.allot.R;
 import com.example.allot.common.AppResult;
 import com.example.allot.common.OnCompleteListener;
+import com.example.allot.controller.notification.NotificationController;
 import com.example.allot.controller.shared.UserController;
 import com.example.allot.data.EventRepository;
 import com.example.allot.model.event.Event;
@@ -17,6 +18,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+
 /**
  * Handles the organizer lottery flow from load to save.
  */
@@ -26,6 +28,7 @@ public class LotteryController {
     private final LotteryDrawService lotteryDrawService;
     private final LotteryInputValidator lotteryInputValidator;
     private final SimpleDateFormat drawDateFormat = new SimpleDateFormat("MMMM d, yyyy", Locale.getDefault());
+    private final NotificationController notificationController;
 
     public LotteryController(android.content.Context context) {
         this(new EventRepository(), new UserController(context), new LotteryDrawService(), new LotteryInputValidator());
@@ -35,10 +38,19 @@ public class LotteryController {
                       UserController userController,
                       LotteryDrawService lotteryDrawService,
                       LotteryInputValidator lotteryInputValidator) {
+        this(eventRepository, userController, lotteryDrawService, lotteryInputValidator, new NotificationController());
+    }
+
+    LotteryController(EventRepository eventRepository,
+                      UserController userController,
+                      LotteryDrawService lotteryDrawService,
+                      LotteryInputValidator lotteryInputValidator,
+                      NotificationController notificationController) {
         this.eventRepository = eventRepository;
         this.userController = userController;
         this.lotteryDrawService = lotteryDrawService;
         this.lotteryInputValidator = lotteryInputValidator;
+        this.notificationController = notificationController;
         drawDateFormat.setLenient(false);
     }
 
@@ -148,7 +160,15 @@ public class LotteryController {
                     return;
                 }
 
-                listener.onComplete(AppResult.success(updatedEvent, R.string.manage_lottery_draw_success), true);
+                String eventName = updatedEvent.getTitle() != null ? updatedEvent.getTitle() : "the event";
+                List<String> chosen = updatedEvent.getChosen() != null ? updatedEvent.getChosen() : new ArrayList<>();
+                List<String> notChosen = updatedEvent.getNotEnrolled() != null ? updatedEvent.getNotEnrolled() : new ArrayList<>();
+
+                notificationController.notifySelectedEntrants(chosen, eventId, eventName, (r, s) ->
+                        notificationController.notifyNotSelectedEntrants(notChosen, eventId, eventName, (r2, s2) ->
+                                listener.onComplete(AppResult.success(updatedEvent, R.string.manage_lottery_draw_success), true)
+                        )
+                );
             });
         });
     }
@@ -212,12 +232,3 @@ public class LotteryController {
         return value == null || value.trim().isEmpty();
     }
 }
-
-
-
-
-
-
-
-
-

@@ -63,6 +63,11 @@ public class ExploreController {
      */
     public void loadBrowseEvents(String searchTerm,
                                  String selectedChipFilter,
+                                 String keywords,
+                                 java.util.Date startDate,
+                                 Double latitude,
+                                 Double longitude,
+                                 Double distanceKm,
                                  List<String> savedEventIds,
                                  OnCompleteListener<List<EventListItem>> listener) {
         eventRepository.getOpenEvents((events, success) -> {
@@ -71,10 +76,18 @@ public class ExploreController {
                 return;
             }
 
-            BrowseFilter browseFilter = new BrowseFilter(searchTerm, selectedChipFilter);
+            BrowseFilter browseFilter = new BrowseFilter(
+                    searchTerm,
+                    selectedChipFilter,
+                    keywords,
+                    startDate,
+                    latitude,
+                    longitude,
+                    distanceKm
+            );
             List<Event> filteredEvents = exploreFilterService.buildBrowsableEventList(
                     events,
-                    new BrowseFilter(browseFilter.getSearchTerm(), browseFilter.getSelectedCategory())
+                    browseFilter
             );
             listener.onComplete(eventListItemMapper.mapEvents(filteredEvents, savedEventIds), true);
         });
