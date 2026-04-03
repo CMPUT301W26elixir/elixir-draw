@@ -140,7 +140,7 @@ public class UserRepository {
         if (deviceId == null || fcmToken == null) return;
         Map<String, Object> data = new HashMap<>();
         data.put("fcmToken", fcmToken);
-        data.put("deviceId", deviceId); // Ensure device ID is set
+        data.put("deviceId", deviceId);
         
         usersCollection.document(deviceId)
                 .set(data, SetOptions.merge())
@@ -171,6 +171,7 @@ public class UserRepository {
                 .get()
                 .addOnCompleteListener(task -> {
                     if (!task.isSuccessful()) {
+                        Log.d(TAG, "Failed to load events for cleanup", task.getException());
                         listener.onComplete(false, false);
                         return;
                     }
@@ -205,6 +206,7 @@ public class UserRepository {
 
         batch.commit().addOnCompleteListener(commitTask -> {
             if (!commitTask.isSuccessful()) {
+                Log.d(TAG, "Failed to delete user profile", commitTask.getException());
                 listener.onComplete(false, false);
                 return;
             }
@@ -233,8 +235,8 @@ public class UserRepository {
         return batches;
     }
 
-    static final class CleanupOperation {
-        enum Type { REMOVE_USER_FROM_EVENT, DELETE_EVENT, DELETE_USER }
+    public static final class CleanupOperation {
+        public enum Type { REMOVE_USER_FROM_EVENT, DELETE_EVENT, DELETE_USER }
         private final Type type;
         private final String documentPath;
         private final String deviceId;
@@ -256,6 +258,10 @@ public class UserRepository {
         static CleanupOperation deleteUser(String deviceId) {
             return new CleanupOperation(Type.DELETE_USER, null, deviceId);
         }
+
+        public Type getType() { return type; }
+        public String getDocumentPath() { return documentPath; }
+        public String getDeviceId() { return deviceId; }
 
         void apply(WriteBatch batch, FirebaseFirestore database, CollectionReference usersCollection) {
             if (type == Type.REMOVE_USER_FROM_EVENT) {
@@ -331,6 +337,7 @@ public class UserRepository {
     public void getAllUsers(OnCompleteListener<List<User>> listener) {
         usersCollection.get().addOnCompleteListener(task -> {
             if (!task.isSuccessful()) {
+                Log.d(TAG, "Failed to load all users", task.getException());
                 listener.onComplete(null, false);
                 return;
             }
