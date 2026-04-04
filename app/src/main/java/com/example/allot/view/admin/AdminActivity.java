@@ -33,6 +33,7 @@ public class AdminActivity extends AppCompatActivity {
     private enum AdminTab {
         EVENTS,
         PROFILES,
+        PHOTOS,
         POSTERS
     }
 
@@ -40,6 +41,7 @@ public class AdminActivity extends AppCompatActivity {
     private ImageView backButton;
     private TextView eventsTabText;
     private TextView profilesTabText;
+    private TextView photosTabText;
     private TextView postersTabText;
 
     // Event management
@@ -59,6 +61,14 @@ public class AdminActivity extends AppCompatActivity {
     private View profilesContainer;
     private View profilesLoadingLayout;
     private TextView profilesEmptyStateText;
+
+    // Profile photo management
+    private RecyclerView photosRecyclerView;
+    private AdminProfilePhotoListAdapter photosAdapter;
+    private List<User> photosList;
+    private View photosContainer;
+    private View photosLoadingLayout;
+    private TextView photosEmptyStateText;
 
     // Poster management
     private EventPosterController eventPosterController;
@@ -87,6 +97,7 @@ public class AdminActivity extends AppCompatActivity {
         eventPosterController = new EventPosterController();
         eventsList = new ArrayList<>();
         profilesList = new ArrayList<>();
+        photosList = new ArrayList<>();
         posterEventsList = new ArrayList<>();
 
         bindViews();
@@ -114,6 +125,7 @@ public class AdminActivity extends AppCompatActivity {
         backButton = findViewById(R.id.backButton);
         eventsTabText = findViewById(R.id.eventsTabText);
         profilesTabText = findViewById(R.id.profilesTabText);
+        photosTabText = findViewById(R.id.photosTabText);
         postersTabText = findViewById(R.id.postersTabText);
 
         // Events
@@ -127,6 +139,12 @@ public class AdminActivity extends AppCompatActivity {
         profilesRecyclerView = findViewById(R.id.profilesRecyclerView);
         profilesLoadingLayout = findViewById(R.id.profilesLoadingLayout);
         profilesEmptyStateText = findViewById(R.id.profilesEmptyStateText);
+
+        // Profile photos
+        photosContainer = findViewById(R.id.photosContainer);
+        photosRecyclerView = findViewById(R.id.photosRecyclerView);
+        photosLoadingLayout = findViewById(R.id.photosLoadingLayout);
+        photosEmptyStateText = findViewById(R.id.photosEmptyStateText);
 
         // Posters
         postersContainer = findViewById(R.id.postersContainer);
@@ -153,6 +171,7 @@ public class AdminActivity extends AppCompatActivity {
     private void setupTabButtons() {
         eventsTabText.setOnClickListener(view -> showEventsTab());
         profilesTabText.setOnClickListener(view -> showProfilesTab());
+        photosTabText.setOnClickListener(view -> showPhotosTab());
         postersTabText.setOnClickListener(view -> showPostersTab());
         updateTabStyles();
     }
@@ -166,6 +185,7 @@ public class AdminActivity extends AppCompatActivity {
 
         eventsTabText.setTextColor(currentTab == AdminTab.EVENTS ? activeColor : inactiveColor);
         profilesTabText.setTextColor(currentTab == AdminTab.PROFILES ? activeColor : inactiveColor);
+        photosTabText.setTextColor(currentTab == AdminTab.PHOTOS ? activeColor : inactiveColor);
         postersTabText.setTextColor(currentTab == AdminTab.POSTERS ? activeColor : inactiveColor);
     }
 
@@ -182,6 +202,10 @@ public class AdminActivity extends AppCompatActivity {
         profilesAdapter = new AdminProfileListAdapter(profilesList, this::onProfileDeleteClick);
         profilesRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         profilesRecyclerView.setAdapter(profilesAdapter);
+
+        photosAdapter = new AdminProfilePhotoListAdapter(photosList);
+        photosRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        photosRecyclerView.setAdapter(photosAdapter);
 
         // Posters RecyclerView
         postersAdapter = new AdminPosterListAdapter(posterEventsList, this::onPosterDeleteClick);
@@ -204,6 +228,7 @@ public class AdminActivity extends AppCompatActivity {
         updateTabStyles();
         eventsContainer.setVisibility(View.VISIBLE);
         profilesContainer.setVisibility(View.GONE);
+        photosContainer.setVisibility(View.GONE);
         postersContainer.setVisibility(View.GONE);
 
         if (eventsList.isEmpty()) {
@@ -219,10 +244,27 @@ public class AdminActivity extends AppCompatActivity {
         updateTabStyles();
         eventsContainer.setVisibility(View.GONE);
         profilesContainer.setVisibility(View.VISIBLE);
+        photosContainer.setVisibility(View.GONE);
         postersContainer.setVisibility(View.GONE);
 
         if (profilesList.isEmpty()) {
             loadProfiles();
+        }
+    }
+
+    /**
+     * Shows the profile photos tab and loads photos if not already loaded.
+     */
+    private void showPhotosTab() {
+        currentTab = AdminTab.PHOTOS;
+        updateTabStyles();
+        eventsContainer.setVisibility(View.GONE);
+        profilesContainer.setVisibility(View.GONE);
+        photosContainer.setVisibility(View.VISIBLE);
+        postersContainer.setVisibility(View.GONE);
+
+        if (photosList.isEmpty()) {
+            loadProfilePhotos();
         }
     }
 
@@ -234,6 +276,7 @@ public class AdminActivity extends AppCompatActivity {
         updateTabStyles();
         eventsContainer.setVisibility(View.GONE);
         profilesContainer.setVisibility(View.GONE);
+        photosContainer.setVisibility(View.GONE);
         postersContainer.setVisibility(View.VISIBLE);
 
         if (posterEventsList.isEmpty()) {
@@ -288,6 +331,37 @@ public class AdminActivity extends AppCompatActivity {
             profilesList.addAll(profiles);
             setProfilesVisibleState();
             profilesAdapter.notifyDataSetChanged();
+        });
+    }
+
+    /**
+     * Loads all profile photos from the database.
+     * Only users with an uploaded profile photo are displayed.
+     */
+    private void loadProfilePhotos() {
+        setPhotosLoadingState();
+        adminProfileController.loadAllProfiles((profiles, success) -> {
+            if (!success || profiles == null) {
+                setPhotosEmptyState(getString(R.string.admin_error_loading_photos));
+                Toast.makeText(this, R.string.admin_error_loading_photos, Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            photosList.clear();
+            for (User user : profiles) {
+                if (user == null || UiHelper.isBlank(user.getProfilePhotoUrl())) {
+                    continue;
+                }
+                photosList.add(user);
+            }
+
+            if (photosList.isEmpty()) {
+                setPhotosEmptyState(getString(R.string.admin_no_photos));
+                return;
+            }
+
+            setPhotosVisibleState();
+            photosAdapter.notifyDataSetChanged();
         });
     }
 
@@ -383,6 +457,38 @@ public class AdminActivity extends AppCompatActivity {
         profilesLoadingLayout.setVisibility(View.GONE);
         profilesEmptyStateText.setVisibility(View.VISIBLE);
         profilesEmptyStateText.setText(message);
+    }
+
+    // ============== Profile photo state management ==============
+
+    /**
+     * Shows the profile photos loading state.
+     */
+    private void setPhotosLoadingState() {
+        photosRecyclerView.setVisibility(View.GONE);
+        photosLoadingLayout.setVisibility(View.VISIBLE);
+        photosEmptyStateText.setVisibility(View.GONE);
+    }
+
+    /**
+     * Shows the profile photos visible state.
+     */
+    private void setPhotosVisibleState() {
+        photosRecyclerView.setVisibility(View.VISIBLE);
+        photosLoadingLayout.setVisibility(View.GONE);
+        photosEmptyStateText.setVisibility(View.GONE);
+    }
+
+    /**
+     * Shows the profile photos empty state.
+     *
+     * @param message the message to display
+     */
+    private void setPhotosEmptyState(String message) {
+        photosRecyclerView.setVisibility(View.GONE);
+        photosLoadingLayout.setVisibility(View.GONE);
+        photosEmptyStateText.setVisibility(View.VISIBLE);
+        photosEmptyStateText.setText(message);
     }
 
     // ============== Poster state management ==============
@@ -573,9 +679,18 @@ public class AdminActivity extends AppCompatActivity {
             profilesList.remove(position);
             profilesAdapter.notifyItemRemoved(position);
 
+            photosList.removeIf(photoUser -> photoUser != null
+                    && user.getDeviceId() != null
+                    && user.getDeviceId().equals(photoUser.getDeviceId()));
+            photosAdapter.notifyDataSetChanged();
+
             // Show empty state if no profiles left
             if (profilesList.isEmpty()) {
                 setProfilesEmptyState(getString(R.string.admin_no_profiles));
+            }
+
+            if (photosList.isEmpty()) {
+                setPhotosEmptyState(getString(R.string.admin_no_photos));
             }
         });
     }

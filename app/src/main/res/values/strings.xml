@@ -83,6 +83,10 @@
     <string name="admin_loading_profiles">Loading profiles...</string>
     <string name="admin_no_profiles">No profiles found</string>
     <string name="admin_error_loading_profiles">Failed to load profiles</string>
+    <string name="admin_view_photos">Photos</string>
+    <string name="admin_loading_photos">Loading profile photos...</string>
+    <string name="admin_no_photos">No profile photos found</string>
+    <string name="admin_error_loading_photos">Failed to load profile photos</string>
     <string name="admin_delete_profile_title">Delete Profile?</string>
     <string name="admin_delete_profile_message">Are you sure you want to delete this profile? This action cannot be undone.</string>
     <string name="admin_profile_deleted">Profile deleted successfully</string>
