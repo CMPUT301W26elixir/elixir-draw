@@ -1,16 +1,25 @@
 package com.example.allot.view.explore;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.location.Address;
+import android.location.Geocoder;
+import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.FrameLayout;
+import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.allot.R;
 import com.example.allot.controller.explore.ExploreController;
@@ -22,6 +31,10 @@ import com.example.allot.view.shared.AppNavigator;
 import com.example.allot.view.shared.BottomNavBarView;
 import com.example.allot.view.shared.EventListAdapter;
 import com.example.allot.view.shared.EventListItem;
+import com.example.allot.view.shared.UiHelper;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -31,6 +44,8 @@ import java.util.Locale;
  */
 public class ExploreActivity extends AppCompatActivity {
     private static final String TAG = "ExploreActivity";
+    private static final int LOCATION_PERMISSION_REQUEST = 1001;
+    private static final double DEFAULT_DISTANCE_KM = 50.0;
 
     private ExploreController browseController;
     private EventListAdapter eventListAdapter;
@@ -43,11 +58,17 @@ public class ExploreActivity extends AppCompatActivity {
 
     private FrameLayout fragmentContainer;
     private LinearLayout exploreContainer;
+    private LinearLayout filterPillsContainer;
+    private HorizontalScrollView filterPillsScrollView;
 
     private NotificationService notificationService;
+    private FusedLocationProviderClient fusedLocationProviderClient;
 
-    // These chips help filter the event list
-    private TextView chipFortnite, chipSports, chipArts, chipScience;
+    private String filterKeywords;
+    private String filterAddress;
+    private Double filterLatitude;
+    private Double filterLongitude;
+    private Double filterDistanceKm;
     private String selectedChipFilter = "";
 
     private List<String> userSavedEvents = new ArrayList<>();
@@ -60,6 +81,7 @@ public class ExploreActivity extends AppCompatActivity {
         browseController = new ExploreController(this);
         notificationService = new NotificationService(this);
         notificationService.startListening();
+        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
 
         bindViews();
         setupSearch();
@@ -78,11 +100,13 @@ public class ExploreActivity extends AppCompatActivity {
         bottomNavBar = findViewById(R.id.bottomNavBar);
         fragmentContainer = findViewById(R.id.fragment_container);
         exploreContainer = findViewById(R.id.exploreContainer);
-
-        chipFortnite = findViewById(R.id.chipFortnite);
-        chipSports = findViewById(R.id.chipSports);
-        chipArts = findViewById(R.id.chipArts);
-        chipScience = findViewById(R.id.chipScience);
+        
+        // These IDs must exist in activity_main.xml or be removed if unused
+        // Restoring standard chip IDs
+        View chipFortnite = findViewById(R.id.chipFortnite);
+        View chipSports = findViewById(R.id.chipSports);
+        View chipArts = findViewById(R.id.chipArts);
+        View chipScience = findViewById(R.id.chipScience);
 
         eventListAdapter = new EventListAdapter(new ArrayList<>(), new EventListAdapter.OnEventClickListener() {
             @Override
@@ -119,24 +143,28 @@ public class ExploreActivity extends AppCompatActivity {
             TextView clickedChip = (TextView) view;
             String clickedText = clickedChip.getText().toString();
             selectedChipFilter = toggleChipFilter(selectedChipFilter, clickedText);
-
             updateChipUI();
             loadBrowseEvents("");
         };
 
-        if (chipFortnite != null) chipFortnite.setOnClickListener(chipClickListener);
-        if (chipSports != null) chipSports.setOnClickListener(chipClickListener);
-        if (chipArts != null) chipArts.setOnClickListener(chipClickListener);
-        if (chipScience != null) chipScience.setOnClickListener(chipClickListener);
+        findViewById(R.id.chipFortnite).setOnClickListener(chipClickListener);
+        findViewById(R.id.chipSports).setOnClickListener(chipClickListener);
+        findViewById(R.id.chipArts).setOnClickListener(chipClickListener);
+        findViewById(R.id.chipScience).setOnClickListener(chipClickListener);
 
         updateChipUI();
     }
 
     private void updateChipUI() {
-        if (chipFortnite != null) chipFortnite.setBackgroundResource(getChipBackground(selectedChipFilter, "Fortnite"));
-        if (chipSports != null) chipSports.setBackgroundResource(getChipBackground(selectedChipFilter, getString(R.string.chip_sports)));
-        if (chipArts != null) chipArts.setBackgroundResource(getChipBackground(selectedChipFilter, getString(R.string.chip_arts)));
-        if (chipScience != null) chipScience.setBackgroundResource(getChipBackground(selectedChipFilter, getString(R.string.chip_science)));
+        TextView chipFortnite = findViewById(R.id.chipFortnite);
+        TextView chipSports = findViewById(R.id.chipSports);
+        TextView chipArts = findViewById(R.id.chipArts);
+        TextView chipScience = findViewById(R.id.chipScience);
+
+        chipFortnite.setBackgroundResource(getChipBackground(selectedChipFilter, "Fortnite"));
+        chipSports.setBackgroundResource(getChipBackground(selectedChipFilter, getString(R.string.chip_sports)));
+        chipArts.setBackgroundResource(getChipBackground(selectedChipFilter, getString(R.string.chip_arts)));
+        chipScience.setBackgroundResource(getChipBackground(selectedChipFilter, getString(R.string.chip_science)));
     }
 
     @Override
@@ -223,15 +251,14 @@ public class ExploreActivity extends AppCompatActivity {
 
     private void loadBrowseEvents(String searchTerm) {
         showBrowseLoadingState();
-        // Updated call to match 9-parameter signature in ExploreController
         browseController.loadBrowseEvents(
                 searchTerm,
                 selectedChipFilter,
-                null, // keywords
+                filterKeywords,
                 null, // startDate
-                null, // latitude
-                null, // longitude
-                null, // distanceKm
+                filterLatitude,
+                filterLongitude,
+                filterDistanceKm,
                 userSavedEvents,
                 (items, success) -> {
                     loadingIndicator.setVisibility(View.GONE);
@@ -279,10 +306,10 @@ public class ExploreActivity extends AppCompatActivity {
     }
 
     private String buildEmptyStateMessage(String searchTerm, String chipFilter) {
-        if (!searchTerm.isEmpty()) {
+        if (!UiHelper.isBlank(searchTerm)) {
             return String.format(Locale.getDefault(), "No events match \"%s\".", searchTerm);
         }
-        if (!chipFilter.isEmpty()) {
+        if (!UiHelper.isBlank(chipFilter)) {
             return String.format(Locale.getDefault(), "No %s events found.", chipFilter);
         }
         return getString(R.string.browse_state_empty);
