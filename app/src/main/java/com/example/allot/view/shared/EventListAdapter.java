@@ -114,15 +114,15 @@ public class EventListAdapter extends RecyclerView.Adapter<EventListAdapter.Even
             }
         });
 
-        int imageBackground = (position % 2 == 0) ? R.drawable.bg_event_image_one : R.drawable.bg_event_image_two;
-        holder.imageFrame.setBackgroundResource(imageBackground);
-        if (TextUtils.isEmpty(event.getPosterUrl())) {
-            holder.posterImage.setImageDrawable(null);
-        } else {
+        Glide.with(holder.itemView.getContext()).clear(holder.posterImage);
+        holder.posterImage.setImageResource(R.drawable.no_image);
+
+        if (!TextUtils.isEmpty(event.getPosterUrl())) {
             Glide.with(holder.itemView.getContext())
                     .load(event.getPosterUrl())
-                    .placeholder(imageBackground)
-                    .error(imageBackground)
+                    .centerCrop()
+                    .placeholder(R.drawable.no_image)
+                    .error(R.drawable.no_image)
                     .into(holder.posterImage);
         }
 

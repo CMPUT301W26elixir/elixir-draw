@@ -12,15 +12,18 @@
     android:padding="7dp">
 
     <FrameLayout
+        android:id="@+id/imageFrame"
         android:layout_width="136dp"
-        android:layout_height="82dp">
+        android:layout_height="82dp"
+        android:background="@drawable/bg_event_image_mask"
+        android:clipToOutline="true">
 
-        <View
-            android:id="@+id/imageBackground"
+        <ImageView
+            android:id="@+id/eventPosterImage"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@drawable/bg_event_image_one" />
-
+            android:contentDescription="@null"
+            android:scaleType="centerCrop" />
 
     </FrameLayout>
 

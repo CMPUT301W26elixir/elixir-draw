@@ -10,7 +10,7 @@
         android:id="@+id/heroImageFrame"
         android:layout_width="match_parent"
         android:layout_height="233dp"
-        android:background="@drawable/bg_event_image_one">
+        android:background="@drawable/no_image">
 
         <ImageView
             android:id="@+id/heroPosterImage"
