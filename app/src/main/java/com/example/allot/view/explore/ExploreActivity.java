@@ -1,8 +1,12 @@
 package com.example.allot.view.explore;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.FrameLayout;
@@ -11,8 +15,12 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.core.content.res.ResourcesCompat;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.allot.R;
+import com.example.allot.controller.event.AndroidEventLocationGeocodingService;
 import com.example.allot.controller.explore.ExploreController;
 import com.example.allot.controller.notification.NotificationService;
 import com.example.allot.view.event.EventDetailActivity;
@@ -22,7 +30,14 @@ import com.example.allot.view.shared.AppNavigator;
 import com.example.allot.view.shared.BottomNavBarView;
 import com.example.allot.view.shared.EventListAdapter;
 import com.example.allot.view.shared.EventListItem;
+import com.example.allot.view.shared.UiHelper;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.Priority;
+import com.google.android.gms.tasks.CancellationTokenSource;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
@@ -40,6 +55,8 @@ public class ExploreActivity extends AppCompatActivity {
     private TextView stateText;
     private BottomNavBarView bottomNavBar;
     private BottomNavBarView.Tab currentHomeTab = BottomNavBarView.Tab.EXPLORE;
+    private HorizontalScrollView filterPillsScrollView;
+    private LinearLayout filterPillsContainer;
 
     private FrameLayout fragmentContainer;
     private LinearLayout exploreContainer;
@@ -51,6 +68,9 @@ public class ExploreActivity extends AppCompatActivity {
     private String selectedChipFilter = "";
 
     private List<String> userSavedEvents = new ArrayList<>();
+    private boolean isInitialBrowseLoadComplete;
+    private boolean hasInitializedDefaultLocationFilter;
+    private boolean isInitializingDefaultLocationFilter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,6 +96,8 @@ public class ExploreActivity extends AppCompatActivity {
         loadingIndicator = findViewById(R.id.loadingIndicator);
         stateText = findViewById(R.id.stateText);
         bottomNavBar = findViewById(R.id.bottomNavBar);
+        filterPillsScrollView = findViewById(R.id.filterPillsScrollView);
+        filterPillsContainer = findViewById(R.id.filterPillsContainer);
         fragmentContainer = findViewById(R.id.fragment_container);
         exploreContainer = findViewById(R.id.exploreContainer);
 
@@ -152,6 +174,7 @@ public class ExploreActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        maybeInitializeDefaultLocationFilter();
         refreshSavedEventsAndVisibleContent();
     }
 
@@ -205,6 +228,93 @@ public class ExploreActivity extends AppCompatActivity {
                 }
             }
         });
+    }
+
+    private boolean shouldDeferExploreRefreshForDefaultLocation() {
+        return currentHomeTab == BottomNavBarView.Tab.EXPLORE
+                && !hasInitializedDefaultLocationFilter
+                && isInitializingDefaultLocationFilter;
+    }
+
+    private void maybeInitializeDefaultLocationFilter() {
+        if (hasInitializedDefaultLocationFilter || isInitializingDefaultLocationFilter) {
+            return;
+        }
+
+        if (!UiHelper.isBlank(filterAddress) || filterLatitude != null || filterLongitude != null || filterDistanceKm != null) {
+            hasInitializedDefaultLocationFilter = true;
+            return;
+        }
+
+        if (!hasLocationPermission()) {
+            isInitializingDefaultLocationFilter = true;
+            ActivityCompat.requestPermissions(
+                    this,
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                    LOCATION_PERMISSION_REQUEST
+            );
+            return;
+        }
+
+        initializeDefaultLocationFilter();
+    }
+
+    private boolean hasLocationPermission() {
+        return ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED;
+    }
+
+    private void initializeDefaultLocationFilter() {
+        isInitializingDefaultLocationFilter = true;
+        CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+        fusedLocationProviderClient
+                .getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, cancellationTokenSource.getToken())
+                .addOnSuccessListener(this, location -> {
+                    if (location == null) {
+                        finishDefaultLocationInitialization();
+                        return;
+                    }
+
+                    reverseGeocodeDefaultLocation(location);
+                })
+                .addOnFailureListener(this, exception -> finishDefaultLocationInitialization());
+    }
+
+    private void reverseGeocodeDefaultLocation(Location location) {
+        new Thread(() -> {
+            AndroidEventLocationGeocodingService geocodingService = new AndroidEventLocationGeocodingService(this);
+            String resolvedAddress = geocodingService.reverseGeocode(
+                    location.getLatitude(),
+                    location.getLongitude()
+            );
+            runOnUiThread(() -> {
+                if (!isFinishing()
+                        && !isDestroyed()
+                        && UiHelper.isBlank(filterAddress)
+                        && filterLatitude == null
+                        && filterLongitude == null
+                        && filterDistanceKm == null
+                        && !UiHelper.isBlank(resolvedAddress)) {
+                    filterAddress = resolvedAddress;
+                    filterLatitude = location.getLatitude();
+                    filterLongitude = location.getLongitude();
+                    filterDistanceKm = DEFAULT_DISTANCE_KM;
+                    rebuildFilterPills();
+                    if (currentHomeTab == BottomNavBarView.Tab.EXPLORE && isInitialBrowseLoadComplete) {
+                        applyBrowseFilters(searchInput.getText() == null ? "" : searchInput.getText().toString());
+                    }
+                }
+                finishDefaultLocationInitialization();
+            });
+        }).start();
+    }
+
+    private void finishDefaultLocationInitialization() {
+        isInitializingDefaultLocationFilter = false;
+        hasInitializedDefaultLocationFilter = true;
+        if (currentHomeTab == BottomNavBarView.Tab.EXPLORE) {
+            refreshSavedEventsAndVisibleContent();
+        }
     }
 
     private BottomNavBarView.Tab resolveInitialTab(Intent intent) {
