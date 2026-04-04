@@ -55,4 +55,27 @@ public class NotificationRepository {
                 })
                 .addOnFailureListener(e -> listener.onComplete(null, false));
     }
+
+    /**
+     * Fetches all notifications for admin browsing.
+     *
+     * @param listener called with the list of notifications on success
+     */
+    public void getAllNotifications(OnCompleteListener<java.util.List<NotificationItem>> listener) {
+        db.collection(COLLECTION)
+                .orderBy("createdAt", com.google.firebase.firestore.Query.Direction.DESCENDING)
+                .get()
+                .addOnSuccessListener(querySnapshot -> {
+                    java.util.List<NotificationItem> items = new java.util.ArrayList<>();
+                    for (com.google.firebase.firestore.DocumentSnapshot doc : querySnapshot.getDocuments()) {
+                        NotificationItem item = doc.toObject(NotificationItem.class);
+                        if (item != null) {
+                            item.setId(doc.getId());
+                            items.add(item);
+                        }
+                    }
+                    listener.onComplete(items, true);
+                })
+                .addOnFailureListener(e -> listener.onComplete(null, false));
+    }
 }

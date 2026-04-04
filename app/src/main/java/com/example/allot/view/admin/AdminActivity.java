@@ -14,16 +14,20 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.allot.R;
 import com.example.allot.controller.admin.AdminEventController;
+import com.example.allot.controller.admin.AdminNotificationController;
 import com.example.allot.controller.admin.AdminProfileController;
 import com.example.allot.controller.event.EventPosterController;
 import com.example.allot.model.event.Event;
+import com.example.allot.model.notification.NotificationItem;
 import com.example.allot.model.profile.User;
 import com.example.allot.view.shared.AppDialogHelper;
 import com.example.allot.view.shared.AppNavigator;
 import com.example.allot.view.shared.BottomNavBarView;
 import com.example.allot.view.shared.UiHelper;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Activity for admin panel with tab-based navigation.
@@ -33,6 +37,8 @@ public class AdminActivity extends AppCompatActivity {
     private enum AdminTab {
         EVENTS,
         PROFILES,
+        PROFILE_PIC,
+        NOTIFICATIONS,
         POSTERS
     }
 
@@ -40,6 +46,8 @@ public class AdminActivity extends AppCompatActivity {
     private ImageView backButton;
     private TextView eventsTabText;
     private TextView profilesTabText;
+    private TextView profilePicTabText;
+    private TextView notificationsTabText;
     private TextView postersTabText;
 
     // Event management
@@ -59,6 +67,24 @@ public class AdminActivity extends AppCompatActivity {
     private View profilesContainer;
     private View profilesLoadingLayout;
     private TextView profilesEmptyStateText;
+
+    // Profile picture management
+    private RecyclerView profilePicsRecyclerView;
+    private AdminProfilePictureListAdapter profilePicsAdapter;
+    private List<User> profilePicsList;
+    private View profilePicsContainer;
+    private View profilePicsLoadingLayout;
+    private TextView profilePicsEmptyStateText;
+
+    // Notification management
+    private AdminNotificationController adminNotificationController;
+    private RecyclerView notificationsRecyclerView;
+    private AdminNotificationListAdapter notificationsAdapter;
+    private List<NotificationItem> notificationsList;
+    private final Map<String, String> notificationUserNamesById = new HashMap<>();
+    private View notificationsContainer;
+    private View notificationsLoadingLayout;
+    private TextView notificationsEmptyStateText;
 
     // Poster management
     private EventPosterController eventPosterController;
@@ -84,9 +110,12 @@ public class AdminActivity extends AppCompatActivity {
 
         adminEventController = new AdminEventController(this);
         adminProfileController = new AdminProfileController(this);
+        adminNotificationController = new AdminNotificationController(this);
         eventPosterController = new EventPosterController();
         eventsList = new ArrayList<>();
         profilesList = new ArrayList<>();
+        profilePicsList = new ArrayList<>();
+        notificationsList = new ArrayList<>();
         posterEventsList = new ArrayList<>();
 
         bindViews();
@@ -114,6 +143,8 @@ public class AdminActivity extends AppCompatActivity {
         backButton = findViewById(R.id.backButton);
         eventsTabText = findViewById(R.id.eventsTabText);
         profilesTabText = findViewById(R.id.profilesTabText);
+        profilePicTabText = findViewById(R.id.profilePicTabText);
+        notificationsTabText = findViewById(R.id.notificationsTabText);
         postersTabText = findViewById(R.id.postersTabText);
 
         // Events
@@ -127,6 +158,18 @@ public class AdminActivity extends AppCompatActivity {
         profilesRecyclerView = findViewById(R.id.profilesRecyclerView);
         profilesLoadingLayout = findViewById(R.id.profilesLoadingLayout);
         profilesEmptyStateText = findViewById(R.id.profilesEmptyStateText);
+
+        // Profile pictures
+        profilePicsContainer = findViewById(R.id.profilePicsContainer);
+        profilePicsRecyclerView = findViewById(R.id.profilePicsRecyclerView);
+        profilePicsLoadingLayout = findViewById(R.id.profilePicsLoadingLayout);
+        profilePicsEmptyStateText = findViewById(R.id.profilePicsEmptyStateText);
+
+        // Notifications
+        notificationsContainer = findViewById(R.id.notificationsContainer);
+        notificationsRecyclerView = findViewById(R.id.notificationsRecyclerView);
+        notificationsLoadingLayout = findViewById(R.id.notificationsLoadingLayout);
+        notificationsEmptyStateText = findViewById(R.id.notificationsEmptyStateText);
 
         // Posters
         postersContainer = findViewById(R.id.postersContainer);
@@ -153,6 +196,8 @@ public class AdminActivity extends AppCompatActivity {
     private void setupTabButtons() {
         eventsTabText.setOnClickListener(view -> showEventsTab());
         profilesTabText.setOnClickListener(view -> showProfilesTab());
+        profilePicTabText.setOnClickListener(view -> showProfilePicsTab());
+        notificationsTabText.setOnClickListener(view -> showNotificationsTab());
         postersTabText.setOnClickListener(view -> showPostersTab());
         updateTabStyles();
     }
@@ -166,6 +211,8 @@ public class AdminActivity extends AppCompatActivity {
 
         eventsTabText.setTextColor(currentTab == AdminTab.EVENTS ? activeColor : inactiveColor);
         profilesTabText.setTextColor(currentTab == AdminTab.PROFILES ? activeColor : inactiveColor);
+        profilePicTabText.setTextColor(currentTab == AdminTab.PROFILE_PIC ? activeColor : inactiveColor);
+        notificationsTabText.setTextColor(currentTab == AdminTab.NOTIFICATIONS ? activeColor : inactiveColor);
         postersTabText.setTextColor(currentTab == AdminTab.POSTERS ? activeColor : inactiveColor);
     }
 
@@ -182,6 +229,16 @@ public class AdminActivity extends AppCompatActivity {
         profilesAdapter = new AdminProfileListAdapter(profilesList, this::onProfileDeleteClick);
         profilesRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         profilesRecyclerView.setAdapter(profilesAdapter);
+
+        // Profile pictures RecyclerView
+        profilePicsAdapter = new AdminProfilePictureListAdapter(profilePicsList);
+        profilePicsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        profilePicsRecyclerView.setAdapter(profilePicsAdapter);
+
+        // Notifications RecyclerView
+        notificationsAdapter = new AdminNotificationListAdapter(notificationsList);
+        notificationsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        notificationsRecyclerView.setAdapter(notificationsAdapter);
 
         // Posters RecyclerView
         postersAdapter = new AdminPosterListAdapter(posterEventsList, this::onPosterDeleteClick);
@@ -204,6 +261,8 @@ public class AdminActivity extends AppCompatActivity {
         updateTabStyles();
         eventsContainer.setVisibility(View.VISIBLE);
         profilesContainer.setVisibility(View.GONE);
+        profilePicsContainer.setVisibility(View.GONE);
+        notificationsContainer.setVisibility(View.GONE);
         postersContainer.setVisibility(View.GONE);
 
         if (eventsList.isEmpty()) {
@@ -219,10 +278,46 @@ public class AdminActivity extends AppCompatActivity {
         updateTabStyles();
         eventsContainer.setVisibility(View.GONE);
         profilesContainer.setVisibility(View.VISIBLE);
+        profilePicsContainer.setVisibility(View.GONE);
+        notificationsContainer.setVisibility(View.GONE);
         postersContainer.setVisibility(View.GONE);
 
         if (profilesList.isEmpty()) {
             loadProfiles();
+        }
+    }
+
+    /**
+     * Shows the profile pictures tab and loads profile pictures if not already loaded.
+     */
+    private void showProfilePicsTab() {
+        currentTab = AdminTab.PROFILE_PIC;
+        updateTabStyles();
+        eventsContainer.setVisibility(View.GONE);
+        profilesContainer.setVisibility(View.GONE);
+        profilePicsContainer.setVisibility(View.VISIBLE);
+        notificationsContainer.setVisibility(View.GONE);
+        postersContainer.setVisibility(View.GONE);
+
+        if (profilePicsList.isEmpty()) {
+            loadProfilePics();
+        }
+    }
+
+    /**
+     * Shows the notifications tab and loads notifications if not already loaded.
+     */
+    private void showNotificationsTab() {
+        currentTab = AdminTab.NOTIFICATIONS;
+        updateTabStyles();
+        eventsContainer.setVisibility(View.GONE);
+        profilesContainer.setVisibility(View.GONE);
+        profilePicsContainer.setVisibility(View.GONE);
+        notificationsContainer.setVisibility(View.VISIBLE);
+        postersContainer.setVisibility(View.GONE);
+
+        if (notificationsList.isEmpty()) {
+            loadNotifications();
         }
     }
 
@@ -234,6 +329,8 @@ public class AdminActivity extends AppCompatActivity {
         updateTabStyles();
         eventsContainer.setVisibility(View.GONE);
         profilesContainer.setVisibility(View.GONE);
+        profilePicsContainer.setVisibility(View.GONE);
+        notificationsContainer.setVisibility(View.GONE);
         postersContainer.setVisibility(View.VISIBLE);
 
         if (posterEventsList.isEmpty()) {
@@ -288,6 +385,78 @@ public class AdminActivity extends AppCompatActivity {
             profilesList.addAll(profiles);
             setProfilesVisibleState();
             profilesAdapter.notifyDataSetChanged();
+        });
+    }
+
+    /**
+     * Loads all users with uploaded profile pictures.
+     */
+    private void loadProfilePics() {
+        setProfilePicsLoadingState();
+        adminProfileController.loadAllProfiles((profiles, success) -> {
+            if (!success || profiles == null) {
+                setProfilePicsEmptyState(getString(R.string.admin_error_loading_profilepic));
+                Toast.makeText(this, R.string.admin_error_loading_profilepic, Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            profilePicsList.clear();
+            for (User user : profiles) {
+                if (user == null || UiHelper.isBlank(user.getProfilePhotoUrl())) {
+                    continue;
+                }
+                profilePicsList.add(user);
+            }
+
+            if (profilePicsList.isEmpty()) {
+                setProfilePicsEmptyState(getString(R.string.admin_no_profilepic));
+                return;
+            }
+
+            setProfilePicsVisibleState();
+            profilePicsAdapter.notifyDataSetChanged();
+        });
+    }
+
+    /**
+     * Loads all sent notifications for admin review.
+     */
+    private void loadNotifications() {
+        setNotificationsLoadingState();
+        adminNotificationController.loadAllNotifications((notifications, success) -> {
+            if (!success || notifications == null) {
+                setNotificationsEmptyState(getString(R.string.admin_error_loading_notifications));
+                Toast.makeText(this, R.string.admin_error_loading_notifications, Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            if (notifications.isEmpty()) {
+                setNotificationsEmptyState(getString(R.string.admin_no_notifications));
+                return;
+            }
+
+            adminProfileController.loadAllProfiles((profiles, profilesSuccess) -> {
+                notificationUserNamesById.clear();
+                if (profilesSuccess && profiles != null) {
+                    for (User user : profiles) {
+                        if (user == null || UiHelper.isBlank(user.getDeviceId())) {
+                            continue;
+                        }
+
+                        String fullName = user.getName();
+                        if (UiHelper.isBlank(fullName)) {
+                            fullName = "Unknown User";
+                        }
+                        notificationUserNamesById.put(user.getDeviceId(), fullName);
+                    }
+                }
+
+                notificationsAdapter.setUserNamesById(notificationUserNamesById);
+                notificationsList.clear();
+                notificationsList.addAll(notifications);
+                setNotificationsVisibleState();
+                notificationsAdapter.notifyDataSetChanged();
+            });
         });
     }
 
@@ -383,6 +552,66 @@ public class AdminActivity extends AppCompatActivity {
         profilesLoadingLayout.setVisibility(View.GONE);
         profilesEmptyStateText.setVisibility(View.VISIBLE);
         profilesEmptyStateText.setText(message);
+    }
+
+    // ============== Profile picture state management ==============
+
+    /**
+     * Shows the profile picture loading state.
+     */
+    private void setProfilePicsLoadingState() {
+        profilePicsRecyclerView.setVisibility(View.GONE);
+        profilePicsLoadingLayout.setVisibility(View.VISIBLE);
+        profilePicsEmptyStateText.setVisibility(View.GONE);
+    }
+
+    /**
+     * Shows the profile picture visible state.
+     */
+    private void setProfilePicsVisibleState() {
+        profilePicsRecyclerView.setVisibility(View.VISIBLE);
+        profilePicsLoadingLayout.setVisibility(View.GONE);
+        profilePicsEmptyStateText.setVisibility(View.GONE);
+    }
+
+    /**
+     * Shows the profile picture empty state.
+     */
+    private void setProfilePicsEmptyState(String message) {
+        profilePicsRecyclerView.setVisibility(View.GONE);
+        profilePicsLoadingLayout.setVisibility(View.GONE);
+        profilePicsEmptyStateText.setVisibility(View.VISIBLE);
+        profilePicsEmptyStateText.setText(message);
+    }
+
+    // ============== Notification state management ==============
+
+    /**
+     * Shows the notifications loading state.
+     */
+    private void setNotificationsLoadingState() {
+        notificationsRecyclerView.setVisibility(View.GONE);
+        notificationsLoadingLayout.setVisibility(View.VISIBLE);
+        notificationsEmptyStateText.setVisibility(View.GONE);
+    }
+
+    /**
+     * Shows the notifications visible state.
+     */
+    private void setNotificationsVisibleState() {
+        notificationsRecyclerView.setVisibility(View.VISIBLE);
+        notificationsLoadingLayout.setVisibility(View.GONE);
+        notificationsEmptyStateText.setVisibility(View.GONE);
+    }
+
+    /**
+     * Shows the notifications empty state.
+     */
+    private void setNotificationsEmptyState(String message) {
+        notificationsRecyclerView.setVisibility(View.GONE);
+        notificationsLoadingLayout.setVisibility(View.GONE);
+        notificationsEmptyStateText.setVisibility(View.VISIBLE);
+        notificationsEmptyStateText.setText(message);
     }
 
     // ============== Poster state management ==============
@@ -573,9 +802,18 @@ public class AdminActivity extends AppCompatActivity {
             profilesList.remove(position);
             profilesAdapter.notifyItemRemoved(position);
 
+            profilePicsList.removeIf(profileUser -> profileUser != null
+                    && user.getDeviceId() != null
+                    && user.getDeviceId().equals(profileUser.getDeviceId()));
+            profilePicsAdapter.notifyDataSetChanged();
+
             // Show empty state if no profiles left
             if (profilesList.isEmpty()) {
                 setProfilesEmptyState(getString(R.string.admin_no_profiles));
+            }
+
+            if (profilePicsList.isEmpty()) {
+                setProfilePicsEmptyState(getString(R.string.admin_no_profilepic));
             }
         });
     }
