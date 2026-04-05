@@ -2,9 +2,12 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <uses-permission
-        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
-        android:maxSdkVersion="28" />
+    <!-- Permissions -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <application
         android:allowBackup="true"
@@ -16,6 +19,11 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Allot">
 
+        <!-- API Keys -->
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="${MAPS_API_KEY}" />
+
         <activity
             android:name=".view.SplashActivity"
             android:exported="true"
@@ -26,35 +34,23 @@
             </intent-filter>
         </activity>
 
+        <!-- Main Content Activities -->
         <activity
             android:name=".view.MainActivity"
-            android:exported="true" />
+            android:exported="false" />
+        <activity
+            android:name=".view.WelcomeActivity"
+            android:exported="false" />
         <activity
             android:name=".view.MyEventsActivity"
             android:exported="false" />
         <activity
-            android:name=".view.CreateEventActivity"
+            android:name=".view.ScanActivity"
             android:exported="false" />
-        <activity
-            android:name=".view.EventDetailActivity"
-            android:exported="false" />
-        <activity
-            android:name=".view.ManageEventActivity"
-            android:exported="false" />
-        <activity
-            android:name=".view.ManageLotteryActivity"
-            android:exported="false" />
-        <activity
-            android:name=".view.EventOfferActivity"
-            android:exported="false" />
-        <activity
-            android:name=".view.ManageEntrantsActivity"
-            android:exported="false" />
+
+        <!-- Profile Flow -->
         <activity
             android:name=".view.ProfileActivity"
-            android:exported="false" />
-        <activity
-            android:name=".view.WelcomeActivity"
             android:exported="false" />
         <activity
             android:name=".view.NameActivity"
@@ -69,19 +65,26 @@
             android:name=".view.NotificationsActivity"
             android:exported="false" />
 
+        <!-- Event and Lottery Management -->
         <activity
-            android:name=".view.ScanActivity"
-            android:exported="false"
-            android:screenOrientation="portrait" />
-        <provider
-            android:name="androidx.core.content.FileProvider"
-            android:authorities="${applicationId}.fileprovider"
-            android:exported="false"
-            android:grantUriPermissions="true">
-            <meta-data
-                android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/file_paths" />
-        </provider>
+            android:name=".view.CreateEventActivity"
+            android:exported="false" />
+        <activity
+            android:name=".view.EventDetailActivity"
+            android:exported="false" />
+        <activity
+            android:name=".view.EventOfferActivity"
+            android:exported="false" />
+        <activity
+            android:name=".view.ManageEventActivity"
+            android:exported="false" />
+        <activity
+            android:name=".view.ManageLotteryActivity"
+            android:exported="false" />
+        <activity
+            android:name=".view.ManageEntrantsActivity"
+            android:exported="false" />
+
     </application>
 
 </manifest>
