@@ -17,6 +17,7 @@ import com.google.firebase.storage.StorageException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
 /**
  * Handles Firestore reads and writes for users.
  */
@@ -139,23 +140,33 @@ public class UserRepository {
     }
 
     /**
-     * Updates arbitrary user fields using a Firestore update map.
+     * Updates specific fields for a user in Firestore.
      *
-     * @param deviceId the user device ID
-     * @param updates the fields to update
-     * @param listener the listener that receives update result
+     * @param deviceId the device ID of the user to update
+     * @param updates  a map of field names to new values
+     * @param listener called with true on success, false on failure
      */
-    public void updateUserFields(String deviceId,
-                                 Map<String, Object> updates,
-                                 OnCompleteListener<Boolean> listener) {
-        if (isBlank(deviceId) || updates == null || updates.isEmpty()) {
-            listener.onComplete(false, false);
-            return;
-        }
-
+    public void updateUserFields(String deviceId, Map<String, Object> updates, OnCompleteListener<Boolean> listener) {
         usersCollection.document(deviceId)
                 .update(updates)
-                .addOnCompleteListener(task -> listener.onComplete(task.isSuccessful(), task.isSuccessful()));
+                .addOnSuccessListener(aVoid -> listener.onComplete(true, true))
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Failed to update user fields for " + deviceId, e);
+                    listener.onComplete(false, false);
+                });
+    }
+
+    /**
+     * Updates the FCM token for the user.
+     *
+     * @param deviceId the device ID of the user
+     * @param fcmToken the new FCM token
+     */
+    public void updateFcmToken(String deviceId, String fcmToken) {
+        if (deviceId == null || fcmToken == null) return;
+        usersCollection.document(deviceId)
+                .update("fcmToken", fcmToken)
+                .addOnFailureListener(e -> Log.e(TAG, "Failed to update FCM token", e));
     }
 
     /**
@@ -517,11 +528,3 @@ public class UserRepository {
                 });
     }
 }
-
-
-
-
-
-
-
-

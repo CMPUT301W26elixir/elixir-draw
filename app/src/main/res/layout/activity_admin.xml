@@ -33,36 +33,36 @@
             android:layout_marginEnd="24dp" />
     </LinearLayout>
 
-    <!-- Tabs -->
-    <LinearLayout
+    <!-- Tabs Slider -->
+    <HorizontalScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:padding="8dp">
+        android:fillViewport="false"
+        android:overScrollMode="never"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
+        android:scrollbars="none">
 
-        <TextView
-            android:id="@+id/eventsTabText"
-            android:layout_width="0dp"
+        <LinearLayout
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/admin_view_events"
-            android:textColor="@color/text_primary"
-            android:textSize="16sp"
-            android:fontFamily="@font/varela_round_regular"
-            android:gravity="center"
-            android:paddingVertical="8dp" />
+            android:orientation="horizontal"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp">
 
-        <TextView
-            android:id="@+id/profilesTabText"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/admin_view_profiles"
-            android:textColor="@color/my_events_tab_inactive"
-            android:textSize="16sp"
-            android:fontFamily="@font/varela_round_regular"
-            android:gravity="center"
-            android:paddingVertical="8dp" />
+            <TextView
+                android:id="@+id/eventsTabText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/varela_round_regular"
+                android:gravity="center"
+                android:paddingStart="14dp"
+                android:paddingTop="8dp"
+                android:paddingEnd="14dp"
+                android:paddingBottom="8dp"
+                android:text="@string/admin_view_events"
+                android:textColor="@color/text_primary"
+                android:textSize="15sp" />
 
         <TextView
             android:id="@+id/photosTabText"

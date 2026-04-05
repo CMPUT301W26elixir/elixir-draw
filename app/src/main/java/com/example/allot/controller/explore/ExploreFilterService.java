@@ -2,7 +2,9 @@ package com.example.allot.controller.explore;
 
 import com.example.allot.model.BrowseFilter;
 import com.example.allot.model.event.Event;
+import android.location.Location;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
@@ -39,6 +41,21 @@ public class ExploreFilterService {
             }
 
             if (!matchesSearch(event, normalizedSearchTerm)) {
+                continue;
+            }
+
+            if (!matchesKeywords(event, filter == null ? null : filter.getKeywords())) {
+                continue;
+            }
+
+            if (!matchesStartDate(event, filter == null ? null : filter.getStartDate())) {
+                continue;
+            }
+
+            if (!matchesDistance(event,
+                    filter == null ? null : filter.getLatitude(),
+                    filter == null ? null : filter.getLongitude(),
+                    filter == null ? null : filter.getDistanceKm())) {
                 continue;
             }
 
@@ -85,9 +102,21 @@ public class ExploreFilterService {
         }
 
         // Let the chip match the category or other event text
-        return normalize(event.getCategory()).equals(normalizedCategory)
+        if (normalize(event.getCategory()).equals(normalizedCategory)
                 || containsNormalized(event.getTitle(), normalizedCategory)
-                || containsNormalized(event.getDescription(), normalizedCategory);
+                || containsNormalized(event.getDescription(), normalizedCategory)) {
+            return true;
+        }
+
+        for (String keyword : categoryKeywords(normalizedCategory)) {
+            if (containsNormalized(event.getTitle(), keyword)
+                    || containsNormalized(event.getDescription(), keyword)
+                    || containsNormalized(event.getCategory(), keyword)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -117,6 +146,99 @@ public class ExploreFilterService {
      */
     private boolean containsNormalized(String value, String normalizedSearchTerm) {
         return normalize(value).contains(normalizedSearchTerm);
+    }
+
+    private boolean matchesKeywords(Event event, String keywords) {
+        String normalizedKeywords = normalize(keywords);
+        if (normalizedKeywords.isEmpty()) {
+            return true;
+        }
+
+        List<String> tokens = splitKeywords(normalizedKeywords);
+        if (tokens.isEmpty()) {
+            return true;
+        }
+
+        for (String token : tokens) {
+            if (!containsNormalized(event.getTitle(), token)
+                    && !containsNormalized(event.getDescription(), token)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private List<String> splitKeywords(String normalizedKeywords) {
+        List<String> tokens = new ArrayList<>();
+        if (normalizedKeywords.isEmpty()) {
+            return tokens;
+        }
+
+        String[] parts = normalizedKeywords.split("[,\\s]+");
+        for (String part : parts) {
+            if (!part.trim().isEmpty()) {
+                tokens.add(part.trim());
+            }
+        }
+        return tokens;
+    }
+
+    private boolean matchesStartDate(Event event, java.util.Date startDate) {
+        if (startDate == null) {
+            return true;
+        }
+
+        if (event == null || event.getEventDate() == null) {
+            return false;
+        }
+
+        return !event.getEventDate().before(startDate);
+    }
+
+    private boolean matchesDistance(Event event, Double latitude, Double longitude, Double distanceKm) {
+        if (latitude == null || longitude == null || distanceKm == null || distanceKm <= 0) {
+            return true;
+        }
+
+        if (event == null || event.getEventLatitude() == null || event.getEventLongitude() == null) {
+            return false;
+        }
+
+        float[] results = new float[1];
+        Location.distanceBetween(
+                latitude,
+                longitude,
+                event.getEventLatitude(),
+                event.getEventLongitude(),
+                results
+        );
+        float distanceMeters = results[0];
+        return distanceMeters <= (distanceKm * 1000.0);
+    }
+
+    private List<String> categoryKeywords(String normalizedCategory) {
+        if (normalizedCategory.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        switch (normalizedCategory) {
+            case "fortnite":
+                return Arrays.asList("fortnite", "battle royale", "epic");
+            case "sports":
+                return Arrays.asList("sports", "soccer", "football", "basketball", "tennis",
+                        "hockey", "baseball", "golf", "running", "marathon");
+            case "arts & crafts":
+            case "arts and crafts":
+            case "arts":
+                return Arrays.asList("art", "arts", "craft", "crafts", "painting", "drawing",
+                        "pottery", "sculpture", "illustration", "ceramics");
+            case "science":
+                return Arrays.asList("science", "stem", "robotics", "chemistry", "physics",
+                        "biology", "astronomy", "engineering");
+            default:
+                return new ArrayList<>();
+        }
     }
 
     /**

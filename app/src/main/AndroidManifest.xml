@@ -7,6 +7,7 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <application
         android:allowBackup="true"
@@ -36,6 +37,9 @@
         <activity
             android:name=".view.explore.ExploreActivity"
             android:exported="true" />
+        <activity
+            android:name=".view.explore.EventFilterActivity"
+            android:exported="false" />
         <activity
             android:name=".view.explore.MapViewActivity"
             android:exported="false" />
@@ -76,6 +80,9 @@
             android:name=".view.profile.ProfileActivity"
             android:exported="false" />
         <activity
+            android:name=".view.profile.ProfilePhotoCropActivity"
+            android:exported="false" />
+        <activity
             android:name=".view.WelcomeActivity"
             android:exported="false" />
         <activity
@@ -100,6 +107,14 @@
             android:exported="false" />
         <activity
             android:name=".view.event.SearchEventActivity" />
+
+        <service
+            android:name=".controller.notification.MyFirebaseMessagingService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
     </application>
 
 </manifest>

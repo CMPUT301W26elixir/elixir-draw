@@ -14,16 +14,20 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.allot.R;
 import com.example.allot.controller.admin.AdminEventController;
+import com.example.allot.controller.admin.AdminNotificationController;
 import com.example.allot.controller.admin.AdminProfileController;
 import com.example.allot.controller.event.EventPosterController;
 import com.example.allot.model.event.Event;
+import com.example.allot.model.notification.NotificationItem;
 import com.example.allot.model.profile.User;
 import com.example.allot.view.shared.AppDialogHelper;
 import com.example.allot.view.shared.AppNavigator;
 import com.example.allot.view.shared.BottomNavBarView;
 import com.example.allot.view.shared.UiHelper;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Activity for admin panel with tab-based navigation.
@@ -94,6 +98,7 @@ public class AdminActivity extends AppCompatActivity {
 
         adminEventController = new AdminEventController(this);
         adminProfileController = new AdminProfileController(this);
+        adminNotificationController = new AdminNotificationController(this);
         eventPosterController = new EventPosterController();
         eventsList = new ArrayList<>();
         profilesList = new ArrayList<>();
