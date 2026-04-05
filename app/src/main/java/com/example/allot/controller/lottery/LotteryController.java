@@ -162,7 +162,14 @@ public class LotteryController {
 
                 String eventName = updatedEvent.getTitle() != null ? updatedEvent.getTitle() : "the event";
                 List<String> chosen = updatedEvent.getChosen() != null ? updatedEvent.getChosen() : new ArrayList<>();
-                List<String> notChosen = updatedEvent.getNotEnrolled() != null ? updatedEvent.getNotEnrolled() : new ArrayList<>();
+                
+                // Calculate the actual list of entrants who were NOT chosen
+                List<String> allWaiting = (updatedEvent.getWaitingList() != null && updatedEvent.getWaitingList().list != null)
+                        ? updatedEvent.getWaitingList().list
+                        : new ArrayList<>();
+                
+                List<String> notChosen = new ArrayList<>(allWaiting);
+                notChosen.removeAll(chosen);
 
                 notificationController.notifySelectedEntrants(chosen, eventId, eventName, (r, s) ->
                         notificationController.notifyNotSelectedEntrants(notChosen, eventId, eventName, (r2, s2) ->

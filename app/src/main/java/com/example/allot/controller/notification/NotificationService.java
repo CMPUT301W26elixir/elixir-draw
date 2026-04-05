@@ -114,10 +114,15 @@ public class NotificationService {
         Intent intent = new Intent(context, SplashActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
         
-        // Setup redirection to Offer screen
-        intent.putExtra("redirect_to", "offer");
+        // Setup redirection based on notification type
+        if (NotificationItem.TYPE_SELECTED.equals(item.getType())) {
+            intent.putExtra("redirect_to", "offer");
+        } else {
+            intent.putExtra("redirect_to", "event_detail");
+        }
+        
         intent.putExtra("event_id", item.getEventId());
-        intent.putExtra("event_title", "Event Update"); // Default title extra if item doesn't have it
+        intent.putExtra("event_title", item.getTitle());
 
         PendingIntent pendingIntent = PendingIntent.getActivity(context, (int) System.currentTimeMillis(), intent,
                 PendingIntent.FLAG_ONE_SHOT | PendingIntent.FLAG_IMMUTABLE);
