@@ -14,10 +14,14 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AlertDialog;
 import com.example.allot.R;
 import com.example.allot.controller.organizer.EventEntrantsController;
+import com.example.allot.controller.organizer.EventEntrantsCsvFormatter;
+import com.example.allot.controller.organizer.EventEntrantsCsvSaveService;
 import com.example.allot.model.event.Event;
 import com.example.allot.model.lottery.LotteryEntrantItem;
+import com.example.allot.model.organizer.EntrantExportRow;
 import com.example.allot.view.explore.MapViewActivity;
 import com.google.android.material.button.MaterialButton;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Locale;
@@ -40,6 +44,8 @@ public class EventEntrantsActivity extends AppCompatActivity {
     }
 
     private EventEntrantsController entrantsController;
+    private EventEntrantsCsvFormatter csvFormatter;
+    private EventEntrantsCsvSaveService csvSaveService;
     private TextView drawDateValueText;
     private TextView attendeesValueText;
     private TextView selectedTabText;
@@ -56,6 +62,7 @@ public class EventEntrantsActivity extends AppCompatActivity {
     private String currentEventId;
     private Event currentEvent;
     private Tab selectedTab = Tab.SELECTED;
+    private boolean isExporting;
 
     /**
      * Initializes the activity, binds views, sets up the header and tabs,
@@ -69,6 +76,8 @@ public class EventEntrantsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_manage_entrants);
 
         entrantsController = new EventEntrantsController(this);
+        csvFormatter = new EventEntrantsCsvFormatter();
+        csvSaveService = new EventEntrantsCsvSaveService();
         currentEventId = getIntent().getStringExtra(EXTRA_EVENT_ID);
 
         bindViews();
@@ -122,10 +131,13 @@ public class EventEntrantsActivity extends AppCompatActivity {
         enrolledTabText.setOnClickListener(view -> showTab(Tab.ENROLLED));
         allEntrantsTabText.setOnClickListener(view -> showTab(Tab.ALL));
         viewEntrantMapButton.setOnClickListener(view -> openEntrantMap());
-        exportFinalListButton.setOnClickListener(view ->
-                Toast.makeText(this, R.string.manage_entrants_export_unavailable, Toast.LENGTH_SHORT).show()
-        );
+
+        // Team's CSV Export logic
+        exportFinalListButton.setOnClickListener(view -> exportFinalList());
+
+        // Your Draw Replacement logic
         drawReplacementButton.setOnClickListener(view -> showDrawReplacementDialog());
+
         updateTabState();
     }
 
@@ -191,7 +203,15 @@ public class EventEntrantsActivity extends AppCompatActivity {
         applyTabStyle(notEnrolledTabText, selectedTab == Tab.NOT_ENROLLED);
         applyTabStyle(enrolledTabText, selectedTab == Tab.ENROLLED);
         applyTabStyle(allEntrantsTabText, selectedTab == Tab.ALL);
+
+        // CSV Export Button logic
         exportFinalListButton.setVisibility(selectedTab == Tab.ENROLLED ? View.VISIBLE : View.GONE);
+        exportFinalListButton.setEnabled(!isExporting);
+        exportFinalListButton.setText(isExporting
+                ? R.string.manage_entrants_export_saving
+                : R.string.manage_entrants_export_final_list);
+
+        // Draw Replacement Button logic
         drawReplacementButton.setVisibility(selectedTab == Tab.CANCELLED ? View.VISIBLE : View.GONE);
     }
 
@@ -244,6 +264,11 @@ public class EventEntrantsActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Displays a confirmation dialog before removing an entrant.
+     *
+     * @param entrantItem the entrant to remove
+     */
     private void showRemoveEntrantDialog(LotteryEntrantItem entrantItem) {
         new AlertDialog.Builder(this)
                 .setTitle(R.string.manage_entrants_cancel_dialog_title)
@@ -262,6 +287,9 @@ public class EventEntrantsActivity extends AppCompatActivity {
                 .show();
     }
 
+    /**
+     * Displays a confirmation dialog before drawing replacement entrants.
+     */
     private void showDrawReplacementDialog() {
         new AlertDialog.Builder(this)
                 .setTitle(R.string.manage_entrants_replacement_dialog_title)
@@ -341,5 +369,51 @@ public class EventEntrantsActivity extends AppCompatActivity {
         startActivity(new android.content.Intent(this, MapViewActivity.class)
                 .putExtra(MapViewActivity.EXTRA_EVENT_ID, currentEventId));
         overridePendingTransition(0, 0);
+    }
+
+    /**
+     * Initiates the export of the final enrolled entrant list to a CSV file.
+     */
+    private void exportFinalList() {
+        if (isExporting) {
+            return;
+        }
+        if (selectedTab != Tab.ENROLLED || currentEvent == null || TextUtils.isEmpty(currentEventId)) {
+            Toast.makeText(this, R.string.manage_entrants_export_failure, Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        setExporting(true);
+        entrantsController.loadEnrolledExportRows(currentEvent, (rows, success) -> {
+            if (!success) {
+                setExporting(false);
+                Toast.makeText(this, R.string.manage_entrants_export_failure, Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            saveExportRows(rows);
+        });
+    }
+
+    /**
+     * Formats and saves the entrant rows to a CSV file in the Downloads folder.
+     *
+     * @param rows the list of entrant details to export
+     */
+    private void saveExportRows(List<EntrantExportRow> rows) {
+        try {
+            String csvContent = csvFormatter.format(rows);
+            csvSaveService.saveToDownloads(this, csvContent, currentEvent.getTitle(), currentEventId);
+            Toast.makeText(this, R.string.manage_entrants_export_success, Toast.LENGTH_SHORT).show();
+        } catch (IOException | SecurityException | IllegalArgumentException exception) {
+            Toast.makeText(this, R.string.manage_entrants_export_failure, Toast.LENGTH_SHORT).show();
+        } finally {
+            setExporting(false);
+        }
+    }
+
+    private void setExporting(boolean exporting) {
+        isExporting = exporting;
+        updateTabState();
     }
 }

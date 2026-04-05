@@ -34,13 +34,32 @@
                 android:textColor="@color/white"
                 android:textSize="24sp" />
 
-            <View
-                android:id="@+id/profileAvatarPlaceholder"
+            <FrameLayout
+                android:id="@+id/profileAvatarContainer"
                 android:layout_width="95dp"
                 android:layout_height="95dp"
                 android:layout_gravity="center_horizontal"
                 android:layout_marginTop="18dp"
-                android:background="@drawable/bg_profile_avatar_placeholder" />
+                android:background="@drawable/bg_profile_avatar_placeholder"
+                android:clipToOutline="true"
+                android:clickable="true"
+                android:focusable="true">
+
+                <View
+                    android:id="@+id/profileAvatarPlaceholder"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@drawable/bg_profile_avatar_placeholder" />
+
+                <ImageView
+                    android:id="@+id/profileAvatarImage"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="centerCrop"
+                    android:contentDescription="@string/profile_photo_content_description"
+                    android:visibility="gone" />
+
+            </FrameLayout>
 
             <TextView
                 android:id="@+id/firstNameLabel"

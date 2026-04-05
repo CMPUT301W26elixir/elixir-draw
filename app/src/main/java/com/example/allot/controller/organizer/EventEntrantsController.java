@@ -10,6 +10,7 @@ import com.example.allot.data.NotificationRepository;
 import com.example.allot.model.Notification;
 import com.example.allot.model.event.Event;
 import com.example.allot.model.lottery.LotteryEntrantItem;
+import com.example.allot.model.organizer.EntrantExportRow;
 import com.example.allot.model.profile.User;
 import com.google.firebase.firestore.FirebaseFirestore;
 import java.util.ArrayList;
@@ -53,6 +54,9 @@ public class EventEntrantsController {
 
     /**
      * Loads the event used by the entrants screen.
+     *
+     * @param eventId  the unique identifier of the event
+     * @param listener the listener that receives the loaded event
      */
     public void loadEvent(String eventId, OnCompleteListener<Event> listener) {
         if (isBlank(eventId)) {
@@ -72,6 +76,10 @@ public class EventEntrantsController {
 
     /**
      * Loads the entrant items shown for one tab.
+     *
+     * @param event       the event to load entrants for
+     * @param selectedTab the currently active tab
+     * @param listener    the listener that receives the list of entrant items
      */
     public void loadEntrantItems(Event event, Tab selectedTab, OnCompleteListener<List<LotteryEntrantItem>> listener) {
         if (event == null) {
@@ -80,6 +88,27 @@ public class EventEntrantsController {
         }
 
         buildTabItems(event, selectedTab, items -> listener.onComplete(items, true));
+    }
+
+    /**
+     * Loads export-ready rows for enrolled entrants only.
+     *
+     * @param event    the event to load export data for
+     * @param listener the listener that receives the list of export rows
+     */
+    public void loadEnrolledExportRows(Event event, OnCompleteListener<List<EntrantExportRow>> listener) {
+        if (event == null) {
+            listener.onComplete(new ArrayList<>(), false);
+            return;
+        }
+
+        List<String> entrantIds = getEnrolledEntrants(event);
+        if (entrantIds.isEmpty()) {
+            listener.onComplete(new ArrayList<>(), true);
+            return;
+        }
+
+        loadExportRows(entrantIds, 0, new ArrayList<>(), listener);
     }
 
     private void buildTabItems(Event event, Tab selectedTab, java.util.function.Consumer<List<LotteryEntrantItem>> consumer) {
@@ -329,6 +358,43 @@ public class EventEntrantsController {
                 eventId
         );
         notificationRepository.sendNotification(userId, notification, null);
+    }
+
+    private void loadExportRows(List<String> entrantIds,
+                                int index,
+                                List<EntrantExportRow> rows,
+                                OnCompleteListener<List<EntrantExportRow>> listener) {
+        if (index >= entrantIds.size()) {
+            listener.onComplete(rows, true);
+            return;
+        }
+
+        String entrantId = entrantIds.get(index);
+        userController.getUserByDeviceId(entrantId, (User user, boolean success) -> {
+            rows.add(buildExportRow(entrantId, success ? user : null));
+            loadExportRows(entrantIds, index + 1, rows, listener);
+        });
+    }
+
+    private EntrantExportRow buildExportRow(String entrantId, User user) {
+        String fallbackName = isBlank(entrantId) ? "" : entrantId;
+        String name = fallbackName;
+        String email = "";
+        String phone = "";
+
+        if (user != null) {
+            if (!isBlank(user.getName())) {
+                name = user.getName();
+            }
+            if (!isBlank(user.getEmail())) {
+                email = user.getEmail();
+            }
+            if (!isBlank(user.getPhone())) {
+                phone = user.getPhone();
+            }
+        }
+
+        return new EntrantExportRow(name, email, phone);
     }
 
     private boolean isBlank(String value) {

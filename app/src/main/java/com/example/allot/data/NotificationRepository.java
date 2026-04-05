@@ -3,6 +3,7 @@ package com.example.allot.data;
 import android.util.Log;
 import com.example.allot.common.OnCompleteListener;
 import com.example.allot.model.Notification;
+import com.example.allot.model.notification.NotificationItem;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
@@ -15,18 +16,22 @@ import java.util.List;
  */
 public class NotificationRepository {
     private static final String TAG = "NotificationRepository";
+    private static final String COLLECTION = "notifications";
     private final CollectionReference usersCollection;
+    private final FirebaseFirestore db;
 
     public NotificationRepository() {
         this(FirebaseFirestore.getInstance());
     }
 
     public NotificationRepository(FirebaseFirestore database) {
+        this.db = database;
         this.usersCollection = database.collection("users");
     }
 
     /**
      * Sends a notification to a specific user by saving it to their notifications sub-collection.
+     * (Used by the Cancel/Draw replacement features)
      *
      * @param userId       the device ID of the user to notify
      * @param notification the notification details
@@ -54,7 +59,7 @@ public class NotificationRepository {
     }
 
     /**
-     * Fetches all notifications for a specific user, ordered by newest first.
+     * Fetches all notifications for a specific user from their sub-collection.
      *
      * @param userId   the device ID of the user
      * @param listener the listener that receives the list of notifications
@@ -74,9 +79,75 @@ public class NotificationRepository {
                         }
                         listener.onComplete(notifications, true);
                     } else {
-                        Log.e(TAG, "Failed to fetch notifications", task.getException());
+                        Log.e(TAG, TAG + " Failed to fetch notifications", task.getException());
                         listener.onComplete(null, false);
                     }
                 });
+    }
+
+    /**
+     * Saves a notification to the top-level notifications collection.
+     * (Team's added logic)
+     *
+     * @param notification the notification to save
+     * @param listener     called with true on success, false on failure
+     */
+    public void saveNotification(NotificationItem notification, OnCompleteListener<Boolean> listener) {
+        db.collection(COLLECTION)
+                .add(notification)
+                .addOnSuccessListener(docRef -> {
+                    notification.setId(docRef.getId());
+                    listener.onComplete(true, true);
+                })
+                .addOnFailureListener(e -> listener.onComplete(false, false));
+    }
+
+    /**
+     * Fetches all notifications for a given user from the top-level collection.
+     * (Team's added logic)
+     *
+     * @param userId   the device ID of the user
+     * @param listener called with the list of notifications on success
+     */
+    public void getNotificationsForUser(String userId, OnCompleteListener<List<NotificationItem>> listener) {
+        db.collection(COLLECTION)
+                .whereEqualTo("userId", userId)
+                .orderBy("createdAt", Query.Direction.DESCENDING)
+                .get()
+                .addOnSuccessListener(querySnapshot -> {
+                    List<NotificationItem> items = new ArrayList<>();
+                    for (com.google.firebase.firestore.DocumentSnapshot doc : querySnapshot.getDocuments()) {
+                        NotificationItem item = doc.toObject(NotificationItem.class);
+                        if (item != null) {
+                            item.setId(doc.getId());
+                            items.add(item);
+                        }
+                    }
+                    listener.onComplete(items, true);
+                })
+                .addOnFailureListener(e -> listener.onComplete(null, false));
+    }
+
+    /**
+     * Fetches all notifications for admin browsing from the top-level collection.
+     *
+     * @param listener called with the list of notifications on success
+     */
+    public void getAllNotifications(OnCompleteListener<List<NotificationItem>> listener) {
+        db.collection(COLLECTION)
+                .orderBy("createdAt", Query.Direction.DESCENDING)
+                .get()
+                .addOnSuccessListener(querySnapshot -> {
+                    List<NotificationItem> items = new ArrayList<>();
+                    for (com.google.firebase.firestore.DocumentSnapshot doc : querySnapshot.getDocuments()) {
+                        NotificationItem item = doc.toObject(NotificationItem.class);
+                        if (item != null) {
+                            item.setId(doc.getId());
+                            items.add(item);
+                        }
+                    }
+                    listener.onComplete(items, true);
+                })
+                .addOnFailureListener(e -> listener.onComplete(null, false));
     }
 }

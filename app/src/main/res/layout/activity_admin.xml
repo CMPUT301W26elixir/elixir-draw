@@ -33,37 +33,94 @@
             android:layout_marginEnd="24dp" />
     </LinearLayout>
 
-    <!-- Tabs -->
-    <LinearLayout
+    <!-- Tabs Slider -->
+    <HorizontalScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:padding="8dp">
+        android:fillViewport="false"
+        android:overScrollMode="never"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
+        android:scrollbars="none">
 
-        <TextView
-            android:id="@+id/eventsTabText"
-            android:layout_width="0dp"
+        <LinearLayout
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/admin_view_events"
-            android:textColor="@color/text_primary"
-            android:textSize="16sp"
-            android:fontFamily="@font/varela_round_regular"
-            android:gravity="center"
-            android:paddingVertical="8dp" />
+            android:orientation="horizontal"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp">
 
-        <TextView
-            android:id="@+id/profilesTabText"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/admin_view_profiles"
-            android:textColor="@color/my_events_tab_inactive"
-            android:textSize="16sp"
-            android:fontFamily="@font/varela_round_regular"
-            android:gravity="center"
-            android:paddingVertical="8dp" />
-    </LinearLayout>
+            <TextView
+                android:id="@+id/eventsTabText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/varela_round_regular"
+                android:gravity="center"
+                android:paddingStart="14dp"
+                android:paddingTop="8dp"
+                android:paddingEnd="14dp"
+                android:paddingBottom="8dp"
+                android:text="@string/admin_view_events"
+                android:textColor="@color/text_primary"
+                android:textSize="15sp" />
+
+            <TextView
+                android:id="@+id/profilesTabText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/varela_round_regular"
+                android:gravity="center"
+                android:paddingStart="14dp"
+                android:paddingTop="8dp"
+                android:paddingEnd="14dp"
+                android:paddingBottom="8dp"
+                android:text="@string/admin_view_profiles"
+                android:textColor="@color/my_events_tab_inactive"
+                android:textSize="15sp" />
+
+            <TextView
+                android:id="@+id/profilePicTabText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/varela_round_regular"
+                android:gravity="center"
+                android:paddingStart="14dp"
+                android:paddingTop="8dp"
+                android:paddingEnd="14dp"
+                android:paddingBottom="8dp"
+                android:text="@string/admin_view_profilepic"
+                android:textColor="@color/my_events_tab_inactive"
+                android:textSize="15sp" />
+
+            <TextView
+                android:id="@+id/postersTabText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/varela_round_regular"
+                android:gravity="center"
+                android:paddingStart="14dp"
+                android:paddingTop="8dp"
+                android:paddingEnd="14dp"
+                android:paddingBottom="8dp"
+                android:text="@string/admin_view_posters"
+                android:textColor="@color/my_events_tab_inactive"
+                android:textSize="15sp" />
+
+            <TextView
+                android:id="@+id/notificationsTabText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/varela_round_regular"
+                android:gravity="center"
+                android:paddingStart="14dp"
+                android:paddingTop="8dp"
+                android:paddingEnd="14dp"
+                android:paddingBottom="8dp"
+                android:text="@string/admin_view_notifications"
+                android:textColor="@color/my_events_tab_inactive"
+                android:textSize="15sp" />
+        </LinearLayout>
+    </HorizontalScrollView>
 
     <!-- Content Area -->
     <FrameLayout
@@ -175,6 +232,162 @@
                 android:layout_height="match_parent"
                 android:gravity="center"
                 android:text="@string/admin_no_profiles"
+                android:textColor="@color/white"
+                android:textSize="16sp"
+                android:fontFamily="@font/varela_round_regular"
+                android:visibility="gone" />
+        </LinearLayout>
+
+        <!-- Notifications Container -->
+        <LinearLayout
+            android:id="@+id/notificationsContainer"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/notificationsRecyclerView"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:padding="16dp"
+                android:clipToPadding="false"
+                android:visibility="gone" />
+
+            <LinearLayout
+                android:id="@+id/notificationsLoadingLayout"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:visibility="visible">
+
+                <ProgressBar
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:indeterminateTint="@color/white" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/admin_loading_notifications"
+                    android:textColor="@color/white"
+                    android:textSize="16sp"
+                    android:fontFamily="@font/varela_round_regular"
+                    android:layout_marginTop="16dp" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/notificationsEmptyStateText"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:text="@string/admin_no_notifications"
+                android:textColor="@color/white"
+                android:textSize="16sp"
+                android:fontFamily="@font/varela_round_regular"
+                android:visibility="gone" />
+        </LinearLayout>
+
+        <!-- Profile Pictures Container -->
+        <LinearLayout
+            android:id="@+id/profilePicsContainer"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/profilePicsRecyclerView"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:clipToPadding="false"
+                android:padding="16dp"
+                android:visibility="gone" />
+
+            <LinearLayout
+                android:id="@+id/profilePicsLoadingLayout"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:visibility="visible">
+
+                <ProgressBar
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:indeterminateTint="@color/white" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:fontFamily="@font/varela_round_regular"
+                    android:text="@string/admin_loading_profilepic"
+                    android:textColor="@color/white"
+                    android:textSize="16sp" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/profilePicsEmptyStateText"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:fontFamily="@font/varela_round_regular"
+                android:gravity="center"
+                android:text="@string/admin_no_profilepic"
+                android:textColor="@color/white"
+                android:textSize="16sp"
+                android:visibility="gone" />
+        </LinearLayout>
+
+        <!-- Posters Container -->
+        <LinearLayout
+            android:id="@+id/postersContainer"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/postersRecyclerView"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:padding="16dp"
+                android:clipToPadding="false"
+                android:visibility="gone" />
+
+            <LinearLayout
+                android:id="@+id/postersLoadingLayout"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:visibility="visible">
+
+                <ProgressBar
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:indeterminateTint="@color/white" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/admin_loading_posters"
+                    android:textColor="@color/white"
+                    android:textSize="16sp"
+                    android:fontFamily="@font/varela_round_regular"
+                    android:layout_marginTop="16dp" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/postersEmptyStateText"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:text="@string/admin_no_posters"
                 android:textColor="@color/white"
                 android:textSize="16sp"
                 android:fontFamily="@font/varela_round_regular"

@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextUtils;
@@ -19,17 +20,22 @@ import android.widget.Toast;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
+import com.bumptech.glide.Glide;
 import com.example.allot.BuildConfig;
 import com.example.allot.R;
 import com.example.allot.common.AppResult;
 import com.example.allot.controller.event.EditEventController;
+import com.example.allot.controller.event.EventPosterController;
 import com.example.allot.model.event.Event;
 import com.example.allot.model.event.EventFormData;
 import com.example.allot.model.event.EventFormSnapshot;
 import com.example.allot.view.lottery.RunLotteryActivity;
 import com.example.allot.view.organizer.EventEntrantsActivity;
+import com.example.allot.view.organizer.EventQrCodeActivity;
 import com.example.allot.view.organizer.InviteCoOrganizerActivity;
+import com.example.allot.view.shared.EventDisplayFormatter;
 import com.example.allot.view.shared.EventFormUiHelper;
+import com.example.allot.view.shared.RegistrationRangePickerView;
 import com.example.allot.view.shared.SimpleTextWatcher;
 import com.example.allot.view.shared.UiHelper;
 import com.google.android.gms.common.api.Status;
@@ -60,9 +66,15 @@ public class EditEventActivity extends AppCompatActivity {
     private EditEventController manageEventController;
 
     private View eventImageBackground;
+    private View posterUploadCard;
+    private View posterUploadPlaceholder;
+    private android.widget.ImageView posterPreviewImage;
+    private TextView posterUploadHintText;
+    private TextView posterRemoveButton;
     private TextView entrantsLotteryButton;
     private TextView inviteEntrantsButton;
     private TextView inviteCoOrganizerButton;
+    private TextView viewQrCodeButton;
     private TextView summaryTitleText;
     private TextView summaryLocationText;
     private TextView summaryDateText;
@@ -76,12 +88,7 @@ public class EditEventActivity extends AppCompatActivity {
     private EditText priceInput;
     private EditText descriptionInput;
     private EditText participantsInput;
-    private Spinner registrationStartMonthSpinner;
-    private EditText registrationStartDayInput;
-    private EditText registrationStartYearInput;
-    private Spinner registrationEndMonthSpinner;
-    private EditText registrationEndDayInput;
-    private EditText registrationEndYearInput;
+    private RegistrationRangePickerView registrationRangePickerView;
     private TextView saveChangesButton;
     private EventFormUiHelper formUiHelper;
     private String currentEventId;
@@ -92,6 +99,9 @@ public class EditEventActivity extends AppCompatActivity {
     private boolean isLoadingEvent;
     private boolean isSaving;
     private boolean shouldRefreshOnResume;
+    private Uri selectedPosterUri;
+    private boolean removePosterRequested;
+    private EventPosterController eventPosterController;
     private final ActivityResultLauncher<Intent> placeAutocompleteLauncher =
             registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
                 if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
@@ -113,6 +123,17 @@ public class EditEventActivity extends AppCompatActivity {
                     Toast.makeText(this, R.string.create_event_places_error, Toast.LENGTH_SHORT).show();
                 }
             });
+    private final ActivityResultLauncher<String> posterPickerLauncher =
+            registerForActivityResult(new ActivityResultContracts.GetContent(), uri -> {
+                if (uri == null) {
+                    return;
+                }
+
+                selectedPosterUri = uri;
+                removePosterRequested = false;
+                renderPosterState();
+                updateSaveButtonState();
+            });
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -120,6 +141,7 @@ public class EditEventActivity extends AppCompatActivity {
         setContentView(R.layout.activity_manage_event);
 
         manageEventController = new EditEventController(this);
+        eventPosterController = new EventPosterController();
         currentEventId = getIntent().getStringExtra(EXTRA_EVENT_ID);
 
         bindViews();
@@ -140,9 +162,15 @@ public class EditEventActivity extends AppCompatActivity {
 
     private void bindViews() {
         eventImageBackground = findViewById(R.id.eventImageBackground);
+        posterUploadCard = findViewById(R.id.posterUploadCard);
+        posterUploadPlaceholder = findViewById(R.id.posterUploadPlaceholder);
+        posterPreviewImage = findViewById(R.id.posterPreviewImage);
+        posterUploadHintText = findViewById(R.id.posterUploadHintText);
+        posterRemoveButton = findViewById(R.id.posterRemoveButton);
         entrantsLotteryButton = findViewById(R.id.entrantsLotteryButton);
         inviteEntrantsButton = findViewById(R.id.inviteEntrantsButton);
         inviteCoOrganizerButton = findViewById(R.id.inviteCoOrganizerButton);
+        viewQrCodeButton = findViewById(R.id.viewQrCodeButton);
         summaryTitleText = findViewById(R.id.summaryTitleText);
         summaryLocationText = findViewById(R.id.summaryLocationText);
         summaryDateText = findViewById(R.id.summaryDateText);
@@ -156,12 +184,7 @@ public class EditEventActivity extends AppCompatActivity {
         priceInput = findViewById(R.id.priceInput);
         descriptionInput = findViewById(R.id.descriptionInput);
         participantsInput = findViewById(R.id.participantsInput);
-        registrationStartMonthSpinner = findViewById(R.id.registrationStartMonthSpinner);
-        registrationStartDayInput = findViewById(R.id.registrationStartDayInput);
-        registrationStartYearInput = findViewById(R.id.registrationStartYearInput);
-        registrationEndMonthSpinner = findViewById(R.id.registrationEndMonthSpinner);
-        registrationEndDayInput = findViewById(R.id.registrationEndDayInput);
-        registrationEndYearInput = findViewById(R.id.registrationEndYearInput);
+        registrationRangePickerView = findViewById(R.id.registrationRangePickerView);
         saveChangesButton = findViewById(R.id.saveChangesButton);
         formUiHelper = new EventFormUiHelper(
                 eventNameInput,
@@ -174,12 +197,7 @@ public class EditEventActivity extends AppCompatActivity {
                 priceInput,
                 descriptionInput,
                 participantsInput,
-                registrationStartMonthSpinner,
-                registrationStartDayInput,
-                registrationStartYearInput,
-                registrationEndMonthSpinner,
-                registrationEndDayInput,
-                registrationEndYearInput
+                registrationRangePickerView
         );
     }
 
@@ -206,10 +224,6 @@ public class EditEventActivity extends AppCompatActivity {
         participantsInput.addTextChangedListener(dirtyStateWatcher);
         startDayInput.addTextChangedListener(dirtyStateWatcher);
         startYearInput.addTextChangedListener(dirtyStateWatcher);
-        registrationStartDayInput.addTextChangedListener(dirtyStateWatcher);
-        registrationStartYearInput.addTextChangedListener(dirtyStateWatcher);
-        registrationEndDayInput.addTextChangedListener(dirtyStateWatcher);
-        registrationEndYearInput.addTextChangedListener(dirtyStateWatcher);
         geolocationCheckbox.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (!isBindingEvent) {
                 updateSaveButtonState();
@@ -237,13 +251,27 @@ public class EditEventActivity extends AppCompatActivity {
         };
 
         startMonthSpinner.setOnItemSelectedListener(dateSelectionListener);
-        registrationStartMonthSpinner.setOnItemSelectedListener(dateSelectionListener);
-        registrationEndMonthSpinner.setOnItemSelectedListener(dateSelectionListener);
+        if (registrationRangePickerView != null) {
+            registrationRangePickerView.setOnRangeChangedListener((startDate, endDate) -> {
+                if (!isBindingEvent) {
+                    updateSaveButtonState();
+                }
+            });
+        }
 
         entrantsLotteryButton.setOnClickListener(view -> openLotteryScreen());
         inviteEntrantsButton.setOnClickListener(view -> openInviteScreen());
         inviteCoOrganizerButton.setOnClickListener(view -> openInviteCoOrganizerScreen());
+        posterUploadCard.setOnClickListener(view -> posterPickerLauncher.launch("image/*"));
+        posterRemoveButton.setOnClickListener(view -> {
+            selectedPosterUri = null;
+            removePosterRequested = true;
+            renderPosterState();
+            updateSaveButtonState();
+        });
+        viewQrCodeButton.setOnClickListener(view -> openQrCodeScreen());
         saveChangesButton.setOnClickListener(view -> saveChanges());
+        renderPosterState();
     }
 
     private void configureLocationPicker() {
@@ -323,11 +351,14 @@ public class EditEventActivity extends AppCompatActivity {
         isBindingEvent = true;
         currentEvent = event;
         currentCategory = UiHelper.cleanText(event.getCategory());
+        selectedPosterUri = null;
+        removePosterRequested = false;
 
         EventFormData viewModel = manageEventController.buildViewModel(event);
         bindFormViewModel(viewModel);
         updateSummary(viewModel.getTitle(), viewModel.getLocation(), manageEventController.buildSummaryDate(readFormData()), currentCategory);
         updateInviteButtonVisibility(event);
+        renderPosterState();
 
         originalFormSnapshot = manageEventController.buildSnapshot(readFormData());
 
@@ -362,6 +393,29 @@ public class EditEventActivity extends AppCompatActivity {
         overridePendingTransition(0, 0);
     }
 
+    private void openQrCodeScreen() {
+        if (TextUtils.isEmpty(currentEventId)) {
+            Toast.makeText(this, R.string.event_qr_generation_failure, Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        Intent intent = new Intent(this, EventQrCodeActivity.class);
+        intent.putExtra(EventCreatedActivity.EXTRA_EVENT_ID, currentEventId);
+        intent.putExtra(EventCreatedActivity.EXTRA_EVENT_TITLE, summaryTitleText.getText().toString());
+        intent.putExtra(EventCreatedActivity.EXTRA_EVENT_LOCATION, summaryLocationText.getText().toString());
+        intent.putExtra(EventCreatedActivity.EXTRA_EVENT_DATE, summaryDateText.getText().toString());
+        intent.putExtra(EventCreatedActivity.EXTRA_EVENT_PRICE, priceInput.getText().toString());
+        intent.putExtra(
+                EventCreatedActivity.EXTRA_EVENT_DEADLINE,
+                currentEvent != null
+                        ? EventDisplayFormatter.deadline(currentEvent)
+                        : getIntent().getStringExtra(EXTRA_REGISTRATION_END)
+        );
+        intent.putExtra(EventCreatedActivity.EXTRA_EVENT_CATEGORY, currentCategory);
+        startActivity(intent);
+        overridePendingTransition(0, 0);
+    }
+
     /**
      * Reloads the event when returning from a related screen that may have changed it.
      */
@@ -386,21 +440,70 @@ public class EditEventActivity extends AppCompatActivity {
 
         isSaving = true;
         updateSaveButtonState();
+
+        boolean formChanged = !manageEventController.buildSnapshot(readFormData()).equals(originalFormSnapshot);
+        if (!formChanged) {
+            applyPosterChangesIfNeeded(null, true);
+            return;
+        }
+
         manageEventController.saveChanges(currentEventId, readFormData(), (AppResult<Event> result, boolean success) -> {
-            isSaving = false;
             if (result == null) {
+                isSaving = false;
                 updateSaveButtonState();
                 Toast.makeText(this, R.string.manage_event_save_failure, Toast.LENGTH_SHORT).show();
                 return;
             }
 
             if (!result.isSuccess() || result.getData() == null) {
+                isSaving = false;
                 updateSaveButtonState();
                 Toast.makeText(this, result.getMessageResId(), Toast.LENGTH_SHORT).show();
                 return;
             }
 
-            reloadEventAfterSave(result);
+            applyPosterChangesIfNeeded(result, false);
+        });
+    }
+
+    private void applyPosterChangesIfNeeded(AppResult<Event> formResult, boolean posterOnly) {
+        if (selectedPosterUri == null && !removePosterRequested) {
+            isSaving = false;
+            updateSaveButtonState();
+            if (posterOnly) {
+                Toast.makeText(this, R.string.manage_event_save_success, Toast.LENGTH_SHORT).show();
+                return;
+            }
+            reloadEventAfterSave(formResult);
+            return;
+        }
+
+        if (removePosterRequested) {
+            String currentPosterUrl = currentEvent == null ? null : currentEvent.getPosterUrl();
+            eventPosterController.deletePoster(currentEventId, currentPosterUrl, (deleted, success) -> {
+                isSaving = false;
+                if (!success || deleted == null || !deleted) {
+                    updateSaveButtonState();
+                    Toast.makeText(this, R.string.event_poster_upload_failure, Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                Toast.makeText(this, R.string.event_poster_upload_success, Toast.LENGTH_SHORT).show();
+                loadEventFromFirestore();
+            });
+            return;
+        }
+
+        eventPosterController.uploadPoster(currentEventId, selectedPosterUri, (posterUrl, success) -> {
+            isSaving = false;
+            if (!success) {
+                updateSaveButtonState();
+                Toast.makeText(this, R.string.event_poster_upload_failure, Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            Toast.makeText(this, R.string.event_poster_upload_success, Toast.LENGTH_SHORT).show();
+            loadEventFromFirestore();
         });
     }
 
@@ -415,20 +518,54 @@ public class EditEventActivity extends AppCompatActivity {
     }
 
     private boolean hasUnsavedChanges() {
-        return !manageEventController.buildSnapshot(readFormData()).equals(originalFormSnapshot);
+        return !manageEventController.buildSnapshot(readFormData()).equals(originalFormSnapshot)
+                || selectedPosterUri != null
+                || removePosterRequested;
     }
 
     private void updateSaveButtonState() {
-        int color = manageEventController.isSaveEnabled(
+        boolean formSaveEnabled = manageEventController.isSaveEnabled(
                 readFormData(),
                 originalFormSnapshot,
                 isSaving,
                 isLoadingEvent
-        )
+        );
+        boolean isPosterPending = selectedPosterUri != null || removePosterRequested;
+        int color = (formSaveEnabled || (!isSaving && !isLoadingEvent && isPosterPending))
                 ? SAVE_ACTIVE_COLOR
                 : SAVE_INACTIVE_COLOR;
         saveChangesButton.setBackgroundTintList(ColorStateList.valueOf(color));
         saveChangesButton.setEnabled(!isSaving && !isLoadingEvent);
+    }
+
+    private void renderPosterState() {
+        String currentPosterUrl = currentEvent == null ? null : currentEvent.getPosterUrl();
+        boolean hasSelectedPoster = selectedPosterUri != null;
+        boolean hasExistingPoster = !TextUtils.isEmpty(currentPosterUrl) && !removePosterRequested;
+
+        if (hasSelectedPoster) {
+            posterPreviewImage.setVisibility(View.VISIBLE);
+            posterUploadPlaceholder.setVisibility(View.GONE);
+            posterRemoveButton.setVisibility(View.VISIBLE);
+            posterUploadHintText.setText(R.string.manage_event_banner_change);
+            Glide.with(this).load(selectedPosterUri).into(posterPreviewImage);
+            return;
+        }
+
+        if (hasExistingPoster) {
+            posterPreviewImage.setVisibility(View.VISIBLE);
+            posterUploadPlaceholder.setVisibility(View.GONE);
+            posterRemoveButton.setVisibility(View.VISIBLE);
+            posterUploadHintText.setText(R.string.manage_event_banner_change);
+            Glide.with(this).load(currentPosterUrl).into(posterPreviewImage);
+            return;
+        }
+
+        posterPreviewImage.setVisibility(View.GONE);
+        posterPreviewImage.setImageDrawable(null);
+        posterUploadPlaceholder.setVisibility(View.VISIBLE);
+        posterRemoveButton.setVisibility(View.GONE);
+        posterUploadHintText.setText(R.string.manage_event_banner_placeholder);
     }
 
     private EventFormData readFormData() {

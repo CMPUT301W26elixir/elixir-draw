@@ -2,10 +2,7 @@ package com.example.allot.view.explore;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.text.Editable;
-import android.text.TextWatcher;
-import android.util.Log;
-import android.view.View;
+import android.util.Log;import android.view.View;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
@@ -17,29 +14,35 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.allot.R;
 import com.example.allot.controller.explore.ExploreController;
 import com.example.allot.controller.shared.NotificationController;
+import com.example.allot.controller.notification.NotificationService;
 import com.example.allot.view.event.EventDetailActivity;
+import com.example.allot.view.event.SearchEventActivity;
 import com.example.allot.view.events.EventListModeFragment;
 import com.example.allot.view.shared.AppNavigator;
 import com.example.allot.view.shared.BottomNavBarView;
 import com.example.allot.view.shared.EventListAdapter;
 import com.example.allot.view.shared.EventListItem;
+import com.example.allot.view.shared.UiHelper;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+
 /**
  * Shows the explore screen where users can browse, search, and save events.
  */
 public class ExploreActivity extends AppCompatActivity {
-    private static final String TAG = "Allot_Logic";
+    private static final String TAG = "ExploreActivity";
 
     private ExploreController browseController;
     private NotificationController notificationController;
+    private NotificationService notificationService;
     private EventListAdapter eventListAdapter;
     private RecyclerView recyclerView;
     private EditText searchInput;
     private ProgressBar loadingIndicator;
     private TextView stateText;
     private BottomNavBarView bottomNavBar;
+    private BottomNavBarView.Tab currentHomeTab = BottomNavBarView.Tab.EXPLORE;
 
     private FrameLayout fragmentContainer;
     private LinearLayout exploreContainer;
@@ -52,7 +55,7 @@ public class ExploreActivity extends AppCompatActivity {
 
     /**
      * Initializes the activity, binds views, configures filters and navigation,
-     * loads the current user, and displays either the explore or saved tab.
+     * and starts the notification background listeners.
      *
      * @param savedInstanceState the saved activity state
      */
@@ -61,6 +64,29 @@ public class ExploreActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        browseController = new ExploreController(this);
+
+        // Start background notification listening (Sub-collection logic)
+        notificationController = new NotificationController(this);
+        notificationController.startListening(browseController.getCurrentDeviceId());
+
+        // Start background notification listening (Top-level collection logic)
+        notificationService = new NotificationService(this);
+        notificationService.startListening();
+
+        bindViews();
+        setupSearch();
+        setupFilterChips();
+        setupBottomNavigation();
+
+        currentHomeTab = resolveInitialTab(getIntent());
+        refreshSavedEventsAndVisibleContent();
+    }
+
+    /**
+     * Binds all layout views to their corresponding fields.
+     */
+    private void bindViews() {
         recyclerView = findViewById(R.id.eventsRecyclerView);
         searchInput = findViewById(R.id.searchInput);
         loadingIndicator = findViewById(R.id.loadingIndicator);
@@ -68,18 +94,11 @@ public class ExploreActivity extends AppCompatActivity {
         bottomNavBar = findViewById(R.id.bottomNavBar);
         fragmentContainer = findViewById(R.id.fragment_container);
         exploreContainer = findViewById(R.id.exploreContainer);
-        browseController = new ExploreController(this);
-        notificationController = new NotificationController(this);
 
-        // Start background notification listening
-        notificationController.startListening(browseController.getCurrentDeviceId());
-
-        // Set up the chips before loading events
         chipFortnite = findViewById(R.id.chipFortnite);
         chipSports = findViewById(R.id.chipSports);
         chipArts = findViewById(R.id.chipArts);
         chipScience = findViewById(R.id.chipScience);
-        setupFilterChips();
 
         eventListAdapter = new EventListAdapter(new ArrayList<>(), new EventListAdapter.OnEventClickListener() {
             @Override
@@ -89,33 +108,28 @@ public class ExploreActivity extends AppCompatActivity {
 
             @Override
             public void onHeartClick(EventListItem event, int position) {
-                boolean isSaving = event.isSaved;
-
-                browseController.toggleSavedEvent(userSavedEvents, event.getEventId(), isSaving, (savedEventIds, success) -> {
-                    userSavedEvents = new ArrayList<>(savedEventIds == null ? new ArrayList<>() : savedEventIds);
-                    // Update the heart after the save call finishes
-                    event.isSaved = success == isSaving;
-                    eventListAdapter.notifyItemChanged(position);
+                boolean isSaving = event.isSaved();
+                browseController.toggleSavedEvent(userSavedEvents, event.getEventId(), !isSaving, (savedEventIds, success) -> {
+                    if (success) {
+                        userSavedEvents = new ArrayList<>(savedEventIds == null ? new ArrayList<>() : savedEventIds);
+                        event.isSaved = !isSaving;
+                        eventListAdapter.notifyItemChanged(position);
+                    }
                 });
             }
         });
-
         recyclerView.setAdapter(eventListAdapter);
-        setupBottomNavigation();
-        setupSearchInput();
+    }
 
-        browseController.loadSavedEventIds((savedEventIds, success) -> {
-            if (success) {
-                userSavedEvents = new ArrayList<>(savedEventIds);
-
-                if ("saved".equals(getIntent().getStringExtra("navigate_to"))) {
-                    openSavedTab();
-                } else {
-                    loadBrowseEvents(searchInput.getText().toString());
-                }
-            } else {
-                Log.e(TAG, "Failed to load user.");
-            }
+    /**
+     * Sets up the search input field to open the search activity.
+     */
+    private void setupSearch() {
+        searchInput.setFocusable(false);
+        searchInput.setClickable(true);
+        searchInput.setOnClickListener(v -> {
+            Intent intent = new Intent(this, SearchEventActivity.class);
+            startActivity(intent);
         });
     }
 
@@ -130,16 +144,14 @@ public class ExploreActivity extends AppCompatActivity {
             selectedChipFilter = toggleChipFilter(selectedChipFilter, clickedText);
 
             updateChipUI();
-            // Load the list again with the new chip filter
-            loadBrowseEvents(searchInput.getText().toString());
+            loadBrowseEvents("");
         };
 
-        chipFortnite.setOnClickListener(chipClickListener);
-        chipSports.setOnClickListener(chipClickListener);
-        chipArts.setOnClickListener(chipClickListener);
-        chipScience.setOnClickListener(chipClickListener);
+        if (chipFortnite != null) chipFortnite.setOnClickListener(chipClickListener);
+        if (chipSports != null) chipSports.setOnClickListener(chipClickListener);
+        if (chipArts != null) chipArts.setOnClickListener(chipClickListener);
+        if (chipScience != null) chipScience.setOnClickListener(chipClickListener);
 
-        // Show the starting chip look
         updateChipUI();
     }
 
@@ -147,10 +159,10 @@ public class ExploreActivity extends AppCompatActivity {
      * Updates the visual state of each filter chip based on the selected filter.
      */
     private void updateChipUI() {
-        chipFortnite.setBackgroundResource(getChipBackground(selectedChipFilter, chipFortnite.getText().toString()));
-        chipSports.setBackgroundResource(getChipBackground(selectedChipFilter, chipSports.getText().toString()));
-        chipArts.setBackgroundResource(getChipBackground(selectedChipFilter, chipArts.getText().toString()));
-        chipScience.setBackgroundResource(getChipBackground(selectedChipFilter, chipScience.getText().toString()));
+        if (chipFortnite != null) chipFortnite.setBackgroundResource(getChipBackground(selectedChipFilter, "Fortnite"));
+        if (chipSports != null) chipSports.setBackgroundResource(getChipBackground(selectedChipFilter, getString(R.string.chip_sports)));
+        if (chipArts != null) chipArts.setBackgroundResource(getChipBackground(selectedChipFilter, getString(R.string.chip_arts)));
+        if (chipScience != null) chipScience.setBackgroundResource(getChipBackground(selectedChipFilter, getString(R.string.chip_science)));
     }
 
     /**
@@ -164,9 +176,31 @@ public class ExploreActivity extends AppCompatActivity {
         super.onNewIntent(intent);
         setIntent(intent);
         if ("saved".equals(intent.getStringExtra("navigate_to"))) {
-            openSavedTab();
-        } else {
-            showExploreTab();
+            currentHomeTab = BottomNavBarView.Tab.SAVED;
+        }
+        refreshSavedEventsAndVisibleContent();
+    }
+
+    /**
+     * Refreshes the saved event list and currently visible tab on resume.
+     */
+    @Override
+    protected void onResume() {
+        super.onResume();
+        refreshSavedEventsAndVisibleContent();
+    }
+
+    /**
+     * Stops the background notification listeners when the activity is destroyed.
+     */
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (notificationService != null) {
+            notificationService.stopListening();
+        }
+        if (notificationController != null) {
+            notificationController.stopListening();
         }
     }
 
@@ -174,28 +208,30 @@ public class ExploreActivity extends AppCompatActivity {
      * Configures the bottom navigation bar and assigns tab actions.
      */
     private void setupBottomNavigation() {
-        bottomNavBar.setSelectedTab(BottomNavBarView.Tab.EXPLORE);
+        bottomNavBar.setSelectedTab(currentHomeTab);
         bottomNavBar.setOnTabClickListener(BottomNavBarView.Tab.EXPLORE, v -> showExploreTab());
         bottomNavBar.setOnTabClickListener(BottomNavBarView.Tab.SAVED, v -> openSavedTab());
-        bottomNavBar.setOnTabClickListener(BottomNavBarView.Tab.MY_EVENTS, v -> openMyEventsScreen());
-        bottomNavBar.setOnTabClickListener(BottomNavBarView.Tab.PROFILE, v -> openProfileScreen());
-        bottomNavBar.setOnTabClickListener(BottomNavBarView.Tab.SCAN, view -> openScanScreen());
+        bottomNavBar.setOnTabClickListener(BottomNavBarView.Tab.MY_EVENTS, v -> AppNavigator.openMyEvents(this, false));
+        bottomNavBar.setOnTabClickListener(BottomNavBarView.Tab.PROFILE, v -> AppNavigator.openProfile(this, false));
+        bottomNavBar.setOnTabClickListener(BottomNavBarView.Tab.SCAN, view -> AppNavigator.openScan(this, false));
     }
 
     /**
      * Shows the explore tab and reloads the browse event list.
      */
     private void showExploreTab() {
+        currentHomeTab = BottomNavBarView.Tab.EXPLORE;
         bottomNavBar.setSelectedTab(BottomNavBarView.Tab.EXPLORE);
         if (fragmentContainer != null) fragmentContainer.setVisibility(View.GONE);
         if (exploreContainer != null) exploreContainer.setVisibility(View.VISIBLE);
-        loadBrowseEvents(searchInput.getText().toString());
+        loadBrowseEvents("");
     }
 
     /**
      * Opens the saved events tab by displaying the shared saved-events fragment.
      */
     private void openSavedTab() {
+        currentHomeTab = BottomNavBarView.Tab.SAVED;
         bottomNavBar.setSelectedTab(BottomNavBarView.Tab.SAVED);
         EventListModeFragment fragment = EventListModeFragment.newSavedEventsInstance(new ArrayList<>(userSavedEvents));
 
@@ -209,24 +245,31 @@ public class ExploreActivity extends AppCompatActivity {
     }
 
     /**
-     * Opens the My Events screen.
+     * Reloads the user's saved events from Firestore and refreshes the current view.
      */
-    private void openMyEventsScreen() {
-        AppNavigator.openMyEvents(this, false);
+    private void refreshSavedEventsAndVisibleContent() {
+        browseController.loadSavedEventIds((savedEventIds, success) -> {
+            if (success) {
+                userSavedEvents = new ArrayList<>(savedEventIds == null ? new ArrayList<>() : savedEventIds);
+                if (currentHomeTab == BottomNavBarView.Tab.SAVED) {
+                    openSavedTab();
+                } else {
+                    loadBrowseEvents("");
+                }
+            }
+        });
     }
 
     /**
-     * Opens the Profile screen.
+     * Resolves the starting tab based on navigation parameters in the intent.
+     *
+     * @param intent the intent that started the activity
+     * @return the resolved starting tab
      */
-    private void openProfileScreen() {
-        AppNavigator.openProfile(this, false);
-    }
-
-    /**
-     * Opens the Scan screen.
-     */
-    private void openScanScreen() {
-        AppNavigator.openScan(this, false);
+    private BottomNavBarView.Tab resolveInitialTab(Intent intent) {
+        return intent != null && "saved".equals(intent.getStringExtra("navigate_to"))
+                ? BottomNavBarView.Tab.SAVED
+                : BottomNavBarView.Tab.EXPLORE;
     }
 
     /**
@@ -235,28 +278,11 @@ public class ExploreActivity extends AppCompatActivity {
      * @param eventItem the selected event item
      */
     private void openEventDetailScreen(EventListItem eventItem) {
-        if (eventItem == null || eventItem.eventId == null || eventItem.eventId.trim().isEmpty()) return;
+        if (eventItem == null || eventItem.getEventId() == null) return;
         Intent intent = new Intent(this, EventDetailActivity.class);
-        intent.putExtra(EventDetailActivity.EXTRA_EVENT_ID, eventItem.eventId);
-        intent.putExtra(EventDetailActivity.EXTRA_EVENT_TITLE, eventItem.title);
-        intent.putExtra(EventDetailActivity.EXTRA_EVENT_LOCATION, eventItem.street);
-        intent.putExtra(EventDetailActivity.EXTRA_EVENT_DATE, eventItem.date);
-        intent.putExtra(EventDetailActivity.EXTRA_EVENT_PRICE, eventItem.price);
-        intent.putExtra(EventDetailActivity.EXTRA_EVENT_DEADLINE, eventItem.daysLeft);
-        intent.putExtra(EventDetailActivity.EXTRA_EVENT_CATEGORY, eventItem.category);
+        intent.putExtra(EventDetailActivity.EXTRA_EVENT_ID, eventItem.getEventId());
+        intent.putExtra(EventDetailActivity.EXTRA_EVENT_TITLE, eventItem.getTitle());
         startActivity(intent);
-    }
-
-    /**
-     * Adds a text watcher to the search input so the event list updates
-     * whenever the search text changes.
-     */
-    private void setupSearchInput() {
-        searchInput.addTextChangedListener(new TextWatcher() {
-            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
-            @Override public void afterTextChanged(Editable editable) { loadBrowseEvents(editable.toString()); }
-        });
     }
 
     /**
@@ -267,25 +293,38 @@ public class ExploreActivity extends AppCompatActivity {
      */
     private void loadBrowseEvents(String searchTerm) {
         showBrowseLoadingState();
-        browseController.loadBrowseEvents(searchTerm, selectedChipFilter, userSavedEvents, (items, success) -> {
-            List<EventListItem> safeItems = items == null ? new ArrayList<>() : items;
-            if (!success) {
-                showBrowseMessageState(getString(R.string.browse_state_error));
-                return;
-            }
+        // Updated call to match the team's new 9-parameter signature in ExploreController while passing your filters
+        browseController.loadBrowseEvents(
+                searchTerm,
+                selectedChipFilter,
+                null, // keywords
+                null, // startDate
+                null, // latitude
+                null, // longitude
+                null, // distanceKm
+                userSavedEvents,
+                (items, success) -> {
+                    loadingIndicator.setVisibility(View.GONE);
+                    if (!success) {
+                        showBrowseMessageState(getString(R.string.browse_state_error));
+                        return;
+                    }
 
-            if (safeItems.isEmpty()) {
-                showBrowseMessageState(buildEmptyStateMessage(searchTerm, selectedChipFilter));
-                return;
-            }
+                    if (items == null || items.isEmpty()) {
+                        showBrowseMessageState(buildEmptyStateMessage(searchTerm, selectedChipFilter));
+                        return;
+                    }
 
-            eventListAdapter.updateEvents(safeItems);
-            recyclerView.setVisibility(View.VISIBLE);
-            loadingIndicator.setVisibility(View.GONE);
-            stateText.setVisibility(View.GONE);
-        });
+                    stateText.setVisibility(View.GONE);
+                    recyclerView.setVisibility(View.VISIBLE);
+                    eventListAdapter.updateEvents(items);
+                }
+        );
     }
 
+    /**
+     * Updates the UI to show the loading state for event browsing.
+     */
     private void showBrowseLoadingState() {
         recyclerView.setVisibility(View.GONE);
         loadingIndicator.setVisibility(View.VISIBLE);
@@ -293,6 +332,11 @@ public class ExploreActivity extends AppCompatActivity {
         stateText.setText(R.string.browse_state_loading);
     }
 
+    /**
+     * Updates the UI to show a specific message state, such as an empty list or error.
+     *
+     * @param message the message to display
+     */
     private void showBrowseMessageState(String message) {
         eventListAdapter.updateEvents(new ArrayList<>());
         recyclerView.setVisibility(View.GONE);
@@ -301,37 +345,54 @@ public class ExploreActivity extends AppCompatActivity {
         stateText.setText(message);
     }
 
+    /**
+     * Toggles a chip filter value. If the filter is already selected, it is removed.
+     *
+     * @param currentFilter the current active filter
+     * @param clickedChipText the text of the chip that was clicked
+     * @return the new active filter value
+     */
     private String toggleChipFilter(String currentFilter, String clickedChipText) {
-        String safeCurrentFilter = normalize(currentFilter);
-        String safeClickedChip = normalize(clickedChipText);
-        return safeCurrentFilter.equals(safeClickedChip) ? "" : safeClickedChip;
+        String clicked = clickedChipText.trim();
+        return currentFilter.equals(clicked) ? "" : clicked;
     }
 
+    /**
+     * Determines the correct background drawable for a filter chip based on its selection state.
+     *
+     * @param currentFilter the currently active filter
+     * @param chipText the text of the chip being styled
+     * @return the drawable resource ID for the chip background
+     */
     private int getChipBackground(String currentFilter, String chipText) {
-        return normalize(currentFilter).equals(normalize(chipText))
+        return currentFilter.equals(chipText.trim())
                 ? R.drawable.bg_chip_selected
                 : R.drawable.bg_chip_unselected;
     }
 
+    /**
+     * Builds a user-friendly empty state message based on the current search and filters.
+     *
+     * @param searchTerm the search query entered by the user
+     * @param chipFilter the active category filter
+     * @return the empty state message string
+     */
     private String buildEmptyStateMessage(String searchTerm, String chipFilter) {
-        String trimmedSearch = normalize(searchTerm);
-        String trimmedFilter = normalize(chipFilter);
-
-        if (!trimmedSearch.isEmpty() && !trimmedFilter.isEmpty()) {
-            return String.format(Locale.getDefault(), "No '%s' events match \"%s\".", trimmedFilter, trimmedSearch);
+        if (!searchTerm.isEmpty()) {
+            return String.format(Locale.getDefault(), "No events match \"%s\".", searchTerm);
         }
-
-        if (!trimmedSearch.isEmpty()) {
-            return String.format(Locale.getDefault(), "No events match \"%s\".", trimmedSearch);
+        if (!chipFilter.isEmpty()) {
+            return String.format(Locale.getDefault(), "No %s events found.", chipFilter);
         }
-
-        if (!trimmedFilter.isEmpty()) {
-            return String.format(Locale.getDefault(), "No %s events found.", trimmedFilter);
-        }
-
         return getString(R.string.browse_state_empty);
     }
 
+    /**
+     * Normalizes a string by trimming whitespace and handling null values.
+     *
+     * @param value the string to normalize
+     * @return the normalized string, or an empty string if null
+     */
     private String normalize(String value) {
         return value == null ? "" : value.trim();
     }

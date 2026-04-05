@@ -19,6 +19,8 @@ public class ExploreController {
     private final UserController userController;
     private final ExploreFilterService exploreFilterService;
     private final EventListItemMapper eventListItemMapper;
+    private List<Event> cachedOpenEvents = new ArrayList<>();
+    private boolean hasLoadedOpenEvents;
 
     public ExploreController(Context context) {
         this(new EventRepository(), new UserController(context), new ExploreFilterService(), new EventListItemMapper());
@@ -61,30 +63,81 @@ public class ExploreController {
     }
 
     /**
-     * Loads the current browse event items.
-     *
-     * @param searchTerm the current search term
-     * @param selectedChipFilter the currently selected chip filter
-     * @param savedEventIds the events currently saved by the user
-     * @param listener the listener that receives the mapped event items
+     * Fetches open events from Firestore and stores them in memory for instant filtering.
      */
-    public void loadBrowseEvents(String searchTerm,
-                                 String selectedChipFilter,
-                                 List<String> savedEventIds,
-                                 OnCompleteListener<List<EventListItem>> listener) {
+    public void refreshOpenEvents(OnCompleteListener<List<Event>> listener) {
         eventRepository.getOpenEvents((events, success) -> {
             if (!success || events == null) {
                 listener.onComplete(new ArrayList<>(), false);
                 return;
             }
 
-            BrowseFilter browseFilter = new BrowseFilter(searchTerm, selectedChipFilter);
-            List<Event> filteredEvents = exploreFilterService.buildBrowsableEventList(
-                    events,
-                    new BrowseFilter(browseFilter.getSearchTerm(), browseFilter.getSelectedCategory())
-            );
-            listener.onComplete(eventListItemMapper.mapEvents(filteredEvents, savedEventIds), true);
+            cachedOpenEvents = new ArrayList<>(events);
+            hasLoadedOpenEvents = true;
+            listener.onComplete(new ArrayList<>(cachedOpenEvents), true);
         });
+    }
+
+    /**
+     * Loads and filters open events. If data is not cached, it fetches from repository first.
+     */
+    public void loadBrowseEvents(String searchTerm,
+                                 String selectedChipFilter,
+                                 String keywords,
+                                 java.util.Date startDate,
+                                 Double latitude,
+                                 Double longitude,
+                                 Double distanceKm,
+                                 List<String> savedEventIds,
+                                 OnCompleteListener<List<EventListItem>> listener) {
+        if (!hasLoadedOpenEvents) {
+            refreshOpenEvents((events, success) -> {
+                if (success) {
+                    filterCachedBrowseEvents(searchTerm, selectedChipFilter, keywords, startDate, latitude, longitude, distanceKm, savedEventIds, listener);
+                } else {
+                    listener.onComplete(new ArrayList<>(), false);
+                }
+            });
+        } else {
+            filterCachedBrowseEvents(searchTerm, selectedChipFilter, keywords, startDate, latitude, longitude, distanceKm, savedEventIds, listener);
+        }
+    }
+
+    /**
+     * Filters the cached open events and maps them into display items.
+     */
+    public void filterCachedBrowseEvents(String searchTerm,
+                                         String selectedChipFilter,
+                                         String keywords,
+                                         java.util.Date startDate,
+                                         Double latitude,
+                                         Double longitude,
+                                         Double distanceKm,
+                                         List<String> savedEventIds,
+                                         OnCompleteListener<List<EventListItem>> listener) {
+        if (!hasLoadedOpenEvents) {
+            listener.onComplete(new ArrayList<>(), false);
+            return;
+        }
+
+        BrowseFilter browseFilter = new BrowseFilter(
+                searchTerm,
+                selectedChipFilter,
+                keywords,
+                startDate,
+                latitude,
+                longitude,
+                distanceKm
+        );
+        List<Event> filteredEvents = exploreFilterService.buildBrowsableEventList(
+                cachedOpenEvents,
+                browseFilter
+        );
+        listener.onComplete(eventListItemMapper.mapEvents(filteredEvents, savedEventIds), true);
+    }
+
+    public boolean hasCachedOpenEvents() {
+        return hasLoadedOpenEvents;
     }
 
     /**

@@ -1,5 +1,6 @@
 package com.example.allot.view.shared;
 
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -7,7 +8,9 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
+import com.bumptech.glide.Glide;
 import com.example.allot.R;
 import java.util.ArrayList;
 import java.util.List;
@@ -96,10 +99,10 @@ public class EventListAdapter extends RecyclerView.Adapter<EventListAdapter.Even
         // Show the right heart icon for this item
         if (event.isSaved) {
             holder.heartIcon.setImageResource(R.drawable.ic_heart_filled);
-            holder.heartIcon.setColorFilter(holder.itemView.getContext().getResources().getColor(R.color.bottom_nav_selected));
+            holder.heartIcon.setColorFilter(ContextCompat.getColor(holder.itemView.getContext(), R.color.favorite_active));
         } else {
             holder.heartIcon.setImageResource(R.drawable.ic_heart_outline);
-            holder.heartIcon.setColorFilter(holder.itemView.getContext().getResources().getColor(R.color.white));
+            holder.heartIcon.setColorFilter(ContextCompat.getColor(holder.itemView.getContext(), R.color.white));
         }
 
         holder.heartIcon.setOnClickListener(v -> {
@@ -111,8 +114,18 @@ public class EventListAdapter extends RecyclerView.Adapter<EventListAdapter.Even
             }
         });
 
-        int imageBackground = (position % 2 == 0) ? R.drawable.bg_event_image_one : R.drawable.bg_event_image_two;
-        holder.imageFrame.setBackgroundResource(imageBackground);
+        Glide.with(holder.itemView.getContext()).clear(holder.posterImage);
+        holder.posterImage.setImageResource(R.drawable.no_image);
+
+        if (!TextUtils.isEmpty(event.getPosterUrl())) {
+            Glide.with(holder.itemView.getContext())
+                    .load(event.getPosterUrl())
+                    .centerCrop()
+                    .placeholder(R.drawable.no_image)
+                    .error(R.drawable.no_image)
+                    .into(holder.posterImage);
+        }
+
         holder.itemView.setOnClickListener(view -> {
             if (onEventClickListener != null) {
                 onEventClickListener.onEventClick(event);
@@ -135,6 +148,7 @@ public class EventListAdapter extends RecyclerView.Adapter<EventListAdapter.Even
      */
     static class EventViewHolder extends RecyclerView.ViewHolder {
         FrameLayout imageFrame;
+        ImageView posterImage;
         ImageView heartIcon;
         TextView titleText;
         TextView streetText;
@@ -150,6 +164,7 @@ public class EventListAdapter extends RecyclerView.Adapter<EventListAdapter.Even
         EventViewHolder(@NonNull View itemView) {
             super(itemView);
             imageFrame = itemView.findViewById(R.id.imageFrame);
+            posterImage = itemView.findViewById(R.id.eventPosterImage);
             heartIcon = itemView.findViewById(R.id.heartIcon);
             titleText = itemView.findViewById(R.id.titleText);
             streetText = itemView.findViewById(R.id.streetText);

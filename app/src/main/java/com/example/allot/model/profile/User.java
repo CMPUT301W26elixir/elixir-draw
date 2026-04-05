@@ -10,8 +10,10 @@ public class User {
     private String lastName;
     private String email;
     private String phone;
+    private String profilePhotoUrl;
     private boolean notiEnabled;
     private String role;
+    private String fcmToken;
 
     private ArrayList<String> history;
     private ArrayList<String> myEvents;
@@ -44,6 +46,7 @@ public class User {
         this.phone = phone;
         this.notiEnabled = true;
         this.role = role;
+        this.fcmToken = null;
         this.history = new ArrayList<>();
         this.myEvents = new ArrayList<>();
         this.savedEvents = new ArrayList<>();
@@ -161,6 +164,24 @@ public class User {
     }
 
     /**
+     * Returns the profile photo URL for this user.
+     *
+     * @return the profile photo URL
+     */
+    public String getProfilePhotoUrl() {
+        return profilePhotoUrl;
+    }
+
+    /**
+     * Sets the profile photo URL for this user.
+     *
+     * @param profilePhotoUrl the profile photo URL to assign
+     */
+    public void setProfilePhotoUrl(String profilePhotoUrl) {
+        this.profilePhotoUrl = profilePhotoUrl;
+    }
+
+    /**
      * Returns whether notifications are enabled for the user.
      *
      * @return true if notifications are enabled, otherwise false
@@ -197,6 +218,24 @@ public class User {
     @SuppressWarnings("unused")
     public void setRole(String role) {
         this.role = role;
+    }
+
+    /**
+     * Returns the user's FCM token.
+     *
+     * @return the user's FCM token
+     */
+    public String getFcmToken() {
+        return fcmToken;
+    }
+
+    /**
+     * Sets the user's FCM token.
+     *
+     * @param fcmToken the token to assign
+     */
+    public void setFcmToken(String fcmToken) {
+        this.fcmToken = fcmToken;
     }
 
     /**
@@ -245,11 +284,3 @@ public class User {
         this.savedEvents = savedEvents;
     }
 }
-
-
-
-
-
-
-
-

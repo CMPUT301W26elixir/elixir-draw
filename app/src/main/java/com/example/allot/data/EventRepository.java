@@ -12,6 +12,8 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.Transaction;
 import com.google.firebase.firestore.WriteBatch;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -126,7 +128,9 @@ public class EventRepository {
     public void addComment(String eventId, EventComment comment, OnCompleteListener<Boolean> listener) {
         database.collection("events")
                 .document(eventId)
-                .update("comments", FieldValue.arrayUnion(comment));
+                .update("comments", FieldValue.arrayUnion(comment))
+                .addOnSuccessListener(unused -> listener.onComplete(true, true))
+                .addOnFailureListener(exception -> listener.onComplete(false, false));
     }
      /* Invites a user to a private event and adds it to their My Events list.
      *
@@ -497,26 +501,65 @@ public class EventRepository {
      * @param listener the listener that receives the result
      */
     public void deleteEventAsAdmin(String eventId, OnCompleteListener<Boolean> listener) {
-        database.collection("users")
-                .get()
-                .addOnCompleteListener(task -> {
-                    if (!task.isSuccessful()) {
+        getEventById(eventId, (event, eventLoaded) -> {
+            if (!eventLoaded || event == null) {
+                listener.onComplete(false, false);
+                return;
+            }
+
+            String posterUrl = event.getPosterUrl();
+            database.collection("users")
+                    .get()
+                    .addOnCompleteListener(task -> {
+                        if (!task.isSuccessful()) {
+                            listener.onComplete(false, false);
+                            return;
+                        }
+
+                        List<UserCleanupTarget> cleanupTargets = new ArrayList<>();
+                        for (QueryDocumentSnapshot document : task.getResult()) {
+                            cleanupTargets.add(new UserCleanupTarget(
+                                    document.getReference().getPath(),
+                                    document.getId()));
+                        }
+
+                        List<CleanupOperation> cleanupOperations = buildEventCleanupOperations(eventId, cleanupTargets);
+                        cleanupOperations.add(CleanupOperation.deleteEvent(eventId));
+                        List<List<CleanupOperation>> batches = chunkCleanupOperations(cleanupOperations);
+                        commitEventCleanupOperations(database, batches, 0, (result, success) -> {
+                            if (!success || result == null || !result) {
+                                listener.onComplete(false, false);
+                                return;
+                            }
+
+                            deletePosterFromStorage(posterUrl, listener);
+                        });
+                    });
+        });
+    }
+
+    private void deletePosterFromStorage(String posterUrl, OnCompleteListener<Boolean> listener) {
+        if (posterUrl == null || posterUrl.trim().isEmpty()) {
+            listener.onComplete(true, true);
+            return;
+        }
+
+        try {
+            FirebaseStorage.getInstance()
+                    .getReferenceFromUrl(posterUrl)
+                    .delete()
+                    .addOnSuccessListener(unused -> listener.onComplete(true, true))
+                    .addOnFailureListener(exception -> {
+                        if (exception instanceof StorageException
+                                && ((StorageException) exception).getErrorCode() == StorageException.ERROR_OBJECT_NOT_FOUND) {
+                            listener.onComplete(true, true);
+                            return;
+                        }
                         listener.onComplete(false, false);
-                        return;
-                    }
-
-                    List<UserCleanupTarget> cleanupTargets = new ArrayList<>();
-                    for (QueryDocumentSnapshot document : task.getResult()) {
-                        cleanupTargets.add(new UserCleanupTarget(
-                                document.getReference().getPath(),
-                                document.getId()));
-                    }
-
-                    List<CleanupOperation> cleanupOperations = buildEventCleanupOperations(eventId, cleanupTargets);
-                    cleanupOperations.add(CleanupOperation.deleteEvent(eventId));
-                    List<List<CleanupOperation>> batches = chunkCleanupOperations(cleanupOperations);
-                    commitEventCleanupOperations(database, batches, 0, listener);
-                });
+                    });
+        } catch (IllegalArgumentException exception) {
+            listener.onComplete(false, false);
+        }
     }
 
     void commitEventCleanupOperations(FirebaseFirestore database,

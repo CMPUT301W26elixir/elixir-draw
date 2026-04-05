@@ -11,9 +11,15 @@ import com.google.firebase.firestore.FieldPath;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.SetOptions;
 import com.google.firebase.firestore.WriteBatch;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
 /**
  * Handles Firestore reads and writes for users.
  */
@@ -46,14 +52,11 @@ public class UserRepository {
      * @param listener the listener that receives the user
      */
     public void getUserByDeviceId(String deviceId, OnCompleteListener<User> listener) {
-        // Get the Firestore user doc for this device
         DocumentReference userRef = usersCollection.document(deviceId);
 
         userRef.get().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 DocumentSnapshot document = task.getResult();
-
-                // Turn the doc into a User object
                 if (document != null && document.exists()) {
                     User user = document.toObject(User.class);
                     if (user != null && isBlank(user.getDeviceId())) {
@@ -61,11 +64,9 @@ public class UserRepository {
                     }
                     listener.onComplete(user, user != null);
                 } else {
-                    // This device does not have a user yet
                     listener.onComplete(null, false);
                 }
             } else {
-                // Let the caller know the Firestore call failed
                 Log.d(TAG, "Failed to get user", task.getException());
                 listener.onComplete(null, false);
             }
@@ -76,7 +77,7 @@ public class UserRepository {
      * Creates a new user with the provided device ID.
      *
      * @param deviceId the device ID to assign
-     * @param listener the listener that receives the created user
+     * @param listener the listener that receives the result
      */
     public void createNewUser(String deviceId, OnCompleteListener<User> listener) {
         User user = new User();
@@ -115,7 +116,6 @@ public class UserRepository {
                                   String phone,
                                   boolean notiEnabled,
                                   OnCompleteListener<User> listener) {
-        // Only update the profile fields the user can change
         DocumentReference userRef = usersCollection.document(deviceId);
         userRef.update(
                 "firstName", firstName.trim(),
@@ -125,10 +125,8 @@ public class UserRepository {
                 "notiEnabled", notiEnabled
         ).addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
-                // Load the user again so the caller gets fresh data
                 getUserByDeviceId(deviceId, listener);
             } else {
-                // Let the UI know the save failed
                 Log.d(TAG, "Failed to update user", task.getException());
                 listener.onComplete(null, false);
             }
@@ -136,17 +134,38 @@ public class UserRepository {
     }
 
     /**
+     * Updates specific fields for a user in Firestore.
+     *
+     * @param deviceId the device ID of the user to update
+     * @param updates  a map of field names to new values
+     * @param listener called with true on success, false on failure
+     */
+    public void updateUserFields(String deviceId, Map<String, Object> updates, OnCompleteListener<Boolean> listener) {
+        usersCollection.document(deviceId)
+                .update(updates)
+                .addOnSuccessListener(aVoid -> listener.onComplete(true, true))
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Failed to update user fields for " + deviceId, e);
+                    listener.onComplete(false, false);
+                });
+    }
+
+    /**
      * Updates the user's FCM registration token for push notifications.
+     * Uses merge to create doc if it doesn't exist.
      *
      * @param deviceId the current user device ID
-     * @param token    the FCM registration token
+     * @param fcmToken the FCM registration token
      */
-    public void updateFcmToken(String deviceId, String token) {
-        if (isBlank(deviceId) || isBlank(token)) return;
+    public void updateFcmToken(String deviceId, String fcmToken) {
+        if (deviceId == null || fcmToken == null) return;
+        Map<String, Object> data = new HashMap<>();
+        data.put("fcmToken", fcmToken);
+        data.put("deviceId", deviceId);
 
         usersCollection.document(deviceId)
-                .update("fcmToken", token)
-                .addOnSuccessListener(unused -> Log.d(TAG, "FCM token updated for user: " + deviceId))
+                .set(data, SetOptions.merge())
+                .addOnSuccessListener(aVoid -> Log.d(TAG, "FCM Token updated successfully"))
                 .addOnFailureListener(e -> Log.e(TAG, "Failed to update FCM token", e));
     }
 
@@ -160,8 +179,6 @@ public class UserRepository {
      */
     public void toggleSavedEvent(String deviceId, String eventId, boolean isSaving, OnCompleteListener<Boolean> listener) {
         DocumentReference userRef = usersCollection.document(deviceId);
-
-        // FieldValue lets Firestore add or remove one saved event
         FieldValue updateAction = isSaving ?
                 FieldValue.arrayUnion(eventId) :
                 FieldValue.arrayRemove(eventId);
@@ -204,7 +221,14 @@ public class UserRepository {
                     List<CleanupOperation> cleanupOperations = buildCleanupOperations(deviceId, cleanupTargets);
                     cleanupOperations.add(CleanupOperation.deleteUser(deviceId));
                     List<List<CleanupOperation>> batches = chunkCleanupOperations(cleanupOperations);
-                    commitCleanupOperations(database, batches, 0, listener);
+                    commitCleanupOperations(database, batches, 0, (result, success) -> {
+                        if (!success || result == null || !result) {
+                            listener.onComplete(false, false);
+                            return;
+                        }
+
+                        deleteProfilePhotoFromStorage(deviceId, listener);
+                    });
                 });
     }
 
@@ -228,7 +252,6 @@ public class UserRepository {
                 listener.onComplete(false, false);
                 return;
             }
-
             commitCleanupOperations(database, batches, startIndex + 1, listener);
         });
     }
@@ -240,7 +263,6 @@ public class UserRepository {
                 operations.add(CleanupOperation.deleteEvent(cleanupTarget.getDocumentPath()));
                 continue;
             }
-
             operations.add(CleanupOperation.removeUserFromEvent(cleanupTarget.getDocumentPath(), deviceId));
         }
         return operations;
@@ -255,13 +277,11 @@ public class UserRepository {
         return batches;
     }
 
-    static final class CleanupOperation {
-        enum Type {
-            REMOVE_USER_FROM_EVENT,
-            DELETE_EVENT,
-            DELETE_USER
-        }
-
+    /**
+     * Represents a single Firestore operation needed to clean up user data.
+     */
+    public static final class CleanupOperation {
+        public enum Type { REMOVE_USER_FROM_EVENT, DELETE_EVENT, DELETE_USER }
         private final Type type;
         private final String documentPath;
         private final String deviceId;
@@ -284,17 +304,9 @@ public class UserRepository {
             return new CleanupOperation(Type.DELETE_USER, null, deviceId);
         }
 
-        Type getType() {
-            return type;
-        }
-
-        String getDocumentPath() {
-            return documentPath;
-        }
-
-        String getDeviceId() {
-            return deviceId;
-        }
+        public Type getType() { return type; }
+        public String getDocumentPath() { return documentPath; }
+        public String getDeviceId() { return deviceId; }
 
         void apply(WriteBatch batch, FirebaseFirestore database, CollectionReference usersCollection) {
             if (type == Type.REMOVE_USER_FROM_EVENT) {
@@ -311,12 +323,10 @@ public class UserRepository {
                         FieldPath.of("waitingList", "status", deviceId), FieldValue.delete());
                 return;
             }
-
             if (type == Type.DELETE_EVENT) {
                 batch.delete(database.document(documentPath));
                 return;
             }
-
             batch.delete(usersCollection.document(deviceId));
         }
     }
@@ -324,23 +334,16 @@ public class UserRepository {
     static final class EventCleanupTarget {
         private final String documentPath;
         private final String organizerId;
-
         EventCleanupTarget(String documentPath, String organizerId) {
             this.documentPath = documentPath;
             this.organizerId = organizerId;
         }
-
-        String getDocumentPath() {
-            return documentPath;
-        }
-
-        String getOrganizerId() {
-            return organizerId;
-        }
+        String getDocumentPath() { return documentPath; }
+        String getOrganizerId() { return organizerId; }
     }
 
     /**
-     * Updates a user's device ID if it is missing.
+     * Backfills a device ID for a user if it is missing.
      *
      * @param deviceId the device ID to backfill
      */
@@ -353,8 +356,8 @@ public class UserRepository {
     /**
      * Searches users by name, email, or phone.
      *
-     * @param query the query to match
-     * @param listener the listener that receives the results
+     * @param query the search query
+     * @param listener the listener that receives matching users
      */
     public void searchUsers(String query, OnCompleteListener<List<User>> listener) {
         String safeQuery = query == null ? "" : query.trim().toLowerCase();
@@ -362,23 +365,16 @@ public class UserRepository {
             listener.onComplete(new ArrayList<>(), true);
             return;
         }
-
         usersCollection.get().addOnCompleteListener(task -> {
             if (!task.isSuccessful() || task.getResult() == null) {
                 listener.onComplete(new ArrayList<>(), false);
                 return;
             }
-
             List<User> results = new ArrayList<>();
             for (QueryDocumentSnapshot document : task.getResult()) {
                 User user = document.toObject(User.class);
-                if (user == null) {
-                    continue;
-                }
-                if (isBlank(user.getDeviceId())) {
-                    user.setDeviceId(document.getId());
-                }
-
+                if (user == null) continue;
+                if (isBlank(user.getDeviceId())) user.setDeviceId(document.getId());
                 String name = safeString(user.getName());
                 String email = safeString(user.getEmail());
                 String phone = safeString(user.getPhone());
@@ -386,40 +382,18 @@ public class UserRepository {
                     results.add(user);
                 }
             }
-
             listener.onComplete(results, true);
         });
     }
 
-    /**
-     * Checks if a string is null or empty after trimming spaces.
-     *
-     * @param value the string to check
-     * @return true if the string is blank, otherwise false
-     */
-    private boolean isBlank(String value) {
-        return TextHelper.isBlank(value);
-    }
-
-    private String safeString(String value) {
-        return value == null ? "" : value.trim().toLowerCase();
-    }
-
-    /**
-     * Cleans up the phone number before storing it.
-     *
-     * @param phone the phone number entered by the user
-     * @return a trimmed phone number, or an empty string if null
-     */
-    private String normalizePhone(String phone) {
-        // Keep the phone value safe for Firestore
-        return phone == null ? "" : phone.trim();
-    }
+    private boolean isBlank(String value) { return TextHelper.isBlank(value); }
+    private String safeString(String value) { return value == null ? "" : value.trim().toLowerCase(); }
+    private String normalizePhone(String phone) { return phone == null ? "" : phone.trim(); }
 
     /**
      * Loads all users for admin browsing.
      *
-     * @param listener the listener that receives the users list and success result
+     * @param listener the listener that receives the users list
      */
     public void getAllUsers(OnCompleteListener<List<User>> listener) {
         usersCollection.get().addOnCompleteListener(task -> {
@@ -428,7 +402,6 @@ public class UserRepository {
                 listener.onComplete(null, false);
                 return;
             }
-
             List<User> users = new ArrayList<>();
             for (QueryDocumentSnapshot document : task.getResult()) {
                 User user = document.toObject(User.class);
@@ -442,11 +415,10 @@ public class UserRepository {
     }
 
     /**
-     * Deletes a user with admin privileges.
-     * Removes the user document and all references from event documents.
+     * Deletes a user profile and cleans up all event references.
      *
      * @param deviceId the device ID of the user to delete
-     * @param listener the listener that receives the deletion success result
+     * @param listener the listener that receives the result
      */
     public void deleteUserAsAdmin(String deviceId, OnCompleteListener<Boolean> listener) {
         FirebaseFirestore database = usersCollection.getFirestore();
@@ -454,22 +426,51 @@ public class UserRepository {
                 .get()
                 .addOnCompleteListener(task -> {
                     if (!task.isSuccessful()) {
-                        Log.d(TAG, "Failed to load events for cleanup", task.getException());
                         listener.onComplete(false, false);
                         return;
                     }
-
                     List<EventCleanupTarget> cleanupTargets = new ArrayList<>();
                     for (QueryDocumentSnapshot document : task.getResult()) {
                         cleanupTargets.add(new EventCleanupTarget(
                                 document.getReference().getPath(),
                                 document.getString("organizerId")));
                     }
-
                     List<CleanupOperation> cleanupOperations = buildCleanupOperations(deviceId, cleanupTargets);
                     cleanupOperations.add(CleanupOperation.deleteUser(deviceId));
                     List<List<CleanupOperation>> batches = chunkCleanupOperations(cleanupOperations);
-                    commitCleanupOperations(database, batches, 0, listener);
+                    commitCleanupOperations(database, batches, 0, (result, success) -> {
+                        if (!success || result == null || !result) {
+                            listener.onComplete(false, false);
+                            return;
+                        }
+
+                        deleteProfilePhotoFromStorage(deviceId, listener);
+                    });
+                });
+    }
+
+    private void deleteProfilePhotoFromStorage(String deviceId, OnCompleteListener<Boolean> listener) {
+        if (isBlank(deviceId)) {
+            listener.onComplete(true, true);
+            return;
+        }
+
+        FirebaseStorage.getInstance()
+                .getReference()
+                .child("user_profiles")
+                .child(deviceId)
+                .child("photo.jpg")
+                .delete()
+                .addOnSuccessListener(unused -> listener.onComplete(true, true))
+                .addOnFailureListener(exception -> {
+                    if (exception instanceof StorageException
+                            && ((StorageException) exception).getErrorCode() == StorageException.ERROR_OBJECT_NOT_FOUND) {
+                        listener.onComplete(true, true);
+                        return;
+                    }
+
+                    Log.w(TAG, "Failed to delete profile photo from Storage for user " + deviceId, exception);
+                    listener.onComplete(false, false);
                 });
     }
 }

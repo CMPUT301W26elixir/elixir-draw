@@ -104,6 +104,27 @@ public class EventDetailController {
     }
 
     /**
+     * Loads just the event data so comments can be refreshed without full screen loading state.
+     *
+     * @param eventId the event ID
+     * @param listener the listener that receives the event
+     */
+    public void loadEventComments(String eventId, OnCompleteListener<Event> listener) {
+        if (isBlank(eventId)) {
+            listener.onComplete(null, false);
+            return;
+        }
+
+        eventRepository.getEventById(eventId, (event, success) -> {
+            if (!success || event == null) {
+                listener.onComplete(null, false);
+                return;
+            }
+            listener.onComplete(event, true);
+        });
+    }
+
+    /**
      * Returns the next action the view should take when the primary button is pressed.
      */
     public EventDetailData.NextAction resolveNextAction(EventDetailData state) {
@@ -200,6 +221,93 @@ public class EventDetailController {
     }
 
     /**
+     * Applies an upvote or downvote to a comment.
+     *
+     * @param eventId the event ID
+     * @param commentId the comment ID
+     * @param isUpvote true for upvote, false for downvote
+     * @param listener the callback that receives the action result
+     */
+    public void voteOnComment(String eventId,
+                              String commentId,
+                              boolean isUpvote,
+                              OnCompleteListener<AppResult<Void>> listener) {
+        if (isBlank(eventId) || isBlank(commentId)) {
+            listener.onComplete(AppResult.failure(R.string.event_comment_post_failure), false);
+            return;
+        }
+
+        String deviceId = userController.getCurrentDeviceId();
+        eventRepository.getEventById(eventId, (event, success) -> {
+            if (!success || event == null) {
+                listener.onComplete(AppResult.failure(R.string.event_comment_post_failure), false);
+                return;
+            }
+
+            List<EventComment> comments = event.getComments();
+            if (comments == null || comments.isEmpty()) {
+                listener.onComplete(AppResult.failure(R.string.event_comment_post_failure), false);
+                return;
+            }
+
+            boolean updated = false;
+            for (EventComment comment : comments) {
+                if (comment == null || !commentId.equals(comment.getCommentId())) {
+                    continue;
+                }
+                java.util.List<String> upvoters = comment.getUpvoterIds();
+                java.util.List<String> downvoters = comment.getDownvoterIds();
+                int upvotes = Math.max(0, comment.getUpvotes());
+                int downvotes = Math.max(0, comment.getDownvotes());
+                if (isUpvote) {
+                    if (upvoters.contains(deviceId)) {
+                        upvoters.remove(deviceId);
+                        upvotes = Math.max(0, upvotes - 1);
+                    } else {
+                        if (downvoters.contains(deviceId)) {
+                            downvoters.remove(deviceId);
+                            downvotes = Math.max(0, downvotes - 1);
+                        }
+                        upvoters.add(deviceId);
+                        upvotes += 1;
+                    }
+                } else {
+                    if (downvoters.contains(deviceId)) {
+                        downvoters.remove(deviceId);
+                        downvotes = Math.max(0, downvotes - 1);
+                    } else {
+                        if (upvoters.contains(deviceId)) {
+                            upvoters.remove(deviceId);
+                            upvotes = Math.max(0, upvotes - 1);
+                        }
+                        downvoters.add(deviceId);
+                        downvotes += 1;
+                    }
+                }
+                comment.setUpvotes(upvotes);
+                comment.setDownvotes(downvotes);
+                updated = true;
+                break;
+            }
+
+            if (!updated) {
+                listener.onComplete(AppResult.failure(R.string.event_comment_post_failure), false);
+                return;
+            }
+
+            java.util.Map<String, Object> updates = new java.util.HashMap<>();
+            updates.put("comments", comments);
+            eventRepository.updateEvent(eventId, updates, (result, updateSuccess) -> {
+                if (!updateSuccess || result == null || !result) {
+                    listener.onComplete(AppResult.failure(R.string.event_comment_post_failure), false);
+                    return;
+                }
+                listener.onComplete(AppResult.success(null, R.string.event_comment_post_success), true);
+            });
+        });
+    }
+
+    /**
      * Deletes a comment thread (comment + replies) for the given event.
      *
      * @param eventId the event ID
@@ -220,35 +328,56 @@ public class EventDetailController {
                 return;
             }
 
-            List<EventComment> comments = event.getComments();
-            if (comments == null || comments.isEmpty()) {
-                listener.onComplete(AppResult.success(null, R.string.event_comment_delete_success), true);
+            String currentDeviceId = userController.getCurrentDeviceId();
+            boolean isOrganizer = currentDeviceId != null && currentDeviceId.equals(event.getOrganizerId());
+            if (isOrganizer) {
+                deleteCommentThreadInternal(eventId, commentId, event, listener);
                 return;
             }
 
-            Set<String> deleteIds = collectThreadIds(comments, commentId);
-            if (deleteIds.isEmpty()) {
-                listener.onComplete(AppResult.success(null, R.string.event_comment_delete_success), true);
-                return;
-            }
-
-            List<EventComment> remaining = new java.util.ArrayList<>();
-            for (EventComment comment : comments) {
-                if (comment == null || deleteIds.contains(comment.getCommentId())) {
-                    continue;
-                }
-                remaining.add(comment);
-            }
-
-            java.util.Map<String, Object> updates = new java.util.HashMap<>();
-            updates.put("comments", remaining);
-            eventRepository.updateEvent(eventId, updates, (result, updateSuccess) -> {
-                if (!updateSuccess || result == null || !result) {
+            userController.isCurrentUserAdmin((isAdmin, adminCheckSuccess) -> {
+                if (!adminCheckSuccess || !isAdmin) {
                     listener.onComplete(AppResult.failure(R.string.event_comment_delete_failure), false);
                     return;
                 }
-                listener.onComplete(AppResult.success(null, R.string.event_comment_delete_success), true);
+
+                deleteCommentThreadInternal(eventId, commentId, event, listener);
             });
+        });
+    }
+
+    private void deleteCommentThreadInternal(String eventId,
+                                             String commentId,
+                                             Event event,
+                                             OnCompleteListener<AppResult<Void>> listener) {
+        List<EventComment> comments = event.getComments();
+        if (comments == null || comments.isEmpty()) {
+            listener.onComplete(AppResult.success(null, R.string.event_comment_delete_success), true);
+            return;
+        }
+
+        Set<String> deleteIds = collectThreadIds(comments, commentId);
+        if (deleteIds.isEmpty()) {
+            listener.onComplete(AppResult.success(null, R.string.event_comment_delete_success), true);
+            return;
+        }
+
+        List<EventComment> remaining = new java.util.ArrayList<>();
+        for (EventComment comment : comments) {
+            if (comment == null || deleteIds.contains(comment.getCommentId())) {
+                continue;
+            }
+            remaining.add(comment);
+        }
+
+        java.util.Map<String, Object> updates = new java.util.HashMap<>();
+        updates.put("comments", remaining);
+        eventRepository.updateEvent(eventId, updates, (result, updateSuccess) -> {
+            if (!updateSuccess || result == null || !result) {
+                listener.onComplete(AppResult.failure(R.string.event_comment_delete_failure), false);
+                return;
+            }
+            listener.onComplete(AppResult.success(null, R.string.event_comment_delete_success), true);
         });
     }
 
@@ -274,6 +403,13 @@ public class EventDetailController {
      */
     public String getCurrentDeviceId() {
         return userController.getCurrentDeviceId();
+    }
+
+    /**
+     * Returns whether the current user has admin privileges.
+     */
+    public void isCurrentUserAdmin(OnCompleteListener<Boolean> listener) {
+        userController.isCurrentUserAdmin(listener);
     }
 
     /**
