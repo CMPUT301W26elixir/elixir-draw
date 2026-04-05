@@ -8,7 +8,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.widget.Toast;
+import android.util.Log;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -18,8 +18,11 @@ import androidx.core.content.ContextCompat;
 import com.example.allot.R;
 import com.example.allot.common.TextHelper;
 import com.example.allot.controller.shared.UserController;
+import com.example.allot.data.UserRepository;
 import com.example.allot.model.profile.User;
+import com.example.allot.view.event.OfferResponseActivity;
 import com.example.allot.view.explore.ExploreActivity;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 @SuppressLint("CustomSplashScreen")
 /**
@@ -27,6 +30,7 @@ import com.example.allot.view.explore.ExploreActivity;
  */
 public class SplashActivity extends AppCompatActivity {
 
+    private static final String TAG = "SplashActivity";
     private static final long MIN_SPLASH_DURATION_MS = 900L;
     private final Handler handler = new Handler(Looper.getMainLooper());
     private long startedAtMs;
@@ -47,6 +51,10 @@ public class SplashActivity extends AppCompatActivity {
         startedAtMs = System.currentTimeMillis();
 
         UserController userController = new UserController(this);
+        
+        // Ensure token is registered for push notifications
+        registerFcmToken(userController.getCurrentDeviceId());
+
         if (userController.isNewDeviceId()) {
             this.requiresProfileSetup = true;
             checkNotificationPermission();
@@ -56,6 +64,26 @@ public class SplashActivity extends AppCompatActivity {
         userController.loadOrCreateUser((user, success) -> {
             this.requiresProfileSetup = !success || requiresProfileSetup(user);
             checkNotificationPermission();
+        });
+    }
+
+    /**
+     * Fetches the current FCM token and saves it to Firestore.
+     * This ensures the device is reachable for push notifications.
+     */
+    private void registerFcmToken(String deviceId) {
+        FirebaseMessaging.getInstance().getToken().addOnCompleteListener(task -> {
+            if (!task.isSuccessful()) {
+                Log.w(TAG, "Fetching FCM registration token failed", task.getException());
+                return;
+            }
+
+            // Get new FCM registration token
+            String token = task.getResult();
+            Log.d(TAG, "Current FCM Token: " + token);
+            
+            // Save to Firestore
+            new UserRepository().updateFcmToken(deviceId, token);
         });
     }
 
@@ -92,11 +120,22 @@ public class SplashActivity extends AppCompatActivity {
         }
 
         navigated = true;
-        Intent intent = new Intent(
+        
+        Intent nextIntent;
+        String redirectTo = getIntent().getStringExtra("redirect_to");
+        
+        if ("offer".equals(redirectTo) && !requiresProfileSetup) {
+            nextIntent = new Intent(this, OfferResponseActivity.class);
+            nextIntent.putExtra(OfferResponseActivity.EXTRA_EVENT_ID, getIntent().getStringExtra("event_id"));
+            nextIntent.putExtra(OfferResponseActivity.EXTRA_EVENT_TITLE, getIntent().getStringExtra("event_title"));
+        } else {
+            nextIntent = new Intent(
                 this,
                 requiresProfileSetup ? WelcomeActivity.class : ExploreActivity.class
-        );
-        startActivity(intent);
+            );
+        }
+        
+        startActivity(nextIntent);
         finish();
     }
 

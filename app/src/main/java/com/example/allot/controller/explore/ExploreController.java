@@ -72,6 +72,31 @@ public class ExploreController {
     }
 
     /**
+     * Loads and filters open events. If data is not cached, it fetches from repository first.
+     */
+    public void loadBrowseEvents(String searchTerm,
+                                 String selectedChipFilter,
+                                 String keywords,
+                                 java.util.Date startDate,
+                                 Double latitude,
+                                 Double longitude,
+                                 Double distanceKm,
+                                 List<String> savedEventIds,
+                                 OnCompleteListener<List<EventListItem>> listener) {
+        if (!hasLoadedOpenEvents) {
+            refreshOpenEvents((events, success) -> {
+                if (success) {
+                    filterCachedBrowseEvents(searchTerm, selectedChipFilter, keywords, startDate, latitude, longitude, distanceKm, savedEventIds, listener);
+                } else {
+                    listener.onComplete(new ArrayList<>(), false);
+                }
+            });
+        } else {
+            filterCachedBrowseEvents(searchTerm, selectedChipFilter, keywords, startDate, latitude, longitude, distanceKm, savedEventIds, listener);
+        }
+    }
+
+    /**
      * Filters the cached open events and maps them into display items.
      */
     public void filterCachedBrowseEvents(String searchTerm,
@@ -140,12 +165,3 @@ public class ExploreController {
         });
     }
 }
-
-
-
-
-
-
-
-
-
