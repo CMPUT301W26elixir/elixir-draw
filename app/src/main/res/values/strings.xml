@@ -111,7 +111,15 @@
     <string name="admin_error_deleting_profile">Failed to delete profile</string>
     <string name="admin_view_events">Events</string>
     <string name="admin_view_profiles">Profiles</string>
+    <string name="admin_view_profilepic">Profilepic</string>
+    <string name="admin_loading_profilepic">Loading profile pictures...</string>
+    <string name="admin_no_profilepic">No profile pictures found</string>
+    <string name="admin_error_loading_profilepic">Failed to load profile pictures</string>
+    <string name="admin_view_notifications">Notifications Log</string>
     <string name="admin_view_posters">Posters</string>
+    <string name="admin_loading_notifications">Loading notifications...</string>
+    <string name="admin_no_notifications">No notifications found</string>
+    <string name="admin_error_loading_notifications">Failed to load notifications</string>
     <string name="admin_loading_posters">Loading posters...</string>
     <string name="admin_no_posters">No posters found</string>
     <string name="admin_error_loading_posters">Failed to load posters</string>
