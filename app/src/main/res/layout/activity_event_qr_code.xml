@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/screen_bg"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:paddingStart="20dp"
+        android:paddingTop="20dp"
+        android:paddingEnd="20dp"
+        android:paddingBottom="16dp">
+
+        <ImageButton
+            android:id="@+id/backButton"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:background="@null"
+            android:contentDescription="@string/event_detail_back"
+            android:padding="10dp"
+            android:src="@drawable/arrow_back" />
+
+        <View
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="4dp"
+            android:background="@drawable/bg_create_event_success_dot" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="54dp"
+            android:fontFamily="@font/varela_round_regular"
+            android:gravity="center"
+            android:text="@string/event_qr_title"
+            android:textColor="@color/text_primary"
+            android:textSize="24sp" />
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="42dp"
+            android:background="@android:color/white"
+            android:padding="28dp">
+
+            <ImageView
+                android:id="@+id/qrImageView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:adjustViewBounds="true"
+                android:contentDescription="@string/event_qr_image_description"
+                android:scaleType="fitCenter" />
+
+            <TextView
+                android:id="@+id/qrErrorText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:fontFamily="@font/varela_round_regular"
+                android:gravity="center"
+                android:text="@string/event_qr_generation_failure"
+                android:textColor="@color/black"
+                android:textSize="16sp"
+                android:visibility="gone" />
+        </FrameLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
+        <TextView
+            android:id="@+id/saveQrButton"
+            android:layout_width="match_parent"
+            android:layout_height="45dp"
+            android:layout_marginBottom="12dp"
+            android:background="@drawable/bg_waitlist_button"
+            android:clickable="true"
+            android:focusable="true"
+            android:fontFamily="@font/varela_round_regular"
+            android:gravity="center"
+            android:text="@string/event_qr_save_button"
+            android:textColor="#1D1D1D"
+            android:textSize="20sp" />
+
+        <TextView
+            android:id="@+id/viewEventPageButton"
+            android:layout_width="match_parent"
+            android:layout_height="45dp"
+            android:layout_marginBottom="18dp"
+            android:background="@drawable/bg_waitlist_button"
+            android:clickable="true"
+            android:focusable="true"
+            android:fontFamily="@font/varela_round_regular"
+            android:gravity="center"
+            android:text="@string/create_event_success_view_event"
+            android:textColor="#1D1D1D"
+            android:textSize="20sp" />
+    </LinearLayout>
+
+    <com.example.allot.view.shared.BottomNavBarView
+        android:id="@+id/bottomNavBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="5dp"
+        android:layout_marginEnd="5dp"
+        android:layout_marginBottom="8dp" />
+
+</LinearLayout>

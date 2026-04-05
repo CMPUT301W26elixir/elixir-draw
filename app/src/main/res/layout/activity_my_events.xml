@@ -84,6 +84,37 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/varela_round_regular"
+                    android:text="@string/my_events_section_invited"
+                    android:textColor="@color/text_primary"
+                    android:textSize="16sp" />
+
+                <LinearLayout
+                    android:id="@+id/invitedContainer"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:orientation="vertical" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:fontFamily="@font/varela_round_regular"
+                    android:text="@string/my_events_section_coorganizer_invites"
+                    android:textColor="@color/text_primary"
+                    android:textSize="16sp" />
+
+                <LinearLayout
+                    android:id="@+id/coOrganizerInvitesContainer"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:orientation="vertical" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/varela_round_regular"
                     android:text="@string/my_events_section_selected"
                     android:textColor="@color/text_primary"
                     android:textSize="16sp" />
@@ -203,7 +234,7 @@
         android:textSize="20sp"
         android:visibility="gone" />
 
-    <com.example.allot.view.BottomNavBarView
+    <com.example.allot.view.shared.BottomNavBarView
         android:id="@+id/bottomNavBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
