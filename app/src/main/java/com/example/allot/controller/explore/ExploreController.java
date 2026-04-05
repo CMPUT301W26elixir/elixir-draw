@@ -42,13 +42,13 @@ public class ExploreController {
      * @param listener the listener that receives the saved event IDs
      */
     public void loadSavedEventIds(OnCompleteListener<List<String>> listener) {
-        userController.loadOrCreateUser((User user, boolean success) -> {
-            if (!success || user == null) {
+        userController.loadCurrentUser((User user, boolean success) -> {
+            if (!success) {
                 listener.onComplete(new ArrayList<>(), false);
                 return;
             }
 
-            List<String> savedEvents = user.getSavedEvents() == null
+            List<String> savedEvents = user == null || user.getSavedEvents() == null
                     ? new ArrayList<>()
                     : new ArrayList<>(user.getSavedEvents());
             listener.onComplete(savedEvents, true);

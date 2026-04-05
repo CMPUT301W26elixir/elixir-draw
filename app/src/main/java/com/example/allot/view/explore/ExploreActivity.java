@@ -28,10 +28,12 @@ import com.example.allot.R;
 import com.example.allot.controller.event.AndroidEventLocationGeocodingService;
 import com.example.allot.controller.explore.ExploreController;
 import com.example.allot.controller.notification.NotificationService;
+import com.example.allot.controller.shared.UserController;
 import com.example.allot.view.event.EventDetailActivity;
 import com.example.allot.view.events.EventListModeFragment;
 import com.example.allot.view.shared.AppNavigator;
 import com.example.allot.view.shared.BottomNavBarView;
+import com.example.allot.view.shared.DeferredOnboardingNavigator;
 import com.example.allot.view.shared.EventListAdapter;
 import com.example.allot.view.shared.EventListItem;
 import com.example.allot.view.shared.UiHelper;
@@ -69,6 +71,7 @@ public class ExploreActivity extends AppCompatActivity {
     private FrameLayout fragmentContainer;
     private LinearLayout exploreContainer;
     private FusedLocationProviderClient fusedLocationProviderClient;
+    private UserController userController;
 
     private String filterDateText = "";
     private String filterAddress = "";
@@ -95,6 +98,7 @@ public class ExploreActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         browseController = new ExploreController(this);
+        userController = new UserController(this);
         notificationService = new NotificationService(this);
         notificationService.startListening();
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
@@ -114,12 +118,14 @@ public class ExploreActivity extends AppCompatActivity {
 
             @Override
             public void onHeartClick(EventListItem event, int position) {
-                boolean nextSavedState = !event.isSaved;
-                browseController.toggleSavedEvent(userSavedEvents, event.getEventId(), nextSavedState, (savedEventIds, success) -> {
-                    userSavedEvents = new ArrayList<>(savedEventIds == null ? new ArrayList<>() : savedEventIds);
-                    event.isSaved = success ? nextSavedState : !nextSavedState;
-                    eventListAdapter.notifyItemChanged(position);
-                });
+                if (event == null) {
+                    return;
+                }
+
+                requireCompletedProfile(
+                        () -> toggleSavedEvent(event, position),
+                        buildDeferredSaveIntent(event)
+                );
             }
         });
         recyclerView.setAdapter(eventListAdapter);
@@ -270,20 +276,9 @@ public class ExploreActivity extends AppCompatActivity {
                 return;
             }
 
-            if (shouldDeferExploreRefreshForDefaultLocation()) {
-                showBrowseLoadingState();
-                return;
-            }
-
             rebuildFilterPills();
             refreshBrowseEvents(!browseController.hasCachedOpenEvents());
         });
-    }
-
-    private boolean shouldDeferExploreRefreshForDefaultLocation() {
-        return currentHomeTab == BottomNavBarView.Tab.EXPLORE
-                && !hasInitializedDefaultLocationFilter
-                && isInitializingDefaultLocationFilter;
     }
 
     private BottomNavBarView.Tab resolveInitialTab(Intent intent) {
@@ -361,7 +356,10 @@ public class ExploreActivity extends AppCompatActivity {
         isInitializingDefaultLocationFilter = false;
         hasInitializedDefaultLocationFilter = true;
         if (currentHomeTab == BottomNavBarView.Tab.EXPLORE) {
-            refreshSavedEventsAndVisibleContent();
+            rebuildFilterPills();
+            if (browseController.hasCachedOpenEvents()) {
+                applyBrowseFilters(searchInput.getText() == null ? "" : searchInput.getText().toString());
+            }
         }
     }
 
@@ -654,5 +652,39 @@ public class ExploreActivity extends AppCompatActivity {
         intent.putExtra(EventDetailActivity.EXTRA_EVENT_DEADLINE, eventItem.getDaysLeft());
         intent.putExtra(EventDetailActivity.EXTRA_EVENT_CATEGORY, eventItem.getCategory());
         startActivity(intent);
+    }
+
+    private void toggleSavedEvent(EventListItem event, int position) {
+        boolean nextSavedState = event.isSaved;
+        browseController.toggleSavedEvent(userSavedEvents, event.getEventId(), nextSavedState, (savedEventIds, success) -> {
+            userSavedEvents = new ArrayList<>(savedEventIds == null ? new ArrayList<>() : savedEventIds);
+            event.isSaved = success ? nextSavedState : !nextSavedState;
+            eventListAdapter.notifyItemChanged(position);
+        });
+    }
+
+    private void requireCompletedProfile(Runnable onReady, Intent onboardingIntent) {
+        userController.loadCurrentUser((user, success) -> {
+            if (success && userController.hasCompletedProfile(user)) {
+                onReady.run();
+                return;
+            }
+
+            DeferredOnboardingNavigator.openOnboarding(this, onboardingIntent, false);
+        });
+    }
+
+    private Intent buildDeferredSaveIntent(EventListItem eventItem) {
+        return DeferredOnboardingNavigator.createEventActionIntent(
+                this,
+                eventItem.getEventId(),
+                eventItem.getTitle(),
+                eventItem.getStreet(),
+                eventItem.getDate(),
+                eventItem.getPrice(),
+                eventItem.getDaysLeft(),
+                eventItem.getCategory(),
+                DeferredOnboardingNavigator.ACTION_AUTO_SAVE
+        );
     }
 }

@@ -2,14 +2,16 @@ package com.example.allot.view.events;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import com.example.allot.R;
 import com.example.allot.controller.shared.UserController;
-import com.example.allot.view.explore.ExploreActivity;
 import com.example.allot.view.profile.NameActivity;
+import com.example.allot.view.shared.DeferredOnboardingNavigator;
 import com.google.android.material.button.MaterialButton;
+import com.google.firebase.messaging.FirebaseMessaging;
 /**
  * Shows the step in the profile setup flow where notification preferences are chosen.
  */
@@ -32,6 +34,9 @@ public class NotificationsActivity extends AppCompatActivity {
         userController = new UserController(this);
         turnOnNotificationsButton = findViewById(R.id.turnOnNotificationsButton);
         notificationsNotNow = findViewById(R.id.notificationsNotNow);
+        ImageButton backButton = findViewById(R.id.backButton);
+
+        backButton.setOnClickListener(view -> getOnBackPressedDispatcher().onBackPressed());
 
         turnOnNotificationsButton.setOnClickListener(view -> saveProfileAndOpenExplore(true));
         notificationsNotNow.setOnClickListener(view -> saveProfileAndOpenExplore(false));
@@ -57,7 +62,13 @@ public class NotificationsActivity extends AppCompatActivity {
         userController.updateUserProfile(firstName, lastName, email, phone, notificationsEnabled,
                 (user, success) -> {
                     if (success && user != null) {
-                        Intent intent = new Intent(NotificationsActivity.this, ExploreActivity.class);
+                        FirebaseMessaging.getInstance().getToken()
+                                .addOnSuccessListener(userController::updateCurrentFcmToken);
+
+                        Intent intent = DeferredOnboardingNavigator.buildPostOnboardingIntent(
+                                NotificationsActivity.this,
+                                getIntent()
+                        );
                         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                         startActivity(intent);
                         return;
