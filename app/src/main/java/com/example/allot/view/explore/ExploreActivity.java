@@ -76,6 +76,8 @@ public class ExploreActivity extends AppCompatActivity {
     private Double filterLongitude;
     private Double filterDistanceKm;
     private String filterKeywords = "";
+    private boolean filterOnlyOpenSpots;
+    private Integer filterMinimumCapacity;
 
     private final Handler searchHandler = new Handler();
     private Runnable searchRunnable;
@@ -181,6 +183,10 @@ public class ExploreActivity extends AppCompatActivity {
                 intent.putExtra(EventFilterActivity.EXTRA_LONGITUDE, filterLongitude);
             }
             intent.putExtra(EventFilterActivity.EXTRA_KEYWORDS, filterKeywords);
+            intent.putExtra(EventFilterActivity.EXTRA_ONLY_OPEN_SPOTS, filterOnlyOpenSpots);
+            if (filterMinimumCapacity != null) {
+                intent.putExtra(EventFilterActivity.EXTRA_MINIMUM_CAPACITY, filterMinimumCapacity);
+            }
             startActivityForResult(intent, FILTER_REQUEST_CODE);
         });
     }
@@ -386,6 +392,8 @@ public class ExploreActivity extends AppCompatActivity {
                 filterLatitude,
                 filterLongitude,
                 filterDistanceKm,
+                filterOnlyOpenSpots,
+                filterMinimumCapacity,
                 userSavedEvents,
                 (items, success) -> {
                     List<EventListItem> safeItems = items == null ? new ArrayList<>() : items;
@@ -451,6 +459,13 @@ public class ExploreActivity extends AppCompatActivity {
         filterDistanceKm = data.hasExtra(EventFilterActivity.EXTRA_DISTANCE_KM)
                 ? data.getDoubleExtra(EventFilterActivity.EXTRA_DISTANCE_KM, 0)
                 : null;
+        filterOnlyOpenSpots = data.getBooleanExtra(EventFilterActivity.EXTRA_ONLY_OPEN_SPOTS, false);
+        filterMinimumCapacity = data.hasExtra(EventFilterActivity.EXTRA_MINIMUM_CAPACITY)
+                ? data.getIntExtra(EventFilterActivity.EXTRA_MINIMUM_CAPACITY, 0)
+                : null;
+        if (filterMinimumCapacity != null && filterMinimumCapacity <= 0) {
+            filterMinimumCapacity = null;
+        }
 
         rebuildFilterPills();
         applyBrowseFilters(searchInput.getText() == null ? "" : searchInput.getText().toString());
@@ -481,6 +496,8 @@ public class ExploreActivity extends AppCompatActivity {
         filterPillsContainer.removeAllViews();
         addFilterPill(buildDatePillLabel(), this::clearDateFilter);
         addFilterPill(buildDistancePillLabel(), this::clearDistanceFilter);
+        addFilterPill(buildOpenSpotsPillLabel(), this::clearOpenSpotsFilter);
+        addFilterPill(buildMinimumCapacityPillLabel(), this::clearMinimumCapacityFilter);
         for (String keyword : splitKeywords(filterKeywords)) {
             addFilterPill(keyword, () -> removeKeywordFilter(keyword));
         }
@@ -542,6 +559,18 @@ public class ExploreActivity extends AppCompatActivity {
         applyBrowseFilters(searchInput.getText() == null ? "" : searchInput.getText().toString());
     }
 
+    private void clearOpenSpotsFilter() {
+        filterOnlyOpenSpots = false;
+        rebuildFilterPills();
+        applyBrowseFilters(searchInput.getText() == null ? "" : searchInput.getText().toString());
+    }
+
+    private void clearMinimumCapacityFilter() {
+        filterMinimumCapacity = null;
+        rebuildFilterPills();
+        applyBrowseFilters(searchInput.getText() == null ? "" : searchInput.getText().toString());
+    }
+
     private String buildDatePillLabel() {
         if (UiHelper.isBlank(filterDateText)) {
             return "";
@@ -561,6 +590,17 @@ public class ExploreActivity extends AppCompatActivity {
             return String.format(Locale.getDefault(), "%.0f km", filterDistanceKm);
         }
         return String.format(Locale.getDefault(), "%.1f km", filterDistanceKm);
+    }
+
+    private String buildOpenSpotsPillLabel() {
+        return filterOnlyOpenSpots ? getString(R.string.filter_open_spots_pill) : "";
+    }
+
+    private String buildMinimumCapacityPillLabel() {
+        if (filterMinimumCapacity == null || filterMinimumCapacity <= 0) {
+            return "";
+        }
+        return getString(R.string.filter_min_capacity_pill, filterMinimumCapacity);
     }
 
     private List<String> splitKeywords(String rawKeywords) {

@@ -6,6 +6,7 @@ import android.location.Location;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ProgressBar;
@@ -37,11 +38,15 @@ public class EventFilterActivity extends AppCompatActivity {
     public static final String EXTRA_LATITUDE = "extra_latitude";
     public static final String EXTRA_LONGITUDE = "extra_longitude";
     public static final String EXTRA_KEYWORDS = "extra_keywords";
+    public static final String EXTRA_ONLY_OPEN_SPOTS = "extra_only_open_spots";
+    public static final String EXTRA_MINIMUM_CAPACITY = "extra_minimum_capacity";
 
     private EditText dateInput;
     private EditText addressInput;
     private EditText distanceInput;
     private EditText keywordsInput;
+    private EditText minimumCapacityInput;
+    private CheckBox openSpotsCheckbox;
     private TextView saveButton;
     private ProgressBar loadingIndicator;
     private FusedLocationProviderClient fusedLocationProviderClient;
@@ -68,6 +73,8 @@ public class EventFilterActivity extends AppCompatActivity {
         addressInput = findViewById(R.id.filterAddressInput);
         distanceInput = findViewById(R.id.filterDistanceInput);
         keywordsInput = findViewById(R.id.filterKeywordsInput);
+        minimumCapacityInput = findViewById(R.id.filterMinimumCapacityInput);
+        openSpotsCheckbox = findViewById(R.id.filterOpenSpotsCheckbox);
         saveButton = findViewById(R.id.filterSaveButton);
         loadingIndicator = findViewById(R.id.filterLoadingIndicator);
     }
@@ -76,6 +83,8 @@ public class EventFilterActivity extends AppCompatActivity {
         dateInput.setText(safeString(getIntent().getStringExtra(EXTRA_DATE_BEGIN)));
         addressInput.setText(safeString(getIntent().getStringExtra(EXTRA_ADDRESS)));
         keywordsInput.setText(safeString(getIntent().getStringExtra(EXTRA_KEYWORDS)));
+        minimumCapacityInput.setText(readMinimumCapacityValue());
+        openSpotsCheckbox.setChecked(getIntent().getBooleanExtra(EXTRA_ONLY_OPEN_SPOTS, false));
 
         if (getIntent().hasExtra(EXTRA_DISTANCE_KM)) {
             double distance = getIntent().getDoubleExtra(EXTRA_DISTANCE_KM, 0);
@@ -117,26 +126,33 @@ public class EventFilterActivity extends AppCompatActivity {
         String address = safeString(addressInput.getText());
         String keywords = safeString(keywordsInput.getText());
         Double distanceKm = parseDistanceKm(safeString(distanceInput.getText()));
-
-        if (!address.isEmpty() && distanceKm == null) {
-            Toast.makeText(this, R.string.filter_error_distance, Toast.LENGTH_SHORT).show();
-            return;
-        }
+        Integer minimumCapacity = parseMinimumCapacity(safeString(minimumCapacityInput.getText()));
+        boolean onlyOpenSpots = openSpotsCheckbox.isChecked();
 
         if (address.isEmpty() && distanceKm != null) {
             Toast.makeText(this, R.string.filter_error_address, Toast.LENGTH_SHORT).show();
             return;
         }
 
-        if (address.isEmpty()) {
-            finishWithResults(rawDate, address, distanceKm, null, null, keywords);
+        if (!safeString(minimumCapacityInput.getText()).isEmpty() && minimumCapacity == null) {
+            Toast.makeText(this, R.string.filter_error_capacity, Toast.LENGTH_SHORT).show();
             return;
         }
 
-        geocodeAndFinish(rawDate, address, distanceKm, keywords);
+        if (address.isEmpty()) {
+            finishWithResults(rawDate, address, distanceKm, null, null, keywords, onlyOpenSpots, minimumCapacity);
+            return;
+        }
+
+        geocodeAndFinish(rawDate, address, distanceKm, keywords, onlyOpenSpots, minimumCapacity);
     }
 
-    private void geocodeAndFinish(String rawDate, String address, Double distanceKm, String keywords) {
+    private void geocodeAndFinish(String rawDate,
+                                  String address,
+                                  Double distanceKm,
+                                  String keywords,
+                                  boolean onlyOpenSpots,
+                                  Integer minimumCapacity) {
         setLoading(true);
         new Thread(() -> {
             AndroidEventLocationGeocodingService geocodingService = new AndroidEventLocationGeocodingService(this);
@@ -148,7 +164,8 @@ public class EventFilterActivity extends AppCompatActivity {
                     return;
                 }
                 finishWithResults(rawDate, address, distanceKm,
-                        coordinates.getLatitude(), coordinates.getLongitude(), keywords);
+                        coordinates.getLatitude(), coordinates.getLongitude(), keywords,
+                        onlyOpenSpots, minimumCapacity);
             });
         }).start();
     }
@@ -203,13 +220,19 @@ public class EventFilterActivity extends AppCompatActivity {
                                    Double distanceKm,
                                    Double latitude,
                                    Double longitude,
-                                   String keywords) {
+                                   String keywords,
+                                   boolean onlyOpenSpots,
+                                   Integer minimumCapacity) {
         android.content.Intent result = new android.content.Intent();
         result.putExtra(EXTRA_DATE_BEGIN, safeString(rawDate));
         result.putExtra(EXTRA_ADDRESS, safeString(address));
         result.putExtra(EXTRA_KEYWORDS, safeString(keywords));
+        result.putExtra(EXTRA_ONLY_OPEN_SPOTS, onlyOpenSpots);
         if (distanceKm != null) {
             result.putExtra(EXTRA_DISTANCE_KM, distanceKm);
+        }
+        if (minimumCapacity != null) {
+            result.putExtra(EXTRA_MINIMUM_CAPACITY, minimumCapacity);
         }
         if (latitude != null && longitude != null) {
             result.putExtra(EXTRA_LATITUDE, latitude);
@@ -238,6 +261,26 @@ public class EventFilterActivity extends AppCompatActivity {
         } catch (NumberFormatException e) {
             return null;
         }
+    }
+
+    private Integer parseMinimumCapacity(String value) {
+        if (TextUtils.isEmpty(value)) {
+            return null;
+        }
+        try {
+            int parsed = Integer.parseInt(value.trim());
+            return parsed > 0 ? parsed : null;
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
+
+    private String readMinimumCapacityValue() {
+        if (!getIntent().hasExtra(EXTRA_MINIMUM_CAPACITY)) {
+            return "";
+        }
+        int value = getIntent().getIntExtra(EXTRA_MINIMUM_CAPACITY, 0);
+        return value > 0 ? String.valueOf(value) : "";
     }
 
     private void setLoading(boolean isLoading) {

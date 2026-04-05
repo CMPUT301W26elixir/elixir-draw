@@ -81,18 +81,22 @@ public class ExploreController {
                                  Double latitude,
                                  Double longitude,
                                  Double distanceKm,
+                                 Boolean onlyOpenSpots,
+                                 Integer minimumCapacity,
                                  List<String> savedEventIds,
                                  OnCompleteListener<List<EventListItem>> listener) {
         if (!hasLoadedOpenEvents) {
             refreshOpenEvents((events, success) -> {
                 if (success) {
-                    filterCachedBrowseEvents(searchTerm, selectedChipFilter, keywords, startDate, latitude, longitude, distanceKm, savedEventIds, listener);
+                    filterCachedBrowseEvents(searchTerm, selectedChipFilter, keywords, startDate, latitude,
+                            longitude, distanceKm, onlyOpenSpots, minimumCapacity, savedEventIds, listener);
                 } else {
                     listener.onComplete(new ArrayList<>(), false);
                 }
             });
         } else {
-            filterCachedBrowseEvents(searchTerm, selectedChipFilter, keywords, startDate, latitude, longitude, distanceKm, savedEventIds, listener);
+            filterCachedBrowseEvents(searchTerm, selectedChipFilter, keywords, startDate, latitude,
+                    longitude, distanceKm, onlyOpenSpots, minimumCapacity, savedEventIds, listener);
         }
     }
 
@@ -106,6 +110,8 @@ public class ExploreController {
                                          Double latitude,
                                          Double longitude,
                                          Double distanceKm,
+                                         Boolean onlyOpenSpots,
+                                         Integer minimumCapacity,
                                          List<String> savedEventIds,
                                          OnCompleteListener<List<EventListItem>> listener) {
         if (!hasLoadedOpenEvents) {
@@ -120,7 +126,9 @@ public class ExploreController {
                 startDate,
                 latitude,
                 longitude,
-                distanceKm
+                distanceKm,
+                onlyOpenSpots,
+                minimumCapacity
         );
         List<Event> filteredEvents = exploreFilterService.buildBrowsableEventList(
                 cachedOpenEvents,
