@@ -47,8 +47,33 @@ public class AdminNotificationControllerTest {
         });
     }
 
+    @Test
+    public void loadAllNotifications_returnsFailureWhenAdminLookupFails() {
+        userController.adminLookupSuccess = false;
+        notificationRepository.notifications = Arrays.asList(
+                new NotificationItem("u1", "e1", "T1", "M1")
+        );
+
+        controller.loadAllNotifications((items, success) -> {
+            assertFalse(success);
+            assertTrue(items == null);
+        });
+    }
+
+    @Test
+    public void loadAllNotifications_propagatesRepositoryFailure() {
+        userController.isAdmin = true;
+        notificationRepository.getAllNotificationsSuccess = false;
+
+        controller.loadAllNotifications((items, success) -> {
+            assertFalse(success);
+            assertTrue(items == null);
+        });
+    }
+
     private static class FakeNotificationRepository extends NotificationRepository {
         private List<NotificationItem> notifications;
+        private boolean getAllNotificationsSuccess = true;
 
         private FakeNotificationRepository() {
             super((FirebaseFirestore) null);
@@ -56,12 +81,13 @@ public class AdminNotificationControllerTest {
 
         @Override
         public void getAllNotifications(com.example.allot.common.OnCompleteListener<List<NotificationItem>> listener) {
-            listener.onComplete(notifications, true);
+            listener.onComplete(notifications, getAllNotificationsSuccess);
         }
     }
 
     private static class FakeUserController extends UserController {
         private boolean isAdmin;
+        private boolean adminLookupSuccess = true;
 
         private FakeUserController() {
             super(null, new DeviceSessionManager(new FakeDeviceSessionStore("device-1")));
@@ -69,7 +95,7 @@ public class AdminNotificationControllerTest {
 
         @Override
         public void isCurrentUserAdmin(com.example.allot.common.OnCompleteListener<Boolean> listener) {
-            listener.onComplete(isAdmin, true);
+            listener.onComplete(isAdmin, adminLookupSuccess);
         }
     }
 
