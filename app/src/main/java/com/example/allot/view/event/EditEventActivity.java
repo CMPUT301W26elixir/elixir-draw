@@ -156,6 +156,9 @@ public class EditEventActivity extends AppCompatActivity {
                 updateSaveButtonState();
             });
 
+    /**
+     * Handles on Create.
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -180,12 +183,18 @@ public class EditEventActivity extends AppCompatActivity {
         loadEventFromFirestore();
     }
 
+    /**
+     * Handles finish.
+     */
     @Override
     public void finish() {
         super.finish();
         overridePendingTransition(0, 0);
     }
 
+    /**
+     * Binds views.
+     */
     private void bindViews() {
         eventImageBackground = findViewById(R.id.eventImageBackground);
         posterUploadCard = findViewById(R.id.posterUploadCard);
@@ -229,13 +238,22 @@ public class EditEventActivity extends AppCompatActivity {
         );
     }
 
+    /**
+     * Updates up header.
+     */
     private void setupHeader() {
         ImageButton backButton = findViewById(R.id.backButton);
         backButton.setOnClickListener(view -> getOnBackPressedDispatcher().onBackPressed());
     }
 
+    /**
+     * Updates up listeners.
+     */
     private void setupListeners() {
         SimpleTextWatcher dirtyStateWatcher = new SimpleTextWatcher() {
+            /**
+             * Handles after Text Changed.
+             */
             @Override
             public void afterTextChanged(Editable editable) {
                 if (!isBindingEvent) {
@@ -266,6 +284,9 @@ public class EditEventActivity extends AppCompatActivity {
         }
 
         AdapterView.OnItemSelectedListener dateSelectionListener = new AdapterView.OnItemSelectedListener() {
+            /**
+             * Handles on Item Selected.
+             */
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 if (!isBindingEvent) {
@@ -273,6 +294,9 @@ public class EditEventActivity extends AppCompatActivity {
                 }
             }
 
+            /**
+             * Handles on Nothing Selected.
+             */
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
             }
@@ -306,6 +330,9 @@ public class EditEventActivity extends AppCompatActivity {
         renderPosterState();
     }
 
+    /**
+     * Handles configure Location Picker.
+     */
     private void configureLocationPicker() {
         locationInput.setKeyListener(null);
         locationInput.setFocusable(false);
@@ -313,6 +340,9 @@ public class EditEventActivity extends AppCompatActivity {
         locationInput.setOnClickListener(view -> openPlaceAutocomplete());
     }
 
+    /**
+     * Opens place autocomplete.
+     */
     private void openPlaceAutocomplete() {
         if (!ensurePlacesInitialized()) {
             Toast.makeText(this, R.string.create_event_places_unavailable, Toast.LENGTH_SHORT).show();
@@ -323,6 +353,9 @@ public class EditEventActivity extends AppCompatActivity {
         placeAutocompleteLauncher.launch(intent);
     }
 
+    /**
+     * Handles ensure Places Initialized.
+     */
     private boolean ensurePlacesInitialized() {
         if (TextUtils.isEmpty(BuildConfig.PLACES_API_KEY)) {
             return false;
@@ -334,6 +367,9 @@ public class EditEventActivity extends AppCompatActivity {
         return true;
     }
 
+    /**
+     * Handles populate Ui From Intent.
+     */
     private void populateUiFromIntent() {
         currentCategory = UiHelper.cleanText(getIntent().getStringExtra(EXTRA_EVENT_CATEGORY));
         EventFormData fallbackViewModel = manageEventController.buildFallbackViewModel(
@@ -355,10 +391,16 @@ public class EditEventActivity extends AppCompatActivity {
         );
     }
 
+    /**
+     * Returns whether i.s Ui Test Mode
+     */
     private boolean isUiTestMode() {
         return getIntent().getBooleanExtra(EXTRA_UI_TEST_MODE, false);
     }
 
+    /**
+     * Binds ui test event.
+     */
     private void bindUiTestEvent() {
         String title = safeString(getIntent().getStringExtra(EXTRA_UI_TEST_EVENT_TITLE), "UI Test Event");
         String location = safeString(getIntent().getStringExtra(EXTRA_UI_TEST_EVENT_LOCATION), "Test Location");
@@ -413,6 +455,9 @@ public class EditEventActivity extends AppCompatActivity {
         updateSaveButtonState();
     }
 
+    /**
+     * Handles parse Participants.
+     */
     private int parseParticipants(String participants) {
         if (TextUtils.isEmpty(participants)) {
             return 0;
@@ -424,10 +469,16 @@ public class EditEventActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Handles safe String.
+     */
     private String safeString(String value, String fallback) {
         return TextUtils.isEmpty(value) ? fallback : value;
     }
 
+    /**
+     * Loads event from firestore.
+     */
     private void loadEventFromFirestore() {
         if (TextUtils.isEmpty(currentEventId)) {
             Toast.makeText(this, R.string.manage_event_load_failure, Toast.LENGTH_SHORT).show();
@@ -448,6 +499,9 @@ public class EditEventActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Binds event.
+     */
     private void bindEvent(Event event) {
         if (event == null) {
             return;
@@ -472,6 +526,9 @@ public class EditEventActivity extends AppCompatActivity {
         updateSaveButtonState();
     }
 
+    /**
+     * Opens lottery screen.
+     */
     private void openLotteryScreen() {
         if (TextUtils.isEmpty(currentEventId)) {
             Toast.makeText(this, R.string.manage_lottery_load_failure, Toast.LENGTH_SHORT).show();
@@ -487,6 +544,9 @@ public class EditEventActivity extends AppCompatActivity {
         overridePendingTransition(0, 0);
     }
 
+    /**
+     * Opens invite co organizer screen.
+     */
     private void openInviteCoOrganizerScreen() {
         if (TextUtils.isEmpty(currentEventId)) {
             Toast.makeText(this, R.string.manage_event_load_failure, Toast.LENGTH_SHORT).show();
@@ -499,6 +559,9 @@ public class EditEventActivity extends AppCompatActivity {
         overridePendingTransition(0, 0);
     }
 
+    /**
+     * Opens qr code screen.
+     */
     private void openQrCodeScreen() {
         if (TextUtils.isEmpty(currentEventId)) {
             Toast.makeText(this, R.string.event_qr_generation_failure, Toast.LENGTH_SHORT).show();
@@ -522,6 +585,9 @@ public class EditEventActivity extends AppCompatActivity {
         overridePendingTransition(0, 0);
     }
 
+    /**
+     * Opens entrant map screen.
+     */
     private void openEntrantMapScreen() {
         if (TextUtils.isEmpty(currentEventId)) {
             Toast.makeText(this, R.string.manage_entrants_load_failure, Toast.LENGTH_SHORT).show();
@@ -534,6 +600,9 @@ public class EditEventActivity extends AppCompatActivity {
         overridePendingTransition(0, 0);
     }
 
+    /**
+     * Updates delete button visibility.
+     */
     private void updateDeleteButtonVisibility(Event event) {
         if (deleteEventButton == null || userController == null) {
             return;
@@ -546,6 +615,9 @@ public class EditEventActivity extends AppCompatActivity {
         deleteEventButton.setVisibility(isOrganizer ? View.VISIBLE : View.GONE);
     }
 
+    /**
+     * Shows delete event dialog.
+     */
     private void showDeleteEventDialog() {
         if (isDeletingEvent || TextUtils.isEmpty(currentEventId)) {
             return;
@@ -580,6 +652,9 @@ public class EditEventActivity extends AppCompatActivity {
         AppDialogHelper.showWrapContent(dialog, UiHelper.dpToPx(this, 320));
     }
 
+    /**
+     * Handles confirm Delete Event.
+     */
     private void confirmDeleteEvent(Dialog dialog, Button cancelButton, Button deleteButton) {
         if (isDeletingEvent || TextUtils.isEmpty(currentEventId) || userController == null) {
             return;
@@ -627,6 +702,9 @@ public class EditEventActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Saves changes.
+     */
     private void saveChanges() {
         if (isSaving || isLoadingEvent || !hasUnsavedChanges()) {
             return;
@@ -665,6 +743,9 @@ public class EditEventActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Handles apply Poster Changes If Needed.
+     */
     private void applyPosterChangesIfNeeded(AppResult<Event> formResult, boolean posterOnly) {
         if (selectedPosterUri == null && !removePosterRequested) {
             isSaving = false;
@@ -706,22 +787,34 @@ public class EditEventActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Handles reload Event After Save.
+     */
     private void reloadEventAfterSave(AppResult<Event> result) {
         bindEvent(result.getData());
         setResult(RESULT_OK);
         Toast.makeText(this, result.getMessageResId(), Toast.LENGTH_SHORT).show();
     }
 
+    /**
+     * Handles capture Original State.
+     */
     private void captureOriginalState() {
         originalFormSnapshot = manageEventController.buildSnapshot(readFormData());
     }
 
+    /**
+     * Returns whether h.as Unsaved Changes
+     */
     private boolean hasUnsavedChanges() {
         return !manageEventController.buildSnapshot(readFormData()).equals(originalFormSnapshot)
                 || selectedPosterUri != null
                 || removePosterRequested;
     }
 
+    /**
+     * Updates save button state.
+     */
     private void updateSaveButtonState() {
         boolean formSaveEnabled = manageEventController.isSaveEnabled(
                 readFormData(),
@@ -737,6 +830,9 @@ public class EditEventActivity extends AppCompatActivity {
         saveChangesButton.setEnabled(!isSaving && !isLoadingEvent);
     }
 
+    /**
+     * Handles render Poster State.
+     */
     private void renderPosterState() {
         String currentPosterUrl = currentEvent == null ? null : currentEvent.getPosterUrl();
         boolean hasSelectedPoster = selectedPosterUri != null;
@@ -767,18 +863,30 @@ public class EditEventActivity extends AppCompatActivity {
         posterUploadHintText.setText(R.string.manage_event_banner_placeholder);
     }
 
+    /**
+     * Handles read Form Data.
+     */
     private EventFormData readFormData() {
         return formUiHelper.readFormData();
     }
 
+    /**
+     * Handles apply Summary Image.
+     */
     private void applySummaryImage(String category) {
         eventImageBackground.setBackgroundResource(UiHelper.eventImageBackgroundRes(category));
     }
 
+    /**
+     * Binds form view model.
+     */
     private void bindFormViewModel(EventFormData viewModel) {
         formUiHelper.bindForm(viewModel);
     }
 
+    /**
+     * Updates summary.
+     */
     private void updateSummary(String title, String location, String date, String category) {
         summaryTitleText.setText(UiHelper.defaultText(title, getString(R.string.default_event_name)));
         summaryLocationText.setText(UiHelper.defaultText(location, getString(R.string.default_street_name)));
@@ -786,6 +894,9 @@ public class EditEventActivity extends AppCompatActivity {
         applySummaryImage(category);
     }
 
+    /**
+     * Updates invite button visibility.
+     */
     private void updateInviteButtonVisibility(Event event) {
         if (inviteEntrantsButton != null) {
             inviteEntrantsButton.setVisibility(event != null && event.isPrivate() ? View.VISIBLE : View.GONE);
@@ -795,6 +906,9 @@ public class EditEventActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Opens invite screen.
+     */
     private void openInviteScreen() {
         if (TextUtils.isEmpty(currentEventId)) {
             Toast.makeText(this, R.string.manage_event_load_failure, Toast.LENGTH_SHORT).show();

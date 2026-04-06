@@ -19,10 +19,16 @@ import java.util.List;
 public class AdminProfilePictureListAdapter extends RecyclerView.Adapter<AdminProfilePictureListAdapter.ViewHolder> {
     private final List<User> users;
 
+    /**
+     * Creates a new AdminProfilePictureListAdapter instance.
+     */
     public AdminProfilePictureListAdapter(List<User> users) {
         this.users = users;
     }
 
+    /**
+     * Handles on Create View Holder.
+     */
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -31,11 +37,17 @@ public class AdminProfilePictureListAdapter extends RecyclerView.Adapter<AdminPr
         return new ViewHolder(view);
     }
 
+    /**
+     * Handles on Bind View Holder.
+     */
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         holder.bind(users.get(position));
     }
 
+    /**
+     * Returns whether g.et Item Count
+     */
     @Override
     public int getItemCount() {
         return users.size();
@@ -53,6 +65,9 @@ public class AdminProfilePictureListAdapter extends RecyclerView.Adapter<AdminPr
             userDeviceIdText = itemView.findViewById(R.id.userDeviceIdText);
         }
 
+        /**
+         * Binds .
+         */
         void bind(User user) {
             String displayName = user == null ? null : user.getName();
             if (TextUtils.isEmpty(displayName)) {

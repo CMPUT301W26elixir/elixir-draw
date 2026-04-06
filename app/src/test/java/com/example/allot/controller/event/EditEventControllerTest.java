@@ -20,6 +20,9 @@ public class EditEventControllerTest {
     private FakeGeocodingService geocodingService;
     private EditEventController controller;
 
+    /**
+     * Updates up.
+     */
     @Before
     public void setUp() {
         eventRepository = new FakeEventRepository();
@@ -33,6 +36,9 @@ public class EditEventControllerTest {
         );
     }
 
+    /**
+     * Returns whether i.s Save Enabled_disables Save When Snapshot Matches
+     */
     @Test
     public void isSaveEnabled_disablesSaveWhenSnapshotMatches() {
         EventFormData formData = buildFormData("Sample Event");
@@ -41,6 +47,9 @@ public class EditEventControllerTest {
         assertFalse(controller.isSaveEnabled(formData, originalSnapshot, false, false));
     }
 
+    /**
+     * Returns whether i.s Save Enabled_enables Save When Form Changes
+     */
     @Test
     public void isSaveEnabled_enablesSaveWhenFormChanges() {
         EventFormData originalFormData = buildFormData("Sample Event");
@@ -50,6 +59,9 @@ public class EditEventControllerTest {
         assertTrue(controller.isSaveEnabled(currentFormData, originalSnapshot, false, false));
     }
 
+    /**
+     * Saves changes_updates coordinates when geocoding succeeds.
+     */
     @Test
     public void saveChanges_updatesCoordinatesWhenGeocodingSucceeds() {
         geocodingService.coordinates = new EventLocationCoordinates(53.5232, -113.5263);
@@ -63,6 +75,9 @@ public class EditEventControllerTest {
         });
     }
 
+    /**
+     * Saves changes_clears coordinates when geocoding fails.
+     */
     @Test
     public void saveChanges_clearsCoordinatesWhenGeocodingFails() {
         geocodingService.coordinates = null;
@@ -76,6 +91,9 @@ public class EditEventControllerTest {
         });
     }
 
+    /**
+     * Builds form data.
+     */
     private EventFormData buildFormData(String title) {
         return new EventFormData(
                 title,
@@ -102,16 +120,25 @@ public class EditEventControllerTest {
         private boolean updateSuccess;
         private Map<String, Object> lastUpdates = new HashMap<>();
 
+        /**
+         * Handles fake Event Repository.
+         */
         private FakeEventRepository() {
             super((com.google.firebase.firestore.FirebaseFirestore) null);
         }
 
+        /**
+         * Updates event.
+         */
         @Override
         public void updateEvent(String eventId, Map<String, Object> updates, com.example.allot.common.OnCompleteListener<Boolean> listener) {
             lastUpdates = new HashMap<>(updates);
             listener.onComplete(updateSuccess, updateSuccess);
         }
 
+        /**
+         * Returns whether g.et Event By Id
+         */
         @Override
         public void getEventById(String eventId, com.example.allot.common.OnCompleteListener<Event> listener) {
             listener.onComplete(event, event != null);
@@ -121,6 +148,9 @@ public class EditEventControllerTest {
     private static class FakeGeocodingService implements EventLocationGeocodingService {
         private EventLocationCoordinates coordinates;
 
+        /**
+         * Handles geocode.
+         */
         @Override
         public EventLocationCoordinates geocode(String location) {
             return coordinates;

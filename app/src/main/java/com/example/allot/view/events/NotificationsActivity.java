@@ -83,6 +83,9 @@ public class NotificationsActivity extends AppCompatActivity {
                 });
     }
 
+    /**
+     * Opens deferred destination.
+     */
     private void openDeferredDestination() {
         Intent intent = DeferredOnboardingNavigator.buildPostOnboardingIntent(
                 NotificationsActivity.this,

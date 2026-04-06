@@ -54,6 +54,9 @@ public class EventFilterActivity extends AppCompatActivity {
 
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("MMM d, yyyy", Locale.getDefault());
 
+    /**
+     * Handles on Create.
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -68,6 +71,9 @@ public class EventFilterActivity extends AppCompatActivity {
         maybeAutoFillCurrentLocationAddress();
     }
 
+    /**
+     * Binds views.
+     */
     private void bindViews() {
         dateInput = findViewById(R.id.filterDateInput);
         addressInput = findViewById(R.id.filterAddressInput);
@@ -79,6 +85,9 @@ public class EventFilterActivity extends AppCompatActivity {
         loadingIndicator = findViewById(R.id.filterLoadingIndicator);
     }
 
+    /**
+     * Binds initial values.
+     */
     private void bindInitialValues() {
         dateInput.setText(safeString(getIntent().getStringExtra(EXTRA_DATE_BEGIN)));
         addressInput.setText(safeString(getIntent().getStringExtra(EXTRA_ADDRESS)));
@@ -92,6 +101,9 @@ public class EventFilterActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Updates up listeners.
+     */
     private void setupListeners() {
         ImageButton backButton = findViewById(R.id.backButton);
         backButton.setOnClickListener(view -> getOnBackPressedDispatcher().onBackPressed());
@@ -99,6 +111,9 @@ public class EventFilterActivity extends AppCompatActivity {
         saveButton.setOnClickListener(view -> saveFilters());
     }
 
+    /**
+     * Handles maybe Auto Fill Current Location Address.
+     */
     private void maybeAutoFillCurrentLocationAddress() {
         if (!safeString(addressInput.getText()).isEmpty() || isAutoFillingAddress) {
             return;
@@ -116,6 +131,9 @@ public class EventFilterActivity extends AppCompatActivity {
         loadCurrentLocationAddress();
     }
 
+    /**
+     * Saves filters.
+     */
     private void saveFilters() {
         String rawDate = safeString(dateInput.getText());
         if (!rawDate.isEmpty() && !isValidDate(rawDate)) {
@@ -147,6 +165,9 @@ public class EventFilterActivity extends AppCompatActivity {
         geocodeAndFinish(rawDate, address, distanceKm, keywords, onlyOpenSpots, minimumCapacity);
     }
 
+    /**
+     * Handles geocode And Finish.
+     */
     private void geocodeAndFinish(String rawDate,
                                   String address,
                                   Double distanceKm,
@@ -170,11 +191,17 @@ public class EventFilterActivity extends AppCompatActivity {
         }).start();
     }
 
+    /**
+     * Returns whether h.as Location Permission
+     */
     private boolean hasLocationPermission() {
         return ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED;
     }
 
+    /**
+     * Loads current location address.
+     */
     private void loadCurrentLocationAddress() {
         isAutoFillingAddress = true;
         setLoading(true);
@@ -193,6 +220,9 @@ public class EventFilterActivity extends AppCompatActivity {
                 .addOnFailureListener(this, exception -> finishAutoFill());
     }
 
+    /**
+     * Handles reverse Geocode Current Location.
+     */
     private void reverseGeocodeCurrentLocation(Location location) {
         new Thread(() -> {
             AndroidEventLocationGeocodingService geocodingService = new AndroidEventLocationGeocodingService(this);
@@ -210,11 +240,17 @@ public class EventFilterActivity extends AppCompatActivity {
         }).start();
     }
 
+    /**
+     * Handles finish Auto Fill.
+     */
     private void finishAutoFill() {
         isAutoFillingAddress = false;
         setLoading(false);
     }
 
+    /**
+     * Handles finish With Results.
+     */
     private void finishWithResults(String rawDate,
                                    String address,
                                    Double distanceKm,
@@ -242,6 +278,9 @@ public class EventFilterActivity extends AppCompatActivity {
         finish();
     }
 
+    /**
+     * Returns whether i.s Valid Date
+     */
     private boolean isValidDate(String value) {
         try {
             dateFormat.parse(value.trim());
@@ -251,6 +290,9 @@ public class EventFilterActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Handles parse Distance Km.
+     */
     private Double parseDistanceKm(String value) {
         if (TextUtils.isEmpty(value)) {
             return null;
@@ -263,6 +305,9 @@ public class EventFilterActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Handles parse Minimum Capacity.
+     */
     private Integer parseMinimumCapacity(String value) {
         if (TextUtils.isEmpty(value)) {
             return null;
@@ -275,6 +320,9 @@ public class EventFilterActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Handles read Minimum Capacity Value.
+     */
     private String readMinimumCapacityValue() {
         if (!getIntent().hasExtra(EXTRA_MINIMUM_CAPACITY)) {
             return "";
@@ -283,11 +331,17 @@ public class EventFilterActivity extends AppCompatActivity {
         return value > 0 ? String.valueOf(value) : "";
     }
 
+    /**
+     * Updates loading.
+     */
     private void setLoading(boolean isLoading) {
         loadingIndicator.setVisibility(isLoading ? View.VISIBLE : View.GONE);
         saveButton.setEnabled(!isLoading);
     }
 
+    /**
+     * Handles on Request Permissions Result.
+     */
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -300,6 +354,9 @@ public class EventFilterActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Handles safe String.
+     */
     private String safeString(CharSequence value) {
         return value == null ? "" : value.toString().trim();
     }

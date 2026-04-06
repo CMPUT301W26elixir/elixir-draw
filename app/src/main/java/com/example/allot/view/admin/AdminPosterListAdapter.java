@@ -21,14 +21,23 @@ public class AdminPosterListAdapter extends RecyclerView.Adapter<AdminPosterList
     private final OnDeleteClickListener onDeleteClickListener;
 
     public interface OnDeleteClickListener {
+        /**
+         * Handles on Delete Click.
+         */
         void onDeleteClick(Event event, int position);
     }
 
+    /**
+     * Creates a new AdminPosterListAdapter instance.
+     */
     public AdminPosterListAdapter(List<Event> posterEvents, OnDeleteClickListener onDeleteClickListener) {
         this.posterEvents = posterEvents;
         this.onDeleteClickListener = onDeleteClickListener;
     }
 
+    /**
+     * Handles on Create View Holder.
+     */
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -37,12 +46,18 @@ public class AdminPosterListAdapter extends RecyclerView.Adapter<AdminPosterList
         return new ViewHolder(view);
     }
 
+    /**
+     * Handles on Bind View Holder.
+     */
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Event event = posterEvents.get(position);
         holder.bind(event, position, onDeleteClickListener);
     }
 
+    /**
+     * Returns whether g.et Item Count
+     */
     @Override
     public int getItemCount() {
         return posterEvents.size();
@@ -62,6 +77,9 @@ public class AdminPosterListAdapter extends RecyclerView.Adapter<AdminPosterList
             deleteButton = itemView.findViewById(R.id.deleteButton);
         }
 
+        /**
+         * Binds .
+         */
         void bind(Event event, int position, OnDeleteClickListener listener) {
             eventTitleText.setText(event.getTitle());
             eventOrganizerText.setText("Event ID: " + event.getEventId());

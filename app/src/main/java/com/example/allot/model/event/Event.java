@@ -141,163 +141,283 @@ public class Event {
         return getWaitingList().status;
     }
 
+    /**
+     * Returns whether g.et Event Id
+     */
     public String getEventId() {
         return eventId;
     }
 
+    /**
+     * Updates event id.
+     */
     public void setEventId(String eventId) {
         this.eventId = eventId;
     }
 
+    /**
+     * Returns whether g.et Organizer Id
+     */
     public String getOrganizerId() {
         return organizerId;
     }
 
+    /**
+     * Updates organizer id.
+     */
     public void setOrganizerId(String organizerId) {
         this.organizerId = organizerId;
     }
 
+    /**
+     * Returns whether g.et Title
+     */
     public String getTitle() {
         return title;
     }
 
+    /**
+     * Updates title.
+     */
     public void setTitle(String title) {
         this.title = title;
     }
 
+    /**
+     * Returns whether g.et Description
+     */
     public String getDescription() {
         return description;
     }
 
+    /**
+     * Updates description.
+     */
     public void setDescription(String description) {
         this.description = description;
     }
 
+    /**
+     * Returns whether g.et Location
+     */
     public String getLocation() {
         return location;
     }
 
+    /**
+     * Updates location.
+     */
     public void setLocation(String location) {
         this.location = location;
     }
 
+    /**
+     * Returns whether g.et Category
+     */
     public String getCategory() {
         return category;
     }
 
+    /**
+     * Updates category.
+     */
     public void setCategory(String category) {
         this.category = category;
     }
 
+    /**
+     * Returns whether g.et Capacity
+     */
     public int getCapacity() {
         return capacity;
     }
 
+    /**
+     * Updates capacity.
+     */
     public void setCapacity(int capacity) {
         this.capacity = capacity;
     }
 
+    /**
+     * Returns whether g.et Price
+     */
     public Double getPrice() {
         return price;
     }
 
+    /**
+     * Updates price.
+     */
     public void setPrice(Double price) {
         this.price = price;
     }
 
+    /**
+     * Returns whether g.et Event Date
+     */
     public Date getEventDate() {
         return eventDate;
     }
 
+    /**
+     * Updates event date.
+     */
     public void setEventDate(Date eventDate) {
         this.eventDate = eventDate;
     }
 
+    /**
+     * Returns whether g.et Draw Date
+     */
     public Date getDrawDate() {
         return drawDate;
     }
 
+    /**
+     * Updates draw date.
+     */
     public void setDrawDate(Date drawDate) {
         this.drawDate = drawDate;
     }
 
+    /**
+     * Returns whether g.et Registration Open
+     */
     public Date getRegistrationOpen() {
         return registrationOpen;
     }
 
+    /**
+     * Updates registration open.
+     */
     public void setRegistrationOpen(Date registrationOpen) {
         this.registrationOpen = registrationOpen;
     }
 
+    /**
+     * Returns whether g.et Registration Deadline
+     */
     public Date getRegistrationDeadline() {
         return registrationDeadline;
     }
 
+    /**
+     * Updates registration deadline.
+     */
     public void setRegistrationDeadline(Date registrationDeadline) {
         this.registrationDeadline = registrationDeadline;
     }
 
+    /**
+     * Returns whether g.et Status
+     */
     public String getStatus() {
         return status;
     }
 
+    /**
+     * Updates status.
+     */
     public void setStatus(String status) {
         this.status = status;
     }
 
+    /**
+     * Returns whether g.et Poster Url
+     */
     public String getPosterUrl() {
         return posterUrl;
     }
 
+    /**
+     * Updates poster url.
+     */
     public void setPosterUrl(String posterUrl) {
         this.posterUrl = posterUrl;
     }
 
+    /**
+     * Returns whether g.et Visibility
+     */
     public String getVisibility() {
         String normalized = normalizeVisibility(visibility);
         return normalized == null ? VISIBILITY_PUBLIC : normalized;
     }
 
+    /**
+     * Updates visibility.
+     */
     public void setVisibility(String visibility) {
         this.visibility = normalizeVisibility(visibility);
     }
 
+    /**
+     * Returns whether i.s Public
+     */
     public boolean isPublic() {
         return VISIBILITY_PUBLIC.equalsIgnoreCase(getVisibility());
     }
 
+    /**
+     * Returns whether i.s Private
+     */
     public boolean isPrivate() {
         return VISIBILITY_PRIVATE.equalsIgnoreCase(getVisibility());
     }
 
+    /**
+     * Returns whether g.et Event Latitude
+     */
     public Double getEventLatitude() {
         return eventLatitude;
     }
 
+    /**
+     * Updates event latitude.
+     */
     public void setEventLatitude(Double eventLatitude) {
         this.eventLatitude = eventLatitude;
     }
 
+    /**
+     * Returns whether g.et Event Longitude
+     */
     public Double getEventLongitude() {
         return eventLongitude;
     }
 
+    /**
+     * Updates event longitude.
+     */
     public void setEventLongitude(Double eventLongitude) {
         this.eventLongitude = eventLongitude;
     }
 
+    /**
+     * Returns whether g.et Limit
+     */
     public int getLimit() {
         return limit;
     }
 
+    /**
+     * Updates limit.
+     */
     public void setLimit(int limit) {
         this.limit = limit;
     }
 
+    /**
+     * Updates waiting list.
+     */
     public void setWaitingList(WaitingList waitingList) {
         this.waitingList = waitingList;
     }
 
+    /**
+     * Returns whether g.et Chosen
+     */
     public ArrayList<String> getChosen() {
         if (chosen == null) {
             chosen = new ArrayList<>();
@@ -305,10 +425,16 @@ public class Event {
         return chosen;
     }
 
+    /**
+     * Updates chosen.
+     */
     public void setChosen(ArrayList<String> chosen) {
         this.chosen = chosen;
     }
 
+    /**
+     * Returns whether g.et Enrolled
+     */
     public ArrayList<String> getEnrolled() {
         if (enrolled == null) {
             enrolled = new ArrayList<>();
@@ -316,10 +442,16 @@ public class Event {
         return enrolled;
     }
 
+    /**
+     * Updates enrolled.
+     */
     public void setEnrolled(ArrayList<String> enrolled) {
         this.enrolled = enrolled;
     }
 
+    /**
+     * Returns whether g.et Cancelled
+     */
     public ArrayList<String> getCancelled() {
         if (cancelled == null) {
             cancelled = new ArrayList<>();
@@ -327,10 +459,16 @@ public class Event {
         return cancelled;
     }
 
+    /**
+     * Updates cancelled.
+     */
     public void setCancelled(ArrayList<String> cancelled) {
         this.cancelled = cancelled;
     }
 
+    /**
+     * Returns whether g.et Not Enrolled
+     */
     public ArrayList<String> getNotEnrolled() {
         if (notEnrolled == null) {
             notEnrolled = new ArrayList<>();
@@ -338,10 +476,16 @@ public class Event {
         return notEnrolled;
     }
 
+    /**
+     * Updates not enrolled.
+     */
     public void setNotEnrolled(ArrayList<String> notEnrolled) {
         this.notEnrolled = notEnrolled;
     }
 
+    /**
+     * Returns whether g.et Co Organizers
+     */
     public ArrayList<String> getCoOrganizers() {
         if (coOrganizers == null) {
             coOrganizers = new ArrayList<>();
@@ -349,10 +493,16 @@ public class Event {
         return coOrganizers;
     }
 
+    /**
+     * Updates co organizers.
+     */
     public void setCoOrganizers(ArrayList<String> coOrganizers) {
         this.coOrganizers = coOrganizers;
     }
 
+    /**
+     * Returns whether g.et Co Organizer Invites
+     */
     public ArrayList<String> getCoOrganizerInvites() {
         if (coOrganizerInvites == null) {
             coOrganizerInvites = new ArrayList<>();
@@ -360,10 +510,16 @@ public class Event {
         return coOrganizerInvites;
     }
 
+    /**
+     * Updates co organizer invites.
+     */
     public void setCoOrganizerInvites(ArrayList<String> coOrganizerInvites) {
         this.coOrganizerInvites = coOrganizerInvites;
     }
 
+    /**
+     * Returns whether g.et Gallery Urls
+     */
     public ArrayList<String> getGalleryUrls() {
         if (galleryUrls == null) {
             galleryUrls = new ArrayList<>();
@@ -371,10 +527,16 @@ public class Event {
         return galleryUrls;
     }
 
+    /**
+     * Updates gallery urls.
+     */
     public void setGalleryUrls(ArrayList<String> galleryUrls) {
         this.galleryUrls = galleryUrls;
     }
 
+    /**
+     * Returns whether g.et Invited
+     */
     public ArrayList<String> getInvited() {
         if (invited == null) {
             invited = new ArrayList<>();
@@ -382,14 +544,23 @@ public class Event {
         return invited;
     }
 
+    /**
+     * Updates invited.
+     */
     public void setInvited(ArrayList<String> invited) {
         this.invited = invited;
     }
 
+    /**
+     * Returns whether i.s Invited
+     */
     public boolean isInvited(String deviceId) {
         return deviceId != null && getInvited().contains(deviceId);
     }
 
+    /**
+     * Returns whether g.et Comments
+     */
     public ArrayList<EventComment> getComments() {
         if (comments == null) {
             comments = new ArrayList<>();
@@ -397,18 +568,30 @@ public class Event {
         return comments;
     }
 
+    /**
+     * Updates comments.
+     */
     public void setComments(ArrayList<EventComment> comments) {
         this.comments = comments;
     }
 
+    /**
+     * Returns whether g.et Geoloc
+     */
     public Boolean getGeoloc() {
         return geoloc;
     }
 
+    /**
+     * Updates geoloc.
+     */
     public void setGeoloc(Boolean geoloc) {
         this.geoloc = geoloc;
     }
 
+    /**
+     * Handles normalize Visibility.
+     */
     private String normalizeVisibility(String value) {
         if (value == null) {
             return null;

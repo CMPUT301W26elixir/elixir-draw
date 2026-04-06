@@ -22,10 +22,16 @@ public class ExploreController {
     private List<Event> cachedOpenEvents = new ArrayList<>();
     private boolean hasLoadedOpenEvents;
 
+    /**
+     * Creates a new ExploreController instance.
+     */
     public ExploreController(Context context) {
         this(new EventRepository(), new UserController(context), new ExploreFilterService(), new EventListItemMapper());
     }
 
+    /**
+     * Creates a new ExploreController instance.
+     */
     ExploreController(EventRepository eventRepository,
                       UserController userController,
                       ExploreFilterService exploreFilterService,
@@ -137,6 +143,9 @@ public class ExploreController {
         listener.onComplete(eventListItemMapper.mapEvents(filteredEvents, savedEventIds), true);
     }
 
+    /**
+     * Returns whether h.as Cached Open Events
+     */
     public boolean hasCachedOpenEvents() {
         return hasLoadedOpenEvents;
     }

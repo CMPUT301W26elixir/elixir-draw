@@ -24,6 +24,9 @@ public class DeviceSessionManager {
         ));
     }
 
+    /**
+     * Creates a new DeviceSessionManager instance.
+     */
     public DeviceSessionManager(DeviceSessionStore deviceSessionStore) {
         // Get the saved device ID, or create one if it does not exist yet
         DeviceIdResult deviceIdResult = getOrCreateDeviceId(deviceSessionStore);
@@ -52,31 +55,52 @@ public class DeviceSessionManager {
         return new DeviceIdResult(newDeviceId, true);
     }
 
+    /**
+     * Returns whether g.et Current Device Id
+     */
     public String getCurrentDeviceId() {
         return deviceId;
     }
 
+    /**
+     * Returns whether i.s New Device Id
+     */
     public boolean isNewDeviceId() {
         return newDeviceId;
     }
 
     public interface DeviceSessionStore {
+        /**
+         * Returns whether g.et Device Id
+         */
         String getDeviceId();
+        /**
+         * Saves device id.
+         */
         void saveDeviceId(String deviceId);
     }
 
     private static class SharedPreferencesDeviceSessionStore implements DeviceSessionStore {
         private final SharedPreferences prefs;
 
+        /**
+         * Handles shared Preferences Device Session Store.
+         */
         private SharedPreferencesDeviceSessionStore(SharedPreferences prefs) {
             this.prefs = prefs;
         }
 
+        /**
+         * Returns whether g.et Device Id
+         */
         @Override
         public String getDeviceId() {
             return prefs.getString(DEVICE_ID_KEY, null);
         }
 
+        /**
+         * Saves device id.
+         */
         @Override
         public void saveDeviceId(String deviceId) {
             prefs.edit().putString(DEVICE_ID_KEY, deviceId).apply();
@@ -87,6 +111,9 @@ public class DeviceSessionManager {
         private final String deviceId;
         private final boolean wasCreated;
 
+        /**
+         * Handles device Id Result.
+         */
         private DeviceIdResult(String deviceId, boolean wasCreated) {
             this.deviceId = deviceId;
             this.wasCreated = wasCreated;

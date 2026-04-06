@@ -46,26 +46,44 @@ public class EventActionState {
         this.subtext = subtext;
     }
 
+    /**
+     * Returns whether g.et Event
+     */
     public Event getEvent() {
         return event;
     }
 
+    /**
+     * Returns whether g.et Action Type
+     */
     public ActionType getActionType() {
         return actionType;
     }
 
+    /**
+     * Returns whether s.hould Show Waitlist Message
+     */
     public boolean shouldShowWaitlistMessage() {
         return showWaitlistMessage;
     }
 
+    /**
+     * Returns whether i.s Button Enabled
+     */
     public boolean isButtonEnabled() {
         return buttonEnabled;
     }
 
+    /**
+     * Returns whether s.hould Show Entrant Count
+     */
     public boolean shouldShowEntrantCount() {
         return showEntrantCount;
     }
 
+    /**
+     * Returns whether g.et Subtext
+     */
     public String getSubtext() {
         return subtext;
     }

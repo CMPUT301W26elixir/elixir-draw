@@ -24,11 +24,17 @@ import org.junit.runner.RunWith;
 @RunWith(AndroidJUnit4.class)
 public class EditProfileFlowTest {
 
+    /**
+     * Handles disable Animations.
+     */
     @Before
     public void disableAnimations() {
         SystemAnimations.disableAll();
     }
 
+    /**
+     * Builds intent.
+     */
     private Intent buildIntent() {
         Intent intent = new Intent(ApplicationProvider.getApplicationContext(), ProfileActivity.class);
         intent.putExtra(ProfileActivity.EXTRA_UI_TEST_PROFILE_MODE, true);
@@ -40,6 +46,9 @@ public class EditProfileFlowTest {
         return intent;
     }
 
+    /**
+     * Handles edit Profile_updates Form And Clears Dirty State After Save.
+     */
     @Test
     public void editProfile_updatesFormAndClearsDirtyStateAfterSave() {
         try (ActivityScenario<ProfileActivity> scenario = ActivityScenario.launch(buildIntent())) {

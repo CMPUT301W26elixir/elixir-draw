@@ -250,11 +250,17 @@ public class User {
         return history;
     }
 
+    /**
+     * Updates history.
+     */
     @SuppressWarnings("unused")
     public void setHistory(ArrayList<String> history) {
         this.history = history;
     }
 
+    /**
+     * Returns whether g.et My Events
+     */
     public ArrayList<String> getMyEvents() {
         if (myEvents == null) {
             myEvents = new ArrayList<>();
@@ -262,6 +268,9 @@ public class User {
         return myEvents;
     }
 
+    /**
+     * Updates my events.
+     */
     @SuppressWarnings("unused")
     public void setMyEvents(ArrayList<String> myEvents) {
         this.myEvents = myEvents;
@@ -279,6 +288,9 @@ public class User {
         return savedEvents;
     }
 
+    /**
+     * Updates saved events.
+     */
     @SuppressWarnings("unused")
     public void setSavedEvents(ArrayList<String> savedEvents) {
         this.savedEvents = savedEvents;

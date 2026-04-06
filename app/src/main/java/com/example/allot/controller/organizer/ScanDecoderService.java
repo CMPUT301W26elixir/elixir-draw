@@ -73,6 +73,9 @@ public class ScanDecoderService {
         return decodeBinaryBitmap(new BinaryBitmap(new HybridBinarizer(source)));
     }
 
+    /**
+     * Handles decode Binary Bitmap.
+     */
     private String decodeBinaryBitmap(BinaryBitmap bitmap) {
         MultiFormatReader reader = new MultiFormatReader();
         try {
@@ -85,6 +88,9 @@ public class ScanDecoderService {
         }
     }
 
+    /**
+     * Builds hints.
+     */
     private Map<DecodeHintType, Object> buildHints() {
         Map<DecodeHintType, Object> hints = new EnumMap<>(DecodeHintType.class);
         hints.put(DecodeHintType.POSSIBLE_FORMATS, Collections.singletonList(BarcodeFormat.QR_CODE));
@@ -92,6 +98,9 @@ public class ScanDecoderService {
         return hints;
     }
 
+    /**
+     * Handles extract Luminance Plane.
+     */
     private byte[] extractLuminancePlane(ImageProxy imageProxy) {
         ImageProxy.PlaneProxy plane = imageProxy.getPlanes()[0];
         ByteBuffer buffer = plane.getBuffer();
@@ -120,6 +129,9 @@ public class ScanDecoderService {
         return luminance;
     }
 
+    /**
+     * Handles rotate Luminance.
+     */
     private RotatedLuminance rotateLuminance(byte[] source, int width, int height, int rotationDegrees) {
         if (rotationDegrees == 90) {
             byte[] rotated = new byte[source.length];
@@ -159,6 +171,9 @@ public class ScanDecoderService {
         private final int width;
         private final int height;
 
+        /**
+         * Handles rotated Luminance.
+         */
         private RotatedLuminance(byte[] data, int width, int height) {
             this.data = data;
             this.width = width;

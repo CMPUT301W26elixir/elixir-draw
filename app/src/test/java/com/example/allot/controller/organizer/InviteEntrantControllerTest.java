@@ -18,6 +18,9 @@ public class InviteEntrantControllerTest {
     private FakeUserController userController;
     private InviteEntrantController controller;
 
+    /**
+     * Updates up.
+     */
     @Before
     public void setUp() {
         eventRepository = new FakeEventRepository();
@@ -25,6 +28,9 @@ public class InviteEntrantControllerTest {
         controller = new InviteEntrantController(eventRepository, userController);
     }
 
+    /**
+     * Handles methods_delegate To Dependencies.
+     */
     @Test
     public void methods_delegateToDependencies() {
         Event event = new Event();
@@ -58,15 +64,24 @@ public class InviteEntrantControllerTest {
         private String inviteEventId;
         private String inviteDeviceId;
 
+        /**
+         * Handles fake Event Repository.
+         */
         private FakeEventRepository() {
             super((com.google.firebase.firestore.FirebaseFirestore) null);
         }
 
+        /**
+         * Returns whether g.et Event By Id
+         */
         @Override
         public void getEventById(String eventId, com.example.allot.common.OnCompleteListener<Event> listener) {
             listener.onComplete(event, true);
         }
 
+        /**
+         * Handles invite User To Event.
+         */
         @Override
         public void inviteUserToEvent(String eventId, String deviceId,
                                       com.example.allot.common.OnCompleteListener<Boolean> listener) {
@@ -79,10 +94,16 @@ public class InviteEntrantControllerTest {
     private static class FakeUserController extends UserController {
         private List<User> searchResults;
 
+        /**
+         * Handles fake User Controller.
+         */
         private FakeUserController() {
             super(null, new DeviceSessionManager(new FakeDeviceSessionStore("device-1")));
         }
 
+        /**
+         * Handles search Users.
+         */
         @Override
         public void searchUsers(String query, com.example.allot.common.OnCompleteListener<List<User>> listener) {
             listener.onComplete(searchResults, true);
@@ -92,15 +113,24 @@ public class InviteEntrantControllerTest {
     private static class FakeDeviceSessionStore implements DeviceSessionManager.DeviceSessionStore {
         private final String deviceId;
 
+        /**
+         * Handles fake Device Session Store.
+         */
         private FakeDeviceSessionStore(String deviceId) {
             this.deviceId = deviceId;
         }
 
+        /**
+         * Returns whether g.et Device Id
+         */
         @Override
         public String getDeviceId() {
             return deviceId;
         }
 
+        /**
+         * Saves device id.
+         */
         @Override
         public void saveDeviceId(String deviceId) {
         }

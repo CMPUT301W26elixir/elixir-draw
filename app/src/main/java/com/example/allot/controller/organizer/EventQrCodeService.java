@@ -95,6 +95,9 @@ public class EventQrCodeService {
         }
     }
 
+    /**
+     * Creates image uri.
+     */
     private Uri createImageUri(Context context, String fileName) {
         ContentValues values = new ContentValues();
         values.put(MediaStore.Images.Media.DISPLAY_NAME, fileName);
@@ -105,6 +108,9 @@ public class EventQrCodeService {
         return context.getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
     }
 
+    /**
+     * Builds file name.
+     */
     private String buildFileName(String eventTitle, String eventId) {
         String baseName = !TextUtils.isEmpty(eventTitle) ? eventTitle : eventId;
         String normalizedName = baseName == null ? "event" : baseName.trim().toLowerCase(Locale.US);
@@ -116,6 +122,9 @@ public class EventQrCodeService {
         return "allot_qr_" + normalizedName + ".png";
     }
 
+    /**
+     * Handles to Bitmap.
+     */
     private Bitmap toBitmap(BitMatrix bitMatrix) {
         int width = bitMatrix.getWidth();
         int height = bitMatrix.getHeight();

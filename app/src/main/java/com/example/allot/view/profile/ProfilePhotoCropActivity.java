@@ -30,6 +30,9 @@ public class ProfilePhotoCropActivity extends AppCompatActivity {
     private TextView usePhotoButton;
     private Uri inputUri;
 
+    /**
+     * Handles on Create.
+     */
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -57,6 +60,9 @@ public class ProfilePhotoCropActivity extends AppCompatActivity {
         loadCropImage();
     }
 
+    /**
+     * Loads crop image.
+     */
     private void loadCropImage() {
         usePhotoButton.setEnabled(false);
         new Thread(() -> {
@@ -84,6 +90,9 @@ public class ProfilePhotoCropActivity extends AppCompatActivity {
         }).start();
     }
 
+    /**
+     * Handles export Cropped Photo.
+     */
     private void exportCroppedPhoto() {
         usePhotoButton.setEnabled(false);
         new Thread(() -> {
@@ -109,6 +118,9 @@ public class ProfilePhotoCropActivity extends AppCompatActivity {
         }).start();
     }
 
+    /**
+     * Handles write Bitmap To Cache.
+     */
     @Nullable
     private Uri writeBitmapToCache(Bitmap bitmap) {
         File outputFile = new File(getCacheDir(), "profile-photo-crop.jpg");
@@ -122,6 +134,9 @@ public class ProfilePhotoCropActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Loads bitmap.
+     */
     @Nullable
     private Bitmap loadBitmap(Uri imageUri) throws IOException {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
@@ -150,6 +165,9 @@ public class ProfilePhotoCropActivity extends AppCompatActivity {
         );
     }
 
+    /**
+     * Handles calculate Sample Size.
+     */
     private int calculateSampleSize(int width, int height) {
         int largestDimension = Math.max(width, height);
         int sampleSize = 1;

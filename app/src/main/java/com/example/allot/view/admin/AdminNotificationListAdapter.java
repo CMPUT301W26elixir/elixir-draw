@@ -22,6 +22,9 @@ public class AdminNotificationListAdapter extends RecyclerView.Adapter<AdminNoti
     private final List<NotificationItem> notifications;
     private final Map<String, String> userNamesById = new HashMap<>();
 
+    /**
+     * Creates a new AdminNotificationListAdapter instance.
+     */
     public AdminNotificationListAdapter(List<NotificationItem> notifications) {
         this.notifications = notifications;
     }
@@ -36,6 +39,9 @@ public class AdminNotificationListAdapter extends RecyclerView.Adapter<AdminNoti
         }
     }
 
+    /**
+     * Handles on Create View Holder.
+     */
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -44,11 +50,17 @@ public class AdminNotificationListAdapter extends RecyclerView.Adapter<AdminNoti
         return new ViewHolder(view);
     }
 
+    /**
+     * Handles on Bind View Holder.
+     */
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         holder.bind(notifications.get(position), userNamesById);
     }
 
+    /**
+     * Returns whether g.et Item Count
+     */
     @Override
     public int getItemCount() {
         return notifications.size();
@@ -70,6 +82,9 @@ public class AdminNotificationListAdapter extends RecyclerView.Adapter<AdminNoti
             sentAtText = itemView.findViewById(R.id.notificationSentAtText);
         }
 
+        /**
+         * Binds .
+         */
         void bind(NotificationItem item, Map<String, String> userNamesById) {
             String safeTitle = item == null || isBlank(item.getTitle()) ? "Notification" : item.getTitle();
             String safeMessage = item == null || isBlank(item.getMessage()) ? "No message" : item.getMessage();
@@ -87,6 +102,9 @@ public class AdminNotificationListAdapter extends RecyclerView.Adapter<AdminNoti
             sentAtText.setText("Sent: " + formatTimestamp(item));
         }
 
+        /**
+         * Handles format Timestamp.
+         */
         private String formatTimestamp(NotificationItem item) {
             if (item == null || item.getCreatedAt() == null || item.getCreatedAt().toDate() == null) {
                 return "Unknown";
@@ -95,6 +113,9 @@ public class AdminNotificationListAdapter extends RecyclerView.Adapter<AdminNoti
             return new SimpleDateFormat("MMM d, yyyy h:mm a", Locale.getDefault()).format(date);
         }
 
+        /**
+         * Returns whether i.s Blank
+         */
         private boolean isBlank(String value) {
             return value == null || value.trim().isEmpty();
         }

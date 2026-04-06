@@ -162,6 +162,9 @@ public class EventCreatedActivity extends AppCompatActivity {
         overridePendingTransition(0, 0);
     }
 
+    /**
+     * Opens hosting screen.
+     */
     private void openHostingScreen() {
         AppNavigator.openMyEventsHosting(this, true);
     }

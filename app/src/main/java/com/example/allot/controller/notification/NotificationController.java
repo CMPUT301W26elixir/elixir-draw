@@ -11,10 +11,16 @@ import java.util.List;
 public class NotificationController {
     private final NotificationRepository notificationRepository;
 
+    /**
+     * Creates a new NotificationController instance.
+     */
     public NotificationController() {
         this.notificationRepository = new NotificationRepository();
     }
 
+    /**
+     * Creates a new NotificationController instance.
+     */
     public NotificationController(NotificationRepository notificationRepository) {
         this.notificationRepository = notificationRepository;
     }
@@ -70,6 +76,9 @@ public class NotificationController {
         notificationRepository.getNotificationsForUser(userId, listener);
     }
 
+    /**
+     * Handles send Notifications.
+     */
     private void sendNotifications(List<String> entrantIds,
                                    int index,
                                    String eventId,
@@ -92,6 +101,9 @@ public class NotificationController {
                 sendNotifications(entrantIds, index + 1, eventId, eventName, listener));
     }
 
+    /**
+     * Handles send Not Selected Notifications.
+     */
     private void sendNotSelectedNotifications(List<String> entrantIds,
                                               int index,
                                               String eventId,

@@ -12,12 +12,18 @@ public class ProfilePhotoControllerTest {
     private FakeUserRepository userRepository;
     private ProfilePhotoController controller;
 
+    /**
+     * Updates up.
+     */
     @Before
     public void setUp() {
         userRepository = new FakeUserRepository();
         controller = new ProfilePhotoController(userRepository, (FirebaseStorage) null);
     }
 
+    /**
+     * Handles upload Photo_rejects Blank Device Id Or Null Photo.
+     */
     @Test
     public void uploadPhoto_rejectsBlankDeviceIdOrNullPhoto() {
         controller.uploadPhoto(" ", null, (result, success) -> {
@@ -31,6 +37,9 @@ public class ProfilePhotoControllerTest {
         });
     }
 
+    /**
+     * Deletes photo_rejects blank device id.
+     */
     @Test
     public void deletePhoto_rejectsBlankDeviceId() {
         controller.deletePhoto(" ", "https://example.com/photo.jpg", (result, success) -> {
@@ -39,6 +48,9 @@ public class ProfilePhotoControllerTest {
         });
     }
 
+    /**
+     * Deletes photo_succeeds without storage delete when url blank.
+     */
     @Test
     public void deletePhoto_succeedsWithoutStorageDeleteWhenUrlBlank() {
         userRepository.updateFieldsSuccess = true;
@@ -54,10 +66,16 @@ public class ProfilePhotoControllerTest {
         private boolean updateFieldsSuccess;
         private boolean updatedFieldsCalled;
 
+        /**
+         * Handles fake User Repository.
+         */
         private FakeUserRepository() {
             super((com.google.firebase.firestore.FirebaseFirestore) null);
         }
 
+        /**
+         * Updates user fields.
+         */
         @Override
         public void updateUserFields(String deviceId, java.util.Map<String, Object> updates,
                                      com.example.allot.common.OnCompleteListener<Boolean> listener) {

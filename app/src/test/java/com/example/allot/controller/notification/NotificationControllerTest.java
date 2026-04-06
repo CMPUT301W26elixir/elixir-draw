@@ -18,12 +18,18 @@ public class NotificationControllerTest {
     private FakeNotificationRepository notificationRepository;
     private NotificationController controller;
 
+    /**
+     * Updates up.
+     */
     @Before
     public void setUp() {
         notificationRepository = new FakeNotificationRepository();
         controller = new NotificationController(notificationRepository);
     }
 
+    /**
+     * Handles notify Selected Entrants_returns Failure For Empty List.
+     */
     @Test
     public void notifySelectedEntrants_returnsFailureForEmptyList() {
         controller.notifySelectedEntrants(new ArrayList<>(), "event-1", "Spring Gala", (result, success) -> {
@@ -33,6 +39,9 @@ public class NotificationControllerTest {
         });
     }
 
+    /**
+     * Handles notify Selected Entrants_saves Notification For Each Entrant.
+     */
     @Test
     public void notifySelectedEntrants_savesNotificationForEachEntrant() {
         controller.notifySelectedEntrants(Arrays.asList("u1", "u2"), "event-1", "Spring Gala", (result, success) -> {
@@ -46,6 +55,9 @@ public class NotificationControllerTest {
         });
     }
 
+    /**
+     * Handles notify Not Selected Entrants_saves Expected Content.
+     */
     @Test
     public void notifyNotSelectedEntrants_savesExpectedContent() {
         controller.notifyNotSelectedEntrants(Arrays.asList("u1"), "event-9", "Hack Night", (result, success) -> {
@@ -58,6 +70,9 @@ public class NotificationControllerTest {
         });
     }
 
+    /**
+     * Returns whether g.et Notifications For User_delegates To Repository
+     */
     @Test
     public void getNotificationsForUser_delegatesToRepository() {
         List<NotificationItem> expected = Arrays.asList(
@@ -77,16 +92,25 @@ public class NotificationControllerTest {
         private List<NotificationItem> notificationsToReturn = new ArrayList<>();
         private String lastRequestedUserId;
 
+        /**
+         * Handles fake Notification Repository.
+         */
         private FakeNotificationRepository() {
             super((FirebaseFirestore) null);
         }
 
+        /**
+         * Saves notification.
+         */
         @Override
         public void saveNotification(NotificationItem notification, OnCompleteListener<Boolean> listener) {
             savedNotifications.add(notification);
             listener.onComplete(true, true);
         }
 
+        /**
+         * Returns whether g.et Notifications For User
+         */
         @Override
         public void getNotificationsForUser(String userId, OnCompleteListener<List<NotificationItem>> listener) {
             lastRequestedUserId = userId;

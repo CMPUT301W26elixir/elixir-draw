@@ -14,6 +14,9 @@ public class EventInputValidatorTest {
     private Date registrationEnd;
     private Date eventDate;
 
+    /**
+     * Updates up.
+     */
     @Before
     public void setUp() {
         validator = new EventInputValidator();
@@ -22,6 +25,9 @@ public class EventInputValidatorTest {
         eventDate = new Date(3_000L);
     }
 
+    /**
+     * Returns whether i.s Valid Create Event Input_accepts Valid Input
+     */
     @Test
     public void isValidCreateEventInput_acceptsValidInput() {
         EventSubmissionInput input = new EventSubmissionInput(
@@ -41,6 +47,9 @@ public class EventInputValidatorTest {
         assertTrue(validator.isValid(input));
     }
 
+    /**
+     * Returns whether i.s Valid Create Event Input_rejects Missing Required Fields
+     */
     @Test
     public void isValidCreateEventInput_rejectsMissingRequiredFields() {
         EventSubmissionInput input = new EventSubmissionInput(
@@ -60,6 +69,9 @@ public class EventInputValidatorTest {
         assertFalse(validator.isValid(input));
     }
 
+    /**
+     * Returns whether i.s Valid Update Event Input_rejects Negative Price
+     */
     @Test
     public void isValidUpdateEventInput_rejectsNegativePrice() {
         EventSubmissionInput input = new EventSubmissionInput(
@@ -79,6 +91,9 @@ public class EventInputValidatorTest {
         assertFalse(validator.isValid(input));
     }
 
+    /**
+     * Returns whether i.s Valid Update Event Input_rejects Invalid Participant Count
+     */
     @Test
     public void isValidUpdateEventInput_rejectsInvalidParticipantCount() {
         EventSubmissionInput input = new EventSubmissionInput(
@@ -98,6 +113,9 @@ public class EventInputValidatorTest {
         assertFalse(validator.isValid(input));
     }
 
+    /**
+     * Returns whether i.s Valid Update Event Input_rejects Invalid Date Ordering
+     */
     @Test
     public void isValidUpdateEventInput_rejectsInvalidDateOrdering() {
         EventSubmissionInput input = new EventSubmissionInput(

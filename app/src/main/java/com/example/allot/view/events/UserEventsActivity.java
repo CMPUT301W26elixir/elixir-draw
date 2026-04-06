@@ -301,6 +301,9 @@ public class UserEventsActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Binds co organizer invite section.
+     */
     private void bindCoOrganizerInviteSection(List<EventListItem> items) {
         coOrganizerInvitesContainer.removeAllViews();
 
@@ -362,6 +365,9 @@ public class UserEventsActivity extends AppCompatActivity {
         cardView.setOnClickListener(view -> openEventDetailScreen(eventItem));
     }
 
+    /**
+     * Binds co organizer invite card.
+     */
     private void bindCoOrganizerInviteCard(View cardView, EventListItem eventItem) {
         TextView titleText = cardView.findViewById(R.id.titleText);
         TextView locationText = cardView.findViewById(R.id.locationText);
@@ -377,6 +383,9 @@ public class UserEventsActivity extends AppCompatActivity {
         declineButton.setOnClickListener(view -> handleCoOrganizerInvite(eventItem, false));
     }
 
+    /**
+     * Handles co organizer invite.
+     */
     private void handleCoOrganizerInvite(EventListItem eventItem, boolean isAccepting) {
         if (eventItem == null || TextUtils.isEmpty(eventItem.eventId)) {
             return;
@@ -475,6 +484,9 @@ public class UserEventsActivity extends AppCompatActivity {
         HOSTING
     }
 
+    /**
+     * Handles are All Registered Sections Empty.
+     */
     private boolean areAllRegisteredSectionsEmpty(UserEventsController.RegisteredEventGroups groups) {
         return groups.getInvitedItems().isEmpty()
                 && groups.getCoOrganizerInviteItems().isEmpty()
@@ -484,6 +496,9 @@ public class UserEventsActivity extends AppCompatActivity {
                 && groups.getPastItems().isEmpty();
     }
 
+    /**
+     * Handles are All Hosted Sections Empty.
+     */
     private boolean areAllHostedSectionsEmpty(UserEventsController.HostedEventGroups groups) {
         return groups.getOngoingItems().isEmpty() && groups.getCompletedItems().isEmpty();
     }

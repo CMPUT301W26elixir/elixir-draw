@@ -130,6 +130,9 @@ public class EventRepository {
                 .addOnFailureListener(exception -> listener.onComplete(false, false));
     }
 
+    /**
+     * Builds join waiting list updates.
+     */
     Map<String, Object> buildJoinWaitingListUpdates(String deviceId,
                                                     Double latitude,
                                                     Double longitude,
@@ -143,6 +146,9 @@ public class EventRepository {
         return updates;
     }
 
+    /**
+     * Builds leave waiting list updates.
+     */
     Map<String, Object> buildLeaveWaitingListUpdates(String deviceId) {
         Map<String, Object> updates = new HashMap<>();
         updates.put("waitingList.list", FieldValue.arrayRemove(deviceId));
@@ -616,6 +622,9 @@ public class EventRepository {
                 .addOnFailureListener(exception -> listener.onComplete(false, false));
     }
 
+    /**
+     * Deletes event with cleanup.
+     */
     private void deleteEventWithCleanup(Event event, OnCompleteListener<Boolean> listener) {
         if (event == null) {
             listener.onComplete(false, false);
@@ -658,6 +667,9 @@ public class EventRepository {
                 });
     }
 
+    /**
+     * Deletes poster from storage.
+     */
     private void deletePosterFromStorage(String posterUrl, OnCompleteListener<Boolean> listener) {
         if (posterUrl == null || posterUrl.trim().isEmpty()) {
             listener.onComplete(true, true);
@@ -682,6 +694,9 @@ public class EventRepository {
         }
     }
 
+    /**
+     * Handles commit Event Cleanup Operations.
+     */
     void commitEventCleanupOperations(FirebaseFirestore database,
                                       List<List<CleanupOperation>> batches,
                                       int startIndex,
@@ -706,6 +721,9 @@ public class EventRepository {
         });
     }
 
+    /**
+     * Builds event cleanup operations.
+     */
     static List<CleanupOperation> buildEventCleanupOperations(String eventId, Iterable<UserCleanupTarget> cleanupTargets) {
         List<CleanupOperation> operations = new ArrayList<>();
         for (UserCleanupTarget cleanupTarget : cleanupTargets) {
@@ -714,6 +732,9 @@ public class EventRepository {
         return operations;
     }
 
+    /**
+     * Handles chunk Cleanup Operations.
+     */
     static List<List<CleanupOperation>> chunkCleanupOperations(List<CleanupOperation> operations) {
         List<List<CleanupOperation>> batches = new ArrayList<>();
         for (int i = 0; i < operations.size(); i += MAX_BATCH_OPERATIONS) {
@@ -733,32 +754,53 @@ public class EventRepository {
         private final String documentPath;
         private final String eventId;
 
+        /**
+         * Handles cleanup Operation.
+         */
         private CleanupOperation(Type type, String documentPath, String eventId) {
             this.type = type;
             this.documentPath = documentPath;
             this.eventId = eventId;
         }
 
+        /**
+         * Handles remove Event From User.
+         */
         static CleanupOperation removeEventFromUser(String documentPath, String eventId) {
             return new CleanupOperation(Type.REMOVE_EVENT_FROM_USER, documentPath, eventId);
         }
 
+        /**
+         * Deletes event.
+         */
         static CleanupOperation deleteEvent(String eventId) {
             return new CleanupOperation(Type.DELETE_EVENT, null, eventId);
         }
 
+        /**
+         * Returns whether g.et Type
+         */
         Type getType() {
             return type;
         }
 
+        /**
+         * Returns whether g.et Document Path
+         */
         String getDocumentPath() {
             return documentPath;
         }
 
+        /**
+         * Returns whether g.et Event Id
+         */
         String getEventId() {
             return eventId;
         }
 
+        /**
+         * Handles apply.
+         */
         void apply(WriteBatch batch, FirebaseFirestore database) {
             if (type == Type.REMOVE_EVENT_FROM_USER) {
                 DocumentReference reference = database.document(documentPath);
@@ -784,15 +826,24 @@ public class EventRepository {
             this.userId = userId;
         }
 
+        /**
+         * Returns whether g.et Document Path
+         */
         String getDocumentPath() {
             return documentPath;
         }
 
+        /**
+         * Returns whether g.et User Id
+         */
         String getUserId() {
             return userId;
         }
     }
 
+    /**
+     * Returns whether i.s Blank
+     */
     private boolean isBlank(String value) {
         return value == null || value.trim().isEmpty();
     }

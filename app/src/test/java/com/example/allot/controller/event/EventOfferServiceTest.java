@@ -13,11 +13,17 @@ import org.junit.Test;
 public class EventOfferServiceTest {
     private EventOfferService service;
 
+    /**
+     * Updates up.
+     */
     @Before
     public void setUp() {
         service = new EventOfferService();
     }
 
+    /**
+     * Builds declined offer state_removes declining user from chosen and enrolled.
+     */
     @Test
     public void buildDeclinedOfferState_removesDecliningUserFromChosenAndEnrolled() {
         Event event = buildOpenEvent();
@@ -36,6 +42,9 @@ public class EventOfferServiceTest {
         assertTrue(result.getCancelled().contains("user1"));
     }
 
+    /**
+     * Builds declined offer state_adds replacement only from eligible users.
+     */
     @Test
     public void buildDeclinedOfferState_addsReplacementOnlyFromEligibleUsers() {
         Event event = buildOpenEvent();
@@ -52,6 +61,9 @@ public class EventOfferServiceTest {
         assertEquals("user3", result.getWaitingList().chosen.get(0));
     }
 
+    /**
+     * Builds declined offer state_does not add replacement when no candidates exist.
+     */
     @Test
     public void buildDeclinedOfferState_doesNotAddReplacementWhenNoCandidatesExist() {
         Event event = buildOpenEvent();
@@ -66,6 +78,9 @@ public class EventOfferServiceTest {
         assertTrue(result.getWaitingList().chosen.isEmpty());
     }
 
+    /**
+     * Builds open event.
+     */
     private Event buildOpenEvent() {
         Event event = new Event();
         event.setStatus("open");

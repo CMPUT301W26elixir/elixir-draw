@@ -13,11 +13,17 @@ import org.junit.Test;
 public class EventDetailViewServiceTest {
     private EventDetailViewService service;
 
+    /**
+     * Updates up.
+     */
     @Before
     public void setUp() {
         service = new EventDetailViewService();
     }
 
+    /**
+     * Builds footer state_returns manage footer for organizer.
+     */
     @Test
     public void buildFooterState_returnsManageFooterForOrganizer() {
         EventActionState state = new EventActionState(
@@ -37,6 +43,9 @@ public class EventDetailViewServiceTest {
         assertTrue(footerState.isButtonEnabled());
     }
 
+    /**
+     * Builds footer state_returns offer footer for selected user.
+     */
     @Test
     public void buildFooterState_returnsOfferFooterForSelectedUser() {
         EventActionState state = new EventActionState(
@@ -56,6 +65,9 @@ public class EventDetailViewServiceTest {
         assertTrue(service.hasActiveOffer(state));
     }
 
+    /**
+     * Builds footer state_returns replacement footer state.
+     */
     @Test
     public void buildFooterState_returnsReplacementFooterState() {
         EventActionState state = new EventActionState(
@@ -74,6 +86,9 @@ public class EventDetailViewServiceTest {
         assertFalse(footerState.shouldShowEntrantCount());
     }
 
+    /**
+     * Builds footer state_returns leave waitlist footer state.
+     */
     @Test
     public void buildFooterState_returnsLeaveWaitlistFooterState() {
         EventActionState state = new EventActionState(
@@ -92,6 +107,9 @@ public class EventDetailViewServiceTest {
         assertTrue(service.isOnWaitingList(state));
     }
 
+    /**
+     * Returns whether g.et Entrant Count_returns Waiting List Size
+     */
     @Test
     public void getEntrantCount_returnsWaitingListSize() {
         Event event = buildEvent();
@@ -101,6 +119,9 @@ public class EventDetailViewServiceTest {
         assertEquals(2, service.getEntrantCount(event));
     }
 
+    /**
+     * Returns whether g.et Selection Criteria Count_prefers Capacity Then Limit
+     */
     @Test
     public void getSelectionCriteriaCount_prefersCapacityThenLimit() {
         Event event = buildEvent();
@@ -113,6 +134,9 @@ public class EventDetailViewServiceTest {
         assertEquals(3, service.getSelectionCriteriaCount(event));
     }
 
+    /**
+     * Builds footer state_returns disabled join defaults when state missing.
+     */
     @Test
     public void buildFooterState_returnsDisabledJoinDefaultsWhenStateMissing() {
         EventDetailViewService.FooterState footerState = service.buildFooterState(null);
@@ -121,6 +145,9 @@ public class EventDetailViewServiceTest {
         assertEquals(R.string.event_detail_join_waiting_list, footerState.getButtonTextRes());
     }
 
+    /**
+     * Builds event.
+     */
     private Event buildEvent() {
         Event event = new Event();
         event.setWaitingList(new WaitingList());

@@ -155,6 +155,9 @@ public class ProfileActivity extends AppCompatActivity {
         deleteProfileText = findViewById(R.id.deleteProfileText);
     }
 
+    /**
+     * Updates up profile photo picker.
+     */
     private void setupProfilePhotoPicker() {
         profileAvatarContainer.setOnClickListener(view -> {
             if (isDeleting || isUploadingPhoto) {
@@ -164,6 +167,9 @@ public class ProfileActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Opens profile photo cropper.
+     */
     private void openProfilePhotoCropper(Uri sourceUri) {
         if (sourceUri == null) {
             return;
@@ -244,6 +250,9 @@ public class ProfileActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Loads profile photo.
+     */
     private void loadProfilePhoto() {
         userController.loadCurrentUser((user, success) -> {
             if (!success || user == null) {
@@ -256,6 +265,9 @@ public class ProfileActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Handles upload Profile Photo.
+     */
     private void uploadProfilePhoto(Uri photoUri) {
         if (photoUri == null || isUploadingPhoto) {
             return;
@@ -276,6 +288,9 @@ public class ProfileActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Handles render Profile Photo.
+     */
     private void renderProfilePhoto(String profilePhotoUrl) {
         if (TextUtils.isEmpty(profilePhotoUrl)) {
             profileAvatarPlaceholder.setVisibility(View.VISIBLE);
@@ -517,10 +532,16 @@ public class ProfileActivity extends AppCompatActivity {
         updateSaveButtonState();
     }
 
+    /**
+     * Returns whether i.s Ui Test Profile Mode
+     */
     private boolean isUiTestProfileMode() {
         return getIntent().getBooleanExtra(EXTRA_UI_TEST_PROFILE_MODE, false);
     }
 
+    /**
+     * Builds ui test profile snapshot.
+     */
     private ProfileFormSnapshot buildUiTestProfileSnapshot() {
         return new ProfileFormSnapshot(
                 getIntent().getStringExtra(EXTRA_UI_TEST_FIRST_NAME),

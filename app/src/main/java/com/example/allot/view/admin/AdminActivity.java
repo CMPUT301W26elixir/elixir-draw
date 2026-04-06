@@ -260,10 +260,16 @@ public class AdminActivity extends AppCompatActivity {
         backButton.setOnClickListener(view -> finish());
     }
 
+    /**
+     * Returns whether i.s Ui Test Mode
+     */
     private boolean isUiTestMode() {
         return getIntent().getBooleanExtra(EXTRA_UI_TEST_MODE, false);
     }
 
+    /**
+     * Handles seed Ui Test Data.
+     */
     private void seedUiTestData() {
         eventsList.clear();
         profilesList.clear();
@@ -895,6 +901,9 @@ public class AdminActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Handles remove Event From List.
+     */
     private void removeEventFromList(int position) {
         if (position < 0 || position >= eventsList.size()) {
             return;
@@ -908,6 +917,9 @@ public class AdminActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Handles remove Profile From List.
+     */
     private void removeProfileFromList(User user, int position) {
         if (position >= 0 && position < profilesList.size()) {
             profilesList.remove(position);

@@ -17,6 +17,9 @@ public class FcmNotificationSender {
     // TODO: Replace with your actual Server Key from Firebase Console
     private static final String SERVER_KEY = "YOUR_SERVER_KEY_HERE";
 
+    /**
+     * Handles send Push Notification.
+     */
     public void sendPushNotification(String userId, String title, String body) {
         if (userId == null || userId.isEmpty()) return;
 
@@ -33,6 +36,9 @@ public class FcmNotificationSender {
                 .addOnFailureListener(e -> Log.e(TAG, "Error fetching user for FCM", e));
     }
 
+    /**
+     * Handles trigger Fcm Request.
+     */
     private void triggerFcmRequest(String token, String title, String body) {
         new Thread(() -> {
             try {

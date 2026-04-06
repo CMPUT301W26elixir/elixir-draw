@@ -23,10 +23,16 @@ public class EventPosterController {
     private final FirebaseStorage storage;
     private String lastErrorMessage;
 
+    /**
+     * Creates a new EventPosterController instance.
+     */
     public EventPosterController() {
         this(new EventRepository(), FirebaseStorage.getInstance());
     }
 
+    /**
+     * Creates a new EventPosterController instance.
+     */
     public EventPosterController(EventRepository eventRepository, FirebaseStorage storage) {
         this.eventRepository = eventRepository;
         this.storage = storage;
@@ -70,6 +76,9 @@ public class EventPosterController {
         });
     }
 
+    /**
+     * Handles fetch Download Url With Retry.
+     */
     private void fetchDownloadUrlWithRetry(StorageReference posterRef,
                                            String eventId,
                                            String previousPosterUrl,
@@ -120,6 +129,9 @@ public class EventPosterController {
                 });
     }
 
+    /**
+     * Deletes previous poster if needed.
+     */
     private void deletePreviousPosterIfNeeded(String previousPosterUrl, StorageReference currentPosterRef) {
         if (isBlank(previousPosterUrl)) {
             return;
@@ -181,6 +193,9 @@ public class EventPosterController {
         }
     }
 
+    /**
+     * Returns whether i.s Object Not Found
+     */
     private boolean isObjectNotFound(Exception exception) {
         if (!(exception instanceof StorageException)) {
             return false;
@@ -237,10 +252,16 @@ public class EventPosterController {
         });
     }
 
+    /**
+     * Returns whether g.et Last Error Message
+     */
     public String getLastErrorMessage() {
         return lastErrorMessage;
     }
 
+    /**
+     * Returns whether i.s Blank
+     */
     private boolean isBlank(String value) {
         return value == null || value.trim().isEmpty();
     }

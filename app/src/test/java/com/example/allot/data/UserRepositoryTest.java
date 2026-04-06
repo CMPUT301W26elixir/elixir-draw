@@ -6,6 +6,9 @@ import java.util.ArrayList;
 import java.util.List;
 import org.junit.Test;
 public class UserRepositoryTest {
+    /**
+     * Builds cleanup operations_deletes organizer events and removes user from others.
+     */
     @Test
     public void buildCleanupOperations_deletesOrganizerEventsAndRemovesUserFromOthers() {
         List<UserRepository.EventCleanupTarget> cleanupTargets = new ArrayList<>();
@@ -22,6 +25,9 @@ public class UserRepositoryTest {
         assertEquals("device-1", operations.get(1).getDeviceId());
     }
 
+    /**
+     * Handles chunk Cleanup Operations_splits Large Operation Lists Into Firestore Sized Batches.
+     */
     @Test
     public void chunkCleanupOperations_splitsLargeOperationListsIntoFirestoreSizedBatches() {
         List<UserRepository.CleanupOperation> operations = new ArrayList<>();

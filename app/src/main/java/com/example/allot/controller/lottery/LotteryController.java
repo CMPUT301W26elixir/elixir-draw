@@ -30,10 +30,16 @@ public class LotteryController {
     private final SimpleDateFormat drawDateFormat = new SimpleDateFormat("MMMM d, yyyy", Locale.getDefault());
     private final NotificationController notificationController;
 
+    /**
+     * Creates a new LotteryController instance.
+     */
     public LotteryController(android.content.Context context) {
         this(new EventRepository(), new UserController(context), new LotteryDrawService(), new LotteryInputValidator());
     }
 
+    /**
+     * Creates a new LotteryController instance.
+     */
     LotteryController(EventRepository eventRepository,
                       UserController userController,
                       LotteryDrawService lotteryDrawService,
@@ -41,6 +47,9 @@ public class LotteryController {
         this(eventRepository, userController, lotteryDrawService, lotteryInputValidator, new NotificationController());
     }
 
+    /**
+     * Creates a new LotteryController instance.
+     */
     LotteryController(EventRepository eventRepository,
                       UserController userController,
                       LotteryDrawService lotteryDrawService,
@@ -181,6 +190,9 @@ public class LotteryController {
         });
     }
 
+    /**
+     * Builds content state.
+     */
     private RunLotteryData buildContentState(Event event, List<LotteryEntrantItem> items) {
         Date effectiveDrawDate = event.getDrawDate() != null
                 ? event.getDrawDate()
@@ -200,6 +212,9 @@ public class LotteryController {
         );
     }
 
+    /**
+     * Builds entrant items.
+     */
     private void buildEntrantItems(List<String> entrantIds, java.util.function.Consumer<List<LotteryEntrantItem>> consumer) {
         List<LotteryEntrantItem> items = new ArrayList<>();
         if (entrantIds == null || entrantIds.isEmpty()) {
@@ -210,6 +225,9 @@ public class LotteryController {
         loadEntrantItem(entrantIds, 0, items, consumer);
     }
 
+    /**
+     * Loads entrant item.
+     */
     private void loadEntrantItem(List<String> entrantIds,
                                  int index,
                                  List<LotteryEntrantItem> items,
@@ -236,6 +254,9 @@ public class LotteryController {
         });
     }
 
+    /**
+     * Returns whether i.s Blank
+     */
     private boolean isBlank(String value) {
         return value == null || value.trim().isEmpty();
     }

@@ -42,6 +42,9 @@ public class AdminProfileListAdapter extends RecyclerView.Adapter<AdminProfileLi
         this.onDeleteClickListener = onDeleteClickListener;
     }
 
+    /**
+     * Handles on Create View Holder.
+     */
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -50,12 +53,18 @@ public class AdminProfileListAdapter extends RecyclerView.Adapter<AdminProfileLi
         return new ViewHolder(view);
     }
 
+    /**
+     * Handles on Bind View Holder.
+     */
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         User user = profiles.get(position);
         holder.bind(user, position, onDeleteClickListener);
     }
 
+    /**
+     * Returns whether g.et Item Count
+     */
     @Override
     public int getItemCount() {
         return profiles.size();

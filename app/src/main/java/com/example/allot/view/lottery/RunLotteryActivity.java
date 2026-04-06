@@ -92,6 +92,9 @@ public class RunLotteryActivity extends AppCompatActivity {
      */
     private void setupListeners() {
         SimpleTextWatcher dirtyWatcher = new SimpleTextWatcher() {
+            /**
+             * Handles after Text Changed.
+             */
             @Override
             public void afterTextChanged(Editable editable) {
                 updateActionState();

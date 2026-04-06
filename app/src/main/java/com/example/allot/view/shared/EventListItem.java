@@ -71,38 +71,65 @@ public class EventListItem {
         );
     }
 
+    /**
+     * Returns whether g.et Event Id
+     */
     public String getEventId() {
         return eventId;
     }
 
+    /**
+     * Returns whether g.et Title
+     */
     public String getTitle() {
         return title;
     }
 
+    /**
+     * Returns whether g.et Street
+     */
     public String getStreet() {
         return street;
     }
 
+    /**
+     * Returns whether g.et Date
+     */
     public String getDate() {
         return date;
     }
 
+    /**
+     * Returns whether g.et Price
+     */
     public String getPrice() {
         return price;
     }
 
+    /**
+     * Returns whether g.et Days Left
+     */
     public String getDaysLeft() {
         return daysLeft;
     }
 
+    /**
+     * Returns whether g.et Category
+     */
     public String getCategory() {
         return category;
     }
 
+    /**
+     * Returns whether g.et Poster Url
+     */
     public String getPosterUrl() {
         return posterUrl;
     }
 
+    /**
+     * Returns whether i.s Saved
+     */
     public boolean isSaved() {
         return isSaved;
     }

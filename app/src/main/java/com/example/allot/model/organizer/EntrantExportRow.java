@@ -21,14 +21,23 @@ public class EntrantExportRow {
         this.phone = phone;
     }
 
+    /**
+     * Returns whether g.et Name
+     */
     public String getName() {
         return name;
     }
 
+    /**
+     * Returns whether g.et Email
+     */
     public String getEmail() {
         return email;
     }
 
+    /**
+     * Returns whether g.et Phone
+     */
     public String getPhone() {
         return phone;
     }

@@ -10,6 +10,9 @@ import java.util.Map;
 import org.junit.Test;
 
 public class EventRepositoryTest {
+    /**
+     * Builds join waiting list updates_adds waitlist and join location entries.
+     */
     @Test
     public void buildJoinWaitingListUpdates_addsWaitlistAndJoinLocationEntries() {
         EventRepository repository = new EventRepository(null);
@@ -26,6 +29,9 @@ public class EventRepositoryTest {
         assertEquals(joinedAt, joinLocation.getJoinedAt());
     }
 
+    /**
+     * Builds leave waiting list updates_removes waitlist and join location entries.
+     */
     @Test
     public void buildLeaveWaitingListUpdates_removesWaitlistAndJoinLocationEntries() {
         EventRepository repository = new EventRepository(null);
@@ -38,6 +44,9 @@ public class EventRepositoryTest {
         assertNotNull(updates.get("waitingList.joinLocations.device-1"));
     }
 
+    /**
+     * Builds join waiting list updates_skips join location when coordinates missing.
+     */
     @Test
     public void buildJoinWaitingListUpdates_skipsJoinLocationWhenCoordinatesMissing() {
         EventRepository repository = new EventRepository(null);

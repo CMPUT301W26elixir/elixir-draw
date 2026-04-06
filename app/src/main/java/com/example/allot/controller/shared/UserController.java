@@ -25,6 +25,9 @@ public class UserController {
         this(new UserRepository(), new DeviceSessionManager(context));
     }
 
+    /**
+     * Creates a new UserController instance.
+     */
     public UserController(UserRepository userRepository, DeviceSessionManager deviceSessionManager) {
         this.userRepository = userRepository;
         this.deviceSessionManager = deviceSessionManager;
@@ -184,9 +187,15 @@ public class UserController {
     }
 
 
+    /**
+     * Returns whether g.et Current Device Id
+     */
     public String getCurrentDeviceId() {
         return deviceSessionManager.getCurrentDeviceId();
     }
+    /**
+     * Returns whether i.s New Device Id
+     */
     public boolean isNewDeviceId() {
         return deviceSessionManager.isNewDeviceId();
     }

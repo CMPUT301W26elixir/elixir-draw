@@ -20,12 +20,18 @@ public class ExampleInstrumentedTest {
     private final EventQrCodeService qrCodeService = new EventQrCodeService();
     private final ScanDecoderService scanDecoderService = new ScanDecoderService();
 
+    /**
+     * Handles use App Context.
+     */
     @Test
     public void useAppContext() {
         Context appContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
         assertEquals("com.example.allot", appContext.getPackageName());
     }
 
+    /**
+     * Handles generate Qr_returns Square Bitmap.
+     */
     @Test
     public void generateQr_returnsSquareBitmap() {
         Bitmap bitmap = qrCodeService.generate("event-123", 128);
@@ -35,16 +41,25 @@ public class ExampleInstrumentedTest {
         assertEquals(128, bitmap.getHeight());
     }
 
+    /**
+     * Handles generate Qr_rejects Blank Payload.
+     */
     @Test(expected = IllegalArgumentException.class)
     public void generateQr_rejectsBlankPayload() {
         qrCodeService.generate("   ", 128);
     }
 
+    /**
+     * Handles generate Qr_rejects Invalid Size.
+     */
     @Test(expected = IllegalArgumentException.class)
     public void generateQr_rejectsInvalidSize() {
         qrCodeService.generate("event-123", 0);
     }
 
+    /**
+     * Handles decode Bitmap_returns Event Id From Generated Qr.
+     */
     @Test
     public void decodeBitmap_returnsEventIdFromGeneratedQr() {
         Bitmap bitmap = qrCodeService.generate("event-123", 256);
@@ -52,6 +67,9 @@ public class ExampleInstrumentedTest {
         assertEquals("event-123", scanDecoderService.decodeBitmap(bitmap));
     }
 
+    /**
+     * Handles decode Bitmap_returns Null When No Qr Is Present.
+     */
     @Test
     public void decodeBitmap_returnsNullWhenNoQrIsPresent() {
         Bitmap bitmap = Bitmap.createBitmap(32, 32, Bitmap.Config.ARGB_8888);

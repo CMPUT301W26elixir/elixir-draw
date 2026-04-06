@@ -7,6 +7,9 @@ import java.util.Date;
 import org.junit.Test;
 
 public class WaitingListTest {
+    /**
+     * Handles join Locations_defaults To Empty Map.
+     */
     @Test
     public void joinLocations_defaultsToEmptyMap() {
         WaitingList waitingList = new WaitingList();
@@ -14,6 +17,9 @@ public class WaitingListTest {
         assertNotNull(waitingList.getJoinLocations());
     }
 
+    /**
+     * Handles join Locations_can Store And Read Entries By Device Id.
+     */
     @Test
     public void joinLocations_canStoreAndReadEntriesByDeviceId() {
         WaitingList waitingList = new WaitingList();

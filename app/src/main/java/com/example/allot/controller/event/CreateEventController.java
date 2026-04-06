@@ -20,6 +20,9 @@ public class CreateEventController {
     private final DeviceSessionManager deviceSessionManager;
     private final EventLocationGeocodingService geocodingService;
 
+    /**
+     * Creates a new CreateEventController instance.
+     */
     public CreateEventController(Context context) {
         this(
                 new EventRepository(),
@@ -30,6 +33,9 @@ public class CreateEventController {
         );
     }
 
+    /**
+     * Creates a new CreateEventController instance.
+     */
     CreateEventController(EventRepository eventRepository,
                           EventFormService eventFormService,
                           EventInputValidator eventInputValidator,
@@ -87,10 +93,16 @@ public class CreateEventController {
         });
     }
 
+    /**
+     * Handles normalize Nullable.
+     */
     private String normalizeNullable(String value) {
         return value == null ? null : value.trim();
     }
 
+    /**
+     * Handles apply Resolved Coordinates.
+     */
     private void applyResolvedCoordinates(Event event, String location) {
         EventLocationCoordinates coordinates = geocodingService == null ? null : geocodingService.geocode(location);
         if (coordinates == null) {

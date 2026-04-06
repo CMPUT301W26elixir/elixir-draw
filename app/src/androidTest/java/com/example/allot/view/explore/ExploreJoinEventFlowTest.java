@@ -22,11 +22,17 @@ import org.junit.runner.RunWith;
 @RunWith(AndroidJUnit4.class)
 public class ExploreJoinEventFlowTest {
 
+    /**
+     * Handles disable Animations.
+     */
     @Before
     public void disableAnimations() {
         SystemAnimations.disableAll();
     }
 
+    /**
+     * Builds intent.
+     */
     private Intent buildIntent() {
         Intent intent = new Intent(ApplicationProvider.getApplicationContext(), ExploreActivity.class);
         intent.putExtra(ExploreActivity.EXTRA_UI_TEST_EVENT_ID, "ui-test-event-1");
@@ -41,6 +47,9 @@ public class ExploreJoinEventFlowTest {
         return intent;
     }
 
+    /**
+     * Handles explore To Event Detail To Join Dialog_flow Works.
+     */
     @Test
     public void exploreToEventDetailToJoinDialog_flowWorks() {
         try (ActivityScenario<ExploreActivity> scenario = ActivityScenario.launch(buildIntent())) {

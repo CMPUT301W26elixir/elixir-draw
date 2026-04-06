@@ -19,6 +19,9 @@ public class EventDetailControllerTest {
     private FakeUserController userController;
     private EventDetailController controller;
 
+    /**
+     * Updates up.
+     */
     @Before
     public void setUp() {
         eventRepository = new FakeEventRepository();
@@ -31,6 +34,9 @@ public class EventDetailControllerTest {
         );
     }
 
+    /**
+     * Loads event action state_returns manage action for organizer.
+     */
     @Test
     public void loadEventActionState_returnsManageActionForOrganizer() {
         Event event = buildEvent();
@@ -44,6 +50,9 @@ public class EventDetailControllerTest {
         });
     }
 
+    /**
+     * Handles join Waiting List_forwards Location And Returns Success Message When Repository Succeeds.
+     */
     @Test
     public void joinWaitingList_forwardsLocationAndReturnsSuccessMessageWhenRepositorySucceeds() {
         eventRepository.joinWaitingListSuccess = true;
@@ -62,6 +71,9 @@ public class EventDetailControllerTest {
         });
     }
 
+    /**
+     * Handles leave Waiting List_returns Success Message When Repository Succeeds.
+     */
     @Test
     public void leaveWaitingList_returnsSuccessMessageWhenRepositorySucceeds() {
         eventRepository.leaveWaitingListSuccess = true;
@@ -73,6 +85,9 @@ public class EventDetailControllerTest {
         });
     }
 
+    /**
+     * Handles decline Offer_returns Success Message When Repository Succeeds.
+     */
     @Test
     public void declineOffer_returnsSuccessMessageWhenRepositorySucceeds() {
         eventRepository.declineOfferSuccess = true;
@@ -84,6 +99,9 @@ public class EventDetailControllerTest {
         });
     }
 
+    /**
+     * Handles decline Offer_returns Failure Message When Repository Fails.
+     */
     @Test
     public void declineOffer_returnsFailureMessageWhenRepositoryFails() {
         eventRepository.declineOfferSuccess = false;
@@ -95,6 +113,9 @@ public class EventDetailControllerTest {
         });
     }
 
+    /**
+     * Builds event.
+     */
     private Event buildEvent() {
         Event event = new Event();
         event.setEventId("event-1");
@@ -114,6 +135,9 @@ public class EventDetailControllerTest {
     }
 
     private static class FakeEventRepository extends EventRepository {
+        /**
+         * Handles fake Event Repository.
+         */
         private FakeEventRepository() {
             super((com.google.firebase.firestore.FirebaseFirestore) null);
         }
@@ -128,11 +152,17 @@ public class EventDetailControllerTest {
         private Double joinLongitude;
         private Date joinedAt;
 
+        /**
+         * Returns whether g.et Event By Id
+         */
         @Override
         public void getEventById(String eventId, com.example.allot.common.OnCompleteListener<Event> listener) {
             listener.onComplete(event, event != null);
         }
 
+        /**
+         * Handles join Waiting List.
+         */
         @Override
         public void joinWaitingList(String eventId,
                                     String deviceId,
@@ -148,11 +178,17 @@ public class EventDetailControllerTest {
             listener.onComplete(joinWaitingListSuccess, joinWaitingListSuccess);
         }
 
+        /**
+         * Handles leave Waiting List.
+         */
         @Override
         public void leaveWaitingList(String eventId, String deviceId, com.example.allot.common.OnCompleteListener<Boolean> listener) {
             listener.onComplete(leaveWaitingListSuccess, leaveWaitingListSuccess);
         }
 
+        /**
+         * Handles decline Offer.
+         */
         @Override
         public void declineOffer(String eventId, String deviceId, com.example.allot.common.OnCompleteListener<Boolean> listener) {
             listener.onComplete(declineOfferSuccess, declineOfferSuccess);
@@ -160,15 +196,24 @@ public class EventDetailControllerTest {
     }
 
     private static class FakeUserController extends UserController {
+        /**
+         * Handles fake User Controller.
+         */
         private FakeUserController() {
             super(null, new DeviceSessionManager(new FakeDeviceSessionStore("device-1")));
         }
 
+        /**
+         * Returns whether g.et Current Device Id
+         */
         @Override
         public String getCurrentDeviceId() {
             return "device-1";
         }
 
+        /**
+         * Returns whether g.et User By Device Id
+         */
         @Override
         public void getUserByDeviceId(String deviceId, com.example.allot.common.OnCompleteListener<com.example.allot.model.profile.User> listener) {
             com.example.allot.model.profile.User user = new com.example.allot.model.profile.User();
@@ -181,15 +226,24 @@ public class EventDetailControllerTest {
     private static class FakeDeviceSessionStore implements DeviceSessionManager.DeviceSessionStore {
         private final String deviceId;
 
+        /**
+         * Handles fake Device Session Store.
+         */
         private FakeDeviceSessionStore(String deviceId) {
             this.deviceId = deviceId;
         }
 
+        /**
+         * Returns whether g.et Device Id
+         */
         @Override
         public String getDeviceId() {
             return deviceId;
         }
 
+        /**
+         * Saves device id.
+         */
         @Override
         public void saveDeviceId(String deviceId) {
         }

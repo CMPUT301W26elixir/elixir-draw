@@ -13,11 +13,17 @@ import org.junit.Test;
 public class EventFormServiceTest {
     private EventFormService service;
 
+    /**
+     * Updates up.
+     */
     @Before
     public void setUp() {
         service = new EventFormService();
     }
 
+    /**
+     * Builds create event input_returns valid input for good form.
+     */
     @Test
     public void buildCreateEventInput_returnsValidInputForGoodForm() {
         AppResult<EventSubmissionInput> result = service.buildCreateEventInput(buildValidFormData());
@@ -28,6 +34,9 @@ public class EventFormServiceTest {
         assertEquals(Integer.valueOf(25), result.getData().getParticipants());
     }
 
+    /**
+     * Builds update event input_fails when required fields missing.
+     */
     @Test
     public void buildUpdateEventInput_failsWhenRequiredFieldsMissing() {
         EventFormData formData = new EventFormData(
@@ -54,6 +63,9 @@ public class EventFormServiceTest {
         assertEquals(EventFormService.ERROR_REQUIRED, result.getMessage());
     }
 
+    /**
+     * Builds update event input_fails for invalid date.
+     */
     @Test
     public void buildUpdateEventInput_failsForInvalidDate() {
         EventFormData formData = new EventFormData(
@@ -80,6 +92,9 @@ public class EventFormServiceTest {
         assertEquals(EventFormService.ERROR_DATE, result.getMessage());
     }
 
+    /**
+     * Builds update event input_fails for invalid price.
+     */
     @Test
     public void buildUpdateEventInput_failsForInvalidPrice() {
         EventFormData formData = new EventFormData(
@@ -106,6 +121,9 @@ public class EventFormServiceTest {
         assertEquals(EventFormService.ERROR_PRICE, result.getMessage());
     }
 
+    /**
+     * Builds update event input_fails for invalid participants.
+     */
     @Test
     public void buildUpdateEventInput_failsForInvalidParticipants() {
         EventFormData formData = new EventFormData(
@@ -132,6 +150,9 @@ public class EventFormServiceTest {
         assertEquals(EventFormService.ERROR_PARTICIPANTS, result.getMessage());
     }
 
+    /**
+     * Builds update event input_fails for invalid date ordering.
+     */
     @Test
     public void buildUpdateEventInput_failsForInvalidDateOrdering() {
         EventFormData formData = new EventFormData(
@@ -158,6 +179,9 @@ public class EventFormServiceTest {
         assertEquals(EventFormService.ERROR_ORDER, result.getMessage());
     }
 
+    /**
+     * Builds valid form data.
+     */
     private EventFormData buildValidFormData() {
         return new EventFormData(
                 "Sample Event",

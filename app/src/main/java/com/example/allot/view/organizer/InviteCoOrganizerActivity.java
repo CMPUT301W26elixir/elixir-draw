@@ -35,6 +35,9 @@ public class InviteCoOrganizerActivity extends AppCompatActivity {
     private TextView emptyText;
     private ProgressBar loadingIndicator;
 
+    /**
+     * Handles on Create.
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -49,6 +52,9 @@ public class InviteCoOrganizerActivity extends AppCompatActivity {
         loadEvent();
     }
 
+    /**
+     * Binds views.
+     */
     private void bindViews() {
         searchInput = findViewById(R.id.searchInput);
         searchButton = findViewById(R.id.searchButton);
@@ -57,15 +63,24 @@ public class InviteCoOrganizerActivity extends AppCompatActivity {
         loadingIndicator = findViewById(R.id.loadingIndicator);
     }
 
+    /**
+     * Updates up header.
+     */
     private void setupHeader() {
         ImageButton backButton = findViewById(R.id.backButton);
         backButton.setOnClickListener(view -> getOnBackPressedDispatcher().onBackPressed());
     }
 
+    /**
+     * Updates up listeners.
+     */
     private void setupListeners() {
         searchButton.setOnClickListener(view -> performSearch());
     }
 
+    /**
+     * Loads event.
+     */
     private void loadEvent() {
         if (getIntent().getBooleanExtra(EXTRA_UI_TEST_MODE, false)) {
             currentEvent = new Event();
@@ -98,6 +113,9 @@ public class InviteCoOrganizerActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Handles perform Search.
+     */
     private void performSearch() {
         String query = searchInput.getText().toString().trim();
         if (query.isEmpty()) {
@@ -117,6 +135,9 @@ public class InviteCoOrganizerActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Filters candidates.
+     */
     private List<User> filterCandidates(List<User> users) {
         List<User> filtered = new ArrayList<>();
         if (users == null) {
@@ -149,6 +170,9 @@ public class InviteCoOrganizerActivity extends AppCompatActivity {
         return filtered;
     }
 
+    /**
+     * Binds results.
+     */
     private void bindResults(List<User> users) {
         resultsContainer.removeAllViews();
 
@@ -172,6 +196,9 @@ public class InviteCoOrganizerActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Handles invite User.
+     */
     private void inviteUser(User user, TextView inviteButton) {
         if (user == null || TextUtils.isEmpty(currentEventId)) {
             return;
@@ -192,6 +219,9 @@ public class InviteCoOrganizerActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Handles resolve Contact.
+     */
     private String resolveContact(User user) {
         if (user == null) {
             return "";
@@ -205,10 +235,16 @@ public class InviteCoOrganizerActivity extends AppCompatActivity {
         return "";
     }
 
+    /**
+     * Updates loading.
+     */
     private void setLoading(boolean isLoading) {
         loadingIndicator.setVisibility(isLoading ? View.VISIBLE : View.GONE);
     }
 
+    /**
+     * Shows empty state.
+     */
     private void showEmptyState(boolean show) {
         emptyText.setVisibility(show ? View.VISIBLE : View.GONE);
     }

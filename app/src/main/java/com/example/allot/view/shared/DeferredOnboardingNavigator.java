@@ -35,15 +35,24 @@ public final class DeferredOnboardingNavigator {
     public static final String ACTION_AUTO_JOIN = "auto_join";
     public static final String ACTION_AUTO_SAVE = "auto_save";
 
+    /**
+     * Creates a new DeferredOnboardingNavigator instance.
+     */
     private DeferredOnboardingNavigator() {
     }
 
+    /**
+     * Creates intent.
+     */
     public static Intent createIntent(Context context, String destination) {
         Intent intent = new Intent(context, NameActivity.class);
         intent.putExtra(EXTRA_POST_ONBOARDING_DESTINATION, destination);
         return intent;
     }
 
+    /**
+     * Creates my events intent.
+     */
     public static Intent createMyEventsIntent(Context context, String initialTab) {
         Intent intent = createIntent(context, DESTINATION_MY_EVENTS);
         if (initialTab != null) {
@@ -52,6 +61,9 @@ public final class DeferredOnboardingNavigator {
         return intent;
     }
 
+    /**
+     * Creates event action intent.
+     */
     public static Intent createEventActionIntent(Context context,
                                                  String eventId,
                                                  String title,
@@ -73,6 +85,9 @@ public final class DeferredOnboardingNavigator {
         return intent;
     }
 
+    /**
+     * Handles copy Deferred Extras.
+     */
     public static void copyDeferredExtras(Intent source, Intent target) {
         if (source == null || target == null) {
             return;
@@ -91,6 +106,9 @@ public final class DeferredOnboardingNavigator {
         copyBooleanExtra(source, target, EXTRA_UI_TEST_COMPLETE_DEFERRED_ONBOARDING);
     }
 
+    /**
+     * Builds post onboarding intent.
+     */
     public static Intent buildPostOnboardingIntent(Context context, Intent sourceIntent) {
         String destination = sourceIntent == null
                 ? DESTINATION_EXPLORE
@@ -127,6 +145,9 @@ public final class DeferredOnboardingNavigator {
         return new Intent(context, ExploreActivity.class);
     }
 
+    /**
+     * Opens onboarding.
+     */
     public static void openOnboarding(Activity activity, Intent intent, boolean finishCurrent) {
         if (activity == null || intent == null) {
             return;
@@ -139,12 +160,18 @@ public final class DeferredOnboardingNavigator {
         }
     }
 
+    /**
+     * Handles copy String Extra.
+     */
     private static void copyStringExtra(Intent source, Intent target, String key) {
         if (source.hasExtra(key)) {
             target.putExtra(key, source.getStringExtra(key));
         }
     }
 
+    /**
+     * Handles copy Boolean Extra.
+     */
     private static void copyBooleanExtra(Intent source, Intent target, String key) {
         if (source.hasExtra(key)) {
             target.putExtra(key, source.getBooleanExtra(key, false));

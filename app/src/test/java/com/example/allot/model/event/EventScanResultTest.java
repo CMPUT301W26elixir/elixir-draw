@@ -8,6 +8,9 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 public class EventScanResultTest {
+    /**
+     * Opens event_should open when event present.
+     */
     @Test
     public void openEvent_shouldOpenWhenEventPresent() {
         Event event = new Event();
@@ -21,6 +24,9 @@ public class EventScanResultTest {
         assertTrue(result.shouldOpenEvent());
     }
 
+    /**
+     * Handles invalid And Error Results_do Not Open Event.
+     */
     @Test
     public void invalidAndErrorResults_doNotOpenEvent() {
         EventScanResult invalid = EventScanResult.invalidPayload("bad", 1);

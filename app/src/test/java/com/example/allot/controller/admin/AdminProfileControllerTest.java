@@ -18,6 +18,9 @@ public class AdminProfileControllerTest {
     private FakeUserController userController;
     private AdminProfileController controller;
 
+    /**
+     * Updates up.
+     */
     @Before
     public void setUp() {
         userRepository = new FakeUserRepository();
@@ -25,6 +28,9 @@ public class AdminProfileControllerTest {
         controller = new AdminProfileController(userRepository, userController);
     }
 
+    /**
+     * Loads all profiles_requires admin and delegates when authorized.
+     */
     @Test
     public void loadAllProfiles_requiresAdminAndDelegatesWhenAuthorized() {
         userController.isAdmin = false;
@@ -43,6 +49,9 @@ public class AdminProfileControllerTest {
         });
     }
 
+    /**
+     * Loads all profiles_returns failure when admin lookup fails.
+     */
     @Test
     public void loadAllProfiles_returnsFailureWhenAdminLookupFails() {
         userController.adminLookupSuccess = false;
@@ -54,6 +63,9 @@ public class AdminProfileControllerTest {
         });
     }
 
+    /**
+     * Loads all profiles_propagates repository failure.
+     */
     @Test
     public void loadAllProfiles_propagatesRepositoryFailure() {
         userController.isAdmin = true;
@@ -65,6 +77,9 @@ public class AdminProfileControllerTest {
         });
     }
 
+    /**
+     * Deletes profile_requires admin and delegates when authorized.
+     */
     @Test
     public void deleteProfile_requiresAdminAndDelegatesWhenAuthorized() {
         userController.isAdmin = false;
@@ -85,6 +100,9 @@ public class AdminProfileControllerTest {
         });
     }
 
+    /**
+     * Deletes profile_returns failure when admin lookup fails.
+     */
     @Test
     public void deleteProfile_returnsFailureWhenAdminLookupFails() {
         userController.adminLookupSuccess = false;
@@ -95,6 +113,9 @@ public class AdminProfileControllerTest {
         });
     }
 
+    /**
+     * Deletes profile_propagates repository delete failure.
+     */
     @Test
     public void deleteProfile_propagatesRepositoryDeleteFailure() {
         userController.isAdmin = true;
@@ -115,15 +136,24 @@ public class AdminProfileControllerTest {
         private boolean getAllUsersSuccess = true;
         private boolean deleteSuccess;
 
+        /**
+         * Handles fake User Repository.
+         */
         private FakeUserRepository() {
             super((com.google.firebase.firestore.FirebaseFirestore) null);
         }
 
+        /**
+         * Returns whether g.et All Users
+         */
         @Override
         public void getAllUsers(com.example.allot.common.OnCompleteListener<List<User>> listener) {
             listener.onComplete(allUsers, getAllUsersSuccess);
         }
 
+        /**
+         * Deletes user as admin.
+         */
         @Override
         public void deleteUserAsAdmin(String deviceId, com.example.allot.common.OnCompleteListener<Boolean> listener) {
             deletedDeviceId = deviceId;
@@ -135,10 +165,16 @@ public class AdminProfileControllerTest {
         private boolean isAdmin;
         private boolean adminLookupSuccess = true;
 
+        /**
+         * Handles fake User Controller.
+         */
         private FakeUserController() {
             super(null, new DeviceSessionManager(new FakeDeviceSessionStore("device-1")));
         }
 
+        /**
+         * Returns whether i.s Current User Admin
+         */
         @Override
         public void isCurrentUserAdmin(com.example.allot.common.OnCompleteListener<Boolean> listener) {
             listener.onComplete(isAdmin, adminLookupSuccess);
@@ -148,15 +184,24 @@ public class AdminProfileControllerTest {
     private static class FakeDeviceSessionStore implements DeviceSessionManager.DeviceSessionStore {
         private final String deviceId;
 
+        /**
+         * Handles fake Device Session Store.
+         */
         private FakeDeviceSessionStore(String deviceId) {
             this.deviceId = deviceId;
         }
 
+        /**
+         * Returns whether g.et Device Id
+         */
         @Override
         public String getDeviceId() {
             return deviceId;
         }
 
+        /**
+         * Saves device id.
+         */
         @Override
         public void saveDeviceId(String deviceId) {
         }

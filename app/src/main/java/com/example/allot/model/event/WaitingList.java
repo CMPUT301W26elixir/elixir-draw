@@ -101,6 +101,9 @@ public class WaitingList {
         return notSigned;
     }
 
+    /**
+     * Returns whether g.et Join Locations
+     */
     public HashMap<String, WaitlistJoinLocation> getJoinLocations() {
         if (joinLocations == null) {
             joinLocations = new HashMap<>();
@@ -108,6 +111,9 @@ public class WaitingList {
         return joinLocations;
     }
 
+    /**
+     * Updates join locations.
+     */
     public void setJoinLocations(HashMap<String, WaitlistJoinLocation> joinLocations) {
         this.joinLocations = joinLocations;
     }

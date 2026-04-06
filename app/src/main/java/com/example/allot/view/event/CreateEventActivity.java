@@ -83,6 +83,9 @@ public class CreateEventActivity extends AppCompatActivity {
                 renderPosterSelection();
             });
 
+    /**
+     * Handles on Create.
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -97,12 +100,18 @@ public class CreateEventActivity extends AppCompatActivity {
         setupListeners();
     }
 
+    /**
+     * Handles finish.
+     */
     @Override
     public void finish() {
         super.finish();
         overridePendingTransition(0, 0);
     }
 
+    /**
+     * Binds views.
+     */
     private void bindViews() {
         EditText eventNameInput = findViewById(R.id.eventNameInput);
         locationInput = findViewById(R.id.locationInput);
@@ -136,11 +145,17 @@ public class CreateEventActivity extends AppCompatActivity {
         );
     }
 
+    /**
+     * Updates up header.
+     */
     private void setupHeader() {
         ImageButton backButton = findViewById(R.id.backButton);
         backButton.setOnClickListener(view -> getOnBackPressedDispatcher().onBackPressed());
     }
 
+    /**
+     * Updates up listeners.
+     */
     private void setupListeners() {
         configureLocationPicker();
         posterUploadCard.setOnClickListener(view -> posterPickerLauncher.launch("image/*"));
@@ -152,6 +167,9 @@ public class CreateEventActivity extends AppCompatActivity {
         renderPosterSelection();
     }
 
+    /**
+     * Handles configure Location Picker.
+     */
     private void configureLocationPicker() {
         locationInput.setKeyListener(null);
         locationInput.setFocusable(false);
@@ -159,6 +177,9 @@ public class CreateEventActivity extends AppCompatActivity {
         locationInput.setOnClickListener(view -> openPlaceAutocomplete());
     }
 
+    /**
+     * Opens place autocomplete.
+     */
     private void openPlaceAutocomplete() {
         if (!ensurePlacesInitialized()) {
             Toast.makeText(this, R.string.create_event_places_unavailable, Toast.LENGTH_SHORT).show();
@@ -169,6 +190,9 @@ public class CreateEventActivity extends AppCompatActivity {
         placeAutocompleteLauncher.launch(intent);
     }
 
+    /**
+     * Handles ensure Places Initialized.
+     */
     private boolean ensurePlacesInitialized() {
         if (TextUtils.isEmpty(BuildConfig.PLACES_API_KEY)) {
             return false;
@@ -180,6 +204,9 @@ public class CreateEventActivity extends AppCompatActivity {
         return true;
     }
 
+    /**
+     * Handles submit Event.
+     */
     private void submitEvent() {
         if (isSaving) {
             return;
@@ -229,6 +256,9 @@ public class CreateEventActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Handles render Poster Selection.
+     */
     private void renderPosterSelection() {
         boolean hasPoster = selectedPosterUri != null;
         posterPreviewImage.setVisibility(hasPoster ? android.view.View.VISIBLE : android.view.View.GONE);
@@ -245,6 +275,9 @@ public class CreateEventActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Opens event created screen.
+     */
     private void openEventCreatedScreen(Event event) {
         if (event == null) {
             return;
@@ -263,6 +296,9 @@ public class CreateEventActivity extends AppCompatActivity {
             finish();
     }
 
+    /**
+     * Handles read Form Data.
+     */
     private EventFormData readFormData() {
         return formUiHelper.readFormData();
     }

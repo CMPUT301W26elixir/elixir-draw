@@ -35,6 +35,9 @@ public class EventEntrantsCsvFormatter {
         return builder.toString();
     }
 
+    /**
+     * Handles escape Cell.
+     */
     private String escapeCell(String value) {
         String safeValue = value == null ? "" : value;
         boolean requiresQuotes = safeValue.contains(",")

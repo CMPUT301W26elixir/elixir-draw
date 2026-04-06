@@ -181,6 +181,9 @@ public class UserRepository {
                 .addOnFailureListener(e -> Log.e(TAG, "Failed to update FCM token", e));
     }
 
+    /**
+     * Handles toggle Saved Event.
+     */
     public void toggleSavedEvent(String deviceId, String eventId, boolean isSaving, OnCompleteListener<Boolean> listener) {
         DocumentReference userRef = usersCollection.document(deviceId);
         FieldValue updateAction = isSaving ?
@@ -198,6 +201,9 @@ public class UserRepository {
                 });
     }
 
+    /**
+     * Deletes current user.
+     */
     public void deleteCurrentUser(String deviceId, OnCompleteListener<Boolean> listener) {
         FirebaseFirestore database = usersCollection.getFirestore();
         database.collection("events")
@@ -230,6 +236,9 @@ public class UserRepository {
                 });
     }
 
+    /**
+     * Handles commit Cleanup Operations.
+     */
     void commitCleanupOperations(FirebaseFirestore database,
                                  List<List<CleanupOperation>> batches,
                                  int startIndex,
@@ -254,6 +263,9 @@ public class UserRepository {
         });
     }
 
+    /**
+     * Builds cleanup operations.
+     */
     static List<CleanupOperation> buildCleanupOperations(String deviceId, Iterable<EventCleanupTarget> cleanupTargets) {
         List<CleanupOperation> operations = new ArrayList<>();
         for (EventCleanupTarget cleanupTarget : cleanupTargets) {
@@ -266,6 +278,9 @@ public class UserRepository {
         return operations;
     }
 
+    /**
+     * Handles chunk Cleanup Operations.
+     */
     static List<List<CleanupOperation>> chunkCleanupOperations(List<CleanupOperation> operations) {
         List<List<CleanupOperation>> batches = new ArrayList<>();
         for (int i = 0; i < operations.size(); i += MAX_BATCH_OPERATIONS) {
@@ -281,20 +296,32 @@ public class UserRepository {
         private final String documentPath;
         private final String deviceId;
 
+        /**
+         * Handles cleanup Operation.
+         */
         private CleanupOperation(Type type, String documentPath, String deviceId) {
             this.type = type;
             this.documentPath = documentPath;
             this.deviceId = deviceId;
         }
 
+        /**
+         * Handles remove User From Event.
+         */
         static CleanupOperation removeUserFromEvent(String documentPath, String deviceId) {
             return new CleanupOperation(Type.REMOVE_USER_FROM_EVENT, documentPath, deviceId);
         }
 
+        /**
+         * Deletes event.
+         */
         static CleanupOperation deleteEvent(String documentPath) {
             return new CleanupOperation(Type.DELETE_EVENT, documentPath, null);
         }
 
+        /**
+         * Deletes user.
+         */
         static CleanupOperation deleteUser(String deviceId) {
             return new CleanupOperation(Type.DELETE_USER, null, deviceId);
         }
@@ -303,6 +330,9 @@ public class UserRepository {
         public String getDocumentPath() { return documentPath; }
         public String getDeviceId() { return deviceId; }
 
+        /**
+         * Handles apply.
+         */
         void apply(WriteBatch batch, FirebaseFirestore database, CollectionReference usersCollection) {
             if (type == Type.REMOVE_USER_FROM_EVENT) {
                 DocumentReference reference = database.document(documentPath);
@@ -337,12 +367,18 @@ public class UserRepository {
         String getOrganizerId() { return organizerId; }
     }
 
+    /**
+     * Handles backfill Device Id.
+     */
     public void backfillDeviceId(String deviceId) {
         usersCollection.document(deviceId)
                 .update("deviceId", deviceId)
                 .addOnFailureListener(e -> Log.d(TAG, "Failed to backfill device ID", e));
     }
 
+    /**
+     * Handles search Users.
+     */
     public void searchUsers(String query, OnCompleteListener<List<User>> listener) {
         String safeQuery = query == null ? "" : query.trim().toLowerCase();
         if (safeQuery.isEmpty()) {
@@ -374,6 +410,9 @@ public class UserRepository {
     private String safeString(String value) { return value == null ? "" : value.trim().toLowerCase(); }
     private String normalizePhone(String phone) { return phone == null ? "" : phone.trim(); }
 
+    /**
+     * Returns whether g.et All Users
+     */
     public void getAllUsers(OnCompleteListener<List<User>> listener) {
         usersCollection.get().addOnCompleteListener(task -> {
             if (!task.isSuccessful()) {
@@ -393,6 +432,9 @@ public class UserRepository {
         });
     }
 
+    /**
+     * Deletes user as admin.
+     */
     public void deleteUserAsAdmin(String deviceId, OnCompleteListener<Boolean> listener) {
         FirebaseFirestore database = usersCollection.getFirestore();
         database.collection("events")
@@ -422,6 +464,9 @@ public class UserRepository {
                 });
     }
 
+    /**
+     * Deletes profile photo from storage.
+     */
     private void deleteProfilePhotoFromStorage(String deviceId, OnCompleteListener<Boolean> listener) {
         if (isBlank(deviceId)) {
             listener.onComplete(true, true);

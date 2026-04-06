@@ -29,11 +29,17 @@ import org.junit.runner.RunWith;
 @RunWith(AndroidJUnit4.class)
 public class OrganizerUiTest {
 
+    /**
+     * Handles disable Animations.
+     */
     @Before
     public void disableAnimations() {
         SystemAnimations.disableAll();
     }
 
+    /**
+     * Builds edit event intent.
+     */
     private Intent buildEditEventIntent(boolean isPrivate) {
         Intent intent = new Intent(ApplicationProvider.getApplicationContext(), EditEventActivity.class);
         intent.putExtra(EditEventActivity.EXTRA_UI_TEST_MODE, true);
@@ -49,6 +55,9 @@ public class OrganizerUiTest {
         return intent;
     }
 
+    /**
+     * Builds entrants intent.
+     */
     private Intent buildEntrantsIntent() {
         Intent intent = new Intent(ApplicationProvider.getApplicationContext(), EventEntrantsActivity.class);
         intent.putExtra(EventEntrantsActivity.EXTRA_UI_TEST_MODE, true);
@@ -65,6 +74,9 @@ public class OrganizerUiTest {
         return intent;
     }
 
+    /**
+     * Handles edit Event_shows Organizer Controls.
+     */
     @Test
     public void editEvent_showsOrganizerControls() {
         try (ActivityScenario<EditEventActivity> scenario = ActivityScenario.launch(buildEditEventIntent(true))) {
@@ -76,6 +88,9 @@ public class OrganizerUiTest {
         }
     }
 
+    /**
+     * Handles edit Event_public Event Hides Invite Entrants.
+     */
     @Test
     public void editEvent_publicEventHidesInviteEntrants() {
         try (ActivityScenario<EditEventActivity> scenario = ActivityScenario.launch(buildEditEventIntent(false))) {
@@ -85,6 +100,9 @@ public class OrganizerUiTest {
         }
     }
 
+    /**
+     * Handles edit Event_allows Editing Fields.
+     */
     @Test
     public void editEvent_allowsEditingFields() {
         try (ActivityScenario<EditEventActivity> scenario = ActivityScenario.launch(buildEditEventIntent(true))) {
@@ -95,6 +113,9 @@ public class OrganizerUiTest {
         }
     }
 
+    /**
+     * Handles edit Event_delete Button Is Clickable.
+     */
     @Test
     public void editEvent_deleteButtonIsClickable() {
         try (ActivityScenario<EditEventActivity> scenario = ActivityScenario.launch(buildEditEventIntent(true))) {
@@ -103,6 +124,9 @@ public class OrganizerUiTest {
         }
     }
 
+    /**
+     * Handles entrants_selected Tab Shows Cancel.
+     */
     @Test
     public void entrants_selectedTabShowsCancel() {
         try (ActivityScenario<EventEntrantsActivity> scenario = ActivityScenario.launch(buildEntrantsIntent())) {
@@ -111,18 +135,30 @@ public class OrganizerUiTest {
         }
     }
 
+    /**
+     * Handles assert Cancel For Entrant.
+     */
     private static androidx.test.espresso.ViewAction assertCancelForEntrant() {
         return new androidx.test.espresso.ViewAction() {
+            /**
+             * Returns whether g.et Constraints
+             */
             @Override
             public org.hamcrest.Matcher<android.view.View> getConstraints() {
                 return isDisplayed();
             }
 
+            /**
+             * Returns whether g.et Description
+             */
             @Override
             public String getDescription() {
                 return "assert cancel button exists for entrant row";
             }
 
+            /**
+             * Handles perform.
+             */
             @Override
             public void perform(androidx.test.espresso.UiController uiController, android.view.View view) {
                 android.view.View parent = (android.view.View) view.getParent();
@@ -141,6 +177,9 @@ public class OrganizerUiTest {
         };
     }
 
+    /**
+     * Handles entrants_cancel Moves To Cancelled Tab.
+     */
     @Test
     public void entrants_cancelMovesToCancelledTab() {
         try (ActivityScenario<EventEntrantsActivity> scenario = ActivityScenario.launch(buildEntrantsIntent())) {
@@ -151,18 +190,30 @@ public class OrganizerUiTest {
         }
     }
 
+    /**
+     * Handles click Cancel For Entrant.
+     */
     private static androidx.test.espresso.ViewAction clickCancelForEntrant() {
         return new androidx.test.espresso.ViewAction() {
+            /**
+             * Returns whether g.et Constraints
+             */
             @Override
             public org.hamcrest.Matcher<android.view.View> getConstraints() {
                 return isDisplayed();
             }
 
+            /**
+             * Returns whether g.et Description
+             */
             @Override
             public String getDescription() {
                 return "click cancel button for entrant row";
             }
 
+            /**
+             * Handles perform.
+             */
             @Override
             public void perform(androidx.test.espresso.UiController uiController, android.view.View view) {
                 android.view.View parent = (android.view.View) view.getParent();
@@ -183,6 +234,9 @@ public class OrganizerUiTest {
         };
     }
 
+    /**
+     * Handles entrants_enrolled Tab Shows Export Button.
+     */
     @Test
     public void entrants_enrolledTabShowsExportButton() {
         try (ActivityScenario<EventEntrantsActivity> scenario = ActivityScenario.launch(buildEntrantsIntent())) {
@@ -191,6 +245,9 @@ public class OrganizerUiTest {
         }
     }
 
+    /**
+     * Handles invite Co Organizer_screen Loads.
+     */
     @Test
     public void inviteCoOrganizer_screenLoads() {
         Intent intent = new Intent(ApplicationProvider.getApplicationContext(), InviteCoOrganizerActivity.class);
@@ -201,6 +258,9 @@ public class OrganizerUiTest {
         }
     }
 
+    /**
+     * Creates event_screen loads for organizer.
+     */
     @Test
     public void createEvent_screenLoadsForOrganizer() {
         try (ActivityScenario<CreateEventActivity> scenario = ActivityScenario.launch(

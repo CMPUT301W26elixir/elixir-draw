@@ -31,14 +31,23 @@ public class EventEntrantsCsvSaveService {
             this.relativePath = relativePath;
         }
 
+        /**
+         * Returns whether g.et Display Name
+         */
         String getDisplayName() {
             return displayName;
         }
 
+        /**
+         * Returns whether g.et Mime Type
+         */
         String getMimeType() {
             return mimeType;
         }
 
+        /**
+         * Returns whether g.et Relative Path
+         */
         String getRelativePath() {
             return relativePath;
         }
@@ -82,6 +91,9 @@ public class EventEntrantsCsvSaveService {
         return savedUri;
     }
 
+    /**
+     * Handles validate Inputs.
+     */
     void validateInputs(Context context, String csvContent) {
         if (context == null) {
             throw new IllegalArgumentException("context must not be null");
@@ -89,12 +101,18 @@ public class EventEntrantsCsvSaveService {
         validateCsvContent(csvContent);
     }
 
+    /**
+     * Handles validate Csv Content.
+     */
     void validateCsvContent(String csvContent) {
         if (isBlank(csvContent)) {
             throw new IllegalArgumentException("csvContent must not be blank");
         }
     }
 
+    /**
+     * Creates download values.
+     */
     ContentValues createDownloadValues(String eventTitle, String eventId, int sdkInt) {
         CsvDownloadSpec spec = buildDownloadSpec(eventTitle, eventId, sdkInt);
         ContentValues values = new ContentValues();
@@ -106,6 +124,9 @@ public class EventEntrantsCsvSaveService {
         return values;
     }
 
+    /**
+     * Builds file name.
+     */
     String buildFileName(String eventTitle, String eventId) {
         String baseName = !isBlank(eventTitle) ? eventTitle : eventId;
         String normalizedName = baseName == null ? DEFAULT_EVENT_NAME : baseName.trim().toLowerCase(Locale.US);
@@ -117,11 +138,17 @@ public class EventEntrantsCsvSaveService {
         return FILE_PREFIX + normalizedName + FILE_EXTENSION;
     }
 
+    /**
+     * Builds download spec.
+     */
     CsvDownloadSpec buildDownloadSpec(String eventTitle, String eventId, int sdkInt) {
         String relativePath = sdkInt >= Build.VERSION_CODES.Q ? RELATIVE_PATH : null;
         return new CsvDownloadSpec(buildFileName(eventTitle, eventId), MIME_TYPE, relativePath);
     }
 
+    /**
+     * Returns whether i.s Blank
+     */
     private boolean isBlank(String value) {
         return value == null || value.trim().isEmpty();
     }

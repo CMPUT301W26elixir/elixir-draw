@@ -8,6 +8,9 @@ import static org.junit.Assert.assertTrue;
 import com.example.allot.data.DeviceSessionManager;
 import org.junit.Test;
 public class DeviceSessionManagerTest {
+    /**
+     * Handles returns Existing Saved Device Id.
+     */
     @Test
     public void returnsExistingSavedDeviceId() {
         FakeDeviceSessionStore store = new FakeDeviceSessionStore("saved-device-id");
@@ -19,6 +22,9 @@ public class DeviceSessionManagerTest {
         assertEquals("saved-device-id", store.savedDeviceId);
     }
 
+    /**
+     * Creates s and stores new device id when missing.
+     */
     @Test
     public void createsAndStoresNewDeviceIdWhenMissing() {
         FakeDeviceSessionStore store = new FakeDeviceSessionStore(null);
@@ -31,6 +37,9 @@ public class DeviceSessionManagerTest {
         assertTrue(manager.isNewDeviceId());
     }
 
+    /**
+     * Handles treats Blank Saved Value As Missing.
+     */
     @Test
     public void treatsBlankSavedValueAsMissing() {
         FakeDeviceSessionStore store = new FakeDeviceSessionStore("   ");
@@ -45,15 +54,24 @@ public class DeviceSessionManagerTest {
     private static class FakeDeviceSessionStore implements DeviceSessionManager.DeviceSessionStore {
         private String savedDeviceId;
 
+        /**
+         * Handles fake Device Session Store.
+         */
         private FakeDeviceSessionStore(String savedDeviceId) {
             this.savedDeviceId = savedDeviceId;
         }
 
+        /**
+         * Returns whether g.et Device Id
+         */
         @Override
         public String getDeviceId() {
             return savedDeviceId;
         }
 
+        /**
+         * Saves device id.
+         */
         @Override
         public void saveDeviceId(String deviceId) {
             this.savedDeviceId = deviceId;

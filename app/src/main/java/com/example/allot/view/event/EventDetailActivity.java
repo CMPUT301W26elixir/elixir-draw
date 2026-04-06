@@ -146,6 +146,9 @@ public class EventDetailActivity extends AppCompatActivity {
         loadEventDetails();
     }
 
+    /**
+     * Loads admin status.
+     */
     private void loadAdminStatus() {
         eventDetailController.isCurrentUserAdmin((adminValue, success) -> {
             isAdmin = success && Boolean.TRUE.equals(adminValue);
@@ -196,12 +199,18 @@ public class EventDetailActivity extends AppCompatActivity {
 
         if (commentSortSpinner != null) {
             commentSortSpinner.setOnItemSelectedListener(new android.widget.AdapterView.OnItemSelectedListener() {
+                /**
+                 * Handles on Item Selected.
+                 */
                 @Override
                 public void onItemSelected(android.widget.AdapterView<?> parent, View view, int position, long id) {
                     commentSortMode = CommentSortMode.fromPosition(position);
                     renderComments(currentEvent);
                 }
 
+                /**
+                 * Handles on Nothing Selected.
+                 */
                 @Override
                 public void onNothingSelected(android.widget.AdapterView<?> parent) {
                 }
@@ -395,6 +404,9 @@ public class EventDetailActivity extends AppCompatActivity {
         loadFavoriteState();
     }
 
+    /**
+     * Loads favorite state.
+     */
     private void loadFavoriteState() {
         isFavoriteLoading = true;
         updateFavoriteUi();
@@ -407,6 +419,9 @@ public class EventDetailActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Handles on Favorite Pressed.
+     */
     private void onFavoritePressed() {
         if (favoriteButton == null || isFavoriteLoading || isFavoriteUpdating || TextUtils.isEmpty(currentEventId)) {
             return;
@@ -418,6 +433,9 @@ public class EventDetailActivity extends AppCompatActivity {
         );
     }
 
+    /**
+     * Handles toggle Favorite Saved State.
+     */
     private void toggleFavoriteSavedState() {
         isFavoriteUpdating = true;
         isFavoriteSaved = !isFavoriteSaved;
@@ -436,6 +454,9 @@ public class EventDetailActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Updates favorite ui.
+     */
     private void updateFavoriteUi() {
         if (favoriteButton == null) {
             return;
@@ -531,6 +552,9 @@ public class EventDetailActivity extends AppCompatActivity {
         );
     }
 
+    /**
+     * Handles accept Invite.
+     */
     private void acceptInvite(Dialog dialog, MaterialButton acceptButton, MaterialButton declineButton) {
         if (isJoiningWaitlist || TextUtils.isEmpty(currentEventId)) {
             return;
@@ -563,6 +587,9 @@ public class EventDetailActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Handles decline Invite.
+     */
     private void declineInvite(Dialog dialog, MaterialButton acceptButton, MaterialButton declineButton) {
         if (isLeavingWaitlist || TextUtils.isEmpty(currentEventId)) {
             return;
@@ -674,15 +701,24 @@ public class EventDetailActivity extends AppCompatActivity {
         errorText.setText(message);
     }
 
+    /**
+     * Returns whether h.as Location Permission
+     */
     private boolean hasLocationPermission() {
         return ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED;
     }
 
+    /**
+     * Returns whether s.hould Collect Join Location
+     */
     private boolean shouldCollectJoinLocation() {
         return currentEvent != null && Boolean.TRUE.equals(currentEvent.getGeoloc());
     }
 
+    /**
+     * Handles capture Location And Join.
+     */
     private void captureLocationAndJoin() {
         CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
         fusedLocationProviderClient
@@ -703,6 +739,9 @@ public class EventDetailActivity extends AppCompatActivity {
                 .addOnFailureListener(this, exception -> handleUnavailableLocation());
     }
 
+    /**
+     * Handles unavailable location.
+     */
     private void handleUnavailableLocation() {
         if (isSyncingWaitlistLocation) {
             isSyncingWaitlistLocation = false;
@@ -713,6 +752,9 @@ public class EventDetailActivity extends AppCompatActivity {
         completeJoinWaitingList(null);
     }
 
+    /**
+     * Handles complete Join Waiting List.
+     */
     private void completeJoinWaitingList(Location location) {
         Double latitude = location == null ? null : location.getLatitude();
         Double longitude = location == null ? null : location.getLongitude();
@@ -744,6 +786,9 @@ public class EventDetailActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Handles complete Waitlist Location Sync.
+     */
     private void completeWaitlistLocationSync(Location location) {
         Double latitude = location == null ? null : location.getLatitude();
         Double longitude = location == null ? null : location.getLongitude();
@@ -758,6 +803,9 @@ public class EventDetailActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Handles fail Join Waiting List.
+     */
     private void failJoinWaitingList(int messageResId) {
         isJoiningWaitlist = false;
         if (pendingJoinConfirmButton != null) {
@@ -768,11 +816,17 @@ public class EventDetailActivity extends AppCompatActivity {
         Toast.makeText(this, messageResId, Toast.LENGTH_SHORT).show();
     }
 
+    /**
+     * Clears pending join state.
+     */
     private void clearPendingJoinState() {
         pendingJoinDialog = null;
         pendingJoinConfirmButton = null;
     }
 
+    /**
+     * Handles on Request Permissions Result.
+     */
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -859,6 +913,9 @@ public class EventDetailActivity extends AppCompatActivity {
         maybeHandleDeferredJoinAction();
     }
 
+    /**
+     * Handles maybe Auto Sync Waitlist Location.
+     */
     private void maybeAutoSyncWaitlistLocation() {
         if (!shouldAutoSyncWaitlistLocation() || hasAttemptedAutoWaitlistLocationSync || isSyncingWaitlistLocation) {
             return;
@@ -879,6 +936,9 @@ public class EventDetailActivity extends AppCompatActivity {
         );
     }
 
+    /**
+     * Returns whether s.hould Auto Sync Waitlist Location
+     */
     private boolean shouldAutoSyncWaitlistLocation() {
         if (currentEvent == null || !Boolean.TRUE.equals(currentEvent.getGeoloc())) {
             return false;
@@ -899,6 +959,9 @@ public class EventDetailActivity extends AppCompatActivity {
                 || joinLocation.getLongitude() == null;
     }
 
+    /**
+     * Handles require Completed Profile.
+     */
     private void requireCompletedProfile(Runnable onReady, Intent onboardingIntent) {
         if (getIntent().getBooleanExtra(EXTRA_UI_TEST_BYPASS_PROFILE_GATE, false)) {
             onReady.run();
@@ -915,6 +978,9 @@ public class EventDetailActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Builds deferred event action intent.
+     */
     private Intent buildDeferredEventActionIntent(String action) {
         return DeferredOnboardingNavigator.createEventActionIntent(
                 this,
@@ -929,6 +995,9 @@ public class EventDetailActivity extends AppCompatActivity {
         );
     }
 
+    /**
+     * Handles maybe Handle Deferred Join Action.
+     */
     private void maybeHandleDeferredJoinAction() {
         if (!shouldAutoOpenJoinDialog || currentScreenState == null) {
             return;
@@ -949,6 +1018,9 @@ public class EventDetailActivity extends AppCompatActivity {
         showLotteryCriteriaDialog();
     }
 
+    /**
+     * Handles maybe Handle Deferred Favorite Save.
+     */
     private void maybeHandleDeferredFavoriteSave() {
         if (!shouldAutoSaveEvent || isFavoriteLoading || isFavoriteUpdating) {
             return;
@@ -962,6 +1034,9 @@ public class EventDetailActivity extends AppCompatActivity {
         toggleFavoriteSavedState();
     }
 
+    /**
+     * Handles render Hero Poster.
+     */
     private void renderHeroPoster(Event event) {
         String posterUrl = event == null ? null : event.getPosterUrl();
         if (TextUtils.isEmpty(posterUrl)) {
@@ -977,6 +1052,9 @@ public class EventDetailActivity extends AppCompatActivity {
                 .into(heroPosterImage);
     }
 
+    /**
+     * Handles render Comments.
+     */
     private void renderComments(Event event) {
         List<EventComment> comments = event == null ? null : event.getComments();
         commentsContainer.removeAllViews();
@@ -1011,6 +1089,9 @@ public class EventDetailActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Handles render Comment Tree.
+     */
     private void renderCommentTree(EventComment comment,
                                    int depth,
                                    Map<String, List<EventComment>> repliesByParent,
@@ -1051,6 +1132,9 @@ public class EventDetailActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Binds delete button.
+     */
     private void bindDeleteButton(TextView deleteButton, EventComment comment) {
         if (deleteButton == null || comment == null || (!isOrganizer && !isAdmin)) {
             if (deleteButton != null) {
@@ -1063,6 +1147,9 @@ public class EventDetailActivity extends AppCompatActivity {
         deleteButton.setOnClickListener(view -> deleteCommentThread(comment.getCommentId()));
     }
 
+    /**
+     * Handles toggle Reply Input.
+     */
     private void toggleReplyInput(LinearLayout replyInputContainer, EventComment parentComment) {
         if (replyInputContainer.getChildCount() > 0) {
             replyInputContainer.removeAllViews();
@@ -1079,11 +1166,17 @@ public class EventDetailActivity extends AppCompatActivity {
                 return;
             }
             postComment(parentComment.getCommentId(), new CommentPostCallback() {
+                /**
+                 * Handles on Success.
+                 */
                 @Override
                 public void onSuccess() {
                     replyInputContainer.removeAllViews();
                 }
 
+                /**
+                 * Handles on Failure.
+                 */
                 @Override
                 public void onFailure() {
                     replySubmit.setEnabled(true);
@@ -1094,10 +1187,16 @@ public class EventDetailActivity extends AppCompatActivity {
         replyInputContainer.addView(inputView);
     }
 
+    /**
+     * Handles post Comment.
+     */
     private void postComment(String parentId, CommentPostCallback callback) {
         postComment(parentId, callback, commentInputText, commentSubmitButton);
     }
 
+    /**
+     * Handles post Comment.
+     */
     private void postComment(String parentId,
                              CommentPostCallback callback,
                              EditText inputView,
@@ -1136,6 +1235,9 @@ public class EventDetailActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Binds vote buttons.
+     */
     private void bindVoteButtons(TextView upvoteButton, TextView downvoteButton, EventComment comment) {
         if (upvoteButton == null || downvoteButton == null || comment == null) {
             return;
@@ -1147,6 +1249,9 @@ public class EventDetailActivity extends AppCompatActivity {
         downvoteButton.setOnClickListener(view -> voteOnComment(comment, false));
     }
 
+    /**
+     * Updates vote button text.
+     */
     private void updateVoteButtonText(TextView upvoteButton, TextView downvoteButton, EventComment comment) {
         String upvoteLabel = getString(R.string.event_comment_upvote) + " " + Math.max(0, comment.getUpvotes());
         String downvoteLabel = getString(R.string.event_comment_downvote) + " " + Math.max(0, comment.getDownvotes());
@@ -1154,6 +1259,9 @@ public class EventDetailActivity extends AppCompatActivity {
         downvoteButton.setText(downvoteLabel);
     }
 
+    /**
+     * Handles vote On Comment.
+     */
     private void voteOnComment(EventComment comment, boolean isUpvote) {
         if (isVotingComment || comment == null || TextUtils.isEmpty(currentEventId)) {
             return;
@@ -1171,6 +1279,9 @@ public class EventDetailActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Deletes comment thread.
+     */
     private void deleteCommentThread(String commentId) {
         if (TextUtils.isEmpty(currentEventId) || TextUtils.isEmpty(commentId)) {
             return;
@@ -1187,6 +1298,9 @@ public class EventDetailActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Handles refresh Comments Only.
+     */
     private void refreshCommentsOnly() {
         if (TextUtils.isEmpty(currentEventId)) {
             return;
@@ -1201,6 +1315,9 @@ public class EventDetailActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Handles resolve Author Name.
+     */
     private String resolveAuthorName(EventComment comment) {
         if (comment == null || UiHelper.isBlank(comment.getAuthorName())) {
             return getString(R.string.event_comment_author_unknown);
@@ -1208,6 +1325,9 @@ public class EventDetailActivity extends AppCompatActivity {
         return comment.getAuthorName();
     }
 
+    /**
+     * Handles format Comment Date.
+     */
     private String formatCommentDate(Date date) {
         if (date == null) {
             return "";
@@ -1216,6 +1336,9 @@ public class EventDetailActivity extends AppCompatActivity {
         return formatter.format(date);
     }
 
+    /**
+     * Handles comment Comparator.
+     */
     private Comparator<EventComment> commentComparator(CommentSortMode mode) {
         return (first, second) -> {
             if (mode == CommentSortMode.MOST_UPVOTED) {
@@ -1254,6 +1377,9 @@ public class EventDetailActivity extends AppCompatActivity {
         MOST_UPVOTED,
         MOST_DOWNVOTED;
 
+        /**
+         * Handles from Position.
+         */
         static CommentSortMode fromPosition(int position) {
             if (position == 1) {
                 return MOST_UPVOTED;
@@ -1266,14 +1392,26 @@ public class EventDetailActivity extends AppCompatActivity {
     }
 
     private interface CommentPostCallback {
+        /**
+         * Handles on Success.
+         */
         void onSuccess();
+        /**
+         * Handles on Failure.
+         */
         void onFailure();
     }
 
+    /**
+     * Returns whether i.s Ui Test Fallback Mode
+     */
     private boolean isUiTestFallbackMode() {
         return getIntent().getBooleanExtra(EXTRA_UI_TEST_SKIP_NETWORK_LOAD, false);
     }
 
+    /**
+     * Returns whether s.hould Start Ui Test On Waitlist
+     */
     private boolean shouldStartUiTestOnWaitlist() {
         return getIntent().getBooleanExtra(EXTRA_UI_TEST_START_ON_WAITLIST, false);
     }

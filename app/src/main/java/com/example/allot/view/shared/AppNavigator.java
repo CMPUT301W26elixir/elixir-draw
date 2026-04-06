@@ -15,6 +15,9 @@ import com.example.allot.view.profile.ProfileActivity;
 public final class AppNavigator {
     private static final int NAV_FLAGS = Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP;
 
+    /**
+     * Creates a new AppNavigator instance.
+     */
     private AppNavigator() {
     }
 
@@ -99,6 +102,13 @@ public final class AppNavigator {
         }
     }
 
+    /**
+     * Opens the requested account-gated destination after checking whether the current
+     * device has a completed profile or should enter deferred onboarding first.
+     *
+     * <p>AI usage note: This Javadoc was drafted with AI assistance and then reviewed
+     * against the implementation by the development team.
+     */
     private static void openAccountRequired(Activity activity,
                                             boolean finishCurrent,
                                             String destination,
@@ -120,6 +130,12 @@ public final class AppNavigator {
         });
     }
 
+    /**
+     * Builds the direct destination intent for users who have already completed onboarding.
+     *
+     * <p>AI usage note: This Javadoc was drafted with AI assistance and then reviewed
+     * against the implementation by the development team.
+     */
     private static Intent buildDestinationIntent(Activity activity, String destination, Bundle extras) {
         if (DeferredOnboardingNavigator.DESTINATION_PROFILE.equals(destination)) {
             return new Intent(activity, ProfileActivity.class);
@@ -135,6 +151,12 @@ public final class AppNavigator {
         return intent;
     }
 
+    /**
+     * Builds the deferred-onboarding intent that preserves the eventual destination.
+     *
+     * <p>AI usage note: This Javadoc was drafted with AI assistance and then reviewed
+     * against the implementation by the development team.
+     */
     private static Intent buildOnboardingIntent(Activity activity, String destination, Bundle extras) {
         Intent intent;
         if (DeferredOnboardingNavigator.DESTINATION_MY_EVENTS.equals(destination)) {
@@ -152,6 +174,12 @@ public final class AppNavigator {
         return intent;
     }
 
+    /**
+     * Returns whether the current navigation request should force deferred onboarding.
+     *
+     * <p>AI usage note: This Javadoc was drafted with AI assistance and then reviewed
+     * against the implementation by the development team.
+     */
     private static boolean shouldForceDeferredOnboarding(Activity activity) {
         return activity != null
                 && activity.getIntent() != null

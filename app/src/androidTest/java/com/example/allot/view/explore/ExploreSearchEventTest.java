@@ -30,11 +30,17 @@ import org.junit.runner.RunWith;
 @RunWith(AndroidJUnit4.class)
 public class ExploreSearchEventTest {
 
+    /**
+     * Handles disable Animations.
+     */
     @Before
     public void disableAnimations() {
         SystemAnimations.disableAll();
     }
 
+    /**
+     * Builds intent.
+     */
     private Intent buildIntent() {
         Intent intent = new Intent(ApplicationProvider.getApplicationContext(), ExploreActivity.class);
         intent.putStringArrayListExtra(
@@ -68,6 +74,9 @@ public class ExploreSearchEventTest {
         return intent;
     }
 
+    /**
+     * Handles search Filters Visible Events And Shows Empty State.
+     */
     @Test
     public void searchFiltersVisibleEventsAndShowsEmptyState() {
         try (ActivityScenario<ExploreActivity> scenario = ActivityScenario.launch(buildIntent())) {
@@ -86,18 +95,30 @@ public class ExploreSearchEventTest {
         }
     }
 
+    /**
+     * Handles wait For.
+     */
     private ViewAction waitFor(long delayMs) {
         return new ViewAction() {
+            /**
+             * Returns whether g.et Constraints
+             */
             @Override
             public Matcher<View> getConstraints() {
                 return isRoot();
             }
 
+            /**
+             * Returns whether g.et Description
+             */
             @Override
             public String getDescription() {
                 return "wait for " + delayMs + " milliseconds";
             }
 
+            /**
+             * Handles perform.
+             */
             @Override
             public void perform(UiController uiController, View view) {
                 if (delayMs < 0) {

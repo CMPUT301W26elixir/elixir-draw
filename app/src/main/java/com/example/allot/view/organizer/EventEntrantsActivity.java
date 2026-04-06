@@ -280,10 +280,16 @@ public class EventEntrantsActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Returns whether i.s Ui Test Mode
+     */
     private boolean isUiTestMode() {
         return getIntent().getBooleanExtra(EXTRA_UI_TEST_MODE, false);
     }
 
+    /**
+     * Loads ui test lists.
+     */
     private void loadUiTestLists() {
         uiTestSelected = getIntent().getStringArrayListExtra(EXTRA_UI_TEST_SELECTED);
         uiTestCancelled = getIntent().getStringArrayListExtra(EXTRA_UI_TEST_CANCELLED);
@@ -304,6 +310,9 @@ public class EventEntrantsActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Binds ui test event.
+     */
     private void bindUiTestEvent() {
         currentEvent = new Event();
         currentEvent.setEventId(currentEventId);
@@ -317,6 +326,9 @@ public class EventEntrantsActivity extends AppCompatActivity {
         bindEntrants(buildUiTestEntrants(selectedTab), getEmptyMessageRes(selectedTab));
     }
 
+    /**
+     * Builds ui test entrants.
+     */
     private List<LotteryEntrantItem> buildUiTestEntrants(Tab tab) {
         List<String> names = getUiTestNamesForTab(tab);
         List<LotteryEntrantItem> items = new java.util.ArrayList<>();
@@ -328,6 +340,9 @@ public class EventEntrantsActivity extends AppCompatActivity {
         return items;
     }
 
+    /**
+     * Returns whether g.et Ui Test Names For Tab
+     */
     private List<String> getUiTestNamesForTab(Tab tab) {
         switch (tab) {
             case CANCELLED:
@@ -344,6 +359,9 @@ public class EventEntrantsActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Returns whether g.et Subtitle Res For Tab
+     */
     private int getSubtitleResForTab(Tab tab) {
         switch (tab) {
             case CANCELLED:
@@ -360,10 +378,16 @@ public class EventEntrantsActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Handles safe String.
+     */
     private String safeString(String value, String fallback) {
         return TextUtils.isEmpty(value) ? fallback : value;
     }
 
+    /**
+     * Handles prompt Cancel Entrant.
+     */
     private void promptCancelEntrant(LotteryEntrantItem entrantItem) {
         if (entrantItem == null || isCancellingEntrant) {
             return;
@@ -378,6 +402,9 @@ public class EventEntrantsActivity extends AppCompatActivity {
                 .show();
     }
 
+    /**
+     * Returns whether c.ancel Entrant
+     */
     private void cancelEntrant(LotteryEntrantItem entrantItem) {
         if (entrantItem == null || isCancellingEntrant) {
             return;
@@ -415,6 +442,9 @@ public class EventEntrantsActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Handles draw Replacement Entrant.
+     */
     private void drawReplacementEntrant() {
         if (isDrawingReplacement || TextUtils.isEmpty(currentEventId)) {
             return;
@@ -441,6 +471,9 @@ public class EventEntrantsActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Maps tab.
+     */
     private EventEntrantsController.Tab mapTab(Tab tab) {
         switch (tab) {
             case CANCELLED:
@@ -457,6 +490,9 @@ public class EventEntrantsActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Returns whether g.et Empty Message Res
+     */
     private int getEmptyMessageRes(Tab tab) {
         switch (tab) {
             case CANCELLED:
@@ -473,6 +509,9 @@ public class EventEntrantsActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Builds draw date text.
+     */
     private String buildDrawDateText(Event event) {
         if (event == null) {
             return "";
@@ -484,6 +523,9 @@ public class EventEntrantsActivity extends AppCompatActivity {
         return new SimpleDateFormat("MMMM d, yyyy", Locale.getDefault()).format(effectiveDrawDate);
     }
 
+    /**
+     * Builds attendees text.
+     */
     private String buildAttendeesText(Event event) {
         if (event == null) {
             return "20";
@@ -493,6 +535,9 @@ public class EventEntrantsActivity extends AppCompatActivity {
         return attendeesToSelect > 0 ? String.valueOf(attendeesToSelect) : "20";
     }
 
+    /**
+     * Opens entrant map.
+     */
     private void openEntrantMap() {
         if (TextUtils.isEmpty(currentEventId) || currentEvent == null) {
             Toast.makeText(this, R.string.manage_entrants_load_failure, Toast.LENGTH_SHORT).show();
@@ -504,10 +549,16 @@ public class EventEntrantsActivity extends AppCompatActivity {
         overridePendingTransition(0, 0);
     }
 
+    /**
+     * Updates map button visibility.
+     */
     private void updateMapButtonVisibility(Event event) {
         viewEntrantMapButton.setVisibility(event == null ? View.GONE : View.VISIBLE);
     }
 
+    /**
+     * Handles export Final List.
+     */
     private void exportFinalList() {
         if (isExporting) {
             return;
@@ -533,6 +584,9 @@ public class EventEntrantsActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Saves export rows.
+     */
     private void saveExportRows(List<EntrantExportRow> rows) {
         try {
             String csvContent = csvFormatter.format(rows);
@@ -545,6 +599,9 @@ public class EventEntrantsActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Updates exporting.
+     */
     private void setExporting(boolean exporting) {
         isExporting = exporting;
         updateTabState();

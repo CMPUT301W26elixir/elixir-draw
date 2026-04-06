@@ -29,26 +29,44 @@ public class UserEventsSectionService {
         private final List<Event> pastEvents = new ArrayList<>();
         private final List<Event> coOrganizerInvites = new ArrayList<>();
 
+        /**
+         * Returns whether g.et Invited Events
+         */
         public List<Event> getInvitedEvents() {
             return invitedEvents;
         }
 
+        /**
+         * Returns whether g.et Selected Events
+         */
         public List<Event> getSelectedEvents() {
             return selectedEvents;
         }
 
+        /**
+         * Returns whether g.et Waiting Events
+         */
         public List<Event> getWaitingEvents() {
             return waitingEvents;
         }
 
+        /**
+         * Returns whether g.et Not Selected Events
+         */
         public List<Event> getNotSelectedEvents() {
             return notSelectedEvents;
         }
 
+        /**
+         * Returns whether g.et Past Events
+         */
         public List<Event> getPastEvents() {
             return pastEvents;
         }
 
+        /**
+         * Returns whether g.et Co Organizer Invites
+         */
         public List<Event> getCoOrganizerInvites() {
             return coOrganizerInvites;
         }
@@ -61,10 +79,16 @@ public class UserEventsSectionService {
         private final List<Event> ongoingEvents = new ArrayList<>();
         private final List<Event> completedEvents = new ArrayList<>();
 
+        /**
+         * Returns whether g.et Ongoing Events
+         */
         public List<Event> getOngoingEvents() {
             return ongoingEvents;
         }
 
+        /**
+         * Returns whether g.et Completed Events
+         */
         public List<Event> getCompletedEvents() {
             return completedEvents;
         }
@@ -165,6 +189,9 @@ public class UserEventsSectionService {
         return RegisteredSection.NOT_SELECTED;
     }
 
+    /**
+     * Returns whether i.s Invited
+     */
     private boolean isInvited(Event event, String deviceId) {
         if (event == null || !event.isPrivate()) {
             return false;

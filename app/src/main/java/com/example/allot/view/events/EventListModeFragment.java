@@ -85,11 +85,17 @@ public class EventListModeFragment extends Fragment {
         emptyStateText = view.findViewById(R.id.emptyStateText);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         adapter = new EventListAdapter(new ArrayList<>(), new EventListAdapter.OnEventClickListener() {
+            /**
+             * Handles on Event Click.
+             */
             @Override
             public void onEventClick(EventListItem event) {
                 openEventDetail(event);
             }
 
+            /**
+             * Handles on Heart Click.
+             */
             @Override
             public void onHeartClick(EventListItem event, int position) {
                 if (event == null || event.getEventId() == null) {
@@ -119,6 +125,9 @@ public class EventListModeFragment extends Fragment {
         return view;
     }
 
+    /**
+     * Handles on Resume.
+     */
     @Override
     public void onResume() {
         super.onResume();
@@ -127,6 +136,9 @@ public class EventListModeFragment extends Fragment {
         }
     }
 
+    /**
+     * Handles refresh Saved Ids And Load.
+     */
     private void refreshSavedIdsAndLoad() {
         exploreController.loadSavedEventIds((savedEventIds, success) -> {
             userSavedIds = new ArrayList<>(savedEventIds == null ? new ArrayList<>() : savedEventIds);
@@ -185,6 +197,9 @@ public class EventListModeFragment extends Fragment {
                 : "You have no events.";
     }
 
+    /**
+     * Opens event detail.
+     */
     private void openEventDetail(EventListItem event) {
         if (event == null || event.getEventId() == null || event.getEventId().trim().isEmpty() || getContext() == null) {
             return;

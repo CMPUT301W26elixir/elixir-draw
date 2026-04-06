@@ -43,6 +43,9 @@ public class AdminEventListAdapter extends RecyclerView.Adapter<AdminEventListAd
         this.onDeleteClickListener = onDeleteClickListener;
     }
 
+    /**
+     * Handles on Create View Holder.
+     */
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -51,12 +54,18 @@ public class AdminEventListAdapter extends RecyclerView.Adapter<AdminEventListAd
         return new ViewHolder(view);
     }
 
+    /**
+     * Handles on Bind View Holder.
+     */
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Event event = events.get(position);
         holder.bind(event, position, onDeleteClickListener);
     }
 
+    /**
+     * Returns whether g.et Item Count
+     */
     @Override
     public int getItemCount() {
         return events.size();

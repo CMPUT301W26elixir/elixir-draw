@@ -74,30 +74,51 @@ public class BrowseFilter {
         return selectedCategory;
     }
 
+    /**
+     * Returns whether g.et Keywords
+     */
     public String getKeywords() {
         return keywords;
     }
 
+    /**
+     * Returns whether g.et Start Date
+     */
     public java.util.Date getStartDate() {
         return startDate;
     }
 
+    /**
+     * Returns whether g.et Latitude
+     */
     public Double getLatitude() {
         return latitude;
     }
 
+    /**
+     * Returns whether g.et Longitude
+     */
     public Double getLongitude() {
         return longitude;
     }
 
+    /**
+     * Returns whether g.et Distance Km
+     */
     public Double getDistanceKm() {
         return distanceKm;
     }
 
+    /**
+     * Returns whether g.et Only Open Spots
+     */
     public Boolean getOnlyOpenSpots() {
         return onlyOpenSpots;
     }
 
+    /**
+     * Returns whether g.et Minimum Capacity
+     */
     public Integer getMinimumCapacity() {
         return minimumCapacity;
     }

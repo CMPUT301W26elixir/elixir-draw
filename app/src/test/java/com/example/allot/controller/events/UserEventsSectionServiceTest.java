@@ -11,11 +11,17 @@ import org.junit.Test;
 public class UserEventsSectionServiceTest {
     private UserEventsSectionService service;
 
+    /**
+     * Updates up.
+     */
     @Before
     public void setUp() {
         service = new UserEventsSectionService();
     }
 
+    /**
+     * Handles classify Registered Event_returns Selected When User Was Chosen.
+     */
     @Test
     public void classifyRegisteredEvent_returnsSelectedWhenUserWasChosen() {
         Event event = buildEvent(System.currentTimeMillis() + 20_000L, System.currentTimeMillis() + 10_000L);
@@ -25,6 +31,9 @@ public class UserEventsSectionServiceTest {
                 service.classifyRegisteredEvent(event, "user1"));
     }
 
+    /**
+     * Handles classify Registered Event_returns Invited For Private Invite.
+     */
     @Test
     public void classifyRegisteredEvent_returnsInvitedForPrivateInvite() {
         Event event = buildEvent(System.currentTimeMillis() + 20_000L, System.currentTimeMillis() + 10_000L);
@@ -35,6 +44,9 @@ public class UserEventsSectionServiceTest {
                 service.classifyRegisteredEvent(event, "user1"));
     }
 
+    /**
+     * Handles classify Registered Event_returns Waiting Before Deadline.
+     */
     @Test
     public void classifyRegisteredEvent_returnsWaitingBeforeDeadline() {
         Event event = buildEvent(System.currentTimeMillis() + 20_000L, System.currentTimeMillis() + 10_000L);
@@ -43,6 +55,9 @@ public class UserEventsSectionServiceTest {
                 service.classifyRegisteredEvent(event, "user1"));
     }
 
+    /**
+     * Handles classify Registered Event_returns Waiting After Deadline Without Published Results.
+     */
     @Test
     public void classifyRegisteredEvent_returnsWaitingAfterDeadlineWithoutPublishedResults() {
         Event event = buildEvent(System.currentTimeMillis() + 20_000L, System.currentTimeMillis() - 10_000L);
@@ -51,6 +66,9 @@ public class UserEventsSectionServiceTest {
                 service.classifyRegisteredEvent(event, "user1"));
     }
 
+    /**
+     * Handles classify Registered Event_returns Not Selected After Deadline With Published Results.
+     */
     @Test
     public void classifyRegisteredEvent_returnsNotSelectedAfterDeadlineWithPublishedResults() {
         Event event = buildEvent(System.currentTimeMillis() + 20_000L, System.currentTimeMillis() - 10_000L);
@@ -60,6 +78,9 @@ public class UserEventsSectionServiceTest {
                 service.classifyRegisteredEvent(event, "user1"));
     }
 
+    /**
+     * Handles classify Registered Event_returns Past When Event Already Occurred.
+     */
     @Test
     public void classifyRegisteredEvent_returnsPastWhenEventAlreadyOccurred() {
         Event event = buildEvent(System.currentTimeMillis() - 10_000L, System.currentTimeMillis() - 20_000L);
@@ -68,6 +89,9 @@ public class UserEventsSectionServiceTest {
                 service.classifyRegisteredEvent(event, "user1"));
     }
 
+    /**
+     * Handles group Registered Events_splits Events Into Expected Sections.
+     */
     @Test
     public void groupRegisteredEvents_splitsEventsIntoExpectedSections() {
         Event invited = buildEvent(System.currentTimeMillis() + 15_000L, System.currentTimeMillis() + 10_000L);
@@ -96,6 +120,9 @@ public class UserEventsSectionServiceTest {
         assertEquals(1, sections.getPastEvents().size());
     }
 
+    /**
+     * Handles group Hosted Events_splits Events Into Ongoing And Completed.
+     */
     @Test
     public void groupHostedEvents_splitsEventsIntoOngoingAndCompleted() {
         Event ongoing = buildEvent(System.currentTimeMillis() + 30_000L, System.currentTimeMillis() + 20_000L);
@@ -107,6 +134,9 @@ public class UserEventsSectionServiceTest {
         assertEquals(1, sections.getCompletedEvents().size());
     }
 
+    /**
+     * Builds event.
+     */
     private Event buildEvent(long eventTime, long deadlineTime) {
         Event event = new Event();
         event.setEventDate(new Date(eventTime));

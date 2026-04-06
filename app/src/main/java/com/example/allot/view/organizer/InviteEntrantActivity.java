@@ -38,6 +38,9 @@ public class InviteEntrantActivity extends AppCompatActivity {
 
     private final Set<String> excludedUserIds = new HashSet<>();
 
+    /**
+     * Handles on Create.
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -51,12 +54,18 @@ public class InviteEntrantActivity extends AppCompatActivity {
         loadEvent();
     }
 
+    /**
+     * Handles finish.
+     */
     @Override
     public void finish() {
         super.finish();
         overridePendingTransition(0, 0);
     }
 
+    /**
+     * Binds views.
+     */
     private void bindViews() {
         ImageButton backButton = findViewById(R.id.backButton);
         backButton.setOnClickListener(view -> getOnBackPressedDispatcher().onBackPressed());
@@ -69,6 +78,9 @@ public class InviteEntrantActivity extends AppCompatActivity {
         searchButton.setOnClickListener(view -> runSearch());
     }
 
+    /**
+     * Loads event.
+     */
     private void loadEvent() {
         if (TextUtils.isEmpty(eventId)) {
             Toast.makeText(this, R.string.invite_entrant_load_failure, Toast.LENGTH_SHORT).show();
@@ -94,6 +106,9 @@ public class InviteEntrantActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Builds excluded users.
+     */
     private void buildExcludedUsers(Event event) {
         excludedUserIds.clear();
         if (event == null) {
@@ -117,6 +132,9 @@ public class InviteEntrantActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Handles run Search.
+     */
     private void runSearch() {
         String query = searchInput.getText() == null ? "" : searchInput.getText().toString().trim();
         if (query.isEmpty()) {
@@ -134,6 +152,9 @@ public class InviteEntrantActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Filters users.
+     */
     private List<User> filterUsers(List<User> users) {
         List<User> filtered = new ArrayList<>();
         if (users == null) {
@@ -152,6 +173,9 @@ public class InviteEntrantActivity extends AppCompatActivity {
         return filtered;
     }
 
+    /**
+     * Handles render Results.
+     */
     private void renderResults(List<User> users) {
         resultsContainer.removeAllViews();
         if (users == null || users.isEmpty()) {
@@ -168,6 +192,9 @@ public class InviteEntrantActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Binds row.
+     */
     private void bindRow(View row, User user) {
         TextView userNameText = row.findViewById(R.id.userNameText);
         TextView userDetailText = row.findViewById(R.id.userDetailText);
@@ -179,6 +206,9 @@ public class InviteEntrantActivity extends AppCompatActivity {
         inviteButton.setOnClickListener(view -> inviteUser(user, inviteButton));
     }
 
+    /**
+     * Handles invite User.
+     */
     private void inviteUser(User user, TextView inviteButton) {
         if (user == null || TextUtils.isEmpty(user.getDeviceId())) {
             return;
@@ -198,6 +228,9 @@ public class InviteEntrantActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Builds user detail.
+     */
     private String buildUserDetail(User user) {
         String email = user.getEmail();
         String phone = user.getPhone();

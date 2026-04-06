@@ -23,17 +23,26 @@ import org.junit.runner.RunWith;
 @RunWith(AndroidJUnit4.class)
 public class AdminUiTest {
 
+    /**
+     * Handles disable Animations.
+     */
     @Before
     public void disableAnimations() {
         SystemAnimations.disableAll();
     }
 
+    /**
+     * Builds intent.
+     */
     private Intent buildIntent() {
         Intent intent = new Intent(ApplicationProvider.getApplicationContext(), AdminActivity.class);
         intent.putExtra(AdminActivity.EXTRA_UI_TEST_MODE, true);
         return intent;
     }
 
+    /**
+     * Handles admin Events Tab_shows Event Row.
+     */
     @Test
     public void adminEventsTab_showsEventRow() {
         try (ActivityScenario<AdminActivity> scenario = ActivityScenario.launch(buildIntent())) {
@@ -41,6 +50,9 @@ public class AdminUiTest {
         }
     }
 
+    /**
+     * Handles admin Profiles Tab_shows Profile Row.
+     */
     @Test
     public void adminProfilesTab_showsProfileRow() {
         try (ActivityScenario<AdminActivity> scenario = ActivityScenario.launch(buildIntent())) {
@@ -50,6 +62,9 @@ public class AdminUiTest {
         }
     }
 
+    /**
+     * Handles admin Profile Pics Tab_shows Profile Picture Row.
+     */
     @Test
     public void adminProfilePicsTab_showsProfilePictureRow() {
         try (ActivityScenario<AdminActivity> scenario = ActivityScenario.launch(buildIntent())) {
@@ -58,6 +73,9 @@ public class AdminUiTest {
         }
     }
 
+    /**
+     * Handles admin Notifications Tab_shows Notification Row.
+     */
     @Test
     public void adminNotificationsTab_showsNotificationRow() {
         try (ActivityScenario<AdminActivity> scenario = ActivityScenario.launch(buildIntent())) {
@@ -67,6 +85,9 @@ public class AdminUiTest {
         }
     }
 
+    /**
+     * Handles admin Posters Tab_shows Poster Row.
+     */
     @Test
     public void adminPostersTab_showsPosterRow() {
         try (ActivityScenario<AdminActivity> scenario = ActivityScenario.launch(buildIntent())) {
@@ -75,6 +96,9 @@ public class AdminUiTest {
         }
     }
 
+    /**
+     * Handles admin Tabs_switch Visibility.
+     */
     @Test
     public void adminTabs_switchVisibility() {
         try (ActivityScenario<AdminActivity> scenario = ActivityScenario.launch(buildIntent())) {
@@ -88,6 +112,9 @@ public class AdminUiTest {
         }
     }
 
+    /**
+     * Handles admin Events Tab_delete Event Shows Empty State.
+     */
     @Test
     public void adminEventsTab_deleteEventShowsEmptyState() {
         try (ActivityScenario<AdminActivity> scenario = ActivityScenario.launch(buildIntent())) {
@@ -97,6 +124,9 @@ public class AdminUiTest {
         }
     }
 
+    /**
+     * Handles admin Profiles Tab_delete Profile Shows Empty State.
+     */
     @Test
     public void adminProfilesTab_deleteProfileShowsEmptyState() {
         try (ActivityScenario<AdminActivity> scenario = ActivityScenario.launch(buildIntent())) {
@@ -107,6 +137,9 @@ public class AdminUiTest {
         }
     }
 
+    /**
+     * Handles admin Posters Tab_delete Poster Shows Empty State.
+     */
     @Test
     public void adminPostersTab_deletePosterShowsEmptyState() {
         try (ActivityScenario<AdminActivity> scenario = ActivityScenario.launch(buildIntent())) {

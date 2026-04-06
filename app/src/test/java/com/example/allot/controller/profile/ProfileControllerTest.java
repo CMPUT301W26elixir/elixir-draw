@@ -18,12 +18,18 @@ public class ProfileControllerTest {
     private FakeUserController userController;
     private ProfileController controller;
 
+    /**
+     * Updates up.
+     */
     @Before
     public void setUp() {
         userController = new FakeUserController();
         controller = new ProfileController(userController);
     }
 
+    /**
+     * Loads profile_returns snapshot from loaded user.
+     */
     @Test
     public void loadProfile_returnsSnapshotFromLoadedUser() {
         User user = new User();
@@ -44,6 +50,9 @@ public class ProfileControllerTest {
         });
     }
 
+    /**
+     * Loads profile_returns failure when user missing.
+     */
     @Test
     public void loadProfile_returnsFailureWhenUserMissing() {
         userController.userToLoad = null;
@@ -55,6 +64,9 @@ public class ProfileControllerTest {
         });
     }
 
+    /**
+     * Returns whether i.s Save Available_only When Changed And Idle
+     */
     @Test
     public void isSaveAvailable_onlyWhenChangedAndIdle() {
         ProfileFormSnapshot original = new ProfileFormSnapshot("A", "B", "a@example.com", "", true);
@@ -66,6 +78,9 @@ public class ProfileControllerTest {
         assertFalse(controller.isSaveAvailable(original, changed, false, true));
     }
 
+    /**
+     * Saves profile_returns saved snapshot on success.
+     */
     @Test
     public void saveProfile_returnsSavedSnapshotOnSuccess() {
         User savedUser = new User();
@@ -84,6 +99,9 @@ public class ProfileControllerTest {
                 });
     }
 
+    /**
+     * Saves profile_returns failure message when update fails.
+     */
     @Test
     public void saveProfile_returnsFailureMessageWhenUpdateFails() {
         userController.updatedUser = null;
@@ -97,6 +115,9 @@ public class ProfileControllerTest {
                 });
     }
 
+    /**
+     * Deletes profile_returns success and failure messages.
+     */
     @Test
     public void deleteProfile_returnsSuccessAndFailureMessages() {
         userController.deleteResult = true;
@@ -126,21 +147,33 @@ public class ProfileControllerTest {
         private Boolean deleteResult;
         private boolean deleteSuccess;
 
+        /**
+         * Handles fake User Controller.
+         */
         private FakeUserController() {
             super(null, new DeviceSessionManager(new FakeDeviceSessionStore("device-1")));
         }
 
+        /**
+         * Loads current user.
+         */
         @Override
         public void loadCurrentUser(com.example.allot.common.OnCompleteListener<User> listener) {
             listener.onComplete(userToLoad, loadSuccess);
         }
 
+        /**
+         * Updates user profile.
+         */
         @Override
         public void updateUserProfile(String firstName, String lastName, String email, String phone,
                                       boolean notiEnabled, com.example.allot.common.OnCompleteListener<User> listener) {
             listener.onComplete(updatedUser, updateSuccess);
         }
 
+        /**
+         * Deletes current user.
+         */
         @Override
         public void deleteCurrentUser(com.example.allot.common.OnCompleteListener<Boolean> listener) {
             listener.onComplete(deleteResult, deleteSuccess);
@@ -150,15 +183,24 @@ public class ProfileControllerTest {
     private static class FakeDeviceSessionStore implements DeviceSessionManager.DeviceSessionStore {
         private final String deviceId;
 
+        /**
+         * Handles fake Device Session Store.
+         */
         private FakeDeviceSessionStore(String deviceId) {
             this.deviceId = deviceId;
         }
 
+        /**
+         * Returns whether g.et Device Id
+         */
         @Override
         public String getDeviceId() {
             return deviceId;
         }
 
+        /**
+         * Saves device id.
+         */
         @Override
         public void saveDeviceId(String deviceId) {
         }

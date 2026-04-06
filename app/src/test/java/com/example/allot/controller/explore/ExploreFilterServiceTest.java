@@ -12,11 +12,17 @@ import org.junit.Test;
 public class ExploreFilterServiceTest {
     private ExploreFilterService service;
 
+    /**
+     * Updates up.
+     */
     @Before
     public void setUp() {
         service = new ExploreFilterService();
     }
 
+    /**
+     * Builds browsable event list_filters by search term.
+     */
     @Test
     public void buildBrowsableEventList_filtersBySearchTerm() {
         long now = System.currentTimeMillis();
@@ -32,6 +38,9 @@ public class ExploreFilterServiceTest {
         assertEquals("2", result.get(0).getEventId());
     }
 
+    /**
+     * Builds browsable event list_filters by category chip.
+     */
     @Test
     public void buildBrowsableEventList_filtersByCategoryChip() {
         long now = System.currentTimeMillis();
@@ -47,6 +56,9 @@ public class ExploreFilterServiceTest {
         assertEquals("1", result.get(0).getEventId());
     }
 
+    /**
+     * Builds browsable event list_excludes non open events.
+     */
     @Test
     public void buildBrowsableEventList_excludesNonOpenEvents() {
         long now = System.currentTimeMillis();
@@ -62,6 +74,9 @@ public class ExploreFilterServiceTest {
         assertEquals("2", result.get(0).getEventId());
     }
 
+    /**
+     * Builds browsable event list_sorts by deadline date and title.
+     */
     @Test
     public void buildBrowsableEventList_sortsByDeadlineDateAndTitle() {
         long now = System.currentTimeMillis();
@@ -78,6 +93,9 @@ public class ExploreFilterServiceTest {
                 Arrays.asList(result.get(0).getEventId(), result.get(1).getEventId(), result.get(2).getEventId()));
     }
 
+    /**
+     * Builds event.
+     */
     private Event buildEvent(String id, String title, String category, String description, long eventTime, long deadlineTime, String status) {
         Event event = new Event();
         event.setEventId(id);

@@ -156,6 +156,9 @@ public class ExploreFilterService {
         return normalize(value).contains(normalizedSearchTerm);
     }
 
+    /**
+     * Handles matches Keywords.
+     */
     private boolean matchesKeywords(Event event, String keywords) {
         String normalizedKeywords = normalize(keywords);
         if (normalizedKeywords.isEmpty()) {
@@ -177,6 +180,9 @@ public class ExploreFilterService {
         return true;
     }
 
+    /**
+     * Handles split Keywords.
+     */
     private List<String> splitKeywords(String normalizedKeywords) {
         List<String> tokens = new ArrayList<>();
         if (normalizedKeywords.isEmpty()) {
@@ -192,6 +198,9 @@ public class ExploreFilterService {
         return tokens;
     }
 
+    /**
+     * Handles matches Start Date.
+     */
     private boolean matchesStartDate(Event event, java.util.Date startDate) {
         if (startDate == null) {
             return true;
@@ -204,6 +213,9 @@ public class ExploreFilterService {
         return !event.getEventDate().before(startDate);
     }
 
+    /**
+     * Handles matches Distance.
+     */
     private boolean matchesDistance(Event event, Double latitude, Double longitude, Double distanceKm) {
         if (latitude == null || longitude == null || distanceKm == null || distanceKm <= 0) {
             return true;
@@ -225,6 +237,9 @@ public class ExploreFilterService {
         return distanceMeters <= (distanceKm * 1000.0);
     }
 
+    /**
+     * Handles matches Open Spots.
+     */
     private boolean matchesOpenSpots(Event event, Boolean onlyOpenSpots) {
         if (!Boolean.TRUE.equals(onlyOpenSpots)) {
             return true;
@@ -243,6 +258,9 @@ public class ExploreFilterService {
         return currentEntrantCount < effectiveCapacity;
     }
 
+    /**
+     * Handles matches Minimum Capacity.
+     */
     private boolean matchesMinimumCapacity(Event event, Integer minimumCapacity) {
         if (minimumCapacity == null || minimumCapacity <= 0) {
             return true;
@@ -252,6 +270,9 @@ public class ExploreFilterService {
         return effectiveCapacity != null && effectiveCapacity >= minimumCapacity;
     }
 
+    /**
+     * Returns whether g.et Effective Capacity
+     */
     private Integer getEffectiveCapacity(Event event) {
         if (event == null) {
             return null;
@@ -265,6 +286,9 @@ public class ExploreFilterService {
         return null;
     }
 
+    /**
+     * Handles category Keywords.
+     */
     private List<String> categoryKeywords(String normalizedCategory) {
         if (normalizedCategory.isEmpty()) {
             return new ArrayList<>();

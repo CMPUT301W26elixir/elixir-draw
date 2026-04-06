@@ -13,11 +13,17 @@ import org.junit.Test;
 public class LotteryDrawServiceTest {
     private LotteryDrawService service;
 
+    /**
+     * Updates up.
+     */
     @Before
     public void setUp() {
         service = new LotteryDrawService();
     }
 
+    /**
+     * Returns whether h.as Draw Results_detects Existing Chosen Entrants
+     */
     @Test
     public void hasDrawResults_detectsExistingChosenEntrants() {
         Event event = buildEventWithEntrants("user1");
@@ -26,6 +32,9 @@ public class LotteryDrawServiceTest {
         assertTrue(service.hasDrawResults(event));
     }
 
+    /**
+     * Builds draw result_builds chosen lists and resets processed state.
+     */
     @Test
     public void buildDrawResult_buildsChosenListsAndResetsProcessedState() {
         Event event = buildEventWithEntrants("user1", "user2", "user3");
@@ -47,6 +56,9 @@ public class LotteryDrawServiceTest {
         assertEquals(result.getChosen().size(), result.getWaitingList().status.size());
     }
 
+    /**
+     * Builds draw result_returns null when no entrants exist.
+     */
     @Test
     public void buildDrawResult_returnsNullWhenNoEntrantsExist() {
         Event event = buildEventWithEntrants();
@@ -58,6 +70,9 @@ public class LotteryDrawServiceTest {
         assertTrue(result == null);
     }
 
+    /**
+     * Builds event with entrants.
+     */
     private Event buildEventWithEntrants(String... entrants) {
         Event event = new Event();
         event.setWaitingList(new WaitingList());

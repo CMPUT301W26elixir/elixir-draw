@@ -33,6 +33,9 @@ public class SplashActivity extends AppCompatActivity {
                 proceedToApp();
             });
 
+    /**
+     * Handles on Create.
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -41,6 +44,9 @@ public class SplashActivity extends AppCompatActivity {
         askNotificationPermission();
     }
 
+    /**
+     * Handles ask Notification Permission.
+     */
     private void askNotificationPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) ==
@@ -54,6 +60,9 @@ public class SplashActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Handles proceed To App.
+     */
     private void proceedToApp() {
         new Handler().postDelayed(() -> {
             DeviceSessionManager sessionManager = new DeviceSessionManager(this);

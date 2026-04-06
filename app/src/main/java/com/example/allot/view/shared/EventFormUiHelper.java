@@ -172,6 +172,9 @@ public class EventFormUiHelper {
                 android.R.layout.simple_spinner_item,
                 context.getResources().getTextArray(R.array.create_event_months)
         ) {
+            /**
+             * Returns whether g.et View
+             */
             @Override
             public View getView(int position, View convertView, android.view.ViewGroup parent) {
                 View view = super.getView(position, convertView, parent);
@@ -186,6 +189,9 @@ public class EventFormUiHelper {
                 return view;
             }
 
+            /**
+             * Returns whether g.et Drop Down View
+             */
             @Override
             public View getDropDownView(int position, View convertView, android.view.ViewGroup parent) {
                 View view = super.getDropDownView(position, convertView, parent);

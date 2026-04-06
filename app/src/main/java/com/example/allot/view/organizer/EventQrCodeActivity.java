@@ -116,6 +116,9 @@ public class EventQrCodeActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Saves qr to gallery.
+     */
     private void saveQrToGallery() {
         if (currentQrBitmap == null) {
             Toast.makeText(this, R.string.event_qr_save_failure, Toast.LENGTH_SHORT).show();

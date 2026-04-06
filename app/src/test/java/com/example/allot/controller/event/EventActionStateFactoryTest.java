@@ -10,11 +10,17 @@ import org.junit.Test;
 public class EventActionStateFactoryTest {
     private EventActionStateFactory factory;
 
+    /**
+     * Updates up.
+     */
     @Before
     public void setUp() {
         factory = new EventActionStateFactory();
     }
 
+    /**
+     * Creates _returns manage state for organizer.
+     */
     @Test
     public void create_returnsManageStateForOrganizer() {
         Event event = buildEvent();
@@ -25,6 +31,9 @@ public class EventActionStateFactoryTest {
         assertEquals(EventActionState.ActionType.MANAGE, state.getActionType());
     }
 
+    /**
+     * Creates _returns enrolled state.
+     */
     @Test
     public void create_returnsEnrolledState() {
         Event event = buildEvent();
@@ -35,6 +44,9 @@ public class EventActionStateFactoryTest {
         assertEquals(EventActionState.ActionType.ENROLLED, state.getActionType());
     }
 
+    /**
+     * Creates _returns offer state.
+     */
     @Test
     public void create_returnsOfferState() {
         Event event = buildEvent();
@@ -45,6 +57,9 @@ public class EventActionStateFactoryTest {
         assertEquals(EventActionState.ActionType.OFFER, state.getActionType());
     }
 
+    /**
+     * Creates _returns replacement state.
+     */
     @Test
     public void create_returnsReplacementState() {
         Event event = buildEvent();
@@ -57,6 +72,9 @@ public class EventActionStateFactoryTest {
         assertEquals(EventActionState.ActionType.NOT_SELECTED_REPLACEMENT, state.getActionType());
     }
 
+    /**
+     * Creates _returns finalized not selected state.
+     */
     @Test
     public void create_returnsFinalizedNotSelectedState() {
         Event event = buildEvent();
@@ -69,6 +87,9 @@ public class EventActionStateFactoryTest {
         assertEquals(EventActionState.ActionType.NOT_SELECTED_FINAL, state.getActionType());
     }
 
+    /**
+     * Creates _returns join and leave waitlist states.
+     */
     @Test
     public void create_returnsJoinAndLeaveWaitlistStates() {
         Event event = buildEvent();
@@ -81,6 +102,9 @@ public class EventActionStateFactoryTest {
         assertEquals(EventActionState.ActionType.LEAVE_WAITLIST, leaveState.getActionType());
     }
 
+    /**
+     * Builds event.
+     */
     private Event buildEvent() {
         Event event = new Event();
         event.setWaitingList(new WaitingList());

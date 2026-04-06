@@ -11,10 +11,16 @@ public class NotificationRepository {
     private static final String COLLECTION = "notifications";
     private final FirebaseFirestore db;
 
+    /**
+     * Creates a new NotificationRepository instance.
+     */
     public NotificationRepository() {
         this(FirebaseFirestore.getInstance());
     }
 
+    /**
+     * Creates a new NotificationRepository instance.
+     */
     public NotificationRepository(FirebaseFirestore db) {
         this.db = db;
     }

@@ -27,6 +27,9 @@ public class EventDetailController {
     private final EventActionStateFactory eventActionStateFactory;
     private final EventDetailViewService eventDetailViewService;
 
+    /**
+     * Creates a new EventDetailController instance.
+     */
     public EventDetailController(android.content.Context context) {
         this(
                 new EventRepository(),
@@ -36,6 +39,9 @@ public class EventDetailController {
         );
     }
 
+    /**
+     * Creates a new EventDetailController instance.
+     */
     EventDetailController(EventRepository eventRepository,
                           UserController userController,
                           EventActionStateFactory eventActionStateFactory,
@@ -390,6 +396,9 @@ public class EventDetailController {
         });
     }
 
+    /**
+     * Deletes comment thread internal.
+     */
     private void deleteCommentThreadInternal(String eventId,
                                              String commentId,
                                              Event event,
@@ -522,6 +531,9 @@ public class EventDetailController {
                 eventDetailViewService.getSelectionCriteriaCount(event));
     }
 
+    /**
+     * Loads organizer name.
+     */
     private void loadOrganizerName(String organizerId, java.util.function.Consumer<String> consumer) {
         if (isBlank(organizerId)) {
             consumer.accept("Organizer TBA");
@@ -538,6 +550,9 @@ public class EventDetailController {
         });
     }
 
+    /**
+     * Builds loaded state.
+     */
     private EventDetailData buildLoadedState(Event event, EventActionState detailState, String organizerName) {
         EventDetailViewService.FooterState footerState = eventDetailViewService.buildFooterState(detailState);
         return new EventDetailData(
@@ -603,6 +618,9 @@ public class EventDetailController {
         return EventDisplayFormatter.shortDate(date);
     }
 
+    /**
+     * Builds error state.
+     */
     private EventDetailData buildErrorState() {
         return new EventDetailData(
                 EventDetailData.Status.ERROR,
@@ -623,6 +641,9 @@ public class EventDetailController {
         );
     }
 
+    /**
+     * Handles resolve Action.
+     */
     private EventDetailData.NextAction resolveAction(EventActionState detailState) {
         if (eventDetailViewService.isManageAction(detailState)) {
             return EventDetailData.NextAction.NAVIGATE_MANAGE;
@@ -642,42 +663,72 @@ public class EventDetailController {
         return EventDetailData.NextAction.SHOW_JOIN_DIALOG;
     }
 
+    /**
+     * Returns whether g.et Hero Background Res
+     */
     private int getHeroBackgroundRes(String category) {
         return UiHelper.eventImageBackgroundRes(category);
     }
 
+    /**
+     * Builds location text.
+     */
     private String buildLocationText(String location) {
         return EventDisplayFormatter.detailLocation(location);
     }
 
+    /**
+     * Builds event date text.
+     */
     private String buildEventDateText(String eventDate) {
         return EventDisplayFormatter.detailDate(eventDate);
     }
 
+    /**
+     * Builds registration open text.
+     */
     private String buildRegistrationOpenText(Date registrationOpen) {
         return EventDisplayFormatter.labeledShortDate("Registration opens", registrationOpen);
     }
 
+    /**
+     * Builds registration deadline text.
+     */
     private String buildRegistrationDeadlineText(Date registrationDeadline) {
         return EventDisplayFormatter.labeledShortDate("Registration closes", registrationDeadline);
     }
 
+    /**
+     * Handles format Date.
+     */
     private String formatDate(Date date) {
         return EventDisplayFormatter.longDate(date);
     }
 
+    /**
+     * Handles format Long Date.
+     */
     private String formatLongDate(Date date) {
         return EventDisplayFormatter.shortDate(date);
     }
 
+    /**
+     * Handles clean Text.
+     */
     private String cleanText(String value) {
         return UiHelper.cleanText(value);
     }
 
+    /**
+     * Returns whether i.s Blank
+     */
     private boolean isBlank(String value) {
         return value == null || value.trim().isEmpty();
     }
 
+    /**
+     * Handles collect Thread Ids.
+     */
     private Set<String> collectThreadIds(List<EventComment> comments, String rootId) {
         Set<String> deleteIds = new HashSet<>();
         if (comments == null || comments.isEmpty() || isBlank(rootId)) {

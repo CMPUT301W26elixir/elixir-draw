@@ -24,10 +24,16 @@ public class ProfilePhotoController {
     private final UserRepository userRepository;
     private final FirebaseStorage storage;
 
+    /**
+     * Creates a new ProfilePhotoController instance.
+     */
     public ProfilePhotoController() {
         this(new UserRepository(), FirebaseStorage.getInstance());
     }
 
+    /**
+     * Creates a new ProfilePhotoController instance.
+     */
     ProfilePhotoController(UserRepository userRepository, FirebaseStorage storage) {
         this.userRepository = userRepository;
         this.storage = storage;
@@ -97,6 +103,9 @@ public class ProfilePhotoController {
         });
     }
 
+    /**
+     * Handles fetch Download Url With Retry.
+     */
     private void fetchDownloadUrlWithRetry(StorageReference photoRef,
                                            String deviceId,
                                            String previousPhotoUrl,
@@ -132,6 +141,9 @@ public class ProfilePhotoController {
                 });
     }
 
+    /**
+     * Deletes previous photo if needed.
+     */
     private void deletePreviousPhotoIfNeeded(String previousPhotoUrl, StorageReference currentPhotoRef) {
         if (isBlank(previousPhotoUrl)) {
             return;
@@ -151,6 +163,9 @@ public class ProfilePhotoController {
         }
     }
 
+    /**
+     * Returns whether i.s Object Not Found
+     */
     private boolean isObjectNotFound(Exception exception) {
         if (!(exception instanceof StorageException)) {
             return false;
@@ -159,6 +174,9 @@ public class ProfilePhotoController {
         return storageException.getErrorCode() == StorageException.ERROR_OBJECT_NOT_FOUND;
     }
 
+    /**
+     * Returns whether i.s Blank
+     */
     private boolean isBlank(String value) {
         return value == null || value.trim().isEmpty();
     }

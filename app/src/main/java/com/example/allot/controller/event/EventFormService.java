@@ -21,6 +21,9 @@ public class EventFormService {
 
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("MMM d, yyyy", Locale.getDefault());
 
+    /**
+     * Creates a new EventFormService instance.
+     */
     public EventFormService() {
         dateFormat.setLenient(false);
     }
@@ -190,6 +193,9 @@ public class EventFormService {
         return R.string.create_event_validation_required;
     }
 
+    /**
+     * Handles validate Form.
+     */
     private ValidationResult validateForm(EventFormData formData) {
         if (formData == null) {
             return ValidationResult.failure(ERROR_REQUIRED);
@@ -230,14 +236,23 @@ public class EventFormService {
         return ValidationResult.success(eventDate, registrationStart, registrationEnd, price, participants);
     }
 
+    /**
+     * Returns whether i.s Blank
+     */
     private boolean isBlank(String value) {
         return value == null || value.trim().isEmpty();
     }
 
+    /**
+     * Handles safe String.
+     */
     private String safeString(String value) {
         return value == null ? "" : value;
     }
 
+    /**
+     * Handles visibility From Form.
+     */
     private String visibilityFromForm(EventFormData formData) {
         if (formData != null && formData.isPrivateEvent()) {
             return Event.VISIBILITY_PRIVATE;
@@ -254,6 +269,9 @@ public class EventFormService {
         private final Double price;
         private final Integer participants;
 
+        /**
+         * Handles validation Result.
+         */
         private ValidationResult(boolean success,
                                  String message,
                                  Date eventDate,
@@ -270,10 +288,16 @@ public class EventFormService {
             this.participants = participants;
         }
 
+        /**
+         * Handles failure.
+         */
         private static ValidationResult failure(String message) {
             return new ValidationResult(false, message, null, null, null, null, null);
         }
 
+        /**
+         * Handles success.
+         */
         private static ValidationResult success(Date eventDate,
                                                 Date registrationStart,
                                                 Date registrationEnd,
@@ -282,30 +306,51 @@ public class EventFormService {
             return new ValidationResult(true, null, eventDate, registrationStart, registrationEnd, price, participants);
         }
 
+        /**
+         * Returns whether i.s Failure
+         */
         private boolean isFailure() {
             return !success;
         }
 
+        /**
+         * Returns whether g.et Message
+         */
         private String getMessage() {
             return message;
         }
 
+        /**
+         * Returns whether g.et Event Date
+         */
         private Date getEventDate() {
             return eventDate;
         }
 
+        /**
+         * Returns whether g.et Registration Start
+         */
         private Date getRegistrationStart() {
             return registrationStart;
         }
 
+        /**
+         * Returns whether g.et Registration End
+         */
         private Date getRegistrationEnd() {
             return registrationEnd;
         }
 
+        /**
+         * Returns whether g.et Price
+         */
         private Double getPrice() {
             return price;
         }
 
+        /**
+         * Returns whether g.et Participants
+         */
         private Integer getParticipants() {
             return participants;
         }

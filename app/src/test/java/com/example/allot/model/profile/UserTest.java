@@ -8,6 +8,9 @@ import java.util.ArrayList;
 import org.junit.Test;
 
 public class UserTest {
+    /**
+     * Handles default Constructor_initializes Event Lists.
+     */
     @Test
     public void defaultConstructor_initializesEventLists() {
         User user = new User();
@@ -18,6 +21,9 @@ public class UserTest {
         assertTrue(user.getHistory().isEmpty());
     }
 
+    /**
+     * Returns whether g.et Name_handles Missing And Trimmed Parts
+     */
     @Test
     public void getName_handlesMissingAndTrimmedParts() {
         User user = new User();
@@ -33,6 +39,9 @@ public class UserTest {
         assertEquals("Stone", user.getName());
     }
 
+    /**
+     * Returns whether g.etters_reinitialize Null Lists
+     */
     @Test
     public void getters_reinitializeNullLists() {
         User user = new User();

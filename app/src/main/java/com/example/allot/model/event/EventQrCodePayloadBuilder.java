@@ -5,6 +5,9 @@ package com.example.allot.model.event;
  */
 public final class EventQrCodePayloadBuilder {
 
+    /**
+     * Creates a new EventQrCodePayloadBuilder instance.
+     */
     private EventQrCodePayloadBuilder() {
     }
 

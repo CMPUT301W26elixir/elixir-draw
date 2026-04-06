@@ -36,14 +36,23 @@ public class ProfilePhotoCropView extends AppCompatImageView {
     private float lastTouchY;
     private boolean isDragging;
 
+    /**
+     * Creates a new ProfilePhotoCropView instance.
+     */
     public ProfilePhotoCropView(@NonNull Context context) {
         this(context, null);
     }
 
+    /**
+     * Creates a new ProfilePhotoCropView instance.
+     */
     public ProfilePhotoCropView(@NonNull Context context, @Nullable AttributeSet attrs) {
         this(context, attrs, 0);
     }
 
+    /**
+     * Creates a new ProfilePhotoCropView instance.
+     */
     public ProfilePhotoCropView(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         setScaleType(ScaleType.MATRIX);
@@ -55,6 +64,9 @@ public class ProfilePhotoCropView extends AppCompatImageView {
         scaleGestureDetector = new ScaleGestureDetector(context, new ScaleListener());
     }
 
+    /**
+     * Updates crop bitmap.
+     */
     public void setCropBitmap(@Nullable Bitmap bitmap) {
         this.bitmap = bitmap;
         if (bitmap == null) {
@@ -67,6 +79,9 @@ public class ProfilePhotoCropView extends AppCompatImageView {
         post(this::resetImagePosition);
     }
 
+    /**
+     * Builds cropped bitmap.
+     */
     @Nullable
     public Bitmap buildCroppedBitmap(int outputSizePx) {
         if (bitmap == null || cropRect.width() <= 0f || cropRect.height() <= 0f) {
@@ -101,6 +116,9 @@ public class ProfilePhotoCropView extends AppCompatImageView {
         return output;
     }
 
+    /**
+     * Handles on Size Changed.
+     */
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
@@ -108,6 +126,9 @@ public class ProfilePhotoCropView extends AppCompatImageView {
         resetImagePosition();
     }
 
+    /**
+     * Handles on Touch Event.
+     */
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         if (bitmap == null) {
@@ -147,6 +168,9 @@ public class ProfilePhotoCropView extends AppCompatImageView {
         }
     }
 
+    /**
+     * Handles on Draw.
+     */
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
@@ -161,6 +185,9 @@ public class ProfilePhotoCropView extends AppCompatImageView {
         canvas.drawRect(cropRect, borderPaint);
     }
 
+    /**
+     * Updates crop rect.
+     */
     private void updateCropRect(int width, int height) {
         float margin = dpToPx(24);
         float size = Math.min(width - (margin * 2f), height - (margin * 2f));
@@ -169,6 +196,9 @@ public class ProfilePhotoCropView extends AppCompatImageView {
         cropRect.set(left, top, left + size, top + size);
     }
 
+    /**
+     * Handles reset Image Position.
+     */
     private void resetImagePosition() {
         if (bitmap == null || getWidth() == 0 || getHeight() == 0 || cropRect.width() <= 0f) {
             return;
@@ -189,6 +219,9 @@ public class ProfilePhotoCropView extends AppCompatImageView {
         invalidate();
     }
 
+    /**
+     * Handles constrain Image.
+     */
     private void constrainImage() {
         if (bitmap == null) {
             return;
@@ -213,11 +246,17 @@ public class ProfilePhotoCropView extends AppCompatImageView {
         drawMatrix.postTranslate(dx, dy);
     }
 
+    /**
+     * Handles dp To Px.
+     */
     private float dpToPx(int dp) {
         return dp * getResources().getDisplayMetrics().density;
     }
 
     private class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {
+        /**
+         * Handles on Scale.
+         */
         @Override
         public boolean onScale(ScaleGestureDetector detector) {
             if (bitmap == null) {

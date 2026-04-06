@@ -20,6 +20,9 @@ public class AdminEventControllerTest {
     private FakeUserController userController;
     private AdminEventController controller;
 
+    /**
+     * Updates up.
+     */
     @Before
     public void setUp() {
         eventRepository = new FakeEventRepository();
@@ -28,6 +31,9 @@ public class AdminEventControllerTest {
         controller = new AdminEventController(eventRepository, posterController, userController);
     }
 
+    /**
+     * Loads all events_requires admin and delegates when authorized.
+     */
     @Test
     public void loadAllEvents_requiresAdminAndDelegatesWhenAuthorized() {
         userController.isAdmin = false;
@@ -46,6 +52,9 @@ public class AdminEventControllerTest {
         });
     }
 
+    /**
+     * Loads all events_returns failure when admin lookup fails.
+     */
     @Test
     public void loadAllEvents_returnsFailureWhenAdminLookupFails() {
         userController.adminLookupSuccess = false;
@@ -57,6 +66,9 @@ public class AdminEventControllerTest {
         });
     }
 
+    /**
+     * Loads all events_propagates repository failure.
+     */
     @Test
     public void loadAllEvents_propagatesRepositoryFailure() {
         userController.isAdmin = true;
@@ -68,6 +80,9 @@ public class AdminEventControllerTest {
         });
     }
 
+    /**
+     * Deletes event_fails without admin or when poster delete fails.
+     */
     @Test
     public void deleteEvent_failsWithoutAdminOrWhenPosterDeleteFails() {
         userController.isAdmin = false;
@@ -90,6 +105,9 @@ public class AdminEventControllerTest {
         });
     }
 
+    /**
+     * Deletes event_fails when admin lookup fails.
+     */
     @Test
     public void deleteEvent_failsWhenAdminLookupFails() {
         userController.adminLookupSuccess = false;
@@ -100,6 +118,9 @@ public class AdminEventControllerTest {
         });
     }
 
+    /**
+     * Deletes event_fails when event lookup fails.
+     */
     @Test
     public void deleteEvent_failsWhenEventLookupFails() {
         userController.isAdmin = true;
@@ -111,6 +132,9 @@ public class AdminEventControllerTest {
         });
     }
 
+    /**
+     * Deletes event_propagates repository delete failure after poster delete.
+     */
     @Test
     public void deleteEvent_propagatesRepositoryDeleteFailureAfterPosterDelete() {
         userController.isAdmin = true;
@@ -130,6 +154,9 @@ public class AdminEventControllerTest {
         });
     }
 
+    /**
+     * Deletes event_uses current poster behavior for blank poster url.
+     */
     @Test
     public void deleteEvent_usesCurrentPosterBehaviorForBlankPosterUrl() {
         userController.isAdmin = true;
@@ -149,6 +176,9 @@ public class AdminEventControllerTest {
         });
     }
 
+    /**
+     * Deletes event_uses current poster behavior for null poster url.
+     */
     @Test
     public void deleteEvent_usesCurrentPosterBehaviorForNullPosterUrl() {
         userController.isAdmin = true;
@@ -167,6 +197,9 @@ public class AdminEventControllerTest {
         });
     }
 
+    /**
+     * Deletes event_deletes poster then event when authorized.
+     */
     @Test
     public void deleteEvent_deletesPosterThenEventWhenAuthorized() {
         userController.isAdmin = true;
@@ -195,20 +228,32 @@ public class AdminEventControllerTest {
         private boolean getEventSuccess = true;
         private boolean deleteEventSuccess;
 
+        /**
+         * Handles fake Event Repository.
+         */
         private FakeEventRepository() {
             super((com.google.firebase.firestore.FirebaseFirestore) null);
         }
 
+        /**
+         * Returns whether g.et All Events
+         */
         @Override
         public void getAllEvents(com.example.allot.common.OnCompleteListener<List<Event>> listener) {
             listener.onComplete(allEvents, getAllEventsSuccess);
         }
 
+        /**
+         * Returns whether g.et Event By Id
+         */
         @Override
         public void getEventById(String eventId, com.example.allot.common.OnCompleteListener<Event> listener) {
             listener.onComplete(event, getEventSuccess && event != null);
         }
 
+        /**
+         * Deletes event as admin.
+         */
         @Override
         public void deleteEventAsAdmin(String eventId, com.example.allot.common.OnCompleteListener<Boolean> listener) {
             deletedEventId = eventId;
@@ -221,10 +266,16 @@ public class AdminEventControllerTest {
         private Boolean deleteResult;
         private boolean deleteSuccess;
 
+        /**
+         * Handles fake Poster Controller.
+         */
         private FakePosterController() {
             super(null, null);
         }
 
+        /**
+         * Deletes poster file.
+         */
         @Override
         public void deletePosterFile(String posterUrl, com.example.allot.common.OnCompleteListener<Boolean> listener) {
             lastPosterUrl = posterUrl;
@@ -236,10 +287,16 @@ public class AdminEventControllerTest {
         private boolean isAdmin;
         private boolean adminLookupSuccess = true;
 
+        /**
+         * Handles fake User Controller.
+         */
         private FakeUserController() {
             super(null, new DeviceSessionManager(new FakeDeviceSessionStore("device-1")));
         }
 
+        /**
+         * Returns whether i.s Current User Admin
+         */
         @Override
         public void isCurrentUserAdmin(com.example.allot.common.OnCompleteListener<Boolean> listener) {
             listener.onComplete(isAdmin, adminLookupSuccess);
@@ -249,15 +306,24 @@ public class AdminEventControllerTest {
     private static class FakeDeviceSessionStore implements DeviceSessionManager.DeviceSessionStore {
         private final String deviceId;
 
+        /**
+         * Handles fake Device Session Store.
+         */
         private FakeDeviceSessionStore(String deviceId) {
             this.deviceId = deviceId;
         }
 
+        /**
+         * Returns whether g.et Device Id
+         */
         @Override
         public String getDeviceId() {
             return deviceId;
         }
 
+        /**
+         * Saves device id.
+         */
         @Override
         public void saveDeviceId(String deviceId) {
         }

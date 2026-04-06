@@ -25,6 +25,9 @@ import java.util.Locale;
  */
 public class RegistrationRangePickerView extends LinearLayout {
     public interface OnRangeChangedListener {
+        /**
+         * Handles on Range Changed.
+         */
         void onRangeChanged(@Nullable Calendar startDate, @Nullable Calendar endDate);
     }
 
@@ -43,21 +46,33 @@ public class RegistrationRangePickerView extends LinearLayout {
     private boolean suppressCallbacks;
     private OnRangeChangedListener onRangeChangedListener;
 
+    /**
+     * Creates a new RegistrationRangePickerView instance.
+     */
     public RegistrationRangePickerView(Context context) {
         super(context);
         init();
     }
 
+    /**
+     * Creates a new RegistrationRangePickerView instance.
+     */
     public RegistrationRangePickerView(Context context, AttributeSet attrs) {
         super(context, attrs);
         init();
     }
 
+    /**
+     * Creates a new RegistrationRangePickerView instance.
+     */
     public RegistrationRangePickerView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         init();
     }
 
+    /**
+     * Handles init.
+     */
     private void init() {
         inflate(getContext(), R.layout.view_registration_range_picker, this);
         setOrientation(VERTICAL);
@@ -75,10 +90,16 @@ public class RegistrationRangePickerView extends LinearLayout {
         renderCalendar();
     }
 
+    /**
+     * Updates on range changed listener.
+     */
     public void setOnRangeChangedListener(@Nullable OnRangeChangedListener listener) {
         onRangeChangedListener = listener;
     }
 
+    /**
+     * Binds range.
+     */
     public void bindRange(String startMonth,
                           String startDay,
                           String startYear,
@@ -109,30 +130,51 @@ public class RegistrationRangePickerView extends LinearLayout {
         suppressCallbacks = false;
     }
 
+    /**
+     * Returns whether g.et Start Month
+     */
     public String getStartMonth() {
         return formatMonth(selectedStartDate);
     }
 
+    /**
+     * Returns whether g.et Start Day
+     */
     public String getStartDay() {
         return formatDay(selectedStartDate);
     }
 
+    /**
+     * Returns whether g.et Start Year
+     */
     public String getStartYear() {
         return formatYear(selectedStartDate);
     }
 
+    /**
+     * Returns whether g.et End Month
+     */
     public String getEndMonth() {
         return formatMonth(selectedEndDate);
     }
 
+    /**
+     * Returns whether g.et End Day
+     */
     public String getEndDay() {
         return formatDay(selectedEndDate);
     }
 
+    /**
+     * Returns whether g.et End Year
+     */
     public String getEndYear() {
         return formatYear(selectedEndDate);
     }
 
+    /**
+     * Builds day grid.
+     */
     private void buildDayGrid() {
         calendarRowsContainer.removeAllViews();
         dayCells.clear();
@@ -175,12 +217,18 @@ public class RegistrationRangePickerView extends LinearLayout {
         }
     }
 
+    /**
+     * Handles shift Displayed Month.
+     */
     private void shiftDisplayedMonth(int monthDelta) {
         displayedMonth.add(Calendar.MONTH, monthDelta);
         displayedMonth.set(Calendar.DAY_OF_MONTH, 1);
         renderCalendar();
     }
 
+    /**
+     * Handles render Calendar.
+     */
     private void renderCalendar() {
         monthLabel.setText(monthFormatter.format(displayedMonth.getTime()));
         yearLabel.setText(String.valueOf(displayedMonth.get(Calendar.YEAR)));
@@ -197,6 +245,9 @@ public class RegistrationRangePickerView extends LinearLayout {
         }
     }
 
+    /**
+     * Binds day cell.
+     */
     private void bindDayCell(TextView cellView, Calendar cellDate) {
         boolean isCurrentMonth = cellDate.get(Calendar.MONTH) == displayedMonth.get(Calendar.MONTH)
                 && cellDate.get(Calendar.YEAR) == displayedMonth.get(Calendar.YEAR);
@@ -225,6 +276,9 @@ public class RegistrationRangePickerView extends LinearLayout {
         cellView.setAlpha(isCurrentMonth ? 1f : 0.55f);
     }
 
+    /**
+     * Handles date tap.
+     */
     private void handleDateTap(int index) {
         if (index < 0 || index >= cellDates.size()) {
             return;
@@ -251,6 +305,9 @@ public class RegistrationRangePickerView extends LinearLayout {
         dispatchRangeChanged();
     }
 
+    /**
+     * Handles dispatch Range Changed.
+     */
     private void dispatchRangeChanged() {
         if (suppressCallbacks || onRangeChangedListener == null) {
             return;
@@ -258,6 +315,9 @@ public class RegistrationRangePickerView extends LinearLayout {
         onRangeChangedListener.onRangeChanged(copyOf(selectedStartDate), copyOf(selectedEndDate));
     }
 
+    /**
+     * Returns whether i.s Within Selected Range
+     */
     private boolean isWithinSelectedRange(Calendar date) {
         if (selectedStartDate == null || selectedEndDate == null) {
             return false;
@@ -265,6 +325,9 @@ public class RegistrationRangePickerView extends LinearLayout {
         return !date.before(selectedStartDate) && !date.after(selectedEndDate);
     }
 
+    /**
+     * Returns whether i.s Same Day
+     */
     private boolean isSameDay(@Nullable Calendar first, @Nullable Calendar second) {
         return first != null
                 && second != null
@@ -272,6 +335,9 @@ public class RegistrationRangePickerView extends LinearLayout {
                 && first.get(Calendar.DAY_OF_YEAR) == second.get(Calendar.DAY_OF_YEAR);
     }
 
+    /**
+     * Handles parse Date.
+     */
     @Nullable
     private Calendar parseDate(String month, String day, String year) {
         if (TextUtils.isEmpty(month) || TextUtils.isEmpty(day) || TextUtils.isEmpty(year)) {
@@ -311,29 +377,47 @@ public class RegistrationRangePickerView extends LinearLayout {
         }
     }
 
+    /**
+     * Handles format Month.
+     */
     private String formatMonth(@Nullable Calendar calendar) {
         return calendar == null ? "" : monthFormatter.format(calendar.getTime());
     }
 
+    /**
+     * Handles format Day.
+     */
     private String formatDay(@Nullable Calendar calendar) {
         return calendar == null ? "" : String.valueOf(calendar.get(Calendar.DAY_OF_MONTH));
     }
 
+    /**
+     * Handles format Year.
+     */
     private String formatYear(@Nullable Calendar calendar) {
         return calendar == null ? "" : String.valueOf(calendar.get(Calendar.YEAR));
     }
 
+    /**
+     * Handles copy Of.
+     */
     @Nullable
     private Calendar copyOf(@Nullable Calendar source) {
         return source == null ? null : normalizedDate((Calendar) source.clone());
     }
 
+    /**
+     * Handles normalized Month.
+     */
     private static Calendar normalizedMonth(Calendar source) {
         Calendar calendar = normalizedDate((Calendar) source.clone());
         calendar.set(Calendar.DAY_OF_MONTH, 1);
         return calendar;
     }
 
+    /**
+     * Handles normalized Date.
+     */
     private static Calendar normalizedDate(Calendar source) {
         source.set(Calendar.HOUR_OF_DAY, 0);
         source.set(Calendar.MINUTE, 0);

@@ -22,11 +22,17 @@ import org.junit.runner.RunWith;
 @RunWith(AndroidJUnit4.class)
 public class ExploreProfileOnboardingFlowTest {
 
+    /**
+     * Handles disable Animations.
+     */
     @Before
     public void disableAnimations() {
         SystemAnimations.disableAll();
     }
 
+    /**
+     * Builds intent.
+     */
     private Intent buildIntent() {
         Intent intent = new Intent(ApplicationProvider.getApplicationContext(), ExploreActivity.class);
         intent.putExtra(ExploreActivity.EXTRA_UI_TEST_EVENT_ID, "ui-test-event-1");
@@ -40,6 +46,9 @@ public class ExploreProfileOnboardingFlowTest {
         return intent;
     }
 
+    /**
+     * Handles explore Profile Tab_launches Deferred Onboarding And Returns To Profile.
+     */
     @Test
     public void exploreProfileTab_launchesDeferredOnboardingAndReturnsToProfile() {
         try (ActivityScenario<ExploreActivity> scenario = ActivityScenario.launch(buildIntent())) {

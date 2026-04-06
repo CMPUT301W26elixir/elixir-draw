@@ -64,6 +64,9 @@ public class ScanActivity extends AppCompatActivity {
     private final ActivityResultLauncher<PickVisualMediaRequest> pickImageLauncher =
             registerForActivityResult(new ActivityResultContracts.PickVisualMedia(), this::handlePickedImage);
 
+    /**
+     * Handles on Create.
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -82,6 +85,9 @@ public class ScanActivity extends AppCompatActivity {
         setupBottomNav();
     }
 
+    /**
+     * Handles on Start.
+     */
     @Override
     protected void onStart() {
         super.onStart();
@@ -98,12 +104,18 @@ public class ScanActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Handles on Stop.
+     */
     @Override
     protected void onStop() {
         super.onStop();
         stopCameraPreview();
     }
 
+    /**
+     * Handles finish.
+     */
     @Override
     public void finish() {
         stopCameraPreview();
@@ -114,6 +126,9 @@ public class ScanActivity extends AppCompatActivity {
         overridePendingTransition(0, 0);
     }
 
+    /**
+     * Updates up bottom nav.
+     */
     private void setupBottomNav() {
         bottomNavBar.setSelectedTab(BottomNavBarView.Tab.SCAN);
         bottomNavBar.setOnTabClickListener(BottomNavBarView.Tab.EXPLORE, view -> AppNavigator.openExplore(this, true));
@@ -122,6 +137,9 @@ public class ScanActivity extends AppCompatActivity {
         bottomNavBar.setOnTabClickListener(BottomNavBarView.Tab.PROFILE, view -> AppNavigator.openProfile(this, true));
     }
 
+    /**
+     * Opens image picker.
+     */
     private void openImagePicker() {
         clearInlineError();
         pickImageLauncher.launch(
@@ -131,6 +149,9 @@ public class ScanActivity extends AppCompatActivity {
         );
     }
 
+    /**
+     * Handles picked image.
+     */
     private void handlePickedImage(Uri imageUri) {
         if (imageUri == null) {
             return;
@@ -163,6 +184,9 @@ public class ScanActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Loads bitmap.
+     */
     private Bitmap loadBitmap(Uri imageUri) throws IOException {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             ImageDecoder.Source source = ImageDecoder.createSource(getContentResolver(), imageUri);
@@ -172,6 +196,9 @@ public class ScanActivity extends AppCompatActivity {
         return MediaStore.Images.Media.getBitmap(getContentResolver(), imageUri);
     }
 
+    /**
+     * Handles start Camera Preview.
+     */
     private void startCameraPreview() {
         if (cameraBound || scanHandlingInProgress) {
             return;
@@ -190,6 +217,9 @@ public class ScanActivity extends AppCompatActivity {
         }, ContextCompat.getMainExecutor(this));
     }
 
+    /**
+     * Binds camera use cases.
+     */
     private void bindCameraUseCases() {
         if (cameraProvider == null) {
             return;
@@ -221,6 +251,9 @@ public class ScanActivity extends AppCompatActivity {
         cameraProvider.bindToLifecycle(this, CameraSelector.DEFAULT_BACK_CAMERA, preview, imageAnalysis);
     }
 
+    /**
+     * Handles stop Camera Preview.
+     */
     private void stopCameraPreview() {
         if (cameraProvider != null) {
             cameraProvider.unbindAll();
@@ -228,6 +261,9 @@ public class ScanActivity extends AppCompatActivity {
         cameraBound = false;
     }
 
+    /**
+     * Handles resolve Scanned Payload.
+     */
     private void resolveScannedPayload(String payload) {
         if (scanHandlingInProgress) {
             return;
@@ -255,6 +291,9 @@ public class ScanActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Opens event detail.
+     */
     private void openEventDetail(Event event) {
         if (event == null) {
             showInlineError(R.string.scan_error_load);
@@ -278,16 +317,25 @@ public class ScanActivity extends AppCompatActivity {
         overridePendingTransition(0, 0);
     }
 
+    /**
+     * Returns whether h.as Camera Permission
+     */
     private boolean hasCameraPermission() {
         return ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
                 == PackageManager.PERMISSION_GRANTED;
     }
 
+    /**
+     * Shows inline error.
+     */
     private void showInlineError(int messageResId) {
         scanErrorText.setVisibility(android.view.View.VISIBLE);
         scanErrorText.setText(messageResId);
     }
 
+    /**
+     * Clears inline error.
+     */
     private void clearInlineError() {
         scanErrorText.setText("");
         scanErrorText.setVisibility(android.view.View.GONE);

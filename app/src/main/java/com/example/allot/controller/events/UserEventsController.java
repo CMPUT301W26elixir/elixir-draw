@@ -61,10 +61,16 @@ public class UserEventsController {
     private final UserEventsSectionService myEventsSectionService;
     private final EventListItemMapper eventListItemMapper;
 
+    /**
+     * Creates a new UserEventsController instance.
+     */
     public UserEventsController(Context context) {
         this(new UserController(context), new EventRepository(), new UserEventsSectionService(), new EventListItemMapper());
     }
 
+    /**
+     * Creates a new UserEventsController instance.
+     */
     UserEventsController(UserController userController,
                          EventRepository eventRepository,
                          UserEventsSectionService myEventsSectionService,
@@ -166,14 +172,23 @@ public class UserEventsController {
         eventRepository.declineCoOrganizerInvite(eventId, userController.getCurrentDeviceId(), listener);
     }
 
+    /**
+     * Maps items.
+     */
     private List<EventListItem> mapItems(List<Event> events) {
         return eventListItemMapper.mapEvents(events, new ArrayList<>());
     }
 
+    /**
+     * Handles copy Items.
+     */
     private static List<EventListItem> copyItems(List<EventListItem> items) {
         return items == null ? new ArrayList<>() : new ArrayList<>(items);
     }
 
+    /**
+     * Builds saved ids.
+     */
     private List<String> buildSavedIds(List<Event> events) {
         List<String> savedIds = new ArrayList<>();
         if (events == null) {
@@ -189,6 +204,9 @@ public class UserEventsController {
         return savedIds;
     }
 
+    /**
+     * Loads events by ids.
+     */
     private void loadEventsByIds(List<String> eventIds, OnCompleteListener<List<Event>> listener) {
         if (eventIds == null || eventIds.isEmpty()) {
             listener.onComplete(new ArrayList<>(), true);
@@ -211,6 +229,9 @@ public class UserEventsController {
         });
     }
 
+    /**
+     * Builds registered event list.
+     */
     private List<Event> buildRegisteredEventList(List<Event> events, String deviceId) {
         List<Event> registeredEvents = new ArrayList<>();
         if (events == null || deviceId == null || deviceId.trim().isEmpty()) {
@@ -235,6 +256,9 @@ public class UserEventsController {
         return registeredEvents;
     }
 
+    /**
+     * Returns whether c.ontains User
+     */
     private boolean containsUser(List<String> users, String deviceId) {
         return users != null && users.contains(deviceId);
     }

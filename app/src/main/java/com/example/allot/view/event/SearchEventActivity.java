@@ -40,6 +40,9 @@ public class SearchEventActivity extends AppCompatActivity {
     private final Handler searchHandler = new Handler();
     private Runnable searchRunnable;
 
+    /**
+     * Handles on Create.
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -72,9 +75,15 @@ public class SearchEventActivity extends AppCompatActivity {
         backButton.setOnClickListener(view -> getOnBackPressedDispatcher().onBackPressed());
 
         searchInput.addTextChangedListener(new TextWatcher() {
+            /**
+             * Handles before Text Changed.
+             */
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
 
+            /**
+             * Handles on Text Changed.
+             */
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 String query = s.toString().trim();
@@ -93,6 +102,9 @@ public class SearchEventActivity extends AppCompatActivity {
                 }
             }
 
+            /**
+             * Handles after Text Changed.
+             */
             @Override
             public void afterTextChanged(Editable s) {}
         });
@@ -111,6 +123,9 @@ public class SearchEventActivity extends AppCompatActivity {
         });
 
         searchEventController.searchEvents(keyword, new SearchEventController.SearchCallback() {
+            /**
+             * Handles on Results.
+             */
             @Override
             public void onResults(List<Event> results) {
                 runOnUiThread(() -> {
@@ -126,6 +141,9 @@ public class SearchEventActivity extends AppCompatActivity {
                 });
             }
 
+            /**
+             * Handles on Error.
+             */
             @Override
             public void onError(Exception e) {
                 runOnUiThread(() -> {
@@ -149,11 +167,17 @@ public class SearchEventActivity extends AppCompatActivity {
         }
 
         resultsRecyclerView.setAdapter(new EventListAdapter(items, new EventListAdapter.OnEventClickListener() {
+            /**
+             * Handles on Event Click.
+             */
             @Override
             public void onEventClick(EventListItem event) {
                 openEventDetail(event);
             }
 
+            /**
+             * Handles on Heart Click.
+             */
             @Override
             public void onHeartClick(EventListItem event, int position) {
                 // not needed for search
@@ -192,6 +216,9 @@ public class SearchEventActivity extends AppCompatActivity {
         loadingIndicator.setVisibility(isLoading ? View.VISIBLE : View.GONE);
     }
 
+    /**
+     * Handles on Destroy.
+     */
     @Override
     protected void onDestroy() {
         super.onDestroy();

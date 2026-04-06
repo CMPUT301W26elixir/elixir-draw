@@ -22,11 +22,17 @@ import org.junit.runner.RunWith;
 @RunWith(AndroidJUnit4.class)
 public class ExploreLeaveEventFlowTest {
 
+    /**
+     * Handles disable Animations.
+     */
     @Before
     public void disableAnimations() {
         SystemAnimations.disableAll();
     }
 
+    /**
+     * Builds intent.
+     */
     private Intent buildIntent() {
         Intent intent = new Intent(ApplicationProvider.getApplicationContext(), ExploreActivity.class);
         intent.putExtra(ExploreActivity.EXTRA_UI_TEST_EVENT_ID, "ui-test-event-1");
@@ -42,6 +48,9 @@ public class ExploreLeaveEventFlowTest {
         return intent;
     }
 
+    /**
+     * Handles explore To Event Detail To Leave Waitlist_flow Works.
+     */
     @Test
     public void exploreToEventDetailToLeaveWaitlist_flowWorks() {
         try (ActivityScenario<ExploreActivity> scenario = ActivityScenario.launch(buildIntent())) {

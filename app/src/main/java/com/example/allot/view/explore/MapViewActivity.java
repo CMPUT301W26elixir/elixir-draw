@@ -44,6 +44,9 @@ public class MapViewActivity extends AppCompatActivity implements OnMapReadyCall
     private boolean eventLoadFinished;
     private boolean emptyStateShown;
 
+    /**
+     * Handles on Create.
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -58,20 +61,32 @@ public class MapViewActivity extends AppCompatActivity implements OnMapReadyCall
         loadEventIfNeeded();
     }
 
+    /**
+     * Handles finish.
+     */
     @Override
     public void finish() {
         super.finish();
         overridePendingTransition(0, 0);
     }
 
+    /**
+     * Binds views.
+     */
     private void bindViews() {
     }
 
+    /**
+     * Updates up header.
+     */
     private void setupHeader() {
         ImageButton backButton = findViewById(R.id.backButton);
         backButton.setOnClickListener(view -> getOnBackPressedDispatcher().onBackPressed());
     }
 
+    /**
+     * Handles attach Map Fragment.
+     */
     private void attachMapFragment(Bundle savedInstanceState) {
         SupportMapFragment mapFragment =
                 (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.mapContainer);
@@ -93,6 +108,9 @@ public class MapViewActivity extends AppCompatActivity implements OnMapReadyCall
         }
     }
 
+    /**
+     * Handles on Map Ready.
+     */
     @Override
     public void onMapReady(GoogleMap googleMap) {
         this.googleMap = googleMap;
@@ -102,6 +120,9 @@ public class MapViewActivity extends AppCompatActivity implements OnMapReadyCall
         renderMapContent();
     }
 
+    /**
+     * Loads event if needed.
+     */
     private void loadEventIfNeeded() {
         if (TextUtils.isEmpty(currentEventId)) {
             eventLoadFinished = true;
@@ -122,6 +143,9 @@ public class MapViewActivity extends AppCompatActivity implements OnMapReadyCall
         });
     }
 
+    /**
+     * Handles render Map Content.
+     */
     private void renderMapContent() {
         if (googleMap == null || !eventLoadFinished) {
             return;
@@ -156,6 +180,9 @@ public class MapViewActivity extends AppCompatActivity implements OnMapReadyCall
         googleMap.moveCamera(CameraUpdateFactory.newLatLngBounds(boundsBuilder.build(), MAP_BOUNDS_PADDING));
     }
 
+    /**
+     * Handles add Event Marker.
+     */
     private int addEventMarker(LatLngBounds.Builder boundsBuilder) {
         if (currentEvent.getEventLatitude() == null || currentEvent.getEventLongitude() == null) {
             return 0;
@@ -170,6 +197,9 @@ public class MapViewActivity extends AppCompatActivity implements OnMapReadyCall
         return 1;
     }
 
+    /**
+     * Handles add Entrant Markers.
+     */
     private int addEntrantMarkers(LatLngBounds.Builder boundsBuilder) {
         if (currentEvent.getWaitingList() == null || currentEvent.getWaitingList().getJoinLocations().isEmpty()) {
             return 0;
@@ -193,10 +223,16 @@ public class MapViewActivity extends AppCompatActivity implements OnMapReadyCall
         return markerCount;
     }
 
+    /**
+     * Returns whether i.s Entrant Location Enabled
+     */
     private boolean isEntrantLocationEnabled() {
         return currentEvent != null && Boolean.TRUE.equals(currentEvent.getGeoloc());
     }
 
+    /**
+     * Returns whether g.et Entrant Marker Title
+     */
     private String getEntrantMarkerTitle(String deviceId) {
         String cachedName = userNameCache.get(deviceId);
         if (!TextUtils.isEmpty(cachedName)) {
@@ -207,6 +243,9 @@ public class MapViewActivity extends AppCompatActivity implements OnMapReadyCall
         return deviceId;
     }
 
+    /**
+     * Loads entrant name.
+     */
     private void loadEntrantName(String deviceId) {
         if (TextUtils.isEmpty(deviceId) || pendingUserIds.contains(deviceId) || userNameCache.containsKey(deviceId)) {
             return;
@@ -225,6 +264,9 @@ public class MapViewActivity extends AppCompatActivity implements OnMapReadyCall
         });
     }
 
+    /**
+     * Returns whether g.et Single Marker Target
+     */
     private LatLng getSingleMarkerTarget() {
         if (currentEvent.getWaitingList() != null) {
             for (WaitlistJoinLocation joinLocation : currentEvent.getWaitingList().getJoinLocations().values()) {
@@ -241,6 +283,9 @@ public class MapViewActivity extends AppCompatActivity implements OnMapReadyCall
         return DEFAULT_CENTER;
     }
 
+    /**
+     * Shows empty state once.
+     */
     private void showEmptyStateOnce() {
         if (emptyStateShown) {
             return;

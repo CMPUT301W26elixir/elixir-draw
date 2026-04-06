@@ -14,12 +14,18 @@ public class ScanControllerTest {
     private FakeEventRepository eventRepository;
     private ScanController controller;
 
+    /**
+     * Updates up.
+     */
     @Before
     public void setUp() {
         eventRepository = new FakeEventRepository();
         controller = new ScanController(eventRepository);
     }
 
+    /**
+     * Handles validate Payload_accepts Trimmed Event Id.
+     */
     @Test
     public void validatePayload_acceptsTrimmedEventId() {
         EventScanResult result = controller.validatePayload("  event-123  ");
@@ -28,6 +34,9 @@ public class ScanControllerTest {
         assertEquals("event-123", result.getEventId());
     }
 
+    /**
+     * Handles validate Payload_rejects Blank Payload.
+     */
     @Test
     public void validatePayload_rejectsBlankPayload() {
         EventScanResult result = controller.validatePayload("   ");
@@ -36,6 +45,9 @@ public class ScanControllerTest {
         assertEquals(Integer.valueOf(R.string.scan_error_invalid_qr), result.getMessageResId());
     }
 
+    /**
+     * Loads scanned event_returns open event when repository finds match.
+     */
     @Test
     public void loadScannedEvent_returnsOpenEventWhenRepositoryFindsMatch() {
         Event event = new Event();
@@ -50,6 +62,9 @@ public class ScanControllerTest {
         });
     }
 
+    /**
+     * Loads scanned event_returns not found when event missing.
+     */
     @Test
     public void loadScannedEvent_returnsNotFoundWhenEventMissing() {
         eventRepository.event = null;
@@ -62,6 +77,9 @@ public class ScanControllerTest {
         });
     }
 
+    /**
+     * Loads scanned event_returns load error when repository fails.
+     */
     @Test
     public void loadScannedEvent_returnsLoadErrorWhenRepositoryFails() {
         eventRepository.success = false;
@@ -77,10 +95,16 @@ public class ScanControllerTest {
         private Event event;
         private boolean success = true;
 
+        /**
+         * Handles fake Event Repository.
+         */
         private FakeEventRepository() {
             super((com.google.firebase.firestore.FirebaseFirestore) null);
         }
 
+        /**
+         * Returns whether g.et Event By Id
+         */
         @Override
         public void getEventById(String eventId, com.example.allot.common.OnCompleteListener<Event> listener) {
             listener.onComplete(event, success);

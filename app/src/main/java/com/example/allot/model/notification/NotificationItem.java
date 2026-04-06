@@ -12,8 +12,14 @@ public class NotificationItem {
     private boolean read;
     private com.google.firebase.Timestamp createdAt;
 
+    /**
+     * Creates a new NotificationItem instance.
+     */
     public NotificationItem() {}
 
+    /**
+     * Creates a new NotificationItem instance.
+     */
     public NotificationItem(String userId, String eventId, String title, String message) {
         this.userId = userId;
         this.eventId = eventId;
@@ -24,17 +30,38 @@ public class NotificationItem {
     }
 
     public String getId() { return id; }
+    /**
+     * Updates id.
+     */
     public void setId(String id) { this.id = id; }
     public String getUserId() { return userId; }
+    /**
+     * Updates user id.
+     */
     public void setUserId(String userId) { this.userId = userId; }
     public String getEventId() { return eventId; }
+    /**
+     * Updates event id.
+     */
     public void setEventId(String eventId) { this.eventId = eventId; }
     public String getTitle() { return title; }
+    /**
+     * Updates title.
+     */
     public void setTitle(String title) { this.title = title; }
     public String getMessage() { return message; }
+    /**
+     * Updates message.
+     */
     public void setMessage(String message) { this.message = message; }
     public boolean isRead() { return read; }
+    /**
+     * Updates read.
+     */
     public void setRead(boolean read) { this.read = read; }
     public com.google.firebase.Timestamp getCreatedAt() { return createdAt; }
+    /**
+     * Updates created at.
+     */
     public void setCreatedAt(com.google.firebase.Timestamp createdAt) { this.createdAt = createdAt; }
 }

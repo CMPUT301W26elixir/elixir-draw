@@ -95,27 +95,45 @@ public final class EventDisplayFormatter {
         return daysLeft + " Days Left";
     }
 
+    /**
+     * Handles detail Location.
+     */
     public static String detailLocation(String location) {
         return TextHelper.defaultText(location, "Address TBA");
     }
 
+    /**
+     * Handles detail Date.
+     */
     public static String detailDate(String value) {
         return TextHelper.defaultText(value, "Date TBA");
     }
 
+    /**
+     * Handles short Date.
+     */
     public static String shortDate(Date date) {
         return formatDate(date, "MMM d, yyyy");
     }
 
+    /**
+     * Handles long Date.
+     */
     public static String longDate(Date date) {
         return formatDate(date, "MMMM d, yyyy");
     }
 
+    /**
+     * Handles labeled Short Date.
+     */
     public static String labeledShortDate(String label, Date date) {
         String value = date == null ? "TBA" : shortDate(date);
         return String.format(Locale.getDefault(), "%s: %s", label, value);
     }
 
+    /**
+     * Handles format Date.
+     */
     private static String formatDate(Date date, String pattern) {
         if (date == null) {
             return null;

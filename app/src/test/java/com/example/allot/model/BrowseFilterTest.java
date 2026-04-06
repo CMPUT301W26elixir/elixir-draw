@@ -7,6 +7,9 @@ import java.util.Date;
 import org.junit.Test;
 
 public class BrowseFilterTest {
+    /**
+     * Handles two Argument Constructor_sets Only Search And Category.
+     */
     @Test
     public void twoArgumentConstructor_setsOnlySearchAndCategory() {
         BrowseFilter filter = new BrowseFilter("music", "Sports");
@@ -17,6 +20,9 @@ public class BrowseFilterTest {
         assertNull(filter.getMinimumCapacity());
     }
 
+    /**
+     * Handles full Constructor_exposes Advanced Filter Values.
+     */
     @Test
     public void fullConstructor_exposesAdvancedFilterValues() {
         Date startDate = new Date(1000L);

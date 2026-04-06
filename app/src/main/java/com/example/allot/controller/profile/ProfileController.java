@@ -13,10 +13,16 @@ import java.util.Objects;
 public class ProfileController {
     private final UserController userController;
 
+    /**
+     * Creates a new ProfileController instance.
+     */
     public ProfileController(Context context) {
         this(new UserController(context));
     }
 
+    /**
+     * Creates a new ProfileController instance.
+     */
     ProfileController(UserController userController) {
         this.userController = userController;
     }

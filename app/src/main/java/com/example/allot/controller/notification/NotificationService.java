@@ -32,6 +32,9 @@ public class NotificationService {
     private final String deviceId;
     private ListenerRegistration listenerRegistration;
 
+    /**
+     * Creates a new NotificationService instance.
+     */
     public NotificationService(Context context) {
         this.context = context;
         this.deviceId = new DeviceSessionManager(context).getCurrentDeviceId();
@@ -98,6 +101,9 @@ public class NotificationService {
         }
     }
 
+    /**
+     * Shows local notification.
+     */
     private void showLocalNotification(NotificationItem item) {
         NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 

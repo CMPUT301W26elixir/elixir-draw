@@ -20,6 +20,9 @@ public class EventEntrantsControllerTest {
     private FakeUserController userController;
     private EventEntrantsController controller;
 
+    /**
+     * Updates up.
+     */
     @Before
     public void setUp() {
         eventRepository = new FakeEventRepository();
@@ -27,6 +30,9 @@ public class EventEntrantsControllerTest {
         controller = new EventEntrantsController(eventRepository, userController, new NotificationRepository(null), new EventOfferService());
     }
 
+    /**
+     * Loads entrant items_returns selected entrants for selected tab.
+     */
     @Test
     public void loadEntrantItems_returnsSelectedEntrantsForSelectedTab() {
         Event event = buildEvent();
@@ -40,6 +46,9 @@ public class EventEntrantsControllerTest {
         });
     }
 
+    /**
+     * Loads enrolled export rows_returns failure when event is null.
+     */
     @Test
     public void loadEnrolledExportRows_returnsFailureWhenEventIsNull() {
         controller.loadEnrolledExportRows(null, (rows, success) -> {
@@ -48,6 +57,9 @@ public class EventEntrantsControllerTest {
         });
     }
 
+    /**
+     * Loads enrolled export rows_returns empty success when no enrolled entrants exist.
+     */
     @Test
     public void loadEnrolledExportRows_returnsEmptySuccessWhenNoEnrolledEntrantsExist() {
         Event event = buildEvent();
@@ -58,6 +70,9 @@ public class EventEntrantsControllerTest {
         });
     }
 
+    /**
+     * Loads enrolled export rows_exports explicit enrolled entrants in order.
+     */
     @Test
     public void loadEnrolledExportRows_exportsExplicitEnrolledEntrantsInOrder() {
         Event event = buildEvent();
@@ -78,6 +93,9 @@ public class EventEntrantsControllerTest {
         });
     }
 
+    /**
+     * Loads enrolled export rows_falls back to waiting list chosen status when enrolled list is empty.
+     */
     @Test
     public void loadEnrolledExportRows_fallsBackToWaitingListChosenStatusWhenEnrolledListIsEmpty() {
         Event event = buildEvent();
@@ -96,6 +114,9 @@ public class EventEntrantsControllerTest {
         });
     }
 
+    /**
+     * Loads enrolled export rows_uses fallback row when user lookup fails.
+     */
     @Test
     public void loadEnrolledExportRows_usesFallbackRowWhenUserLookupFails() {
         Event event = buildEvent();
@@ -111,6 +132,9 @@ public class EventEntrantsControllerTest {
         });
     }
 
+    /**
+     * Loads enrolled export rows_keeps blank contact fields blank.
+     */
     @Test
     public void loadEnrolledExportRows_keepsBlankContactFieldsBlank() {
         Event event = buildEvent();
@@ -126,6 +150,9 @@ public class EventEntrantsControllerTest {
         });
     }
 
+    /**
+     * Builds event.
+     */
     private Event buildEvent() {
         Event event = new Event();
         event.setTitle("Event");
@@ -139,6 +166,9 @@ public class EventEntrantsControllerTest {
         return event;
     }
 
+    /**
+     * Builds user.
+     */
     private com.example.allot.model.profile.User buildUser(String firstName,
                                                            String lastName,
                                                            String email,
@@ -158,12 +188,18 @@ public class EventEntrantsControllerTest {
     }
 
     private static class FakeEventRepository extends EventRepository {
+        /**
+         * Handles fake Event Repository.
+         */
         private FakeEventRepository() {
             super((com.google.firebase.firestore.FirebaseFirestore) null);
         }
 
         private Event event;
 
+        /**
+         * Returns whether g.et Event By Id
+         */
         @Override
         public void getEventById(String eventId, com.example.allot.common.OnCompleteListener<Event> listener) {
             listener.onComplete(event, event != null);
@@ -173,14 +209,23 @@ public class EventEntrantsControllerTest {
     private static class FakeUserController extends UserController {
         private final java.util.Map<String, com.example.allot.model.profile.User> users = new java.util.HashMap<>();
 
+        /**
+         * Handles fake User Controller.
+         */
         private FakeUserController() {
             super(null, new DeviceSessionManager(new FakeDeviceSessionStore("device-1")));
         }
 
+        /**
+         * Handles add User.
+         */
         private void addUser(String deviceId, com.example.allot.model.profile.User user) {
             users.put(deviceId, user);
         }
 
+        /**
+         * Returns whether g.et User By Device Id
+         */
         @Override
         public void getUserByDeviceId(String deviceId, com.example.allot.common.OnCompleteListener<com.example.allot.model.profile.User> listener) {
             com.example.allot.model.profile.User user = users.get(deviceId);
@@ -191,6 +236,9 @@ public class EventEntrantsControllerTest {
     private static class FakeDeviceSessionStore implements DeviceSessionManager.DeviceSessionStore {
         private final String deviceId;
 
+        /**
+         * Handles fake Device Session Store.
+         */
         private FakeDeviceSessionStore(String deviceId) {
             this.deviceId = deviceId;
         }
@@ -198,6 +246,9 @@ public class EventEntrantsControllerTest {
         @Override
         public String getDeviceId() { return deviceId; }
 
+        /**
+         * Saves device id.
+         */
         @Override
         public void saveDeviceId(String deviceId) { }
     }

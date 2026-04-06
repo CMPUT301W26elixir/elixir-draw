@@ -19,6 +19,9 @@ public class EventDetailViewService {
         private final String subtext;
         private final boolean showEntrantCount;
 
+        /**
+         * Handles footer State.
+         */
         public FooterState(boolean showWaitlistMessage,
                            boolean buttonEnabled,
                            int buttonTextRes,
@@ -35,30 +38,51 @@ public class EventDetailViewService {
             this.showEntrantCount = showEntrantCount;
         }
 
+        /**
+         * Returns whether s.hould Show Waitlist Message
+         */
         public boolean shouldShowWaitlistMessage() {
             return showWaitlistMessage;
         }
 
+        /**
+         * Returns whether i.s Button Enabled
+         */
         public boolean isButtonEnabled() {
             return buttonEnabled;
         }
 
+        /**
+         * Returns whether g.et Button Text Res
+         */
         public int getButtonTextRes() {
             return buttonTextRes;
         }
 
+        /**
+         * Returns whether g.et Button Background Res
+         */
         public int getButtonBackgroundRes() {
             return buttonBackgroundRes;
         }
 
+        /**
+         * Returns whether g.et Button Text Color Res
+         */
         public int getButtonTextColorRes() {
             return buttonTextColorRes;
         }
 
+        /**
+         * Returns whether g.et Subtext
+         */
         public String getSubtext() {
             return subtext;
         }
 
+        /**
+         * Returns whether s.hould Show Entrant Count
+         */
         public boolean shouldShowEntrantCount() {
             return showEntrantCount;
         }

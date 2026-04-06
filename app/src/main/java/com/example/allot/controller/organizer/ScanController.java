@@ -12,10 +12,16 @@ import com.example.allot.model.event.EventScanResult;
 public class ScanController {
     private final EventRepository eventRepository;
 
+    /**
+     * Creates a new ScanController instance.
+     */
     public ScanController() {
         this(new EventRepository());
     }
 
+    /**
+     * Creates a new ScanController instance.
+     */
     ScanController(EventRepository eventRepository) {
         this.eventRepository = eventRepository;
     }
@@ -61,6 +67,9 @@ public class ScanController {
         });
     }
 
+    /**
+     * Builds event stub.
+     */
     private Event buildEventStub(String eventId) {
         Event event = new Event();
         event.setEventId(eventId);

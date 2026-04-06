@@ -23,11 +23,17 @@ import org.junit.runner.RunWith;
 @RunWith(AndroidJUnit4.class)
 public class EventQrCodeActivityTest {
 
+    /**
+     * Handles disable Animations.
+     */
     @Before
     public void disableAnimations() {
         SystemAnimations.disableAll();
     }
 
+    /**
+     * Builds intent.
+     */
     private Intent buildIntent() {
         Intent intent = new Intent(ApplicationProvider.getApplicationContext(), EventQrCodeActivity.class);
         intent.putExtra(EventCreatedActivity.EXTRA_EVENT_ID, "ui-test-event-qr-1");
@@ -40,6 +46,9 @@ public class EventQrCodeActivityTest {
         return intent;
     }
 
+    /**
+     * Handles event Qr Screen_renders Generated Qr Code.
+     */
     @Test
     public void eventQrScreen_rendersGeneratedQrCode() {
         try (ActivityScenario<EventQrCodeActivity> scenario = ActivityScenario.launch(buildIntent())) {

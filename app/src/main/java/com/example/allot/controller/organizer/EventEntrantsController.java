@@ -37,10 +37,16 @@ public class EventEntrantsController {
     private final EventOfferService eventOfferService;
     private final Map<String, String> userNameCache = new HashMap<>();
 
+    /**
+     * Creates a new EventEntrantsController instance.
+     */
     public EventEntrantsController(android.content.Context context) {
         this(new EventRepository(), new UserController(context), new NotificationRepository(), new EventOfferService());
     }
 
+    /**
+     * Creates a new EventEntrantsController instance.
+     */
     EventEntrantsController(EventRepository eventRepository,
                             UserController userController,
                             NotificationRepository notificationRepository,
@@ -168,6 +174,9 @@ public class EventEntrantsController {
         }).addOnFailureListener(e -> listener.onComplete(false, false));
     }
 
+    /**
+     * Handles send Cancellation Notification.
+     */
     private void sendCancellationNotification(String userId, String eventId, String eventTitle) {
         String title = "Selection Cancelled";
         String body = "Your selection for " + eventTitle + " has been cancelled by the organizer.";
@@ -176,6 +185,9 @@ public class EventEntrantsController {
         notificationRepository.saveNotification(new NotificationItem(userId, eventId, title, body), (r, s) -> {});
     }
 
+    /**
+     * Handles send Selection Notification.
+     */
     private void sendSelectionNotification(String userId, String eventId, String eventTitle) {
         String title = "You've been selected!";
         String body = "Congratulations! You have been selected for " + eventTitle + ". Please accept the invitation.";
@@ -184,6 +196,9 @@ public class EventEntrantsController {
         notificationRepository.saveNotification(new NotificationItem(userId, eventId, title, body), (r, s) -> {});
     }
 
+    /**
+     * Builds tab items.
+     */
     private void buildTabItems(Event event, Tab selectedTab, java.util.function.Consumer<List<LotteryEntrantItem>> consumer) {
         List<String> entrantIds = getEntrantIds(event, selectedTab);
         if (entrantIds.isEmpty()) {
@@ -193,6 +208,9 @@ public class EventEntrantsController {
         loadEntrantItems(entrantIds, 0, new ArrayList<>(), getSubtitleRes(selectedTab), consumer);
     }
 
+    /**
+     * Returns whether g.et Entrant Ids
+     */
     private List<String> getEntrantIds(Event event, Tab selectedTab) {
         switch (selectedTab) {
             case CANCELLED:
@@ -209,6 +227,9 @@ public class EventEntrantsController {
         }
     }
 
+    /**
+     * Returns whether g.et Subtitle Res
+     */
     private int getSubtitleRes(Tab selectedTab) {
         switch (selectedTab) {
             case CANCELLED:
@@ -225,6 +246,9 @@ public class EventEntrantsController {
         }
     }
 
+    /**
+     * Returns whether g.et Selected Entrants
+     */
     private List<String> getSelectedEntrants(Event event) {
         if (event == null) {
             return new ArrayList<>();
@@ -239,6 +263,9 @@ public class EventEntrantsController {
         return new ArrayList<>();
     }
 
+    /**
+     * Returns whether g.et Cancelled Entrants
+     */
     private List<String> getCancelledEntrants(Event event) {
         if (event != null) {
             return new ArrayList<>(event.getCancelled());
@@ -246,6 +273,9 @@ public class EventEntrantsController {
         return new ArrayList<>();
     }
 
+    /**
+     * Returns whether g.et Not Enrolled Entrants
+     */
     private List<String> getNotEnrolledEntrants(Event event) {
         if (event != null) {
             return new ArrayList<>(event.getNotEnrolled());
@@ -253,6 +283,9 @@ public class EventEntrantsController {
         return new ArrayList<>();
     }
 
+    /**
+     * Returns whether g.et Enrolled Entrants
+     */
     private List<String> getEnrolledEntrants(Event event) {
         if (event == null) {
             return new ArrayList<>();
@@ -273,6 +306,9 @@ public class EventEntrantsController {
         return enrolledEntrants;
     }
 
+    /**
+     * Returns whether g.et All Entrants
+     */
     private List<String> getAllEntrants(Event event) {
         if (event != null && event.getWaitingList() != null && event.getWaitingList().list != null) {
             return new ArrayList<>(event.getWaitingList().list);
@@ -280,6 +316,9 @@ public class EventEntrantsController {
         return new ArrayList<>();
     }
 
+    /**
+     * Loads entrant items.
+     */
     private void loadEntrantItems(List<String> entrantIds,
                                   int index,
                                   List<LotteryEntrantItem> items,
@@ -309,6 +348,9 @@ public class EventEntrantsController {
         });
     }
 
+    /**
+     * Loads export rows.
+     */
     private void loadExportRows(List<String> entrantIds,
                                 int index,
                                 List<EntrantExportRow> rows,
@@ -325,6 +367,9 @@ public class EventEntrantsController {
         });
     }
 
+    /**
+     * Builds export row.
+     */
     private EntrantExportRow buildExportRow(String entrantId, User user) {
         String fallbackName = isBlank(entrantId) ? "" : entrantId;
         String name = fallbackName;
@@ -346,6 +391,9 @@ public class EventEntrantsController {
         return new EntrantExportRow(name, email, phone);
     }
 
+    /**
+     * Returns whether i.s Blank
+     */
     private boolean isBlank(String value) {
         return TextHelper.isBlank(value);
     }

@@ -21,6 +21,9 @@ public class EditEventController {
     private final LotteryDrawService lotteryDrawService;
     private final EventLocationGeocodingService geocodingService;
 
+    /**
+     * Creates a new EditEventController instance.
+     */
     public EditEventController(android.content.Context context) {
         this(
                 new EventRepository(),
@@ -31,6 +34,9 @@ public class EditEventController {
         );
     }
 
+    /**
+     * Creates a new EditEventController instance.
+     */
     EditEventController(EventRepository eventRepository,
                         EventFormService eventFormService,
                         EventInputValidator eventInputValidator,
@@ -272,6 +278,9 @@ public class EditEventController {
         );
     }
 
+    /**
+     * Builds view model.
+     */
     private EventFormData buildViewModel(String title,
                                          String location,
                                          String eventDate,
@@ -314,23 +323,38 @@ public class EditEventController {
         return formattedDateValue(formData.getEventMonth(), formData.getEventDay(), formData.getEventYear());
     }
 
+    /**
+     * Handles formatted Date Value.
+     */
     private String formattedDateValue(String month, String day, String year) {
         Date date = eventFormService.parseDate(month, day, year);
         return date == null ? "" : eventFormService.formatDate(date);
     }
 
+    /**
+     * Handles month Value.
+     */
     private String monthValue(Date date) {
         return formatDatePart(date, "MMM");
     }
 
+    /**
+     * Handles day Value.
+     */
     private String dayValue(Date date) {
         return formatDatePart(date, "d");
     }
 
+    /**
+     * Handles year Value.
+     */
     private String yearValue(Date date) {
         return formatDatePart(date, "yyyy");
     }
 
+    /**
+     * Handles format Date Part.
+     */
     private String formatDatePart(Date date, String pattern) {
         if (date == null) {
             return "";
@@ -338,6 +362,9 @@ public class EditEventController {
         return new SimpleDateFormat(pattern, Locale.getDefault()).format(date);
     }
 
+    /**
+     * Handles month From Formatted Date.
+     */
     private String monthFromFormattedDate(String value) {
         if (safeValue(value).length() < 3) {
             return "";
@@ -345,6 +372,9 @@ public class EditEventController {
         return safeValue(value).substring(0, 3);
     }
 
+    /**
+     * Handles day From Formatted Date.
+     */
     private String dayFromFormattedDate(String value) {
         String[] parts = safeValue(value).split(" ");
         if (parts.length < 2) {
@@ -353,6 +383,9 @@ public class EditEventController {
         return parts[1].replace(",", "");
     }
 
+    /**
+     * Handles year From Formatted Date.
+     */
     private String yearFromFormattedDate(String value) {
         String[] parts = safeValue(value).split(" ");
         if (parts.length < 3) {
@@ -361,14 +394,23 @@ public class EditEventController {
         return parts[2];
     }
 
+    /**
+     * Handles safe Value.
+     */
     private String safeValue(String value) {
         return value == null ? "" : value.trim();
     }
 
+    /**
+     * Returns whether i.s Blank
+     */
     private boolean isBlank(String value) {
         return value == null || value.trim().isEmpty();
     }
 
+    /**
+     * Handles apply Resolved Coordinates.
+     */
     private void applyResolvedCoordinates(java.util.Map<String, Object> updates, String location) {
         EventLocationCoordinates coordinates = geocodingService == null ? null : geocodingService.geocode(location);
         if (coordinates == null) {

@@ -9,15 +9,27 @@ public class SearchEventController {
 
     private FirebaseFirestore db;
 
+    /**
+     * Creates a new SearchEventController instance.
+     */
     public SearchEventController() {
         db = FirebaseFirestore.getInstance();
     }
 
     public interface SearchCallback {
+        /**
+         * Handles on Results.
+         */
         void onResults(List<Event> results);
+        /**
+         * Handles on Error.
+         */
         void onError(Exception e);
     }
 
+    /**
+     * Handles search Events.
+     */
     public void searchEvents(String keyword, SearchCallback callback) {
         db.collection("events").get()
                 .addOnSuccessListener(querySnapshot -> {
