@@ -25,7 +25,6 @@ import com.bumptech.glide.Glide;
 import com.example.allot.R;
 import com.example.allot.common.AppResult;
 import com.example.allot.controller.event.EventDetailController;
-import com.example.allot.controller.event.EventJoinDistanceValidator;
 import com.example.allot.controller.explore.ExploreController;
 import com.example.allot.controller.shared.UserController;
 import com.example.allot.model.event.Event;
@@ -70,7 +69,6 @@ public class EventDetailActivity extends AppCompatActivity {
     private ExploreController exploreController;
     private UserController userController;
     private FusedLocationProviderClient fusedLocationProviderClient;
-    private final EventJoinDistanceValidator eventJoinDistanceValidator = new EventJoinDistanceValidator();
 
     private String currentEventId;
     private boolean isJoiningWaitlist;
@@ -82,6 +80,8 @@ public class EventDetailActivity extends AppCompatActivity {
     private boolean shouldRefreshOnResume;
     private boolean isOrganizer;
     private boolean isAdmin;
+    private boolean isSyncingWaitlistLocation;
+    private boolean hasAttemptedAutoWaitlistLocationSync;
 
     private FrameLayout heroImageFrame;
     private ImageView heroPosterImage;
@@ -514,6 +514,11 @@ public class EventDetailActivity extends AppCompatActivity {
         pendingJoinDialog = dialog;
         pendingJoinConfirmButton = confirmButton;
 
+        if (!shouldCollectJoinLocation()) {
+            completeJoinWaitingList(null);
+            return;
+        }
+
         if (hasLocationPermission()) {
             captureLocationAndJoin();
             return;
@@ -674,27 +679,8 @@ public class EventDetailActivity extends AppCompatActivity {
                 == PackageManager.PERMISSION_GRANTED;
     }
 
-    private boolean isJoinLocationRequired() {
+    private boolean shouldCollectJoinLocation() {
         return currentEvent != null && Boolean.TRUE.equals(currentEvent.getGeoloc());
-    }
-
-    private boolean shouldBlockJoinForDistance(Double entrantLatitude, Double entrantLongitude) {
-        if (!isJoinLocationRequired() || currentEvent == null) {
-            return false;
-        }
-
-        Double eventLatitude = currentEvent.getEventLatitude();
-        Double eventLongitude = currentEvent.getEventLongitude();
-        if (eventLatitude == null || eventLongitude == null) {
-            return false;
-        }
-
-        return !eventJoinDistanceValidator.isWithinAllowedRadius(
-                entrantLatitude,
-                entrantLongitude,
-                eventLatitude,
-                eventLongitude
-        );
     }
 
     private void captureLocationAndJoin() {
@@ -707,14 +693,20 @@ public class EventDetailActivity extends AppCompatActivity {
                         return;
                     }
 
+                    if (isSyncingWaitlistLocation) {
+                        completeWaitlistLocationSync(location);
+                        return;
+                    }
+
                     completeJoinWaitingList(location);
                 })
                 .addOnFailureListener(this, exception -> handleUnavailableLocation());
     }
 
     private void handleUnavailableLocation() {
-        if (isJoinLocationRequired()) {
-            failJoinWaitingList(R.string.event_detail_join_location_unavailable);
+        if (isSyncingWaitlistLocation) {
+            isSyncingWaitlistLocation = false;
+            hasAttemptedAutoWaitlistLocationSync = true;
             return;
         }
 
@@ -724,11 +716,6 @@ public class EventDetailActivity extends AppCompatActivity {
     private void completeJoinWaitingList(Location location) {
         Double latitude = location == null ? null : location.getLatitude();
         Double longitude = location == null ? null : location.getLongitude();
-        if (shouldBlockJoinForDistance(latitude, longitude)) {
-            failJoinWaitingList(R.string.event_detail_join_too_far);
-            return;
-        }
-
         eventDetailController.joinWaitingList(currentEventId, latitude, longitude, new java.util.Date(), (AppResult<Void> result, boolean success) -> {
             isJoiningWaitlist = false;
             if (pendingJoinConfirmButton != null) {
@@ -757,6 +744,20 @@ public class EventDetailActivity extends AppCompatActivity {
         });
     }
 
+    private void completeWaitlistLocationSync(Location location) {
+        Double latitude = location == null ? null : location.getLatitude();
+        Double longitude = location == null ? null : location.getLongitude();
+        eventDetailController.syncWaitlistLocation(currentEventId, latitude, longitude, new java.util.Date(), (result, success) -> {
+            isSyncingWaitlistLocation = false;
+            hasAttemptedAutoWaitlistLocationSync = true;
+            if (result == null || !result.isSuccess()) {
+                return;
+            }
+
+            loadEventDetails();
+        });
+    }
+
     private void failJoinWaitingList(int messageResId) {
         isJoiningWaitlist = false;
         if (pendingJoinConfirmButton != null) {
@@ -779,13 +780,19 @@ public class EventDetailActivity extends AppCompatActivity {
             return;
         }
 
-        if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            captureLocationAndJoin();
+        if (isSyncingWaitlistLocation) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                captureLocationAndJoin();
+                return;
+            }
+
+            isSyncingWaitlistLocation = false;
+            hasAttemptedAutoWaitlistLocationSync = true;
             return;
         }
 
-        if (isJoinLocationRequired()) {
-            failJoinWaitingList(R.string.event_detail_join_location_required);
+        if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            captureLocationAndJoin();
             return;
         }
 
@@ -848,7 +855,48 @@ public class EventDetailActivity extends AppCompatActivity {
         );
 
         renderComments(state.getCurrentEvent());
+        maybeAutoSyncWaitlistLocation();
         maybeHandleDeferredJoinAction();
+    }
+
+    private void maybeAutoSyncWaitlistLocation() {
+        if (!shouldAutoSyncWaitlistLocation() || hasAttemptedAutoWaitlistLocationSync || isSyncingWaitlistLocation) {
+            return;
+        }
+
+        hasAttemptedAutoWaitlistLocationSync = true;
+        if (hasLocationPermission()) {
+            isSyncingWaitlistLocation = true;
+            captureLocationAndJoin();
+            return;
+        }
+
+        isSyncingWaitlistLocation = true;
+        ActivityCompat.requestPermissions(
+                this,
+                new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                LOCATION_PERMISSION_REQUEST
+        );
+    }
+
+    private boolean shouldAutoSyncWaitlistLocation() {
+        if (currentEvent == null || !Boolean.TRUE.equals(currentEvent.getGeoloc())) {
+            return false;
+        }
+
+        String deviceId = eventDetailController == null ? null : eventDetailController.getCurrentDeviceId();
+        if (TextUtils.isEmpty(deviceId) || currentEvent.getWaitingList() == null) {
+            return false;
+        }
+        if (currentEvent.getWaitingList().list == null || !currentEvent.getWaitingList().list.contains(deviceId)) {
+            return false;
+        }
+
+        com.example.allot.model.event.WaitlistJoinLocation joinLocation =
+                currentEvent.getWaitingList().getJoinLocations().get(deviceId);
+        return joinLocation == null
+                || joinLocation.getLatitude() == null
+                || joinLocation.getLongitude() == null;
     }
 
     private void requireCompletedProfile(Runnable onReady, Intent onboardingIntent) {

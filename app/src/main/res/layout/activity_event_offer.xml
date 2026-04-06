@@ -83,7 +83,6 @@
         android:id="@+id/acceptOfferButton"
         android:layout_width="match_parent"
         android:layout_height="48dp"
-        android:background="@drawable/bg_waitlist_button"
         android:fontFamily="@font/varela_round_regular"
         android:insetTop="0dp"
         android:insetBottom="0dp"
@@ -92,7 +91,7 @@
         android:textAllCaps="false"
         android:textColor="#1D1D1D"
         android:textSize="18sp"
-        app:backgroundTint="@android:color/transparent"
+        app:backgroundTint="#F1F1F1"
         app:cornerRadius="24dp" />
 
     <com.google.android.material.button.MaterialButton
@@ -100,7 +99,6 @@
         android:layout_width="match_parent"
         android:layout_height="48dp"
         android:layout_marginTop="12dp"
-        android:background="@drawable/bg_waitlist_button"
         android:fontFamily="@font/varela_round_regular"
         android:insetTop="0dp"
         android:insetBottom="0dp"
@@ -109,7 +107,7 @@
         android:textAllCaps="false"
         android:textColor="#1D1D1D"
         android:textSize="18sp"
-        app:backgroundTint="@android:color/transparent"
+        app:backgroundTint="#F1F1F1"
         app:cornerRadius="24dp" />
 
 </LinearLayout>
