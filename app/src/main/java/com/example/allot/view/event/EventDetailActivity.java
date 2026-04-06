@@ -61,6 +61,8 @@ public class EventDetailActivity extends AppCompatActivity {
     public static final String EXTRA_EVENT_CATEGORY = "event_category";
     public static final String EXTRA_AUTO_OPEN_JOIN_DIALOG = "auto_open_join_dialog";
     public static final String EXTRA_AUTO_SAVE_EVENT = "auto_save_event";
+    public static final String EXTRA_UI_TEST_SKIP_NETWORK_LOAD = "ui_test_skip_network_load";
+    public static final String EXTRA_UI_TEST_BYPASS_PROFILE_GATE = "ui_test_bypass_profile_gate";
     private static final int LOCATION_PERMISSION_REQUEST = 1002;
 
     private EventDetailController eventDetailController;
@@ -136,6 +138,9 @@ public class EventDetailActivity extends AppCompatActivity {
         bindViews();
         bindFallbackContent();
         setupListeners();
+        if (isUiTestFallbackMode()) {
+            return;
+        }
         loadAdminStatus();
         loadEventDetails();
     }
@@ -372,6 +377,9 @@ public class EventDetailActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        if (isUiTestFallbackMode()) {
+            return;
+        }
         if (TextUtils.isEmpty(currentEventId)) {
             return;
         }
@@ -576,7 +584,7 @@ public class EventDetailActivity extends AppCompatActivity {
 
             dialog.dismiss();
             Toast.makeText(this, result.getMessageResId(), Toast.LENGTH_SHORT).show();
-            finish();
+            loadEventDetails();
         });
     }
 
@@ -828,6 +836,11 @@ public class EventDetailActivity extends AppCompatActivity {
     }
 
     private void requireCompletedProfile(Runnable onReady, Intent onboardingIntent) {
+        if (getIntent().getBooleanExtra(EXTRA_UI_TEST_BYPASS_PROFILE_GATE, false)) {
+            onReady.run();
+            return;
+        }
+
         userController.loadCurrentUser((user, success) -> {
             if (success && userController.hasCompletedProfile(user)) {
                 onReady.run();
@@ -1191,6 +1204,10 @@ public class EventDetailActivity extends AppCompatActivity {
     private interface CommentPostCallback {
         void onSuccess();
         void onFailure();
+    }
+
+    private boolean isUiTestFallbackMode() {
+        return getIntent().getBooleanExtra(EXTRA_UI_TEST_SKIP_NETWORK_LOAD, false);
     }
 }
 

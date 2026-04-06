@@ -36,6 +36,12 @@ import com.example.allot.view.shared.UiHelper;
  * Shows the main profile screen where the user can view and update their details.
  */
 public class ProfileActivity extends AppCompatActivity {
+    public static final String EXTRA_UI_TEST_PROFILE_MODE = "ui_test_profile_mode";
+    public static final String EXTRA_UI_TEST_FIRST_NAME = "ui_test_first_name";
+    public static final String EXTRA_UI_TEST_LAST_NAME = "ui_test_last_name";
+    public static final String EXTRA_UI_TEST_EMAIL = "ui_test_email";
+    public static final String EXTRA_UI_TEST_PHONE = "ui_test_phone";
+    public static final String EXTRA_UI_TEST_NOTIFICATIONS_ENABLED = "ui_test_notifications_enabled";
     /**
      * Background color used for the save button when saving is not currently available.
      */
@@ -111,6 +117,12 @@ public class ProfileActivity extends AppCompatActivity {
         setupFormListeners();
         setupProfilePhotoPicker();
         updateSaveButtonState();
+        if (isUiTestProfileMode()) {
+            bindProfileState(buildUiTestProfileSnapshot());
+            renderProfilePhoto(null);
+            adminPanelButton.setVisibility(View.GONE);
+            return;
+        }
         checkAdminStatus();
         loadProfile();
         loadProfilePhoto();
@@ -335,6 +347,12 @@ public class ProfileActivity extends AppCompatActivity {
             return;
         }
 
+        if (isUiTestProfileMode()) {
+            bindProfileState(buildCurrentProfileSnapshot());
+            Toast.makeText(ProfileActivity.this, "Profile updated.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         isSaving = true;
         updateSaveButtonState();
 
@@ -497,6 +515,20 @@ public class ProfileActivity extends AppCompatActivity {
 
         isBindingProfile = false;
         updateSaveButtonState();
+    }
+
+    private boolean isUiTestProfileMode() {
+        return getIntent().getBooleanExtra(EXTRA_UI_TEST_PROFILE_MODE, false);
+    }
+
+    private ProfileFormSnapshot buildUiTestProfileSnapshot() {
+        return new ProfileFormSnapshot(
+                getIntent().getStringExtra(EXTRA_UI_TEST_FIRST_NAME),
+                getIntent().getStringExtra(EXTRA_UI_TEST_LAST_NAME),
+                getIntent().getStringExtra(EXTRA_UI_TEST_EMAIL),
+                getIntent().getStringExtra(EXTRA_UI_TEST_PHONE),
+                getIntent().getBooleanExtra(EXTRA_UI_TEST_NOTIFICATIONS_ENABLED, false)
+        );
     }
 
 }
