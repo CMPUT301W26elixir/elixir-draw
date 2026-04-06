@@ -59,9 +59,9 @@
         android:minHeight="0dp"
         android:text="@string/delete_profile_dialog_stay"
         android:textAllCaps="false"
-        android:textColor="#FF84E49D"
+        android:textColor="#1D1D1D"
         android:textSize="16sp"
-        app:backgroundTint="#FF5A994A"
+        app:backgroundTint="#FFFFFFFF"
         app:cornerRadius="16dp" />
 
     <com.google.android.material.button.MaterialButton
@@ -76,8 +76,8 @@
         android:minHeight="0dp"
         android:text="@string/delete_profile_dialog_confirm"
         android:textAllCaps="false"
-        android:textColor="#FFFF7E5D"
+        android:textColor="#1D1D1D"
         android:textSize="16sp"
-        app:backgroundTint="#FF9E4141"
+        app:backgroundTint="#FFFFFFFF"
         app:cornerRadius="16dp" />
 </LinearLayout>

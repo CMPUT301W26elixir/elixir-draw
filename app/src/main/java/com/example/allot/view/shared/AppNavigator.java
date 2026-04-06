@@ -106,7 +106,9 @@ public final class AppNavigator {
         UserController userController = new UserController(activity);
         userController.loadCurrentUser((user, success) -> {
             Intent intent;
-            if (success && userController.hasCompletedProfile(user)) {
+            if (shouldForceDeferredOnboarding(activity)) {
+                intent = buildOnboardingIntent(activity, destination, extras);
+            } else if (success && userController.hasCompletedProfile(user)) {
                 intent = buildDestinationIntent(activity, destination, extras);
             } else {
                 intent = buildOnboardingIntent(activity, destination, extras);
@@ -131,14 +133,29 @@ public final class AppNavigator {
     }
 
     private static Intent buildOnboardingIntent(Activity activity, String destination, Bundle extras) {
+        Intent intent;
         if (DeferredOnboardingNavigator.DESTINATION_MY_EVENTS.equals(destination)) {
             String initialTab = extras == null
                     ? null
                     : extras.getString(DeferredOnboardingNavigator.EXTRA_POST_MY_EVENTS_INITIAL_TAB);
-            return DeferredOnboardingNavigator.createMyEventsIntent(activity, initialTab);
+            intent = DeferredOnboardingNavigator.createMyEventsIntent(activity, initialTab);
+        } else {
+            intent = DeferredOnboardingNavigator.createIntent(activity, destination);
         }
 
-        return DeferredOnboardingNavigator.createIntent(activity, destination);
+        if (shouldForceDeferredOnboarding(activity)) {
+            intent.putExtra(DeferredOnboardingNavigator.EXTRA_UI_TEST_COMPLETE_DEFERRED_ONBOARDING, true);
+        }
+        return intent;
+    }
+
+    private static boolean shouldForceDeferredOnboarding(Activity activity) {
+        return activity != null
+                && activity.getIntent() != null
+                && activity.getIntent().getBooleanExtra(
+                DeferredOnboardingNavigator.EXTRA_UI_TEST_COMPLETE_DEFERRED_ONBOARDING,
+                false
+        );
     }
 }
 

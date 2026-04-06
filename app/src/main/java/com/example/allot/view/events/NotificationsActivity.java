@@ -54,6 +54,14 @@ public class NotificationsActivity extends AppCompatActivity {
     private void saveProfileAndOpenExplore(boolean notificationsEnabled) {
         setButtonsEnabled(false);
 
+        if (getIntent().getBooleanExtra(
+                DeferredOnboardingNavigator.EXTRA_UI_TEST_COMPLETE_DEFERRED_ONBOARDING,
+                false
+        )) {
+            openDeferredDestination();
+            return;
+        }
+
         String firstName = getIntent().getStringExtra(NameActivity.EXTRA_FIRST_NAME);
         String lastName = getIntent().getStringExtra(NameActivity.EXTRA_LAST_NAME);
         String email = getIntent().getStringExtra(NameActivity.EXTRA_EMAIL);
@@ -64,13 +72,7 @@ public class NotificationsActivity extends AppCompatActivity {
                     if (success && user != null) {
                         FirebaseMessaging.getInstance().getToken()
                                 .addOnSuccessListener(userController::updateCurrentFcmToken);
-
-                        Intent intent = DeferredOnboardingNavigator.buildPostOnboardingIntent(
-                                NotificationsActivity.this,
-                                getIntent()
-                        );
-                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                        startActivity(intent);
+                        openDeferredDestination();
                         return;
                     }
 
@@ -79,6 +81,15 @@ public class NotificationsActivity extends AppCompatActivity {
                             "Could not save your profile. Please try again.",
                             Toast.LENGTH_SHORT).show();
                 });
+    }
+
+    private void openDeferredDestination() {
+        Intent intent = DeferredOnboardingNavigator.buildPostOnboardingIntent(
+                NotificationsActivity.this,
+                getIntent()
+        );
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
     }
 
     /**

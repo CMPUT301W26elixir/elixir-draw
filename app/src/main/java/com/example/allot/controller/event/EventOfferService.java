@@ -109,6 +109,54 @@ public class EventOfferService {
     }
 
     /**
+     * Removes a selected entrant from the event and marks them as cancelled.
+     *
+     * @param event the event to update
+     * @param entrantId the entrant to cancel
+     * @return the updated event state, or null if inputs are invalid
+     */
+    public Event buildManualCancellationState(Event event, String entrantId) {
+        if (event == null || isBlank(entrantId)) {
+            return null;
+        }
+
+        WaitingList waitingList = event.getWaitingList();
+        if (waitingList == null) {
+            return null;
+        }
+
+        if (waitingList.chosen == null) {
+            waitingList.chosen = new ArrayList<>();
+        }
+        if (waitingList.status == null) {
+            waitingList.status = new HashMap<>();
+        }
+        if (event.getChosen() == null) {
+            event.setChosen(new ArrayList<>());
+        }
+        if (event.getEnrolled() == null) {
+            event.setEnrolled(new ArrayList<>());
+        }
+        if (event.getCancelled() == null) {
+            event.setCancelled(new ArrayList<>());
+        }
+
+        waitingList.chosen.remove(entrantId);
+        waitingList.status.remove(entrantId);
+        event.getChosen().remove(entrantId);
+        event.getEnrolled().remove(entrantId);
+        event.getNotEnrolled().remove(entrantId);
+        if (!event.getCancelled().contains(entrantId)) {
+            event.getCancelled().add(entrantId);
+        }
+
+        event.setChosen(new ArrayList<>(waitingList.chosen));
+        event.setEnrolled(waitingList.enrolled());
+        event.setNotEnrolled(waitingList.notEnrolled());
+        return event;
+    }
+
+    /**
      * Checks whether a string is blank after trimming whitespace.
      *
      * @param value the string to check

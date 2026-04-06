@@ -63,6 +63,7 @@ public class EventEntrantsActivity extends AppCompatActivity {
     private Event currentEvent;
     private Tab selectedTab = Tab.SELECTED;
     private boolean isExporting;
+    private boolean isCancellingEntrant;
 
     /**
      * Initializes the activity, binds views, sets up the header and tabs,
@@ -247,44 +248,20 @@ public class EventEntrantsActivity extends AppCompatActivity {
             View itemView = inflater.inflate(R.layout.item_lottery_entrant, entrantsContainer, false);
             TextView nameText = itemView.findViewById(R.id.entrantNameText);
             TextView timeText = itemView.findViewById(R.id.entrantTimeText);
-            ImageButton removeButton = itemView.findViewById(R.id.removeEntrantButton);
+            TextView cancelButton = itemView.findViewById(R.id.cancelEntrantButton);
 
             nameText.setText(entrantItem.getDisplayName());
             timeText.setText(entrantItem.getSubtitleRes());
-
-            // Show remove button in Selected and All Entrants tabs
-            if (selectedTab == Tab.SELECTED || selectedTab == Tab.ALL) {
-                removeButton.setVisibility(View.VISIBLE);
-                removeButton.setOnClickListener(v -> showRemoveEntrantDialog(entrantItem));
-            } else {
-                removeButton.setVisibility(View.GONE);
+            if (cancelButton != null) {
+                if (selectedTab == Tab.SELECTED) {
+                    cancelButton.setVisibility(View.VISIBLE);
+                    cancelButton.setOnClickListener(view -> promptCancelEntrant(entrantItem));
+                } else {
+                    cancelButton.setVisibility(View.GONE);
+                }
             }
-
             entrantsContainer.addView(itemView);
         }
-    }
-
-    /**
-     * Displays a confirmation dialog before removing an entrant.
-     *
-     * @param entrantItem the entrant to remove
-     */
-    private void showRemoveEntrantDialog(LotteryEntrantItem entrantItem) {
-        new AlertDialog.Builder(this)
-                .setTitle(R.string.manage_entrants_cancel_dialog_title)
-                .setMessage(R.string.manage_entrants_cancel_dialog_message)
-                .setPositiveButton(R.string.admin_delete, (dialog, which) -> {
-                    entrantsController.cancelEntrant(currentEventId, entrantItem.getEntrantId(), (result, success) -> {
-                        if (success) {
-                            Toast.makeText(this, R.string.manage_entrants_cancel_success, Toast.LENGTH_SHORT).show();
-                            loadEvent();
-                        } else {
-                            Toast.makeText(this, R.string.manage_entrants_cancel_failure, Toast.LENGTH_SHORT).show();
-                        }
-                    });
-                })
-                .setNegativeButton(R.string.admin_cancel, null)
-                .show();
     }
 
     /**
@@ -306,6 +283,43 @@ public class EventEntrantsActivity extends AppCompatActivity {
                 })
                 .setNegativeButton(R.string.admin_cancel, null)
                 .show();
+    }
+
+    private void promptCancelEntrant(LotteryEntrantItem entrantItem) {
+        if (entrantItem == null || isCancellingEntrant) {
+            return;
+        }
+
+        String displayName = entrantItem.getDisplayName();
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.manage_entrants_cancel_title)
+                .setMessage(getString(R.string.manage_entrants_cancel_message, displayName))
+                .setNegativeButton(R.string.manage_entrants_cancel_stay, null)
+                .setPositiveButton(R.string.manage_entrants_cancel_confirm, (dialog, which) -> cancelEntrant(entrantItem))
+                .show();
+    }
+
+    private void cancelEntrant(LotteryEntrantItem entrantItem) {
+        if (entrantItem == null || isCancellingEntrant) {
+            return;
+        }
+
+        if (TextUtils.isEmpty(currentEventId)) {
+            Toast.makeText(this, R.string.manage_entrants_cancel_failure, Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        isCancellingEntrant = true;
+        entrantsController.cancelSelectedEntrant(currentEventId, entrantItem.getEntrantId(), (result, success) -> {
+            isCancellingEntrant = false;
+            if (!success || result == null || !result) {
+                Toast.makeText(this, R.string.manage_entrants_cancel_failure, Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            Toast.makeText(this, R.string.manage_entrants_cancel_success, Toast.LENGTH_SHORT).show();
+            loadEvent();
+        });
     }
 
     private EventEntrantsController.Tab mapTab(Tab tab) {

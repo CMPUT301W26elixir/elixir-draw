@@ -111,6 +111,18 @@ public class EventEntrantsController {
         loadExportRows(entrantIds, 0, new ArrayList<>(), listener);
     }
 
+    /**
+     * Cancels a selected entrant and moves them to the not selected list.
+     */
+    public void cancelSelectedEntrant(String eventId, String entrantId, OnCompleteListener<Boolean> listener) {
+        if (isBlank(eventId) || isBlank(entrantId)) {
+            listener.onComplete(false, false);
+            return;
+        }
+
+        eventRepository.cancelSelectedEntrant(eventId, entrantId, listener);
+    }
+
     private void buildTabItems(Event event, Tab selectedTab, java.util.function.Consumer<List<LotteryEntrantItem>> consumer) {
         List<String> entrantIds = getEntrantIds(event, selectedTab);
         if (entrantIds.isEmpty()) {

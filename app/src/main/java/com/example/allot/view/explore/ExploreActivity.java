@@ -56,6 +56,22 @@ public class ExploreActivity extends AppCompatActivity {
     private static final int FILTER_REQUEST_CODE = 4102;
     private static final int LOCATION_PERMISSION_REQUEST = 4103;
     private static final int SEARCH_DEBOUNCE_MS = 150;
+    public static final String EXTRA_UI_TEST_EVENT_ID = "ui_test_event_id";
+    public static final String EXTRA_UI_TEST_EVENT_TITLE = "ui_test_event_title";
+    public static final String EXTRA_UI_TEST_EVENT_LOCATION = "ui_test_event_location";
+    public static final String EXTRA_UI_TEST_EVENT_DATE = "ui_test_event_date";
+    public static final String EXTRA_UI_TEST_EVENT_PRICE = "ui_test_event_price";
+    public static final String EXTRA_UI_TEST_EVENT_DEADLINE = "ui_test_event_deadline";
+    public static final String EXTRA_UI_TEST_EVENT_CATEGORY = "ui_test_event_category";
+    public static final String EXTRA_UI_TEST_EVENT_IDS = "ui_test_event_ids";
+    public static final String EXTRA_UI_TEST_EVENT_TITLES = "ui_test_event_titles";
+    public static final String EXTRA_UI_TEST_EVENT_LOCATIONS = "ui_test_event_locations";
+    public static final String EXTRA_UI_TEST_EVENT_DATES = "ui_test_event_dates";
+    public static final String EXTRA_UI_TEST_EVENT_PRICES = "ui_test_event_prices";
+    public static final String EXTRA_UI_TEST_EVENT_DEADLINES = "ui_test_event_deadlines";
+    public static final String EXTRA_UI_TEST_EVENT_CATEGORIES = "ui_test_event_categories";
+    public static final String EXTRA_UI_TEST_BYPASS_PROFILE_GATE = "ui_test_bypass_profile_gate";
+    public static final String EXTRA_UI_TEST_SKIP_DETAIL_NETWORK_LOAD = "ui_test_skip_detail_network_load";
 
     private ExploreController browseController;
     private NotificationController notificationController;
@@ -93,6 +109,8 @@ public class ExploreActivity extends AppCompatActivity {
     private boolean isInitialBrowseLoadComplete;
     private boolean hasInitializedDefaultLocationFilter;
     private boolean isInitializingDefaultLocationFilter;
+    private boolean isUiTestInjectedExploreMode;
+    private List<EventListItem> uiTestInjectedEvents = new ArrayList<>();
 
     /**
      * Initializes the activity, binds views, configures filters and navigation,
@@ -144,6 +162,12 @@ public class ExploreActivity extends AppCompatActivity {
             }
         });
         recyclerView.setAdapter(eventListAdapter);
+
+        isUiTestInjectedExploreMode = hasInjectedUiTestEvent(getIntent());
+        if (isUiTestInjectedExploreMode) {
+            showInjectedUiTestEvent();
+            return;
+        }
 
         maybeInitializeDefaultLocationFilter();
         refreshSavedEventsAndVisibleContent();
@@ -231,6 +255,11 @@ public class ExploreActivity extends AppCompatActivity {
     protected void onNewIntent(@NonNull Intent intent) {
         super.onNewIntent(intent);
         setIntent(intent);
+        isUiTestInjectedExploreMode = hasInjectedUiTestEvent(intent);
+        if (isUiTestInjectedExploreMode) {
+            showInjectedUiTestEvent();
+            return;
+        }
         if ("saved".equals(intent.getStringExtra("navigate_to"))) {
             currentHomeTab = BottomNavBarView.Tab.SAVED;
         }
@@ -243,6 +272,9 @@ public class ExploreActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        if (isUiTestInjectedExploreMode) {
+            return;
+        }
         maybeInitializeDefaultLocationFilter();
         refreshSavedEventsAndVisibleContent();
     }
@@ -276,6 +308,34 @@ public class ExploreActivity extends AppCompatActivity {
         bottomNavBar.setOnTabClickListener(BottomNavBarView.Tab.SCAN, view -> openScanScreen());
     }
 
+    private boolean hasInjectedUiTestEvent(Intent intent) {
+        return intent != null
+                && (!UiHelper.isBlank(intent.getStringExtra(EXTRA_UI_TEST_EVENT_ID))
+                || hasInjectedUiTestEventList(intent));
+    }
+
+    private void showInjectedUiTestEvent() {
+        currentHomeTab = BottomNavBarView.Tab.EXPLORE;
+        bottomNavBar.setSelectedTab(BottomNavBarView.Tab.EXPLORE);
+        if (fragmentContainer != null) {
+            fragmentContainer.setVisibility(View.GONE);
+        }
+        if (exploreContainer != null) {
+            exploreContainer.setVisibility(View.VISIBLE);
+        }
+        if (filterPillsScrollView != null) {
+            filterPillsScrollView.setVisibility(View.GONE);
+        }
+        loadingIndicator.setVisibility(View.GONE);
+        stateText.setVisibility(View.GONE);
+        recyclerView.setVisibility(View.VISIBLE);
+        userSavedEvents = new ArrayList<>();
+        isInitialBrowseLoadComplete = true;
+
+        uiTestInjectedEvents = buildInjectedUiTestEvents(getIntent());
+        renderInjectedUiTestItems(uiTestInjectedEvents, "");
+    }
+
     /**
      * Shows the explore tab and reloads the browse event list.
      */
@@ -287,6 +347,13 @@ public class ExploreActivity extends AppCompatActivity {
         }
         if (exploreContainer != null) {
             exploreContainer.setVisibility(View.VISIBLE);
+        }
+        if (isUiTestInjectedExploreMode) {
+            if (filterPillsScrollView != null) {
+                filterPillsScrollView.setVisibility(View.GONE);
+            }
+            renderInjectedUiTestItems(uiTestInjectedEvents, searchInput.getText() == null ? "" : searchInput.getText().toString());
+            return;
         }
         rebuildFilterPills();
         refreshBrowseEvents(false);
@@ -449,6 +516,11 @@ public class ExploreActivity extends AppCompatActivity {
      * Applies current filters to the locally cached event list.
      */
     private void applyBrowseFilters(String searchTerm) {
+        if (isUiTestInjectedExploreMode) {
+            renderInjectedUiTestItems(uiTestInjectedEvents, searchTerm);
+            return;
+        }
+
         browseController.filterCachedBrowseEvents(
                 searchTerm,
                 "",
@@ -749,6 +821,12 @@ public class ExploreActivity extends AppCompatActivity {
         intent.putExtra(EventDetailActivity.EXTRA_EVENT_PRICE, eventItem.getPrice());
         intent.putExtra(EventDetailActivity.EXTRA_EVENT_DEADLINE, eventItem.getDaysLeft());
         intent.putExtra(EventDetailActivity.EXTRA_EVENT_CATEGORY, eventItem.getCategory());
+        if (getIntent().getBooleanExtra(EXTRA_UI_TEST_BYPASS_PROFILE_GATE, false)) {
+            intent.putExtra(EventDetailActivity.EXTRA_UI_TEST_BYPASS_PROFILE_GATE, true);
+        }
+        if (getIntent().getBooleanExtra(EXTRA_UI_TEST_SKIP_DETAIL_NETWORK_LOAD, false)) {
+            intent.putExtra(EventDetailActivity.EXTRA_UI_TEST_SKIP_NETWORK_LOAD, true);
+        }
         startActivity(intent);
     }
 
@@ -761,7 +839,89 @@ public class ExploreActivity extends AppCompatActivity {
         });
     }
 
+    private boolean hasInjectedUiTestEventList(Intent intent) {
+        ArrayList<String> eventIds = intent.getStringArrayListExtra(EXTRA_UI_TEST_EVENT_IDS);
+        return eventIds != null && !eventIds.isEmpty();
+    }
+
+    private List<EventListItem> buildInjectedUiTestEvents(Intent intent) {
+        List<EventListItem> injectedItems = new ArrayList<>();
+        ArrayList<String> eventIds = intent.getStringArrayListExtra(EXTRA_UI_TEST_EVENT_IDS);
+        if (eventIds != null && !eventIds.isEmpty()) {
+            ArrayList<String> titles = intent.getStringArrayListExtra(EXTRA_UI_TEST_EVENT_TITLES);
+            ArrayList<String> locations = intent.getStringArrayListExtra(EXTRA_UI_TEST_EVENT_LOCATIONS);
+            ArrayList<String> dates = intent.getStringArrayListExtra(EXTRA_UI_TEST_EVENT_DATES);
+            ArrayList<String> prices = intent.getStringArrayListExtra(EXTRA_UI_TEST_EVENT_PRICES);
+            ArrayList<String> deadlines = intent.getStringArrayListExtra(EXTRA_UI_TEST_EVENT_DEADLINES);
+            ArrayList<String> categories = intent.getStringArrayListExtra(EXTRA_UI_TEST_EVENT_CATEGORIES);
+
+            for (int index = 0; index < eventIds.size(); index++) {
+                injectedItems.add(new EventListItem(
+                        safeString(valueAt(eventIds, index)),
+                        safeString(valueAt(titles, index)),
+                        safeString(valueAt(locations, index)),
+                        safeString(valueAt(dates, index)),
+                        safeString(valueAt(prices, index)),
+                        safeString(valueAt(deadlines, index)),
+                        safeString(valueAt(categories, index)),
+                        null
+                ));
+            }
+            return injectedItems;
+        }
+
+        injectedItems.add(new EventListItem(
+                safeString(intent.getStringExtra(EXTRA_UI_TEST_EVENT_ID)),
+                safeString(intent.getStringExtra(EXTRA_UI_TEST_EVENT_TITLE)),
+                safeString(intent.getStringExtra(EXTRA_UI_TEST_EVENT_LOCATION)),
+                safeString(intent.getStringExtra(EXTRA_UI_TEST_EVENT_DATE)),
+                safeString(intent.getStringExtra(EXTRA_UI_TEST_EVENT_PRICE)),
+                safeString(intent.getStringExtra(EXTRA_UI_TEST_EVENT_DEADLINE)),
+                safeString(intent.getStringExtra(EXTRA_UI_TEST_EVENT_CATEGORY)),
+                null
+        ));
+        return injectedItems;
+    }
+
+    private void renderInjectedUiTestItems(List<EventListItem> sourceItems, String searchTerm) {
+        List<EventListItem> filteredItems = new ArrayList<>();
+        String normalizedSearch = normalize(searchTerm).toLowerCase(Locale.getDefault());
+        for (EventListItem item : sourceItems) {
+            if (item == null) {
+                continue;
+            }
+            if (normalizedSearch.isEmpty()
+                    || item.getTitle().toLowerCase(Locale.getDefault()).contains(normalizedSearch)
+                    || item.getStreet().toLowerCase(Locale.getDefault()).contains(normalizedSearch)
+                    || item.getCategory().toLowerCase(Locale.getDefault()).contains(normalizedSearch)) {
+                filteredItems.add(item);
+            }
+        }
+
+        if (filteredItems.isEmpty()) {
+            showBrowseMessageState(buildEmptyStateMessage(searchTerm));
+            return;
+        }
+
+        eventListAdapter.updateEvents(filteredItems);
+        recyclerView.setVisibility(View.VISIBLE);
+        loadingIndicator.setVisibility(View.GONE);
+        stateText.setVisibility(View.GONE);
+    }
+
+    private String valueAt(ArrayList<String> values, int index) {
+        if (values == null || index < 0 || index >= values.size()) {
+            return "";
+        }
+        return values.get(index);
+    }
+
     private void requireCompletedProfile(Runnable onReady, Intent onboardingIntent) {
+        if (getIntent().getBooleanExtra(EXTRA_UI_TEST_BYPASS_PROFILE_GATE, false)) {
+            onReady.run();
+            return;
+        }
+
         userController.loadCurrentUser((user, success) -> {
             if (success && userController.hasCompletedProfile(user)) {
                 onReady.run();
