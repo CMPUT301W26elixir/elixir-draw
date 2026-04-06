@@ -507,35 +507,123 @@ public class EventRepository {
                 return;
             }
 
-            String posterUrl = event.getPosterUrl();
-            database.collection("users")
-                    .get()
-                    .addOnCompleteListener(task -> {
-                        if (!task.isSuccessful()) {
+            deleteEventWithCleanup(event, listener);
+        });
+    }
+
+    /**
+     * Deletes an event owned by the given organizer and removes all user references.
+     *
+     * @param eventId the event ID to delete
+     * @param organizerId the organizer device ID requesting deletion
+     * @param listener the listener that receives the result
+     */
+    public void deleteEventAsOrganizer(String eventId, String organizerId, OnCompleteListener<Boolean> listener) {
+        if (isBlank(eventId) || isBlank(organizerId)) {
+            listener.onComplete(false, false);
+            return;
+        }
+
+        getEventById(eventId, (event, eventLoaded) -> {
+            if (!eventLoaded || event == null) {
+                listener.onComplete(false, false);
+                return;
+            }
+
+            if (!organizerId.equals(event.getOrganizerId())) {
+                listener.onComplete(false, false);
+                return;
+            }
+
+            deleteEventWithCleanup(event, listener);
+        });
+    }
+
+    /**
+     * Removes an entrant from the selected list and records them as not selected.
+     *
+     * @param eventId the event ID
+     * @param entrantId the entrant device ID
+     * @param listener the listener that receives the result
+     */
+    public void cancelSelectedEntrant(String eventId, String entrantId, OnCompleteListener<Boolean> listener) {
+        if (isBlank(eventId) || isBlank(entrantId)) {
+            listener.onComplete(false, false);
+            return;
+        }
+
+        database.runTransaction((Transaction.Function<Boolean>) transaction -> {
+                    DocumentSnapshot snapshot = transaction.get(database.collection("events").document(eventId));
+                    if (!snapshot.exists()) {
+                        return false;
+                    }
+
+                    Event event = snapshot.toObject(Event.class);
+                    if (event == null) {
+                        return false;
+                    }
+                    if (event.getEventId() == null || event.getEventId().trim().isEmpty()) {
+                        event.setEventId(snapshot.getId());
+                    }
+
+                    Event updatedEvent = eventOfferService.buildManualCancellationState(event, entrantId);
+                    if (updatedEvent == null) {
+                        return false;
+                    }
+
+                    transaction.update(snapshot.getReference(),
+                            "chosen", updatedEvent.getChosen(),
+                            "enrolled", updatedEvent.getEnrolled(),
+                            "cancelled", updatedEvent.getCancelled(),
+                            "notEnrolled", updatedEvent.getNotEnrolled(),
+                            "waitingList.chosen", updatedEvent.getWaitingList().chosen,
+                            "waitingList.status", updatedEvent.getWaitingList().status);
+                    return true;
+                })
+                .addOnSuccessListener(result -> listener.onComplete(Boolean.TRUE.equals(result), Boolean.TRUE.equals(result)))
+                .addOnFailureListener(exception -> listener.onComplete(false, false));
+    }
+
+    private void deleteEventWithCleanup(Event event, OnCompleteListener<Boolean> listener) {
+        if (event == null) {
+            listener.onComplete(false, false);
+            return;
+        }
+
+        String eventId = event.getEventId();
+        if (isBlank(eventId)) {
+            listener.onComplete(false, false);
+            return;
+        }
+
+        String posterUrl = event.getPosterUrl();
+        database.collection("users")
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (!task.isSuccessful()) {
+                        listener.onComplete(false, false);
+                        return;
+                    }
+
+                    List<UserCleanupTarget> cleanupTargets = new ArrayList<>();
+                    for (QueryDocumentSnapshot document : task.getResult()) {
+                        cleanupTargets.add(new UserCleanupTarget(
+                                document.getReference().getPath(),
+                                document.getId()));
+                    }
+
+                    List<CleanupOperation> cleanupOperations = buildEventCleanupOperations(eventId, cleanupTargets);
+                    cleanupOperations.add(CleanupOperation.deleteEvent(eventId));
+                    List<List<CleanupOperation>> batches = chunkCleanupOperations(cleanupOperations);
+                    commitEventCleanupOperations(database, batches, 0, (result, success) -> {
+                        if (!success || result == null || !result) {
                             listener.onComplete(false, false);
                             return;
                         }
 
-                        List<UserCleanupTarget> cleanupTargets = new ArrayList<>();
-                        for (QueryDocumentSnapshot document : task.getResult()) {
-                            cleanupTargets.add(new UserCleanupTarget(
-                                    document.getReference().getPath(),
-                                    document.getId()));
-                        }
-
-                        List<CleanupOperation> cleanupOperations = buildEventCleanupOperations(eventId, cleanupTargets);
-                        cleanupOperations.add(CleanupOperation.deleteEvent(eventId));
-                        List<List<CleanupOperation>> batches = chunkCleanupOperations(cleanupOperations);
-                        commitEventCleanupOperations(database, batches, 0, (result, success) -> {
-                            if (!success || result == null || !result) {
-                                listener.onComplete(false, false);
-                                return;
-                            }
-
-                            deletePosterFromStorage(posterUrl, listener);
-                        });
+                        deletePosterFromStorage(posterUrl, listener);
                     });
-        });
+                });
     }
 
     private void deletePosterFromStorage(String posterUrl, OnCompleteListener<Boolean> listener) {

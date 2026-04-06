@@ -205,6 +205,31 @@ public class EditEventController {
     }
 
     /**
+     * Deletes an event owned by the current organizer.
+     *
+     * @param eventId the event ID to delete
+     * @param organizerId the organizer device ID requesting deletion
+     * @param listener the listener that receives the delete result
+     */
+    public void deleteEvent(String eventId,
+                            String organizerId,
+                            OnCompleteListener<AppResult<Boolean>> listener) {
+        if (isBlank(eventId)) {
+            listener.onComplete(AppResult.failure(R.string.manage_event_not_found), false);
+            return;
+        }
+
+        eventRepository.deleteEventAsOrganizer(eventId, organizerId, (result, success) -> {
+            if (!success || result == null || !result) {
+                listener.onComplete(AppResult.failure(R.string.manage_event_delete_failure), false);
+                return;
+            }
+
+            listener.onComplete(AppResult.success(true, R.string.manage_event_delete_success), true);
+        });
+    }
+
+    /**
      * Determines whether the entrants screen should open instead of the draw screen.
      *
      * @param event the current event

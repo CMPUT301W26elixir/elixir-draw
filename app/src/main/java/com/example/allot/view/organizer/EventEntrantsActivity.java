@@ -11,6 +11,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import androidx.core.content.ContextCompat;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AlertDialog;
 import com.example.allot.R;
 import com.example.allot.controller.organizer.EventEntrantsController;
 import com.example.allot.controller.organizer.EventEntrantsCsvFormatter;
@@ -60,6 +61,7 @@ public class EventEntrantsActivity extends AppCompatActivity {
     private Event currentEvent;
     private Tab selectedTab = Tab.SELECTED;
     private boolean isExporting;
+    private boolean isCancellingEntrant;
 
     /**
      * Initializes the activity, binds views, sets up the header and tabs,
@@ -232,11 +234,57 @@ public class EventEntrantsActivity extends AppCompatActivity {
             View itemView = inflater.inflate(R.layout.item_lottery_entrant, entrantsContainer, false);
             TextView nameText = itemView.findViewById(R.id.entrantNameText);
             TextView timeText = itemView.findViewById(R.id.entrantTimeText);
+            TextView cancelButton = itemView.findViewById(R.id.cancelEntrantButton);
 
             nameText.setText(entrantItem.getDisplayName());
             timeText.setText(entrantItem.getSubtitleRes());
+            if (cancelButton != null) {
+                if (selectedTab == Tab.SELECTED) {
+                    cancelButton.setVisibility(View.VISIBLE);
+                    cancelButton.setOnClickListener(view -> promptCancelEntrant(entrantItem));
+                } else {
+                    cancelButton.setVisibility(View.GONE);
+                }
+            }
             entrantsContainer.addView(itemView);
         }
+    }
+
+    private void promptCancelEntrant(LotteryEntrantItem entrantItem) {
+        if (entrantItem == null || isCancellingEntrant) {
+            return;
+        }
+
+        String displayName = entrantItem.getDisplayName();
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.manage_entrants_cancel_title)
+                .setMessage(getString(R.string.manage_entrants_cancel_message, displayName))
+                .setNegativeButton(R.string.manage_entrants_cancel_stay, null)
+                .setPositiveButton(R.string.manage_entrants_cancel_confirm, (dialog, which) -> cancelEntrant(entrantItem))
+                .show();
+    }
+
+    private void cancelEntrant(LotteryEntrantItem entrantItem) {
+        if (entrantItem == null || isCancellingEntrant) {
+            return;
+        }
+
+        if (TextUtils.isEmpty(currentEventId)) {
+            Toast.makeText(this, R.string.manage_entrants_cancel_failure, Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        isCancellingEntrant = true;
+        entrantsController.cancelSelectedEntrant(currentEventId, entrantItem.getEntrantId(), (result, success) -> {
+            isCancellingEntrant = false;
+            if (!success || result == null || !result) {
+                Toast.makeText(this, R.string.manage_entrants_cancel_failure, Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            Toast.makeText(this, R.string.manage_entrants_cancel_success, Toast.LENGTH_SHORT).show();
+            loadEvent();
+        });
     }
 
     private EventEntrantsController.Tab mapTab(Tab tab) {

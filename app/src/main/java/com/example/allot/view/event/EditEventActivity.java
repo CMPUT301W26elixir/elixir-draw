@@ -1,6 +1,7 @@
 package com.example.allot.view.event;
 
 import android.app.Activity;
+import android.app.Dialog;
 import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
@@ -17,6 +18,7 @@ import android.widget.ImageButton;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.Button;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
@@ -26,6 +28,7 @@ import com.example.allot.R;
 import com.example.allot.common.AppResult;
 import com.example.allot.controller.event.EditEventController;
 import com.example.allot.controller.event.EventPosterController;
+import com.example.allot.controller.shared.UserController;
 import com.example.allot.model.event.Event;
 import com.example.allot.model.event.EventFormData;
 import com.example.allot.model.event.EventFormSnapshot;
@@ -33,6 +36,8 @@ import com.example.allot.view.lottery.RunLotteryActivity;
 import com.example.allot.view.organizer.EventEntrantsActivity;
 import com.example.allot.view.organizer.EventQrCodeActivity;
 import com.example.allot.view.organizer.InviteCoOrganizerActivity;
+import com.example.allot.view.shared.AppDialogHelper;
+import com.example.allot.view.shared.AppNavigator;
 import com.example.allot.view.shared.EventDisplayFormatter;
 import com.example.allot.view.shared.EventFormUiHelper;
 import com.example.allot.view.shared.RegistrationRangePickerView;
@@ -90,7 +95,9 @@ public class EditEventActivity extends AppCompatActivity {
     private EditText participantsInput;
     private RegistrationRangePickerView registrationRangePickerView;
     private TextView saveChangesButton;
+    private TextView deleteEventButton;
     private EventFormUiHelper formUiHelper;
+    private UserController userController;
     private String currentEventId;
     private Event currentEvent;
     private String currentCategory;
@@ -98,6 +105,7 @@ public class EditEventActivity extends AppCompatActivity {
     private boolean isBindingEvent;
     private boolean isLoadingEvent;
     private boolean isSaving;
+    private boolean isDeletingEvent;
     private boolean shouldRefreshOnResume;
     private Uri selectedPosterUri;
     private boolean removePosterRequested;
@@ -142,6 +150,7 @@ public class EditEventActivity extends AppCompatActivity {
 
         manageEventController = new EditEventController(this);
         eventPosterController = new EventPosterController();
+        userController = new UserController(this);
         currentEventId = getIntent().getStringExtra(EXTRA_EVENT_ID);
 
         bindViews();
@@ -186,6 +195,7 @@ public class EditEventActivity extends AppCompatActivity {
         participantsInput = findViewById(R.id.participantsInput);
         registrationRangePickerView = findViewById(R.id.registrationRangePickerView);
         saveChangesButton = findViewById(R.id.saveChangesButton);
+        deleteEventButton = findViewById(R.id.deleteEventButton);
         formUiHelper = new EventFormUiHelper(
                 eventNameInput,
                 locationInput,
@@ -271,6 +281,9 @@ public class EditEventActivity extends AppCompatActivity {
         });
         viewQrCodeButton.setOnClickListener(view -> openQrCodeScreen());
         saveChangesButton.setOnClickListener(view -> saveChanges());
+        if (deleteEventButton != null) {
+            deleteEventButton.setOnClickListener(view -> showDeleteEventDialog());
+        }
         renderPosterState();
     }
 
@@ -358,6 +371,7 @@ public class EditEventActivity extends AppCompatActivity {
         bindFormViewModel(viewModel);
         updateSummary(viewModel.getTitle(), viewModel.getLocation(), manageEventController.buildSummaryDate(readFormData()), currentCategory);
         updateInviteButtonVisibility(event);
+        updateDeleteButtonVisibility(event);
         renderPosterState();
 
         originalFormSnapshot = manageEventController.buildSnapshot(readFormData());
@@ -414,6 +428,87 @@ public class EditEventActivity extends AppCompatActivity {
         intent.putExtra(EventCreatedActivity.EXTRA_EVENT_CATEGORY, currentCategory);
         startActivity(intent);
         overridePendingTransition(0, 0);
+    }
+
+    private void updateDeleteButtonVisibility(Event event) {
+        if (deleteEventButton == null || userController == null) {
+            return;
+        }
+
+        String deviceId = userController.getCurrentDeviceId();
+        boolean isOrganizer = event != null
+                && deviceId != null
+                && deviceId.equals(event.getOrganizerId());
+        deleteEventButton.setVisibility(isOrganizer ? View.VISIBLE : View.GONE);
+    }
+
+    private void showDeleteEventDialog() {
+        if (isDeletingEvent || TextUtils.isEmpty(currentEventId)) {
+            return;
+        }
+
+        Dialog dialog = AppDialogHelper.createDialog(this, R.layout.dialog_admin_delete_event, true);
+        TextView titleText = dialog.findViewById(R.id.dialogTitle);
+        TextView messageText = dialog.findViewById(R.id.dialogMessage);
+        TextView eventTitleText = dialog.findViewById(R.id.eventTitleText);
+        Button cancelButton = dialog.findViewById(R.id.cancelButton);
+        Button deleteButton = dialog.findViewById(R.id.deleteEventButton);
+
+        if (titleText != null) {
+            titleText.setText(R.string.manage_event_delete_title);
+        }
+        if (messageText != null) {
+            messageText.setText(R.string.manage_event_delete_message);
+        }
+        if (eventTitleText != null) {
+            eventTitleText.setText(currentEvent == null ? "" : currentEvent.getTitle());
+        }
+
+        if (cancelButton != null) {
+            cancelButton.setText(R.string.manage_event_delete_cancel);
+            cancelButton.setOnClickListener(view -> dialog.dismiss());
+        }
+        if (deleteButton != null) {
+            deleteButton.setText(R.string.manage_event_delete_confirm);
+            deleteButton.setOnClickListener(view -> confirmDeleteEvent(dialog, cancelButton, deleteButton));
+        }
+
+        AppDialogHelper.showWrapContent(dialog, UiHelper.dpToPx(this, 320));
+    }
+
+    private void confirmDeleteEvent(Dialog dialog, Button cancelButton, Button deleteButton) {
+        if (isDeletingEvent || TextUtils.isEmpty(currentEventId) || userController == null) {
+            return;
+        }
+
+        isDeletingEvent = true;
+        if (cancelButton != null) {
+            cancelButton.setEnabled(false);
+        }
+        if (deleteButton != null) {
+            deleteButton.setEnabled(false);
+        }
+
+        String organizerId = userController.getCurrentDeviceId();
+        manageEventController.deleteEvent(currentEventId, organizerId, (result, success) -> {
+            isDeletingEvent = false;
+            if (result == null || !result.isSuccess()) {
+                if (cancelButton != null) {
+                    cancelButton.setEnabled(true);
+                }
+                if (deleteButton != null) {
+                    deleteButton.setEnabled(true);
+                }
+                Toast.makeText(this, R.string.manage_event_delete_failure, Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            if (dialog != null && dialog.isShowing()) {
+                dialog.dismiss();
+            }
+            Toast.makeText(this, R.string.manage_event_delete_success, Toast.LENGTH_SHORT).show();
+            AppNavigator.openMyEventsHosting(this, true);
+        });
     }
 
     /**
