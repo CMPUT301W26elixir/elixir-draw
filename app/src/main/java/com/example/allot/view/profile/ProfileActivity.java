@@ -241,7 +241,7 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     private void loadProfilePhoto() {
-        userController.loadOrCreateUser((user, success) -> {
+        userController.loadCurrentUser((user, success) -> {
             if (!success || user == null) {
                 renderProfilePhoto(null);
                 return;

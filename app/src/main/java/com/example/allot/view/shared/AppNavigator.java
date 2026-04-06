@@ -2,6 +2,8 @@ package com.example.allot.view.shared;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.os.Bundle;
+import com.example.allot.controller.shared.UserController;
 import com.example.allot.view.events.UserEventsActivity;
 import com.example.allot.view.explore.ExploreActivity;
 import com.example.allot.view.organizer.ScanActivity;
@@ -45,7 +47,7 @@ public final class AppNavigator {
      * @param finishCurrent true when the current activity should be finished
      */
     public static void openMyEvents(Activity activity, boolean finishCurrent) {
-        navigate(activity, new Intent(activity, UserEventsActivity.class), finishCurrent);
+        openAccountRequired(activity, finishCurrent, DeferredOnboardingNavigator.DESTINATION_MY_EVENTS, null);
     }
 
     /**
@@ -55,9 +57,10 @@ public final class AppNavigator {
      * @param finishCurrent true when the current activity should be finished
      */
     public static void openMyEventsHosting(Activity activity, boolean finishCurrent) {
-        Intent intent = new Intent(activity, UserEventsActivity.class);
-        intent.putExtra(UserEventsActivity.EXTRA_INITIAL_TAB, UserEventsActivity.INITIAL_TAB_HOSTING);
-        navigate(activity, intent, finishCurrent);
+        Bundle extras = new Bundle();
+        extras.putString(DeferredOnboardingNavigator.EXTRA_POST_MY_EVENTS_INITIAL_TAB,
+                UserEventsActivity.INITIAL_TAB_HOSTING);
+        openAccountRequired(activity, finishCurrent, DeferredOnboardingNavigator.DESTINATION_MY_EVENTS, extras);
     }
 
     /**
@@ -67,7 +70,7 @@ public final class AppNavigator {
      * @param finishCurrent true when the current activity should be finished
      */
     public static void openProfile(Activity activity, boolean finishCurrent) {
-        navigate(activity, new Intent(activity, ProfileActivity.class), finishCurrent);
+        openAccountRequired(activity, finishCurrent, DeferredOnboardingNavigator.DESTINATION_PROFILE, null);
     }
 
     /**
@@ -94,6 +97,48 @@ public final class AppNavigator {
         if (finishCurrent) {
             activity.finish();
         }
+    }
+
+    private static void openAccountRequired(Activity activity,
+                                            boolean finishCurrent,
+                                            String destination,
+                                            Bundle extras) {
+        UserController userController = new UserController(activity);
+        userController.loadCurrentUser((user, success) -> {
+            Intent intent;
+            if (success && userController.hasCompletedProfile(user)) {
+                intent = buildDestinationIntent(activity, destination, extras);
+            } else {
+                intent = buildOnboardingIntent(activity, destination, extras);
+            }
+            navigate(activity, intent, finishCurrent);
+        });
+    }
+
+    private static Intent buildDestinationIntent(Activity activity, String destination, Bundle extras) {
+        if (DeferredOnboardingNavigator.DESTINATION_PROFILE.equals(destination)) {
+            return new Intent(activity, ProfileActivity.class);
+        }
+
+        Intent intent = new Intent(activity, UserEventsActivity.class);
+        if (extras != null) {
+            String initialTab = extras.getString(DeferredOnboardingNavigator.EXTRA_POST_MY_EVENTS_INITIAL_TAB);
+            if (initialTab != null) {
+                intent.putExtra(UserEventsActivity.EXTRA_INITIAL_TAB, initialTab);
+            }
+        }
+        return intent;
+    }
+
+    private static Intent buildOnboardingIntent(Activity activity, String destination, Bundle extras) {
+        if (DeferredOnboardingNavigator.DESTINATION_MY_EVENTS.equals(destination)) {
+            String initialTab = extras == null
+                    ? null
+                    : extras.getString(DeferredOnboardingNavigator.EXTRA_POST_MY_EVENTS_INITIAL_TAB);
+            return DeferredOnboardingNavigator.createMyEventsIntent(activity, initialTab);
+        }
+
+        return DeferredOnboardingNavigator.createIntent(activity, destination);
     }
 }
 

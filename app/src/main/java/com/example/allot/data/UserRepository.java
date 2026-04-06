@@ -42,7 +42,7 @@ public class UserRepository {
      * @param database the Firestore instance to use
      */
     public UserRepository(FirebaseFirestore database) {
-        this.usersCollection = database.collection("users");
+        this.usersCollection = database == null ? null : database.collection("users");
     }
 
     /**
@@ -70,6 +70,36 @@ public class UserRepository {
                 Log.d(TAG, "Failed to get user", task.getException());
                 listener.onComplete(null, false);
             }
+        });
+    }
+
+    /**
+     * Loads a user by device ID without treating a missing document as an error.
+     *
+     * @param deviceId the device ID to look up
+     * @param listener the listener that receives the user or null when none exists
+     */
+    public void findUserByDeviceId(String deviceId, OnCompleteListener<User> listener) {
+        DocumentReference userRef = usersCollection.document(deviceId);
+
+        userRef.get().addOnCompleteListener(task -> {
+            if (!task.isSuccessful()) {
+                Log.d(TAG, "Failed to find user", task.getException());
+                listener.onComplete(null, false);
+                return;
+            }
+
+            DocumentSnapshot document = task.getResult();
+            if (document == null || !document.exists()) {
+                listener.onComplete(null, true);
+                return;
+            }
+
+            User user = document.toObject(User.class);
+            if (user != null && isBlank(user.getDeviceId())) {
+                user.setDeviceId(deviceId);
+            }
+            listener.onComplete(user, user != null);
         });
     }
 
@@ -117,13 +147,14 @@ public class UserRepository {
                                   boolean notiEnabled,
                                   OnCompleteListener<User> listener) {
         DocumentReference userRef = usersCollection.document(deviceId);
-        userRef.update(
-                "firstName", firstName.trim(),
-                "lastName", lastName.trim(),
-                "email", email.trim(),
-                "phone", normalizePhone(phone),
-                "notiEnabled", notiEnabled
-        ).addOnCompleteListener(task -> {
+        Map<String, Object> updates = new HashMap<>();
+        updates.put("deviceId", deviceId);
+        updates.put("firstName", firstName.trim());
+        updates.put("lastName", lastName.trim());
+        updates.put("email", email.trim());
+        updates.put("phone", normalizePhone(phone));
+        updates.put("notiEnabled", notiEnabled);
+        userRef.set(updates, SetOptions.merge()).addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 getUserByDeviceId(deviceId, listener);
             } else {

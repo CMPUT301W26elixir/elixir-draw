@@ -27,10 +27,12 @@ import com.example.allot.common.AppResult;
 import com.example.allot.controller.event.EventDetailController;
 import com.example.allot.controller.event.EventJoinDistanceValidator;
 import com.example.allot.controller.explore.ExploreController;
+import com.example.allot.controller.shared.UserController;
 import com.example.allot.model.event.Event;
 import com.example.allot.model.event.EventComment;
 import com.example.allot.model.event.EventDetailData;
 import com.example.allot.view.shared.AppDialogHelper;
+import com.example.allot.view.shared.DeferredOnboardingNavigator;
 import com.example.allot.view.shared.EventDisplayFormatter;
 import com.example.allot.view.shared.UiHelper;
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -57,10 +59,13 @@ public class EventDetailActivity extends AppCompatActivity {
     public static final String EXTRA_EVENT_PRICE = "event_price";
     public static final String EXTRA_EVENT_DEADLINE = "event_deadline";
     public static final String EXTRA_EVENT_CATEGORY = "event_category";
+    public static final String EXTRA_AUTO_OPEN_JOIN_DIALOG = "auto_open_join_dialog";
+    public static final String EXTRA_AUTO_SAVE_EVENT = "auto_save_event";
     private static final int LOCATION_PERMISSION_REQUEST = 1002;
 
     private EventDetailController eventDetailController;
     private ExploreController exploreController;
+    private UserController userController;
     private FusedLocationProviderClient fusedLocationProviderClient;
     private final EventJoinDistanceValidator eventJoinDistanceValidator = new EventJoinDistanceValidator();
 
@@ -82,6 +87,8 @@ public class EventDetailActivity extends AppCompatActivity {
     private boolean isFavoriteSaved;
     private boolean isFavoriteLoading = true;
     private boolean isFavoriteUpdating;
+    private boolean shouldAutoOpenJoinDialog;
+    private boolean shouldAutoSaveEvent;
 
     private ImageView favoriteButton;
     private TextView heroDeadlineText;
@@ -120,8 +127,11 @@ public class EventDetailActivity extends AppCompatActivity {
 
         eventDetailController = new EventDetailController(this);
         exploreController = new ExploreController(this);
+        userController = new UserController(this);
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
         currentEventId = getIntent().getStringExtra(EXTRA_EVENT_ID);
+        shouldAutoOpenJoinDialog = getIntent().getBooleanExtra(EXTRA_AUTO_OPEN_JOIN_DIALOG, false);
+        shouldAutoSaveEvent = getIntent().getBooleanExtra(EXTRA_AUTO_SAVE_EVENT, false);
 
         bindViews();
         bindFallbackContent();
@@ -288,10 +298,16 @@ public class EventDetailActivity extends AppCompatActivity {
                 leaveWaitingList();
                 return;
             case SHOW_JOIN_DIALOG:
-                showLotteryCriteriaDialog();
+                requireCompletedProfile(
+                        this::showLotteryCriteriaDialog,
+                        buildDeferredEventActionIntent(DeferredOnboardingNavigator.ACTION_AUTO_JOIN)
+                );
                 return;
             case SHOW_INVITE_DIALOG:
-                showInviteResponseDialog();
+                requireCompletedProfile(
+                        this::showInviteResponseDialog,
+                        buildDeferredEventActionIntent(DeferredOnboardingNavigator.ACTION_AUTO_JOIN)
+                );
                 return;
             case NONE:
             default:
@@ -377,6 +393,7 @@ public class EventDetailActivity extends AppCompatActivity {
             isFavoriteSaved = success && !TextUtils.isEmpty(currentEventId) && userSavedEventIds.contains(currentEventId);
             isFavoriteLoading = false;
             updateFavoriteUi();
+            maybeHandleDeferredFavoriteSave();
         });
     }
 
@@ -385,6 +402,13 @@ public class EventDetailActivity extends AppCompatActivity {
             return;
         }
 
+        requireCompletedProfile(
+                this::toggleFavoriteSavedState,
+                buildDeferredEventActionIntent(DeferredOnboardingNavigator.ACTION_AUTO_SAVE)
+        );
+    }
+
+    private void toggleFavoriteSavedState() {
         isFavoriteUpdating = true;
         isFavoriteSaved = !isFavoriteSaved;
         boolean isSaving = isFavoriteSaved;
@@ -393,7 +417,7 @@ public class EventDetailActivity extends AppCompatActivity {
         exploreController.toggleSavedEvent(userSavedEventIds, currentEventId, isSaving, (savedEventIds, success) -> {
             isFavoriteUpdating = false;
             userSavedEventIds = new ArrayList<>(savedEventIds == null ? new ArrayList<>() : savedEventIds);
-            isFavoriteSaved = success == isSaving;
+            isFavoriteSaved = success ? isSaving : !isSaving;
             updateFavoriteUi();
             if (!success) {
                 Toast.makeText(this, R.string.event_detail_save_failure, Toast.LENGTH_SHORT).show();
@@ -800,6 +824,65 @@ public class EventDetailActivity extends AppCompatActivity {
         );
 
         renderComments(state.getCurrentEvent());
+        maybeHandleDeferredJoinAction();
+    }
+
+    private void requireCompletedProfile(Runnable onReady, Intent onboardingIntent) {
+        userController.loadCurrentUser((user, success) -> {
+            if (success && userController.hasCompletedProfile(user)) {
+                onReady.run();
+                return;
+            }
+
+            DeferredOnboardingNavigator.openOnboarding(this, onboardingIntent, false);
+        });
+    }
+
+    private Intent buildDeferredEventActionIntent(String action) {
+        return DeferredOnboardingNavigator.createEventActionIntent(
+                this,
+                currentEventId,
+                currentEvent == null ? getIntent().getStringExtra(EXTRA_EVENT_TITLE) : currentEvent.getTitle(),
+                currentEvent == null ? getIntent().getStringExtra(EXTRA_EVENT_LOCATION) : EventDisplayFormatter.location(currentEvent),
+                currentEvent == null ? getIntent().getStringExtra(EXTRA_EVENT_DATE) : EventDisplayFormatter.date(currentEvent),
+                currentEvent == null ? getIntent().getStringExtra(EXTRA_EVENT_PRICE) : EventDisplayFormatter.price(currentEvent),
+                currentEvent == null ? getIntent().getStringExtra(EXTRA_EVENT_DEADLINE) : EventDisplayFormatter.deadline(currentEvent),
+                currentEvent == null ? getIntent().getStringExtra(EXTRA_EVENT_CATEGORY) : currentEvent.getCategory(),
+                action
+        );
+    }
+
+    private void maybeHandleDeferredJoinAction() {
+        if (!shouldAutoOpenJoinDialog || currentScreenState == null) {
+            return;
+        }
+
+        EventDetailData.NextAction nextAction = eventDetailController.resolveNextAction(currentScreenState);
+        if (nextAction != EventDetailData.NextAction.SHOW_JOIN_DIALOG
+                && nextAction != EventDetailData.NextAction.SHOW_INVITE_DIALOG) {
+            return;
+        }
+
+        shouldAutoOpenJoinDialog = false;
+        if (nextAction == EventDetailData.NextAction.SHOW_INVITE_DIALOG) {
+            showInviteResponseDialog();
+            return;
+        }
+
+        showLotteryCriteriaDialog();
+    }
+
+    private void maybeHandleDeferredFavoriteSave() {
+        if (!shouldAutoSaveEvent || isFavoriteLoading || isFavoriteUpdating) {
+            return;
+        }
+
+        shouldAutoSaveEvent = false;
+        if (isFavoriteSaved) {
+            return;
+        }
+
+        toggleFavoriteSavedState();
     }
 
     private void renderHeroPoster(Event event) {

@@ -49,13 +49,13 @@ public class ExploreController {
      * @param listener the listener that receives the saved event IDs
      */
     public void loadSavedEventIds(OnCompleteListener<List<String>> listener) {
-        userController.loadOrCreateUser((User user, boolean success) -> {
-            if (!success || user == null) {
+        userController.loadCurrentUser((User user, boolean success) -> {
+            if (!success) {
                 listener.onComplete(new ArrayList<>(), false);
                 return;
             }
 
-            List<String> savedEvents = user.getSavedEvents() == null
+            List<String> savedEvents = user == null || user.getSavedEvents() == null
                     ? new ArrayList<>()
                     : new ArrayList<>(user.getSavedEvents());
             listener.onComplete(savedEvents, true);
@@ -88,18 +88,22 @@ public class ExploreController {
                                  Double latitude,
                                  Double longitude,
                                  Double distanceKm,
+                                 Boolean onlyOpenSpots,
+                                 Integer minimumCapacity,
                                  List<String> savedEventIds,
                                  OnCompleteListener<List<EventListItem>> listener) {
         if (!hasLoadedOpenEvents) {
             refreshOpenEvents((events, success) -> {
                 if (success) {
-                    filterCachedBrowseEvents(searchTerm, selectedChipFilter, keywords, startDate, latitude, longitude, distanceKm, savedEventIds, listener);
+                    filterCachedBrowseEvents(searchTerm, selectedChipFilter, keywords, startDate, latitude,
+                            longitude, distanceKm, onlyOpenSpots, minimumCapacity, savedEventIds, listener);
                 } else {
                     listener.onComplete(new ArrayList<>(), false);
                 }
             });
         } else {
-            filterCachedBrowseEvents(searchTerm, selectedChipFilter, keywords, startDate, latitude, longitude, distanceKm, savedEventIds, listener);
+            filterCachedBrowseEvents(searchTerm, selectedChipFilter, keywords, startDate, latitude,
+                    longitude, distanceKm, onlyOpenSpots, minimumCapacity, savedEventIds, listener);
         }
     }
 
@@ -113,6 +117,8 @@ public class ExploreController {
                                          Double latitude,
                                          Double longitude,
                                          Double distanceKm,
+                                         Boolean onlyOpenSpots,
+                                         Integer minimumCapacity,
                                          List<String> savedEventIds,
                                          OnCompleteListener<List<EventListItem>> listener) {
         if (!hasLoadedOpenEvents) {
@@ -127,7 +133,9 @@ public class ExploreController {
                 startDate,
                 latitude,
                 longitude,
-                distanceKm
+                distanceKm,
+                onlyOpenSpots,
+                minimumCapacity
         );
         List<Event> filteredEvents = exploreFilterService.buildBrowsableEventList(
                 cachedOpenEvents,

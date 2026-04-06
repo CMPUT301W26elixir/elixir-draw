@@ -20,10 +20,18 @@ public class NotificationRepository {
     private final CollectionReference usersCollection;
     private final FirebaseFirestore db;
 
+    /**
+     * Creates a NotificationRepository and connects it to the default Firestore instance.
+     */
     public NotificationRepository() {
         this(FirebaseFirestore.getInstance());
     }
 
+    /**
+     * Creates a NotificationRepository with a provided Firestore instance.
+     *
+     * @param database the Firestore instance to use
+     */
     public NotificationRepository(FirebaseFirestore database) {
         this.db = database;
         this.usersCollection = database.collection("users");
