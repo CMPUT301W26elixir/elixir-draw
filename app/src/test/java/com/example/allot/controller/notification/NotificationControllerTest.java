@@ -1,0 +1,96 @@
+package com.example.allot.controller.notification;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
+import com.example.allot.common.OnCompleteListener;
+import com.example.allot.data.NotificationRepository;
+import com.example.allot.model.notification.NotificationItem;
+import com.google.firebase.firestore.FirebaseFirestore;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import org.junit.Before;
+import org.junit.Test;
+
+public class NotificationControllerTest {
+    private FakeNotificationRepository notificationRepository;
+    private NotificationController controller;
+
+    @Before
+    public void setUp() {
+        notificationRepository = new FakeNotificationRepository();
+        controller = new NotificationController(notificationRepository);
+    }
+
+    @Test
+    public void notifySelectedEntrants_returnsFailureForEmptyList() {
+        controller.notifySelectedEntrants(new ArrayList<>(), "event-1", "Spring Gala", (result, success) -> {
+            assertFalse(success);
+            assertFalse(result);
+            assertTrue(notificationRepository.savedNotifications.isEmpty());
+        });
+    }
+
+    @Test
+    public void notifySelectedEntrants_savesNotificationForEachEntrant() {
+        controller.notifySelectedEntrants(Arrays.asList("u1", "u2"), "event-1", "Spring Gala", (result, success) -> {
+            assertTrue(success);
+            assertTrue(result);
+            assertEquals(2, notificationRepository.savedNotifications.size());
+            assertEquals("u1", notificationRepository.savedNotifications.get(0).getUserId());
+            assertEquals("You've been selected!", notificationRepository.savedNotifications.get(0).getTitle());
+            assertTrue(notificationRepository.savedNotifications.get(0).getMessage().contains("Spring Gala"));
+            assertEquals("u2", notificationRepository.savedNotifications.get(1).getUserId());
+        });
+    }
+
+    @Test
+    public void notifyNotSelectedEntrants_savesExpectedContent() {
+        controller.notifyNotSelectedEntrants(Arrays.asList("u1"), "event-9", "Hack Night", (result, success) -> {
+            assertTrue(success);
+            assertTrue(result);
+            assertEquals(1, notificationRepository.savedNotifications.size());
+            NotificationItem item = notificationRepository.savedNotifications.get(0);
+            assertEquals("Better luck next time", item.getTitle());
+            assertTrue(item.getMessage().contains("Hack Night"));
+        });
+    }
+
+    @Test
+    public void getNotificationsForUser_delegatesToRepository() {
+        List<NotificationItem> expected = Arrays.asList(
+                new NotificationItem("u1", "event-1", "Title", "Message")
+        );
+        notificationRepository.notificationsToReturn = expected;
+
+        controller.getNotificationsForUser("u1", (items, success) -> {
+            assertTrue(success);
+            assertEquals(expected, items);
+            assertEquals("u1", notificationRepository.lastRequestedUserId);
+        });
+    }
+
+    private static class FakeNotificationRepository extends NotificationRepository {
+        private final List<NotificationItem> savedNotifications = new ArrayList<>();
+        private List<NotificationItem> notificationsToReturn = new ArrayList<>();
+        private String lastRequestedUserId;
+
+        private FakeNotificationRepository() {
+            super((FirebaseFirestore) null);
+        }
+
+        @Override
+        public void saveNotification(NotificationItem notification, OnCompleteListener<Boolean> listener) {
+            savedNotifications.add(notification);
+            listener.onComplete(true, true);
+        }
+
+        @Override
+        public void getNotificationsForUser(String userId, OnCompleteListener<List<NotificationItem>> listener) {
+            lastRequestedUserId = userId;
+            listener.onComplete(notificationsToReturn, true);
+        }
+    }
+}

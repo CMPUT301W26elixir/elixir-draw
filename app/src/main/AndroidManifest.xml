@@ -36,7 +36,8 @@
 
         <activity
             android:name=".view.explore.ExploreActivity"
-            android:exported="true" />
+            android:exported="true"
+            tools:ignore="MissingClass" />
         <activity
             android:name=".view.explore.EventFilterActivity"
             android:exported="false" />

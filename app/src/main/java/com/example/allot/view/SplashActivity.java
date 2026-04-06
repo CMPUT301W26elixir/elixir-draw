@@ -9,18 +9,18 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
-
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
-
 import com.example.allot.R;
-import com.example.allot.common.TextHelper;
 import com.example.allot.controller.shared.UserController;
+<<<<<<< HEAD
 import com.example.allot.data.UserRepository;
 import com.example.allot.model.profile.User;
 import com.example.allot.view.event.EventDetailActivity;
+=======
+>>>>>>> origin/main
 import com.example.allot.view.event.OfferResponseActivity;
 import com.example.allot.view.explore.ExploreActivity;
 import com.google.firebase.messaging.FirebaseMessaging;
@@ -36,7 +36,7 @@ public class SplashActivity extends AppCompatActivity {
     private final Handler handler = new Handler(Looper.getMainLooper());
     private long startedAtMs;
     private boolean navigated;
-    private boolean requiresProfileSetup;
+    private boolean canOpenOfferRedirect;
 
     private final ActivityResultLauncher<String> requestPermissionLauncher =
             registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
@@ -52,18 +52,17 @@ public class SplashActivity extends AppCompatActivity {
         startedAtMs = System.currentTimeMillis();
 
         UserController userController = new UserController(this);
-        
-        // Ensure token is registered for push notifications
-        registerFcmToken(userController.getCurrentDeviceId());
 
         if (userController.isNewDeviceId()) {
-            this.requiresProfileSetup = true;
             checkNotificationPermission();
             return;
         }
 
-        userController.loadOrCreateUser((user, success) -> {
-            this.requiresProfileSetup = !success || requiresProfileSetup(user);
+        userController.loadCurrentUser((user, success) -> {
+            canOpenOfferRedirect = success && user != null && userController.hasCompletedProfile(user);
+            if (success && user != null) {
+                registerFcmToken(userController);
+            }
             checkNotificationPermission();
         });
     }
@@ -72,7 +71,7 @@ public class SplashActivity extends AppCompatActivity {
      * Fetches the current FCM token and saves it to Firestore.
      * This ensures the device is reachable for push notifications.
      */
-    private void registerFcmToken(String deviceId) {
+    private void registerFcmToken(UserController userController) {
         FirebaseMessaging.getInstance().getToken().addOnCompleteListener(task -> {
             if (!task.isSuccessful()) {
                 Log.w(TAG, "Fetching FCM registration token failed", task.getException());
@@ -82,9 +81,8 @@ public class SplashActivity extends AppCompatActivity {
             // Get new FCM registration token
             String token = task.getResult();
             Log.d(TAG, "Current FCM Token: " + token);
-            
-            // Save to Firestore
-            new UserRepository().updateFcmToken(deviceId, token);
+
+            userController.updateCurrentFcmToken(token);
         });
     }
 
@@ -102,19 +100,20 @@ public class SplashActivity extends AppCompatActivity {
     }
 
     private void proceedToNextStep() {
-        navigateAfterDelay(this.requiresProfileSetup);
+        navigateAfterDelay();
     }
 
-    private void navigateAfterDelay(boolean requiresProfileSetup) {
+    private void navigateAfterDelay() {
         if (navigated) {
             return;
         }
 
         long elapsedMs = System.currentTimeMillis() - startedAtMs;
         long remainingMs = Math.max(0L, MIN_SPLASH_DURATION_MS - elapsedMs);
-        handler.postDelayed(() -> openNextScreen(requiresProfileSetup), remainingMs);
+        handler.postDelayed(this::openNextScreen, remainingMs);
     }
 
+<<<<<<< HEAD
     /**
      * Opens the next screen after the splash screen.
      * Handles redirection from push notifications if present.
@@ -123,6 +122,9 @@ public class SplashActivity extends AppCompatActivity {
      *                             welcome/profile setup screen; false otherwise
      */
     private void openNextScreen(boolean requiresProfileSetup) {
+=======
+    private void openNextScreen() {
+>>>>>>> origin/main
         if (navigated || isFinishing()) {
             return;
         }
@@ -134,7 +136,11 @@ public class SplashActivity extends AppCompatActivity {
         String eventId = getIntent().getStringExtra("event_id");
         String eventTitle = getIntent().getStringExtra("event_title");
         
+<<<<<<< HEAD
         if ("offer".equals(redirectTo) && !requiresProfileSetup && eventId != null) {
+=======
+        if ("offer".equals(redirectTo) && canOpenOfferRedirect) {
+>>>>>>> origin/main
             nextIntent = new Intent(this, OfferResponseActivity.class);
             nextIntent.putExtra(OfferResponseActivity.EXTRA_EVENT_ID, eventId);
             nextIntent.putExtra(OfferResponseActivity.EXTRA_EVENT_TITLE, eventTitle);
@@ -143,27 +149,10 @@ public class SplashActivity extends AppCompatActivity {
             nextIntent.putExtra(EventDetailActivity.EXTRA_EVENT_ID, eventId);
             nextIntent.putExtra(EventDetailActivity.EXTRA_EVENT_TITLE, eventTitle);
         } else {
-            nextIntent = new Intent(
-                this,
-                requiresProfileSetup ? WelcomeActivity.class : ExploreActivity.class
-            );
+            nextIntent = new Intent(this, ExploreActivity.class);
         }
         
         startActivity(nextIntent);
         finish();
-    }
-
-    private boolean requiresProfileSetup(User user) {
-        if (user == null) {
-            return true;
-        }
-
-        return isBlank(user.getFirstName())
-                || isBlank(user.getLastName())
-                || isBlank(user.getEmail());
-    }
-
-    private boolean isBlank(String value) {
-        return TextHelper.isBlank(value);
     }
 }
