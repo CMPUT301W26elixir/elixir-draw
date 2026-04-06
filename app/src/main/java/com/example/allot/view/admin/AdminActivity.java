@@ -42,6 +42,8 @@ public class AdminActivity extends AppCompatActivity {
         POSTERS
     }
 
+    public static final String EXTRA_UI_TEST_MODE = "ui_test_mode";
+
     private BottomNavBarView bottomNavBar;
     private ImageView backButton;
     private TextView eventsTabText;
@@ -123,6 +125,11 @@ public class AdminActivity extends AppCompatActivity {
         setupTabButtons();
         setupRecyclerViews();
         setupBackButton();
+        if (isUiTestMode()) {
+            seedUiTestData();
+            showEventsTab();
+            return;
+        }
         loadEvents();
     }
 
@@ -251,6 +258,71 @@ public class AdminActivity extends AppCompatActivity {
      */
     private void setupBackButton() {
         backButton.setOnClickListener(view -> finish());
+    }
+
+    private boolean isUiTestMode() {
+        return getIntent().getBooleanExtra(EXTRA_UI_TEST_MODE, false);
+    }
+
+    private void seedUiTestData() {
+        eventsList.clear();
+        profilesList.clear();
+        profilePicsList.clear();
+        notificationsList.clear();
+        posterEventsList.clear();
+
+        Event event = new Event();
+        event.setEventId("admin-event-1");
+        event.setOrganizerId("organizer-1");
+        event.setTitle("Admin Event One");
+        event.setEventDate(new java.util.Date());
+        event.setPosterUrl("https://example.com/poster.jpg");
+        eventsList.add(event);
+
+        Event posterEvent = new Event();
+        posterEvent.setEventId("poster-event-1");
+        posterEvent.setOrganizerId("organizer-2");
+        posterEvent.setTitle("Poster Event");
+        posterEvent.setPosterUrl("https://example.com/poster2.jpg");
+        posterEventsList.add(posterEvent);
+
+        User user = new User();
+        user.setDeviceId("device-1");
+        user.setFirstName("Admin");
+        user.setLastName("User");
+        user.setEmail("admin@example.com");
+        user.setRole("admin");
+        profilesList.add(user);
+
+        User profilePicUser = new User();
+        profilePicUser.setDeviceId("device-2");
+        profilePicUser.setFirstName("Photo");
+        profilePicUser.setLastName("User");
+        profilePicUser.setProfilePhotoUrl("https://example.com/profile.jpg");
+        profilePicsList.add(profilePicUser);
+
+        NotificationItem notification = new NotificationItem(
+                "device-1",
+                "admin-event-1",
+                "System Notice",
+                "Admin notification body"
+        );
+        notificationsList.add(notification);
+
+        notificationUserNamesById.clear();
+        notificationUserNamesById.put("device-1", "Admin User");
+        notificationsAdapter.setUserNamesById(notificationUserNamesById);
+
+        setEventsVisibleState();
+        eventsAdapter.notifyDataSetChanged();
+        setProfilesVisibleState();
+        profilesAdapter.notifyDataSetChanged();
+        setProfilePicsVisibleState();
+        profilePicsAdapter.notifyDataSetChanged();
+        setNotificationsVisibleState();
+        notificationsAdapter.notifyDataSetChanged();
+        setPostersVisibleState();
+        postersAdapter.notifyDataSetChanged();
     }
 
     /**
@@ -676,6 +748,15 @@ public class AdminActivity extends AppCompatActivity {
             return;
         }
 
+        if (isUiTestMode()) {
+            posterEventsList.remove(position);
+            postersAdapter.notifyItemRemoved(position);
+            if (posterEventsList.isEmpty()) {
+                setPostersEmptyState(getString(R.string.admin_no_posters));
+            }
+            return;
+        }
+
         eventPosterController.deletePoster(event.getEventId(), event.getPosterUrl(), (result, success) -> {
             if (!success || result == null || !result) {
                 Toast.makeText(this, R.string.admin_error_deleting_poster, Toast.LENGTH_SHORT).show();
@@ -752,6 +833,12 @@ public class AdminActivity extends AppCompatActivity {
         cancelButton.setEnabled(false);
         deleteButton.setEnabled(false);
 
+        if (isUiTestMode()) {
+            dialog.dismiss();
+            removeEventFromList(position);
+            return;
+        }
+
         adminEventController.deleteEvent(event.getEventId(), (success, result) -> {
             if (!success || !result) {
                 cancelButton.setEnabled(true);
@@ -787,6 +874,12 @@ public class AdminActivity extends AppCompatActivity {
         cancelButton.setEnabled(false);
         deleteButton.setEnabled(false);
 
+        if (isUiTestMode()) {
+            dialog.dismiss();
+            removeProfileFromList(user, position);
+            return;
+        }
+
         adminProfileController.deleteProfile(user.getDeviceId(), (success, result) -> {
             if (!success || !result) {
                 cancelButton.setEnabled(true);
@@ -798,23 +891,40 @@ public class AdminActivity extends AppCompatActivity {
             dialog.dismiss();
             Toast.makeText(this, R.string.admin_profile_deleted, Toast.LENGTH_SHORT).show();
 
-            // Remove from list
+            removeProfileFromList(user, position);
+        });
+    }
+
+    private void removeEventFromList(int position) {
+        if (position < 0 || position >= eventsList.size()) {
+            return;
+        }
+
+        eventsList.remove(position);
+        eventsAdapter.notifyItemRemoved(position);
+
+        if (eventsList.isEmpty()) {
+            setEventsEmptyState(getString(R.string.admin_no_events));
+        }
+    }
+
+    private void removeProfileFromList(User user, int position) {
+        if (position >= 0 && position < profilesList.size()) {
             profilesList.remove(position);
             profilesAdapter.notifyItemRemoved(position);
+        }
 
-            profilePicsList.removeIf(profileUser -> profileUser != null
-                    && user.getDeviceId() != null
-                    && user.getDeviceId().equals(profileUser.getDeviceId()));
-            profilePicsAdapter.notifyDataSetChanged();
+        profilePicsList.removeIf(profileUser -> profileUser != null
+                && user.getDeviceId() != null
+                && user.getDeviceId().equals(profileUser.getDeviceId()));
+        profilePicsAdapter.notifyDataSetChanged();
 
-            // Show empty state if no profiles left
-            if (profilesList.isEmpty()) {
-                setProfilesEmptyState(getString(R.string.admin_no_profiles));
-            }
+        if (profilesList.isEmpty()) {
+            setProfilesEmptyState(getString(R.string.admin_no_profiles));
+        }
 
-            if (profilePicsList.isEmpty()) {
-                setProfilePicsEmptyState(getString(R.string.admin_no_profilepic));
-            }
-        });
+        if (profilePicsList.isEmpty()) {
+            setProfilePicsEmptyState(getString(R.string.admin_no_profilepic));
+        }
     }
 }
