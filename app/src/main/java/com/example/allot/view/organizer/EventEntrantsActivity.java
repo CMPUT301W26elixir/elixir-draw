@@ -64,12 +64,14 @@ public class EventEntrantsActivity extends AppCompatActivity {
     private LinearLayout entrantsContainer;
     private MaterialButton viewEntrantMapButton;
     private MaterialButton exportFinalListButton;
+    private MaterialButton drawReplacementButton;
 
     private String currentEventId;
     private Event currentEvent;
     private Tab selectedTab = Tab.SELECTED;
     private boolean isExporting;
     private boolean isCancellingEntrant;
+    private boolean isDrawingReplacement;
     private java.util.ArrayList<String> uiTestSelected;
     private java.util.ArrayList<String> uiTestCancelled;
     private java.util.ArrayList<String> uiTestNotEnrolled;
@@ -126,6 +128,7 @@ public class EventEntrantsActivity extends AppCompatActivity {
         entrantsContainer = findViewById(R.id.entrantsContainer);
         viewEntrantMapButton = findViewById(R.id.viewEntrantMapButton);
         exportFinalListButton = findViewById(R.id.exportFinalListButton);
+        drawReplacementButton = findViewById(R.id.drawReplacementButton);
     }
 
     /**
@@ -147,6 +150,7 @@ public class EventEntrantsActivity extends AppCompatActivity {
         allEntrantsTabText.setOnClickListener(view -> showTab(Tab.ALL));
         viewEntrantMapButton.setOnClickListener(view -> openEntrantMap());
         exportFinalListButton.setOnClickListener(view -> exportFinalList());
+        drawReplacementButton.setOnClickListener(view -> drawReplacementEntrant());
         updateTabState();
     }
 
@@ -222,6 +226,9 @@ public class EventEntrantsActivity extends AppCompatActivity {
         exportFinalListButton.setText(isExporting
                 ? R.string.manage_entrants_export_saving
                 : R.string.manage_entrants_export_final_list);
+
+        drawReplacementButton.setVisibility(selectedTab == Tab.CANCELLED ? View.VISIBLE : View.GONE);
+        drawReplacementButton.setEnabled(!isDrawingReplacement);
     }
 
     /**
@@ -261,7 +268,8 @@ public class EventEntrantsActivity extends AppCompatActivity {
             nameText.setText(entrantItem.getDisplayName());
             timeText.setText(entrantItem.getSubtitleRes());
             if (cancelButton != null) {
-                if (selectedTab == Tab.SELECTED) {
+                boolean canCancel = selectedTab == Tab.SELECTED || selectedTab == Tab.ENROLLED || selectedTab == Tab.NOT_ENROLLED;
+                if (canCancel) {
                     cancelButton.setVisibility(View.VISIBLE);
                     cancelButton.setOnClickListener(view -> promptCancelEntrant(entrantItem));
                 } else {
@@ -384,11 +392,10 @@ public class EventEntrantsActivity extends AppCompatActivity {
         if (isUiTestMode()) {
             String name = entrantItem.getDisplayName();
             uiTestSelected.remove(name);
+            uiTestEnrolled.remove(name);
+            uiTestNotEnrolled.remove(name);
             if (!uiTestCancelled.contains(name)) {
                 uiTestCancelled.add(name);
-            }
-            if (!uiTestAll.contains(name)) {
-                uiTestAll.add(name);
             }
             isCancellingEntrant = false;
             Toast.makeText(this, R.string.manage_entrants_cancel_success, Toast.LENGTH_SHORT).show();
@@ -405,6 +412,32 @@ public class EventEntrantsActivity extends AppCompatActivity {
 
             Toast.makeText(this, R.string.manage_entrants_cancel_success, Toast.LENGTH_SHORT).show();
             loadEvent();
+        });
+    }
+
+    private void drawReplacementEntrant() {
+        if (isDrawingReplacement || TextUtils.isEmpty(currentEventId)) {
+            return;
+        }
+
+        isDrawingReplacement = true;
+        updateTabState();
+
+        entrantsController.drawReplacementEntrant(currentEventId, (result, success) -> {
+            isDrawingReplacement = false;
+            updateTabState();
+
+            if (!success) {
+                Toast.makeText(this, R.string.manage_entrants_load_failure, Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            if (result != null && result) {
+                Toast.makeText(this, R.string.manage_entrants_draw_replacement_success, Toast.LENGTH_SHORT).show();
+                loadEvent();
+            } else {
+                Toast.makeText(this, R.string.manage_entrants_draw_replacement_failure, Toast.LENGTH_SHORT).show();
+            }
         });
     }
 
@@ -517,12 +550,3 @@ public class EventEntrantsActivity extends AppCompatActivity {
         updateTabState();
     }
 }
-
-
-
-
-
-
-
-
-
