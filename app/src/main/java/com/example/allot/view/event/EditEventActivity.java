@@ -32,6 +32,7 @@ import com.example.allot.controller.shared.UserController;
 import com.example.allot.model.event.Event;
 import com.example.allot.model.event.EventFormData;
 import com.example.allot.model.event.EventFormSnapshot;
+import com.example.allot.view.explore.MapViewActivity;
 import com.example.allot.view.lottery.RunLotteryActivity;
 import com.example.allot.view.organizer.EventEntrantsActivity;
 import com.example.allot.view.organizer.EventQrCodeActivity;
@@ -91,6 +92,7 @@ public class EditEventActivity extends AppCompatActivity {
     private TextView inviteEntrantsButton;
     private TextView inviteCoOrganizerButton;
     private TextView viewQrCodeButton;
+    private TextView viewEntrantMapButton;
     private TextView summaryTitleText;
     private TextView summaryLocationText;
     private TextView summaryDateText;
@@ -195,6 +197,7 @@ public class EditEventActivity extends AppCompatActivity {
         inviteEntrantsButton = findViewById(R.id.inviteEntrantsButton);
         inviteCoOrganizerButton = findViewById(R.id.inviteCoOrganizerButton);
         viewQrCodeButton = findViewById(R.id.viewQrCodeButton);
+        viewEntrantMapButton = findViewById(R.id.viewEntrantMapButton);
         summaryTitleText = findViewById(R.id.summaryTitleText);
         summaryLocationText = findViewById(R.id.summaryLocationText);
         summaryDateText = findViewById(R.id.summaryDateText);
@@ -287,6 +290,7 @@ public class EditEventActivity extends AppCompatActivity {
         entrantsLotteryButton.setOnClickListener(view -> openLotteryScreen());
         inviteEntrantsButton.setOnClickListener(view -> openInviteScreen());
         inviteCoOrganizerButton.setOnClickListener(view -> openInviteCoOrganizerScreen());
+        viewEntrantMapButton.setOnClickListener(view -> openEntrantMapScreen());
         posterUploadCard.setOnClickListener(view -> posterPickerLauncher.launch("image/*"));
         posterRemoveButton.setOnClickListener(view -> {
             selectedPosterUri = null;
@@ -514,6 +518,18 @@ public class EditEventActivity extends AppCompatActivity {
                         : getIntent().getStringExtra(EXTRA_REGISTRATION_END)
         );
         intent.putExtra(EventCreatedActivity.EXTRA_EVENT_CATEGORY, currentCategory);
+        startActivity(intent);
+        overridePendingTransition(0, 0);
+    }
+
+    private void openEntrantMapScreen() {
+        if (TextUtils.isEmpty(currentEventId)) {
+            Toast.makeText(this, R.string.manage_entrants_load_failure, Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        Intent intent = new Intent(this, MapViewActivity.class);
+        intent.putExtra(MapViewActivity.EXTRA_EVENT_ID, currentEventId);
         startActivity(intent);
         overridePendingTransition(0, 0);
     }
