@@ -27,7 +27,7 @@ public class EventPosterController {
         this(new EventRepository(), FirebaseStorage.getInstance());
     }
 
-    EventPosterController(EventRepository eventRepository, FirebaseStorage storage) {
+    public EventPosterController(EventRepository eventRepository, FirebaseStorage storage) {
         this.eventRepository = eventRepository;
         this.storage = storage;
     }

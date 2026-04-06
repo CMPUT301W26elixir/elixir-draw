@@ -42,7 +42,7 @@ public class UserRepository {
      * @param database the Firestore instance to use
      */
     public UserRepository(FirebaseFirestore database) {
-        this.usersCollection = database.collection("users");
+        this.usersCollection = database == null ? null : database.collection("users");
     }
 
     /**

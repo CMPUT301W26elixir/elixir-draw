@@ -12,7 +12,11 @@ public class NotificationRepository {
     private final FirebaseFirestore db;
 
     public NotificationRepository() {
-        this.db = FirebaseFirestore.getInstance();
+        this(FirebaseFirestore.getInstance());
+    }
+
+    public NotificationRepository(FirebaseFirestore db) {
+        this.db = db;
     }
 
     /**
