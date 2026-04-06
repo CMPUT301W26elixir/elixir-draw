@@ -3,6 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginBottom="12dp"
+    android:gravity="center_vertical"
     android:orientation="horizontal">
 
     <LinearLayout
@@ -31,18 +32,16 @@
 
     <TextView
         android:id="@+id/cancelEntrantButton"
-        android:layout_width="wrap_content"
+        android:layout_width="32dp"
         android:layout_height="32dp"
-        android:layout_gravity="center_vertical"
         android:layout_marginStart="12dp"
         android:background="@drawable/bg_waitlist_button"
         android:fontFamily="@font/varela_round_regular"
         android:gravity="center"
-        android:paddingStart="14dp"
-        android:paddingEnd="14dp"
-        android:text="@string/manage_entrants_cancel_action"
+        android:text="✕"
         android:textColor="#FF9E4141"
-        android:textSize="14sp"
+        android:textSize="18sp"
+        android:textStyle="bold"
         android:visibility="gone" />
 
 </LinearLayout>

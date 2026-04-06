@@ -3,12 +3,18 @@ package com.example.allot.controller.organizer;
 import com.example.allot.R;
 import com.example.allot.common.OnCompleteListener;
 import com.example.allot.common.TextHelper;
+import com.example.allot.controller.event.EventOfferService;
 import com.example.allot.controller.shared.UserController;
 import com.example.allot.data.EventRepository;
+import com.example.allot.data.NotificationRepository;
 import com.example.allot.model.event.Event;
 import com.example.allot.model.lottery.LotteryEntrantItem;
+import com.example.allot.model.notification.NotificationItem;
 import com.example.allot.model.organizer.EntrantExportRow;
 import com.example.allot.model.profile.User;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Transaction;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -27,16 +33,22 @@ public class EventEntrantsController {
 
     private final EventRepository eventRepository;
     private final UserController userController;
+    private final NotificationRepository notificationRepository;
+    private final EventOfferService eventOfferService;
     private final Map<String, String> userNameCache = new HashMap<>();
 
     public EventEntrantsController(android.content.Context context) {
-        this(new EventRepository(), new UserController(context));
+        this(new EventRepository(), new UserController(context), new NotificationRepository(), new EventOfferService());
     }
 
     EventEntrantsController(EventRepository eventRepository,
-                            UserController userController) {
+                            UserController userController,
+                            NotificationRepository notificationRepository,
+                            EventOfferService eventOfferService) {
         this.eventRepository = eventRepository;
         this.userController = userController;
+        this.notificationRepository = notificationRepository;
+        this.eventOfferService = eventOfferService;
     }
 
     /**
@@ -89,7 +101,7 @@ public class EventEntrantsController {
     }
 
     /**
-     * Cancels a selected entrant and moves them to the not selected list.
+     * Cancels a selected entrant, moves them to the cancelled list, and notifies them via Firestore.
      */
     public void cancelSelectedEntrant(String eventId, String entrantId, OnCompleteListener<Boolean> listener) {
         if (isBlank(eventId) || isBlank(entrantId)) {
@@ -97,7 +109,79 @@ public class EventEntrantsController {
             return;
         }
 
-        eventRepository.cancelSelectedEntrant(eventId, entrantId, listener);
+        eventRepository.getEventById(eventId, (event, success) -> {
+            if (!success || event == null) {
+                listener.onComplete(false, false);
+                return;
+            }
+
+            eventRepository.cancelSelectedEntrant(eventId, entrantId, (result, cancelSuccess) -> {
+                if (cancelSuccess && result != null && result) {
+                    sendCancellationNotification(entrantId, eventId, event.getTitle());
+                    listener.onComplete(true, true);
+                } else {
+                    listener.onComplete(false, false);
+                }
+            });
+        });
+    }
+
+    /**
+     * Draws a replacement entrant from the waitlist and notifies them via Firestore.
+     */
+    public void drawReplacementEntrant(String eventId, OnCompleteListener<Boolean> listener) {
+        if (isBlank(eventId)) {
+            listener.onComplete(false, false);
+            return;
+        }
+
+        FirebaseFirestore.getInstance().runTransaction((Transaction.Function<String>) transaction -> {
+            DocumentSnapshot snapshot = transaction.get(FirebaseFirestore.getInstance().collection("events").document(eventId));
+            if (!snapshot.exists()) return null;
+
+            Event event = snapshot.toObject(Event.class);
+            if (event == null) return null;
+
+            Event updatedEvent = eventOfferService.buildReplacementDrawState(event);
+            if (updatedEvent == null) return null;
+
+            transaction.update(snapshot.getReference(),
+                    "chosen", updatedEvent.getChosen(),
+                    "waitingList.chosen", updatedEvent.getWaitingList().chosen,
+                    "waitingList.status", updatedEvent.getWaitingList().status);
+
+            // Return the ID of the newly selected entrant to notify them
+            List<String> currentChosen = updatedEvent.getChosen();
+            if (currentChosen.isEmpty()) return null;
+            return currentChosen.get(currentChosen.size() - 1);
+        }).addOnSuccessListener(replacementId -> {
+            if (replacementId != null) {
+                loadEvent(eventId, (event, success) -> {
+                    if (success && event != null) {
+                        sendSelectionNotification(replacementId, eventId, event.getTitle());
+                    }
+                });
+                listener.onComplete(true, true);
+            } else {
+                listener.onComplete(false, true);
+            }
+        }).addOnFailureListener(e -> listener.onComplete(false, false));
+    }
+
+    private void sendCancellationNotification(String userId, String eventId, String eventTitle) {
+        String title = "Selection Cancelled";
+        String body = "Your selection for " + eventTitle + " has been cancelled by the organizer.";
+        
+        // Saving to Firestore triggers the snapshot listener on the user's device
+        notificationRepository.saveNotification(new NotificationItem(userId, eventId, title, body), (r, s) -> {});
+    }
+
+    private void sendSelectionNotification(String userId, String eventId, String eventTitle) {
+        String title = "You've been selected!";
+        String body = "Congratulations! You have been selected for " + eventTitle + ". Please accept the invitation.";
+        
+        // Saving to Firestore triggers the snapshot listener on the user's device
+        notificationRepository.saveNotification(new NotificationItem(userId, eventId, title, body), (r, s) -> {});
     }
 
     private void buildTabItems(Event event, Tab selectedTab, java.util.function.Consumer<List<LotteryEntrantItem>> consumer) {
@@ -266,12 +350,3 @@ public class EventEntrantsController {
         return TextHelper.isBlank(value);
     }
 }
-
-
-
-
-
-
-
-
-

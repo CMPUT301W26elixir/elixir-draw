@@ -66,6 +66,60 @@ public class EventOfferService {
     }
 
     /**
+     * Draws a replacement entrant from the waiting list for an event.
+     *
+     * @param event the event to update
+     * @return the updated event state, or null if no replacement could be drawn
+     */
+    public Event buildReplacementDrawState(Event event) {
+        if (event == null) {
+            return null;
+        }
+
+        WaitingList waitingList = event.getWaitingList();
+        if (waitingList == null || waitingList.list == null) {
+            return null;
+        }
+
+        if (waitingList.chosen == null) {
+            waitingList.chosen = new ArrayList<>();
+        }
+        if (waitingList.status == null) {
+            waitingList.status = new HashMap<>();
+        }
+        if (event.getCancelled() == null) {
+            event.setCancelled(new ArrayList<>());
+        }
+
+        List<String> eligibleEntrants = new ArrayList<>();
+        for (String entrantId : waitingList.list) {
+            if (isBlank(entrantId)) {
+                continue;
+            }
+            if (waitingList.chosen.contains(entrantId)) {
+                continue;
+            }
+            if (event.getCancelled().contains(entrantId)) {
+                continue;
+            }
+            eligibleEntrants.add(entrantId);
+        }
+
+        if (eligibleEntrants.isEmpty()) {
+            return null;
+        }
+
+        String replacementId = eligibleEntrants.get(new Random().nextInt(eligibleEntrants.size()));
+        waitingList.chosen.add(replacementId);
+        waitingList.status.put(replacementId, false);
+
+        event.setChosen(new ArrayList<>(waitingList.chosen));
+        event.setEnrolled(waitingList.enrolled());
+        event.setNotEnrolled(waitingList.notEnrolled());
+        return event;
+    }
+
+    /**
      * Adds a replacement offer to the event by randomly selecting
      * an eligible entrant from the waiting list.
      *
@@ -176,12 +230,3 @@ public class EventOfferService {
         return value == null ? null : value.trim();
     }
 }
-
-
-
-
-
-
-
-
-

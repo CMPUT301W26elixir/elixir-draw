@@ -236,6 +236,13 @@ This action cannot be undone.</string>
     <string name="manage_entrants_cancel_confirm">Cancel Entrant</string>
     <string name="manage_entrants_cancel_success">Entrant moved to Cancelled.</string>
     <string name="manage_entrants_cancel_failure">Could not cancel that entrant. Please try again.</string>
+    <string name="manage_entrants_draw_replacement">Draw Replacement</string>
+    <string name="manage_entrants_draw_replacement_success">Replacement entrant drawn.</string>
+    <string name="manage_entrants_draw_replacement_failure">Could not draw a replacement. No eligible entrants found.</string>
+    <string name="manage_entrants_notification_cancelled_title">Selection Cancelled</string>
+    <string name="manage_entrants_notification_cancelled_body">Your selection for %1$s has been cancelled by the organizer.</string>
+    <string name="manage_entrants_notification_selected_title">You\'ve been selected!</string>
+    <string name="manage_entrants_notification_selected_body">Congratulations! You have been selected for %1$s. Please accept the invitation.</string>
     <string name="event_detail_waitlist_joined_message">You are on the waiting list for this event.</string>
     <string name="event_detail_offer">You have an offer</string>
     <string name="event_detail_enrolled">You are enrolled</string>
@@ -433,9 +440,3 @@ This action cannot be undone.</string>
     <string name="event_qr_save_success">QR code saved to Pictures.</string>
     <string name="event_qr_save_failure">Could not save this QR code right now.</string>
 </resources>
-
-
-
-
-
-
