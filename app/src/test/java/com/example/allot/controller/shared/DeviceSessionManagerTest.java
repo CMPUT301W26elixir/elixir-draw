@@ -7,7 +7,13 @@ import static org.junit.Assert.assertTrue;
 
 import com.example.allot.data.DeviceSessionManager;
 import org.junit.Test;
+/**
+ * Tests the device session manager.
+ */
 public class DeviceSessionManagerTest {
+    /**
+     * Performs returns existing saved device id.
+     */
     @Test
     public void returnsExistingSavedDeviceId() {
         FakeDeviceSessionStore store = new FakeDeviceSessionStore("saved-device-id");
@@ -19,6 +25,9 @@ public class DeviceSessionManagerTest {
         assertEquals("saved-device-id", store.savedDeviceId);
     }
 
+    /**
+     * Performs creates and stores new device id when missing.
+     */
     @Test
     public void createsAndStoresNewDeviceIdWhenMissing() {
         FakeDeviceSessionStore store = new FakeDeviceSessionStore(null);
@@ -31,6 +40,9 @@ public class DeviceSessionManagerTest {
         assertTrue(manager.isNewDeviceId());
     }
 
+    /**
+     * Performs treats blank saved value as missing.
+     */
     @Test
     public void treatsBlankSavedValueAsMissing() {
         FakeDeviceSessionStore store = new FakeDeviceSessionStore("   ");
@@ -42,18 +54,36 @@ public class DeviceSessionManagerTest {
         assertTrue(manager.isNewDeviceId());
     }
 
+    /**
+     * Represents the fake device session store.
+     */
     private static class FakeDeviceSessionStore implements DeviceSessionManager.DeviceSessionStore {
         private String savedDeviceId;
 
+        /**
+         * Creates a new FakeDeviceSessionStore instance.
+         *
+         * @param savedDeviceId the saved device id
+         */
         private FakeDeviceSessionStore(String savedDeviceId) {
             this.savedDeviceId = savedDeviceId;
         }
 
+        /**
+         * Returns the device id.
+         *
+         * @return the device id
+         */
         @Override
         public String getDeviceId() {
             return savedDeviceId;
         }
 
+        /**
+         * Performs save device id.
+         *
+         * @param deviceId the device id
+         */
         @Override
         public void saveDeviceId(String deviceId) {
             this.savedDeviceId = deviceId;

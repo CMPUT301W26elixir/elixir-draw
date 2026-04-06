@@ -8,11 +8,11 @@ import java.util.List;
  */
 public class EventActionStateFactory {
     /**
-     * Builds detail-screen state for the current event and user.
+     * Returns the result of create.
      *
-     * @param event the event to evaluate
-     * @param deviceId the current user device ID
-     * @return the derived detail-screen state
+     * @param event the event
+     * @param deviceId the device id
+     * @return the result of this call
      */
     public EventActionState create(Event event, String deviceId) {
         if (isCurrentUserOrganizer(event, deviceId)) {
@@ -83,22 +83,22 @@ public class EventActionStateFactory {
     }
 
     /**
-     * Checks whether the current user is enrolled in the event.
+     * Returns whether current user enrolled.
      *
-     * @param event the event to check
-     * @param deviceId the current user device ID
-     * @return true if the current user is enrolled, otherwise false
+     * @param event the event
+     * @param deviceId the device id
+     * @return whether current user enrolled
      */
     private boolean isCurrentUserEnrolled(Event event, String deviceId) {
         return containsUser(event == null ? null : event.getEnrolled(), deviceId);
     }
 
     /**
-     * Checks whether the current user has been selected in the event draw.
+     * Returns whether current user selected.
      *
-     * @param event the event to check
-     * @param deviceId the current user device ID
-     * @return true if the current user has been selected, otherwise false
+     * @param event the event
+     * @param deviceId the device id
+     * @return whether current user selected
      */
     private boolean isCurrentUserSelected(Event event, String deviceId) {
         return containsUser(event == null ? null : event.getChosen(), deviceId)
@@ -106,12 +106,11 @@ public class EventActionStateFactory {
     }
 
     /**
-     * Checks whether the UI should show the replacement-state message
-     * for a user who was not selected in the main draw.
+     * Returns whether this instance should show replacement state.
      *
-     * @param event the event to check
-     * @param deviceId the current user device ID
-     * @return true if the replacement-state message should be shown
+     * @param event the event
+     * @param deviceId the device id
+     * @return whether this instance should show replacement state
      */
     private boolean shouldShowReplacementState(Event event, String deviceId) {
         return hasPublishedSelectionResults(event)
@@ -122,11 +121,11 @@ public class EventActionStateFactory {
     }
 
     /**
-     * Checks whether the UI should show the finalized not-selected state.
+     * Returns whether this instance should show finalized not selected state.
      *
-     * @param event the event to check
-     * @param deviceId the current user device ID
-     * @return true if the finalized not-selected state should be shown
+     * @param event the event
+     * @param deviceId the device id
+     * @return whether this instance should show finalized not selected state
      */
     private boolean shouldShowFinalizedNotSelectedState(Event event, String deviceId) {
         return hasPublishedSelectionResults(event)
@@ -137,10 +136,10 @@ public class EventActionStateFactory {
     }
 
     /**
-     * Checks whether any selection results have been published for the event.
+     * Returns whether this instance has published selection results.
      *
-     * @param event the event to check
-     * @return true if selection results exist, otherwise false
+     * @param event the event
+     * @return whether this instance has published selection results
      */
     private boolean hasPublishedSelectionResults(Event event) {
         return (event != null && event.getChosen() != null && !event.getChosen().isEmpty())
@@ -151,11 +150,11 @@ public class EventActionStateFactory {
     }
 
     /**
-     * Checks whether the current user is on the event waiting list.
+     * Returns whether current user on waiting list.
      *
-     * @param event the event to check
-     * @param deviceId the current user device ID
-     * @return true if the current user is on the waiting list, otherwise false
+     * @param event the event
+     * @param deviceId the device id
+     * @return whether current user on waiting list
      */
     private boolean isCurrentUserOnWaitingList(Event event, String deviceId) {
         if (event == null || event.getWaitingList() == null || event.getWaitingList().list == null) {
@@ -165,11 +164,11 @@ public class EventActionStateFactory {
     }
 
     /**
-     * Checks whether the current user is the organizer of the event.
+     * Returns whether current user organizer.
      *
-     * @param event the event to check
-     * @param deviceId the current user device ID
-     * @return true if the current user is the organizer, otherwise false
+     * @param event the event
+     * @param deviceId the device id
+     * @return whether current user organizer
      */
     private boolean isCurrentUserOrganizer(Event event, String deviceId) {
         if (event == null) {
@@ -185,41 +184,41 @@ public class EventActionStateFactory {
     }
 
     /**
-     * Checks whether a user ID exists in a list of user IDs.
+     * Returns the result of contains user.
      *
-     * @param users the list of user IDs to search
-     * @param deviceId the device ID to look for
-     * @return true if the user exists in the list, otherwise false
+     * @param users the users
+     * @param deviceId the device id
+     * @return the result of this call
      */
     private boolean containsUser(List<String> users, String deviceId) {
         return users != null && users.contains(deviceId);
     }
 
     /**
-     * Checks whether a string is blank after trimming whitespace.
+     * Returns whether blank.
      *
-     * @param value the string to check
-     * @return true if the string is blank, otherwise false
+     * @param value the value
+     * @return whether blank
      */
     private boolean isBlank(String value) {
         return safeString(value).trim().isEmpty();
     }
 
     /**
-     * Returns a safe string value, replacing null with an empty string.
+     * Returns the result of safe string.
      *
-     * @param value the string to sanitize
-     * @return the original string, or an empty string if null
+     * @param value the value
+     * @return the result of this call
      */
     private String safeString(String value) {
         return value == null ? "" : value;
     }
 
     /**
-     * Returns a trimmed string value, or null if the value is null.
+     * Returns the result of normalize nullable.
      *
-     * @param value the string to normalize
-     * @return the normalized string
+     * @param value the value
+     * @return the result of this call
      */
     private String normalizeNullable(String value) {
         return value == null ? null : value.trim();

@@ -64,6 +64,11 @@ public class ScanActivity extends AppCompatActivity {
     private final ActivityResultLauncher<PickVisualMediaRequest> pickImageLauncher =
             registerForActivityResult(new ActivityResultContracts.PickVisualMedia(), this::handlePickedImage);
 
+    /**
+     * Handles the create callback.
+     *
+     * @param savedInstanceState the saved instance state
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -82,6 +87,9 @@ public class ScanActivity extends AppCompatActivity {
         setupBottomNav();
     }
 
+    /**
+     * Handles the start callback.
+     */
     @Override
     protected void onStart() {
         super.onStart();
@@ -98,12 +106,18 @@ public class ScanActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Handles the stop callback.
+     */
     @Override
     protected void onStop() {
         super.onStop();
         stopCameraPreview();
     }
 
+    /**
+     * Performs finish.
+     */
     @Override
     public void finish() {
         stopCameraPreview();
@@ -114,6 +128,9 @@ public class ScanActivity extends AppCompatActivity {
         overridePendingTransition(0, 0);
     }
 
+    /**
+     * Updates the up bottom nav.
+     */
     private void setupBottomNav() {
         bottomNavBar.setSelectedTab(BottomNavBarView.Tab.SCAN);
         bottomNavBar.setOnTabClickListener(BottomNavBarView.Tab.EXPLORE, view -> AppNavigator.openExplore(this, true));
@@ -122,6 +139,9 @@ public class ScanActivity extends AppCompatActivity {
         bottomNavBar.setOnTabClickListener(BottomNavBarView.Tab.PROFILE, view -> AppNavigator.openProfile(this, true));
     }
 
+    /**
+     * Performs open image picker.
+     */
     private void openImagePicker() {
         clearInlineError();
         pickImageLauncher.launch(
@@ -131,6 +151,11 @@ public class ScanActivity extends AppCompatActivity {
         );
     }
 
+    /**
+     * Performs handle picked image.
+     *
+     * @param imageUri the image uri
+     */
     private void handlePickedImage(Uri imageUri) {
         if (imageUri == null) {
             return;
@@ -163,6 +188,12 @@ public class ScanActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Returns the result of load bitmap.
+     *
+     * @param imageUri the image uri
+     * @return the result of this call
+     */
     private Bitmap loadBitmap(Uri imageUri) throws IOException {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             ImageDecoder.Source source = ImageDecoder.createSource(getContentResolver(), imageUri);
@@ -172,6 +203,9 @@ public class ScanActivity extends AppCompatActivity {
         return MediaStore.Images.Media.getBitmap(getContentResolver(), imageUri);
     }
 
+    /**
+     * Performs start camera preview.
+     */
     private void startCameraPreview() {
         if (cameraBound || scanHandlingInProgress) {
             return;
@@ -190,6 +224,9 @@ public class ScanActivity extends AppCompatActivity {
         }, ContextCompat.getMainExecutor(this));
     }
 
+    /**
+     * Performs bind camera use cases.
+     */
     private void bindCameraUseCases() {
         if (cameraProvider == null) {
             return;
@@ -221,6 +258,9 @@ public class ScanActivity extends AppCompatActivity {
         cameraProvider.bindToLifecycle(this, CameraSelector.DEFAULT_BACK_CAMERA, preview, imageAnalysis);
     }
 
+    /**
+     * Performs stop camera preview.
+     */
     private void stopCameraPreview() {
         if (cameraProvider != null) {
             cameraProvider.unbindAll();
@@ -228,6 +268,11 @@ public class ScanActivity extends AppCompatActivity {
         cameraBound = false;
     }
 
+    /**
+     * Performs resolve scanned payload.
+     *
+     * @param payload the payload
+     */
     private void resolveScannedPayload(String payload) {
         if (scanHandlingInProgress) {
             return;
@@ -255,6 +300,11 @@ public class ScanActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Performs open event detail.
+     *
+     * @param event the event
+     */
     private void openEventDetail(Event event) {
         if (event == null) {
             showInlineError(R.string.scan_error_load);
@@ -278,16 +328,29 @@ public class ScanActivity extends AppCompatActivity {
         overridePendingTransition(0, 0);
     }
 
+    /**
+     * Returns whether this instance has camera permission.
+     *
+     * @return whether this instance has camera permission
+     */
     private boolean hasCameraPermission() {
         return ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
                 == PackageManager.PERMISSION_GRANTED;
     }
 
+    /**
+     * Performs show inline error.
+     *
+     * @param messageResId the message res id
+     */
     private void showInlineError(int messageResId) {
         scanErrorText.setVisibility(android.view.View.VISIBLE);
         scanErrorText.setText(messageResId);
     }
 
+    /**
+     * Performs clear inline error.
+     */
     private void clearInlineError() {
         scanErrorText.setText("");
         scanErrorText.setVisibility(android.view.View.GONE);

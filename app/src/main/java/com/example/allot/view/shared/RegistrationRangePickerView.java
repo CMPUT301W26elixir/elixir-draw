@@ -24,7 +24,16 @@ import java.util.Locale;
  * Inline two-tap calendar widget for choosing a registration date range.
  */
 public class RegistrationRangePickerView extends LinearLayout {
+    /**
+     * Defines the contract for an on range changed listener.
+     */
     public interface OnRangeChangedListener {
+        /**
+         * Handles the range changed callback.
+         *
+         * @param startDate the start date
+         * @param endDate the end date
+         */
         void onRangeChanged(@Nullable Calendar startDate, @Nullable Calendar endDate);
     }
 
@@ -43,21 +52,42 @@ public class RegistrationRangePickerView extends LinearLayout {
     private boolean suppressCallbacks;
     private OnRangeChangedListener onRangeChangedListener;
 
+    /**
+     * Creates a new RegistrationRangePickerView instance.
+     *
+     * @param context the context
+     */
     public RegistrationRangePickerView(Context context) {
         super(context);
         init();
     }
 
+    /**
+     * Creates a new RegistrationRangePickerView instance.
+     *
+     * @param context the context
+     * @param attrs the attrs
+     */
     public RegistrationRangePickerView(Context context, AttributeSet attrs) {
         super(context, attrs);
         init();
     }
 
+    /**
+     * Creates a new RegistrationRangePickerView instance.
+     *
+     * @param context the context
+     * @param attrs the attrs
+     * @param defStyleAttr the def style attr
+     */
     public RegistrationRangePickerView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         init();
     }
 
+    /**
+     * Performs init.
+     */
     private void init() {
         inflate(getContext(), R.layout.view_registration_range_picker, this);
         setOrientation(VERTICAL);
@@ -75,10 +105,25 @@ public class RegistrationRangePickerView extends LinearLayout {
         renderCalendar();
     }
 
+    /**
+     * Updates the on range changed listener.
+     *
+     * @param listener the listener
+     */
     public void setOnRangeChangedListener(@Nullable OnRangeChangedListener listener) {
         onRangeChangedListener = listener;
     }
 
+    /**
+     * Performs bind range.
+     *
+     * @param startMonth the start month
+     * @param startDay the start day
+     * @param startYear the start year
+     * @param endMonth the end month
+     * @param endDay the end day
+     * @param endYear the end year
+     */
     public void bindRange(String startMonth,
                           String startDay,
                           String startYear,
@@ -109,30 +154,63 @@ public class RegistrationRangePickerView extends LinearLayout {
         suppressCallbacks = false;
     }
 
+    /**
+     * Returns the start month.
+     *
+     * @return the start month
+     */
     public String getStartMonth() {
         return formatMonth(selectedStartDate);
     }
 
+    /**
+     * Returns the start day.
+     *
+     * @return the start day
+     */
     public String getStartDay() {
         return formatDay(selectedStartDate);
     }
 
+    /**
+     * Returns the start year.
+     *
+     * @return the start year
+     */
     public String getStartYear() {
         return formatYear(selectedStartDate);
     }
 
+    /**
+     * Returns the end month.
+     *
+     * @return the end month
+     */
     public String getEndMonth() {
         return formatMonth(selectedEndDate);
     }
 
+    /**
+     * Returns the end day.
+     *
+     * @return the end day
+     */
     public String getEndDay() {
         return formatDay(selectedEndDate);
     }
 
+    /**
+     * Returns the end year.
+     *
+     * @return the end year
+     */
     public String getEndYear() {
         return formatYear(selectedEndDate);
     }
 
+    /**
+     * Performs build day grid.
+     */
     private void buildDayGrid() {
         calendarRowsContainer.removeAllViews();
         dayCells.clear();
@@ -175,12 +253,20 @@ public class RegistrationRangePickerView extends LinearLayout {
         }
     }
 
+    /**
+     * Performs shift displayed month.
+     *
+     * @param monthDelta the month delta
+     */
     private void shiftDisplayedMonth(int monthDelta) {
         displayedMonth.add(Calendar.MONTH, monthDelta);
         displayedMonth.set(Calendar.DAY_OF_MONTH, 1);
         renderCalendar();
     }
 
+    /**
+     * Performs render calendar.
+     */
     private void renderCalendar() {
         monthLabel.setText(monthFormatter.format(displayedMonth.getTime()));
         yearLabel.setText(String.valueOf(displayedMonth.get(Calendar.YEAR)));
@@ -197,6 +283,12 @@ public class RegistrationRangePickerView extends LinearLayout {
         }
     }
 
+    /**
+     * Performs bind day cell.
+     *
+     * @param cellView the cell view
+     * @param cellDate the cell date
+     */
     private void bindDayCell(TextView cellView, Calendar cellDate) {
         boolean isCurrentMonth = cellDate.get(Calendar.MONTH) == displayedMonth.get(Calendar.MONTH)
                 && cellDate.get(Calendar.YEAR) == displayedMonth.get(Calendar.YEAR);
@@ -225,6 +317,11 @@ public class RegistrationRangePickerView extends LinearLayout {
         cellView.setAlpha(isCurrentMonth ? 1f : 0.55f);
     }
 
+    /**
+     * Performs handle date tap.
+     *
+     * @param index the index
+     */
     private void handleDateTap(int index) {
         if (index < 0 || index >= cellDates.size()) {
             return;
@@ -251,6 +348,9 @@ public class RegistrationRangePickerView extends LinearLayout {
         dispatchRangeChanged();
     }
 
+    /**
+     * Performs dispatch range changed.
+     */
     private void dispatchRangeChanged() {
         if (suppressCallbacks || onRangeChangedListener == null) {
             return;
@@ -258,6 +358,12 @@ public class RegistrationRangePickerView extends LinearLayout {
         onRangeChangedListener.onRangeChanged(copyOf(selectedStartDate), copyOf(selectedEndDate));
     }
 
+    /**
+     * Returns whether within selected range.
+     *
+     * @param date the date
+     * @return whether within selected range
+     */
     private boolean isWithinSelectedRange(Calendar date) {
         if (selectedStartDate == null || selectedEndDate == null) {
             return false;
@@ -265,6 +371,13 @@ public class RegistrationRangePickerView extends LinearLayout {
         return !date.before(selectedStartDate) && !date.after(selectedEndDate);
     }
 
+    /**
+     * Returns whether same day.
+     *
+     * @param first the first
+     * @param second the second
+     * @return whether same day
+     */
     private boolean isSameDay(@Nullable Calendar first, @Nullable Calendar second) {
         return first != null
                 && second != null
@@ -272,6 +385,14 @@ public class RegistrationRangePickerView extends LinearLayout {
                 && first.get(Calendar.DAY_OF_YEAR) == second.get(Calendar.DAY_OF_YEAR);
     }
 
+    /**
+     * Returns the result of parse date.
+     *
+     * @param month the month
+     * @param day the day
+     * @param year the year
+     * @return the result of this call
+     */
     @Nullable
     private Calendar parseDate(String month, String day, String year) {
         if (TextUtils.isEmpty(month) || TextUtils.isEmpty(day) || TextUtils.isEmpty(year)) {
@@ -311,29 +432,65 @@ public class RegistrationRangePickerView extends LinearLayout {
         }
     }
 
+    /**
+     * Returns the result of format month.
+     *
+     * @param calendar the calendar
+     * @return the result of this call
+     */
     private String formatMonth(@Nullable Calendar calendar) {
         return calendar == null ? "" : monthFormatter.format(calendar.getTime());
     }
 
+    /**
+     * Returns the result of format day.
+     *
+     * @param calendar the calendar
+     * @return the result of this call
+     */
     private String formatDay(@Nullable Calendar calendar) {
         return calendar == null ? "" : String.valueOf(calendar.get(Calendar.DAY_OF_MONTH));
     }
 
+    /**
+     * Returns the result of format year.
+     *
+     * @param calendar the calendar
+     * @return the result of this call
+     */
     private String formatYear(@Nullable Calendar calendar) {
         return calendar == null ? "" : String.valueOf(calendar.get(Calendar.YEAR));
     }
 
+    /**
+     * Returns the result of copy of.
+     *
+     * @param source the source
+     * @return the result of this call
+     */
     @Nullable
     private Calendar copyOf(@Nullable Calendar source) {
         return source == null ? null : normalizedDate((Calendar) source.clone());
     }
 
+    /**
+     * Returns the result of normalized month.
+     *
+     * @param source the source
+     * @return the result of this call
+     */
     private static Calendar normalizedMonth(Calendar source) {
         Calendar calendar = normalizedDate((Calendar) source.clone());
         calendar.set(Calendar.DAY_OF_MONTH, 1);
         return calendar;
     }
 
+    /**
+     * Returns the result of normalized date.
+     *
+     * @param source the source
+     * @return the result of this call
+     */
     private static Calendar normalizedDate(Calendar source) {
         source.set(Calendar.HOUR_OF_DAY, 0);
         source.set(Calendar.MINUTE, 0);

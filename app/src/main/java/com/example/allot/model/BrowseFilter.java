@@ -14,27 +14,27 @@ public class BrowseFilter {
     private final Integer minimumCapacity;
 
     /**
-     * Creates a browse filter with the provided search term and category.
+     * Creates a new BrowseFilter instance.
      *
-     * @param searchTerm the search text entered by the user
-     * @param selectedCategory the selected category filter
+     * @param searchTerm the search term
+     * @param selectedCategory the selected category
      */
     public BrowseFilter(String searchTerm, String selectedCategory) {
         this(searchTerm, selectedCategory, null, null, null, null, null, null, null);
     }
 
     /**
-     * Creates a browse filter with search, category, and optional advanced filters.
+     * Creates a new BrowseFilter instance.
      *
-     * @param searchTerm the search text entered by the user
-     * @param selectedCategory the selected category filter
-     * @param keywords optional keywords for title/description matching
-     * @param startDate optional minimum event date
-     * @param latitude optional filter latitude
-     * @param longitude optional filter longitude
-     * @param distanceKm optional filter distance in kilometers
-     * @param onlyOpenSpots optional open-spots requirement
-     * @param minimumCapacity optional minimum effective capacity
+     * @param searchTerm the search term
+     * @param selectedCategory the selected category
+     * @param keywords the keywords
+     * @param startDate the start date
+     * @param latitude the latitude
+     * @param longitude the longitude
+     * @param distanceKm the distance km
+     * @param onlyOpenSpots the only open spots
+     * @param minimumCapacity the minimum capacity
      */
     public BrowseFilter(String searchTerm,
                         String selectedCategory,
@@ -57,7 +57,7 @@ public class BrowseFilter {
     }
 
     /**
-     * Returns the active search term.
+     * Returns the search term.
      *
      * @return the search term
      */
@@ -66,7 +66,7 @@ public class BrowseFilter {
     }
 
     /**
-     * Returns the active category filter.
+     * Returns the selected category.
      *
      * @return the selected category
      */
@@ -74,30 +74,65 @@ public class BrowseFilter {
         return selectedCategory;
     }
 
+    /**
+     * Returns the keywords.
+     *
+     * @return the keywords
+     */
     public String getKeywords() {
         return keywords;
     }
 
+    /**
+     * Returns the start date.
+     *
+     * @return the start date
+     */
     public java.util.Date getStartDate() {
         return startDate;
     }
 
+    /**
+     * Returns the latitude.
+     *
+     * @return the latitude
+     */
     public Double getLatitude() {
         return latitude;
     }
 
+    /**
+     * Returns the longitude.
+     *
+     * @return the longitude
+     */
     public Double getLongitude() {
         return longitude;
     }
 
+    /**
+     * Returns the distance km.
+     *
+     * @return the distance km
+     */
     public Double getDistanceKm() {
         return distanceKm;
     }
 
+    /**
+     * Returns the only open spots.
+     *
+     * @return the only open spots
+     */
     public Boolean getOnlyOpenSpots() {
         return onlyOpenSpots;
     }
 
+    /**
+     * Returns the minimum capacity.
+     *
+     * @return the minimum capacity
+     */
     public Integer getMinimumCapacity() {
         return minimumCapacity;
     }

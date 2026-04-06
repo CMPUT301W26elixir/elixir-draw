@@ -8,16 +8,25 @@ import com.google.firebase.storage.FirebaseStorage;
 import org.junit.Before;
 import org.junit.Test;
 
+/**
+ * Tests the profile photo controller.
+ */
 public class ProfilePhotoControllerTest {
     private FakeUserRepository userRepository;
     private ProfilePhotoController controller;
 
+    /**
+     * Updates the up.
+     */
     @Before
     public void setUp() {
         userRepository = new FakeUserRepository();
         controller = new ProfilePhotoController(userRepository, (FirebaseStorage) null);
     }
 
+    /**
+     * Performs upload photo rejects blank device id or null photo.
+     */
     @Test
     public void uploadPhoto_rejectsBlankDeviceIdOrNullPhoto() {
         controller.uploadPhoto(" ", null, (result, success) -> {
@@ -31,6 +40,9 @@ public class ProfilePhotoControllerTest {
         });
     }
 
+    /**
+     * Performs delete photo rejects blank device id.
+     */
     @Test
     public void deletePhoto_rejectsBlankDeviceId() {
         controller.deletePhoto(" ", "https://example.com/photo.jpg", (result, success) -> {
@@ -39,6 +51,9 @@ public class ProfilePhotoControllerTest {
         });
     }
 
+    /**
+     * Performs delete photo succeeds without storage delete when url blank.
+     */
     @Test
     public void deletePhoto_succeedsWithoutStorageDeleteWhenUrlBlank() {
         userRepository.updateFieldsSuccess = true;
@@ -50,14 +65,27 @@ public class ProfilePhotoControllerTest {
         });
     }
 
+    /**
+     * Stores and retrieves fake user.
+     */
     private static class FakeUserRepository extends UserRepository {
         private boolean updateFieldsSuccess;
         private boolean updatedFieldsCalled;
 
+        /**
+         * Creates a new FakeUserRepository instance.
+         */
         private FakeUserRepository() {
             super((com.google.firebase.firestore.FirebaseFirestore) null);
         }
 
+        /**
+         * Performs update user fields.
+         *
+         * @param deviceId the device id
+         * @param updates the updates
+         * @param listener the listener
+         */
         @Override
         public void updateUserFields(String deviceId, java.util.Map<String, Object> updates,
                                      com.example.allot.common.OnCompleteListener<Boolean> listener) {

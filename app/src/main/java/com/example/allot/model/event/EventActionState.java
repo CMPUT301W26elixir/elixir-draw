@@ -3,6 +3,9 @@ package com.example.allot.model.event;
  * Stores the action button state and text for an event detail user.
  */
 public class EventActionState {
+    /**
+     * Enumerates the available action type values.
+     */
     public enum ActionType {
         MANAGE,
         OFFER,
@@ -23,14 +26,14 @@ public class EventActionState {
     private final String subtext;
 
     /**
-     * Creates a detail-screen state for the current event and user.
+     * Creates a new EventActionState instance.
      *
-     * @param event the loaded event
-     * @param actionType the primary action type for the footer
-     * @param showWaitlistMessage true to show the waitlist message
-     * @param buttonEnabled true if the action button should be enabled
-     * @param showEntrantCount true if the entrant count should be shown
-     * @param subtext optional descriptive subtext
+     * @param event the event
+     * @param actionType the action type
+     * @param showWaitlistMessage the show waitlist message
+     * @param buttonEnabled the button enabled
+     * @param showEntrantCount the show entrant count
+     * @param subtext the subtext
      */
     public EventActionState(Event event,
                             ActionType actionType,
@@ -46,26 +49,56 @@ public class EventActionState {
         this.subtext = subtext;
     }
 
+    /**
+     * Returns the event.
+     *
+     * @return the event
+     */
     public Event getEvent() {
         return event;
     }
 
+    /**
+     * Returns the action type.
+     *
+     * @return the action type
+     */
     public ActionType getActionType() {
         return actionType;
     }
 
+    /**
+     * Returns whether this instance should show waitlist message.
+     *
+     * @return whether this instance should show waitlist message
+     */
     public boolean shouldShowWaitlistMessage() {
         return showWaitlistMessage;
     }
 
+    /**
+     * Returns whether button enabled.
+     *
+     * @return whether button enabled
+     */
     public boolean isButtonEnabled() {
         return buttonEnabled;
     }
 
+    /**
+     * Returns whether this instance should show entrant count.
+     *
+     * @return whether this instance should show entrant count
+     */
     public boolean shouldShowEntrantCount() {
         return showEntrantCount;
     }
 
+    /**
+     * Returns the subtext.
+     *
+     * @return the subtext
+     */
     public String getSubtext() {
         return subtext;
     }

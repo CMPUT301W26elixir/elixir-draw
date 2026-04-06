@@ -11,17 +11,17 @@ public class LotteryInputValidator {
     private final SimpleDateFormat drawDateFormat = new SimpleDateFormat("MMMM d, yyyy", Locale.getDefault());
 
     /**
-     * Creates a validator with strict date parsing.
+     * Creates a new LotteryInputValidator instance.
      */
     public LotteryInputValidator() {
         drawDateFormat.setLenient(false);
     }
 
     /**
-     * Parses the draw date entered by the user.
+     * Returns the result of parse draw date.
      *
-     * @param value the date text to parse
-     * @return the parsed Date, or null if parsing fails
+     * @param value the value
+     * @return the result of this call
      */
     public Date parseDrawDate(String value) {
         try {
@@ -32,10 +32,10 @@ public class LotteryInputValidator {
     }
 
     /**
-     * Parses the attendee count entered by the organizer.
+     * Returns the result of parse positive int.
      *
-     * @param value the text value to parse
-     * @return the parsed integer, or null if the value is invalid
+     * @param value the value
+     * @return the result of this call
      */
     public Integer parsePositiveInt(String value) {
         try {
@@ -46,11 +46,11 @@ public class LotteryInputValidator {
     }
 
     /**
-     * Validates the lottery form values.
+     * Returns whether valid.
      *
-     * @param drawDateValue the draw date text
-     * @param attendeesValue the attendee count text
-     * @return true if both values are valid, otherwise false
+     * @param drawDateValue the draw date value
+     * @param attendeesValue the attendees value
+     * @return whether valid
      */
     public boolean isValid(String drawDateValue, String attendeesValue) {
         Date drawDate = parseDrawDate(drawDateValue);

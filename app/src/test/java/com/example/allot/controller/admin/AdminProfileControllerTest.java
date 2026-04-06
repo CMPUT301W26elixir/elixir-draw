@@ -13,11 +13,17 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 
+/**
+ * Tests the admin profile controller.
+ */
 public class AdminProfileControllerTest {
     private FakeUserRepository userRepository;
     private FakeUserController userController;
     private AdminProfileController controller;
 
+    /**
+     * Updates the up.
+     */
     @Before
     public void setUp() {
         userRepository = new FakeUserRepository();
@@ -25,6 +31,9 @@ public class AdminProfileControllerTest {
         controller = new AdminProfileController(userRepository, userController);
     }
 
+    /**
+     * Performs load all profiles requires admin and delegates when authorized.
+     */
     @Test
     public void loadAllProfiles_requiresAdminAndDelegatesWhenAuthorized() {
         userController.isAdmin = false;
@@ -43,6 +52,9 @@ public class AdminProfileControllerTest {
         });
     }
 
+    /**
+     * Performs load all profiles returns failure when admin lookup fails.
+     */
     @Test
     public void loadAllProfiles_returnsFailureWhenAdminLookupFails() {
         userController.adminLookupSuccess = false;
@@ -54,6 +66,9 @@ public class AdminProfileControllerTest {
         });
     }
 
+    /**
+     * Performs load all profiles propagates repository failure.
+     */
     @Test
     public void loadAllProfiles_propagatesRepositoryFailure() {
         userController.isAdmin = true;
@@ -65,6 +80,9 @@ public class AdminProfileControllerTest {
         });
     }
 
+    /**
+     * Performs delete profile requires admin and delegates when authorized.
+     */
     @Test
     public void deleteProfile_requiresAdminAndDelegatesWhenAuthorized() {
         userController.isAdmin = false;
@@ -85,6 +103,9 @@ public class AdminProfileControllerTest {
         });
     }
 
+    /**
+     * Performs delete profile returns failure when admin lookup fails.
+     */
     @Test
     public void deleteProfile_returnsFailureWhenAdminLookupFails() {
         userController.adminLookupSuccess = false;
@@ -95,6 +116,9 @@ public class AdminProfileControllerTest {
         });
     }
 
+    /**
+     * Performs delete profile propagates repository delete failure.
+     */
     @Test
     public void deleteProfile_propagatesRepositoryDeleteFailure() {
         userController.isAdmin = true;
@@ -108,6 +132,9 @@ public class AdminProfileControllerTest {
         });
     }
 
+    /**
+     * Stores and retrieves fake user.
+     */
     private static class FakeUserRepository extends UserRepository {
         private List<User> allUsers;
         private String deletedDeviceId;
@@ -115,15 +142,29 @@ public class AdminProfileControllerTest {
         private boolean getAllUsersSuccess = true;
         private boolean deleteSuccess;
 
+        /**
+         * Creates a new FakeUserRepository instance.
+         */
         private FakeUserRepository() {
             super((com.google.firebase.firestore.FirebaseFirestore) null);
         }
 
+        /**
+         * Performs get all users.
+         *
+         * @param listener the listener
+         */
         @Override
         public void getAllUsers(com.example.allot.common.OnCompleteListener<List<User>> listener) {
             listener.onComplete(allUsers, getAllUsersSuccess);
         }
 
+        /**
+         * Performs delete user as admin.
+         *
+         * @param deviceId the device id
+         * @param listener the listener
+         */
         @Override
         public void deleteUserAsAdmin(String deviceId, com.example.allot.common.OnCompleteListener<Boolean> listener) {
             deletedDeviceId = deviceId;
@@ -131,32 +172,61 @@ public class AdminProfileControllerTest {
         }
     }
 
+    /**
+     * Coordinates fake user.
+     */
     private static class FakeUserController extends UserController {
         private boolean isAdmin;
         private boolean adminLookupSuccess = true;
 
+        /**
+         * Creates a new FakeUserController instance.
+         */
         private FakeUserController() {
             super(null, new DeviceSessionManager(new FakeDeviceSessionStore("device-1")));
         }
 
+        /**
+         * Performs is current user admin.
+         *
+         * @param listener the listener
+         */
         @Override
         public void isCurrentUserAdmin(com.example.allot.common.OnCompleteListener<Boolean> listener) {
             listener.onComplete(isAdmin, adminLookupSuccess);
         }
     }
 
+    /**
+     * Represents the fake device session store.
+     */
     private static class FakeDeviceSessionStore implements DeviceSessionManager.DeviceSessionStore {
         private final String deviceId;
 
+        /**
+         * Creates a new FakeDeviceSessionStore instance.
+         *
+         * @param deviceId the device id
+         */
         private FakeDeviceSessionStore(String deviceId) {
             this.deviceId = deviceId;
         }
 
+        /**
+         * Returns the device id.
+         *
+         * @return the device id
+         */
         @Override
         public String getDeviceId() {
             return deviceId;
         }
 
+        /**
+         * Performs save device id.
+         *
+         * @param deviceId the device id
+         */
         @Override
         public void saveDeviceId(String deviceId) {
         }

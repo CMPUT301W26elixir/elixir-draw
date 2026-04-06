@@ -9,11 +9,11 @@ public class EntrantExportRow {
     private final String phone;
 
     /**
-     * Creates one CSV export row with human-facing entrant details.
+     * Creates a new EntrantExportRow instance.
      *
-     * @param name the entrant display name
-     * @param email the entrant email address
-     * @param phone the entrant phone number
+     * @param name the name
+     * @param email the email
+     * @param phone the phone
      */
     public EntrantExportRow(String name, String email, String phone) {
         this.name = name;
@@ -21,14 +21,29 @@ public class EntrantExportRow {
         this.phone = phone;
     }
 
+    /**
+     * Returns the name.
+     *
+     * @return the name
+     */
     public String getName() {
         return name;
     }
 
+    /**
+     * Returns the email.
+     *
+     * @return the email
+     */
     public String getEmail() {
         return email;
     }
 
+    /**
+     * Returns the phone.
+     *
+     * @return the phone
+     */
     public String getPhone() {
         return phone;
     }

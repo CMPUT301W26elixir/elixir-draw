@@ -12,26 +12,26 @@ import java.util.concurrent.TimeUnit;
 public final class EventDisplayFormatter {
 
     /**
-     * Private constructor to prevent instantiation of this utility class.
+     * Creates a new EventDisplayFormatter instance.
      */
     private EventDisplayFormatter() {
     }
 
     /**
-     * Returns the trimmed title of the given event.
+     * Returns the result of title.
      *
-     * @param event the event whose title should be formatted
-     * @return the trimmed event title, or an empty string if unavailable
+     * @param event the event
+     * @return the result of this call
      */
     public static String title(Event event) {
         return event == null || event.getTitle() == null ? "" : event.getTitle().trim();
     }
 
     /**
-     * Returns the formatted location text for the given event.
+     * Returns the result of location.
      *
-     * @param event the event whose location should be formatted
-     * @return the event location, or "Location TBA" if unavailable
+     * @param event the event
+     * @return the result of this call
      */
     public static String location(Event event) {
         if (event == null || TextHelper.isBlank(event.getLocation())) {
@@ -41,10 +41,10 @@ public final class EventDisplayFormatter {
     }
 
     /**
-     * Returns the formatted event date for the given event.
+     * Returns the result of date.
      *
-     * @param event the event whose date should be formatted
-     * @return the formatted event date, or "Date TBA" if unavailable
+     * @param event the event
+     * @return the result of this call
      */
     public static String date(Event event) {
         if (event == null || event.getEventDate() == null) {
@@ -54,10 +54,10 @@ public final class EventDisplayFormatter {
     }
 
     /**
-     * Returns the formatted price text for the given event.
+     * Returns the result of price.
      *
-     * @param event the event whose price should be formatted
-     * @return the formatted price, or "Free" if the event has no price
+     * @param event the event
+     * @return the result of this call
      */
     public static String price(Event event) {
         if (event == null || event.getPrice() == null || event.getPrice() <= 0) {
@@ -70,10 +70,10 @@ public final class EventDisplayFormatter {
     }
 
     /**
-     * Returns the formatted registration deadline text for the given event.
+     * Returns the result of deadline.
      *
-     * @param event the event whose registration deadline should be formatted
-     * @return the formatted deadline text, or "Deadline TBA" if unavailable
+     * @param event the event
+     * @return the result of this call
      */
     public static String deadline(Event event) {
         if (event == null || event.getRegistrationDeadline() == null) {
@@ -95,27 +95,65 @@ public final class EventDisplayFormatter {
         return daysLeft + " Days Left";
     }
 
+    /**
+     * Returns the result of detail location.
+     *
+     * @param location the location
+     * @return the result of this call
+     */
     public static String detailLocation(String location) {
         return TextHelper.defaultText(location, "Address TBA");
     }
 
+    /**
+     * Returns the result of detail date.
+     *
+     * @param value the value
+     * @return the result of this call
+     */
     public static String detailDate(String value) {
         return TextHelper.defaultText(value, "Date TBA");
     }
 
+    /**
+     * Returns the result of short date.
+     *
+     * @param date the date
+     * @return the result of this call
+     */
     public static String shortDate(Date date) {
         return formatDate(date, "MMM d, yyyy");
     }
 
+    /**
+     * Returns the result of long date.
+     *
+     * @param date the date
+     * @return the result of this call
+     */
     public static String longDate(Date date) {
         return formatDate(date, "MMMM d, yyyy");
     }
 
+    /**
+     * Returns the result of labeled short date.
+     *
+     * @param label the label
+     * @param date the date
+     * @return the result of this call
+     */
     public static String labeledShortDate(String label, Date date) {
         String value = date == null ? "TBA" : shortDate(date);
         return String.format(Locale.getDefault(), "%s: %s", label, value);
     }
 
+    /**
+     * Returns the result of format date.
+     *
+     * @param date the date
+     * @param pattern the pattern
+     * @return the result of this call
+     */
     private static String formatDate(Date date, String pattern) {
         if (date == null) {
             return null;

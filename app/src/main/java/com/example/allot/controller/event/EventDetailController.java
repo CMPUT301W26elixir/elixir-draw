@@ -27,6 +27,11 @@ public class EventDetailController {
     private final EventActionStateFactory eventActionStateFactory;
     private final EventDetailViewService eventDetailViewService;
 
+    /**
+     * Creates a new EventDetailController instance.
+     *
+     * @param context the context
+     */
     public EventDetailController(android.content.Context context) {
         this(
                 new EventRepository(),
@@ -36,6 +41,14 @@ public class EventDetailController {
         );
     }
 
+    /**
+     * Creates a new EventDetailController instance.
+     *
+     * @param eventRepository the event repository
+     * @param userController the user controller
+     * @param eventActionStateFactory the event action state factory
+     * @param eventDetailViewService the event detail view service
+     */
     EventDetailController(EventRepository eventRepository,
                           UserController userController,
                           EventActionStateFactory eventActionStateFactory,
@@ -47,7 +60,15 @@ public class EventDetailController {
     }
 
     /**
-     * Builds the fallback event detail state from intent data.
+     * Returns the result of build fallback state.
+     *
+     * @param title the title
+     * @param price the price
+     * @param location the location
+     * @param date the date
+     * @param deadline the deadline
+     * @param category the category
+     * @return the result of this call
      */
     public EventDetailData buildFallbackState(String title,
                                               String price,
@@ -59,8 +80,16 @@ public class EventDetailController {
     }
 
     /**
-     * Builds the fallback event detail state from intent data, optionally starting
-     * in the joined waitlist state for deterministic UI tests.
+     * Returns the result of build fallback state.
+     *
+     * @param title the title
+     * @param price the price
+     * @param location the location
+     * @param date the date
+     * @param deadline the deadline
+     * @param category the category
+     * @param startOnWaitlist the start on waitlist
+     * @return the result of this call
      */
     public EventDetailData buildFallbackState(String title,
                                               String price,
@@ -103,7 +132,10 @@ public class EventDetailController {
     }
 
     /**
-     * Loads the full event detail state from Firestore.
+     * Performs load event action state.
+     *
+     * @param eventId the event id
+     * @param listener the listener
      */
     public void loadEventActionState(String eventId, OnCompleteListener<EventDetailData> listener) {
         if (isBlank(eventId)) {
@@ -124,10 +156,10 @@ public class EventDetailController {
     }
 
     /**
-     * Loads just the event data so comments can be refreshed without full screen loading state.
+     * Performs load event comments.
      *
-     * @param eventId the event ID
-     * @param listener the listener that receives the event
+     * @param eventId the event id
+     * @param listener the listener
      */
     public void loadEventComments(String eventId, OnCompleteListener<Event> listener) {
         if (isBlank(eventId)) {
@@ -145,14 +177,23 @@ public class EventDetailController {
     }
 
     /**
-     * Returns the next action the view should take when the primary button is pressed.
+     * Returns the result of resolve next action.
+     *
+     * @param state the state
+     * @return the result of this call
      */
     public EventDetailData.NextAction resolveNextAction(EventDetailData state) {
         return state == null ? EventDetailData.NextAction.NONE : state.getNextAction();
     }
 
     /**
-     * Joins the waiting list for the current event.
+     * Performs join waiting list.
+     *
+     * @param eventId the event id
+     * @param latitude the latitude
+     * @param longitude the longitude
+     * @param joinedAt the joined at
+     * @param listener the listener
      */
     public void joinWaitingList(String eventId,
                                 Double latitude,
@@ -183,7 +224,10 @@ public class EventDetailController {
     }
 
     /**
-     * Leaves the waiting list for the current event.
+     * Performs leave waiting list.
+     *
+     * @param eventId the event id
+     * @param listener the listener
      */
     public void leaveWaitingList(String eventId, OnCompleteListener<AppResult<Void>> listener) {
         eventRepository.leaveWaitingList(eventId, userController.getCurrentDeviceId(), (result, success) -> {
@@ -197,7 +241,13 @@ public class EventDetailController {
     }
 
     /**
-     * Saves the current user's location for an event they have already joined.
+     * Performs sync waitlist location.
+     *
+     * @param eventId the event id
+     * @param latitude the latitude
+     * @param longitude the longitude
+     * @param joinedAt the joined at
+     * @param listener the listener
      */
     public void syncWaitlistLocation(String eventId,
                                      Double latitude,
@@ -221,12 +271,12 @@ public class EventDetailController {
     }
 
     /**
-     * Adds a comment or reply to the event.
+     * Performs add comment.
      *
-     * @param eventId the event ID
-     * @param message the comment text
-     * @param parentId the parent comment ID if this is a reply
-     * @param listener the callback that receives the action result
+     * @param eventId the event id
+     * @param message the message
+     * @param parentId the parent id
+     * @param listener the listener
      */
     public void addComment(String eventId,
                            String message,
@@ -265,12 +315,12 @@ public class EventDetailController {
     }
 
     /**
-     * Applies an upvote or downvote to a comment.
+     * Performs vote on comment.
      *
-     * @param eventId the event ID
-     * @param commentId the comment ID
-     * @param isUpvote true for upvote, false for downvote
-     * @param listener the callback that receives the action result
+     * @param eventId the event id
+     * @param commentId the comment id
+     * @param isUpvote whether upvote
+     * @param listener the listener
      */
     public void voteOnComment(String eventId,
                               String commentId,
@@ -352,11 +402,11 @@ public class EventDetailController {
     }
 
     /**
-     * Deletes a comment thread (comment + replies) for the given event.
+     * Performs delete comment thread.
      *
-     * @param eventId the event ID
-     * @param commentId the comment to delete
-     * @param listener the callback that receives the action result
+     * @param eventId the event id
+     * @param commentId the comment id
+     * @param listener the listener
      */
     public void deleteCommentThread(String eventId,
                                     String commentId,
@@ -390,6 +440,14 @@ public class EventDetailController {
         });
     }
 
+    /**
+     * Performs delete comment thread internal.
+     *
+     * @param eventId the event id
+     * @param commentId the comment id
+     * @param event the event
+     * @param listener the listener
+     */
     private void deleteCommentThreadInternal(String eventId,
                                              String commentId,
                                              Event event,
@@ -426,10 +484,10 @@ public class EventDetailController {
     }
 
     /**
-     * Accepts the user's current offer for the given event.
+     * Performs accept offer.
      *
-     * @param eventId the event whose offer is being accepted
-     * @param listener the callback that receives the action result
+     * @param eventId the event id
+     * @param listener the listener
      */
     public void acceptOffer(String eventId, OnCompleteListener<AppResult<Void>> listener) {
         eventRepository.acceptOffer(eventId, userController.getCurrentDeviceId(), (result, success) -> {
@@ -443,24 +501,28 @@ public class EventDetailController {
     }
 
     /**
-     * Returns the current device ID.
+     * Returns the current device id.
+     *
+     * @return the current device id
      */
     public String getCurrentDeviceId() {
         return userController.getCurrentDeviceId();
     }
 
     /**
-     * Returns whether the current user has admin privileges.
+     * Performs is current user admin.
+     *
+     * @param listener the listener
      */
     public void isCurrentUserAdmin(OnCompleteListener<Boolean> listener) {
         userController.isCurrentUserAdmin(listener);
     }
 
     /**
-     * Declines the user's current offer and saves any new offer changes.
+     * Performs decline offer.
      *
-     * @param eventId the event whose offer is being declined
-     * @param listener the callback that receives the action result
+     * @param eventId the event id
+     * @param listener the listener
      */
     public void declineOffer(String eventId, OnCompleteListener<AppResult<Void>> listener) {
         eventRepository.declineOffer(eventId, userController.getCurrentDeviceId(), (result, success) -> {
@@ -473,7 +535,10 @@ public class EventDetailController {
     }
 
     /**
-     * Accepts an invite to a private event.
+     * Performs accept invite.
+     *
+     * @param eventId the event id
+     * @param listener the listener
      */
     public void acceptInvite(String eventId, OnCompleteListener<AppResult<Void>> listener) {
         eventRepository.acceptInvite(eventId, userController.getCurrentDeviceId(), (result, success) -> {
@@ -487,7 +552,10 @@ public class EventDetailController {
     }
 
     /**
-     * Declines an invite to a private event.
+     * Performs decline invite.
+     *
+     * @param eventId the event id
+     * @param listener the listener
      */
     public void declineInvite(String eventId, OnCompleteListener<AppResult<Void>> listener) {
         eventRepository.declineInvite(eventId, userController.getCurrentDeviceId(), (result, success) -> {
@@ -501,7 +569,10 @@ public class EventDetailController {
     }
 
     /**
-     * Builds the eligibility text shown in the join dialog.
+     * Returns the result of build eligibility criteria text.
+     *
+     * @param event the event
+     * @return the result of this call
      */
     public String buildEligibilityCriteriaText(Event event) {
         String closeDate = "TBA";
@@ -514,7 +585,10 @@ public class EventDetailController {
     }
 
     /**
-     * Builds the selection text shown in the join dialog.
+     * Returns the result of build selection criteria text.
+     *
+     * @param event the event
+     * @return the result of this call
      */
     public String buildSelectionCriteriaText(Event event) {
         return String.format(Locale.getDefault(),
@@ -522,6 +596,12 @@ public class EventDetailController {
                 eventDetailViewService.getSelectionCriteriaCount(event));
     }
 
+    /**
+     * Performs load organizer name.
+     *
+     * @param organizerId the organizer id
+     * @param consumer the consumer
+     */
     private void loadOrganizerName(String organizerId, java.util.function.Consumer<String> consumer) {
         if (isBlank(organizerId)) {
             consumer.accept("Organizer TBA");
@@ -538,6 +618,14 @@ public class EventDetailController {
         });
     }
 
+    /**
+     * Returns the result of build loaded state.
+     *
+     * @param event the event
+     * @param detailState the detail state
+     * @param organizerName the organizer name
+     * @return the result of this call
+     */
     private EventDetailData buildLoadedState(Event event, EventActionState detailState, String organizerName) {
         EventDetailViewService.FooterState footerState = eventDetailViewService.buildFooterState(detailState);
         return new EventDetailData(
@@ -568,11 +656,11 @@ public class EventDetailController {
     }
 
     /**
-     * Builds the location text used on manage screens.
+     * Returns the result of build manage location text.
      *
-     * @param event the loaded event
-     * @param fallbackLocation the fallback location passed through the intent
-     * @return the location text shown in the management UI
+     * @param event the event
+     * @param fallbackLocation the fallback location
+     * @return the result of this call
      */
     public String buildManageLocationText(Event event, String fallbackLocation) {
         return event == null
@@ -581,11 +669,11 @@ public class EventDetailController {
     }
 
     /**
-     * Builds the event date text used on manage screens.
+     * Returns the result of build manage date text.
      *
-     * @param event the loaded event
-     * @param fallbackDate the fallback date passed through the intent
-     * @return the date text shown in the management UI
+     * @param event the event
+     * @param fallbackDate the fallback date
+     * @return the result of this call
      */
     public String buildManageDateText(Event event, String fallbackDate) {
         return event == null
@@ -594,15 +682,20 @@ public class EventDetailController {
     }
 
     /**
-     * Formats a registration date for manage screens.
+     * Returns the result of build manage registration text.
      *
-     * @param date the registration date to format
-     * @return the formatted registration text, or a fallback when the date is missing
+     * @param date the date
+     * @return the result of this call
      */
     public String buildManageRegistrationText(Date date) {
         return EventDisplayFormatter.shortDate(date);
     }
 
+    /**
+     * Returns the result of build error state.
+     *
+     * @return the result of this call
+     */
     private EventDetailData buildErrorState() {
         return new EventDetailData(
                 EventDetailData.Status.ERROR,
@@ -623,6 +716,12 @@ public class EventDetailController {
         );
     }
 
+    /**
+     * Returns the result of resolve action.
+     *
+     * @param detailState the detail state
+     * @return the result of this call
+     */
     private EventDetailData.NextAction resolveAction(EventActionState detailState) {
         if (eventDetailViewService.isManageAction(detailState)) {
             return EventDetailData.NextAction.NAVIGATE_MANAGE;
@@ -642,42 +741,103 @@ public class EventDetailController {
         return EventDetailData.NextAction.SHOW_JOIN_DIALOG;
     }
 
+    /**
+     * Returns the hero background res.
+     *
+     * @param category the category
+     * @return the hero background res
+     */
     private int getHeroBackgroundRes(String category) {
         return UiHelper.eventImageBackgroundRes(category);
     }
 
+    /**
+     * Returns the result of build location text.
+     *
+     * @param location the location
+     * @return the result of this call
+     */
     private String buildLocationText(String location) {
         return EventDisplayFormatter.detailLocation(location);
     }
 
+    /**
+     * Returns the result of build event date text.
+     *
+     * @param eventDate the event date
+     * @return the result of this call
+     */
     private String buildEventDateText(String eventDate) {
         return EventDisplayFormatter.detailDate(eventDate);
     }
 
+    /**
+     * Returns the result of build registration open text.
+     *
+     * @param registrationOpen the registration open
+     * @return the result of this call
+     */
     private String buildRegistrationOpenText(Date registrationOpen) {
         return EventDisplayFormatter.labeledShortDate("Registration opens", registrationOpen);
     }
 
+    /**
+     * Returns the result of build registration deadline text.
+     *
+     * @param registrationDeadline the registration deadline
+     * @return the result of this call
+     */
     private String buildRegistrationDeadlineText(Date registrationDeadline) {
         return EventDisplayFormatter.labeledShortDate("Registration closes", registrationDeadline);
     }
 
+    /**
+     * Returns the result of format date.
+     *
+     * @param date the date
+     * @return the result of this call
+     */
     private String formatDate(Date date) {
         return EventDisplayFormatter.longDate(date);
     }
 
+    /**
+     * Returns the result of format long date.
+     *
+     * @param date the date
+     * @return the result of this call
+     */
     private String formatLongDate(Date date) {
         return EventDisplayFormatter.shortDate(date);
     }
 
+    /**
+     * Returns the result of clean text.
+     *
+     * @param value the value
+     * @return the result of this call
+     */
     private String cleanText(String value) {
         return UiHelper.cleanText(value);
     }
 
+    /**
+     * Returns whether blank.
+     *
+     * @param value the value
+     * @return whether blank
+     */
     private boolean isBlank(String value) {
         return value == null || value.trim().isEmpty();
     }
 
+    /**
+     * Returns the result of collect thread ids.
+     *
+     * @param comments the comments
+     * @param rootId the root id
+     * @return the result of this call
+     */
     private Set<String> collectThreadIds(List<EventComment> comments, String rootId) {
         Set<String> deleteIds = new HashSet<>();
         if (comments == null || comments.isEmpty() || isBlank(rootId)) {
@@ -692,6 +852,9 @@ public class EventDetailController {
                 if (comment == null || isBlank(comment.getParentId())) {
                     continue;
                 }
+                /**
+                 * Returns whether get Comment Id.
+                 */
                 if (deleteIds.contains(comment.getParentId())
                         && !deleteIds.contains(comment.getCommentId())) {
                     deleteIds.add(comment.getCommentId());

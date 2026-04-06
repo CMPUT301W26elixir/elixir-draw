@@ -21,15 +21,18 @@ public class EventFormService {
 
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("MMM d, yyyy", Locale.getDefault());
 
+    /**
+     * Creates a new EventFormService instance.
+     */
     public EventFormService() {
         dateFormat.setLenient(false);
     }
 
     /**
-     * Checks create-event form values and turns them into input data.
+     * Returns the result of build create event input.
      *
-     * @param formData the raw form values entered by the user
-     * @return a good input result or a failed check result
+     * @param formData the form data
+     * @return the result of this call
      */
     public AppResult<EventSubmissionInput> buildCreateEventInput(EventFormData formData) {
         ValidationResult validationResult = validateForm(formData);
@@ -53,10 +56,10 @@ public class EventFormService {
     }
 
     /**
-     * Checks edit-event form values and turns them into input data.
+     * Returns the result of build update event input.
      *
-     * @param formData the raw form values entered by the user
-     * @return a good input result or a failed check result
+     * @param formData the form data
+     * @return the result of this call
      */
     public AppResult<EventSubmissionInput> buildUpdateEventInput(EventFormData formData) {
         ValidationResult validationResult = validateForm(formData);
@@ -80,24 +83,24 @@ public class EventFormService {
     }
 
     /**
-     * Checks whether all parts of a date input have been filled in.
+     * Returns whether date input incomplete.
      *
-     * @param month the selected month
-     * @param day the entered day
-     * @param year the entered year
-     * @return true if the date input is complete, otherwise false
+     * @param month the month
+     * @param day the day
+     * @param year the year
+     * @return whether date input incomplete
      */
     private boolean isDateInputIncomplete(String month, String day, String year) {
         return isBlank(month) || isBlank(day) || isBlank(year);
     }
 
     /**
-     * Parses a date from the provided month, day, and year fields.
+     * Returns the result of parse date.
      *
-     * @param month the selected month
-     * @param day the entered day
-     * @param year the entered year
-     * @return the parsed date, or null if parsing fails
+     * @param month the month
+     * @param day the day
+     * @param year the year
+     * @return the result of this call
      */
     public Date parseDate(String month, String day, String year) {
         if (isDateInputIncomplete(month, day, year)) {
@@ -112,10 +115,10 @@ public class EventFormService {
     }
 
     /**
-     * Parses a price value from text.
+     * Returns the result of parse price.
      *
-     * @param value the price text to parse
-     * @return the parsed price, or null if invalid
+     * @param value the value
+     * @return the result of this call
      */
     public Double parsePrice(String value) {
         try {
@@ -126,10 +129,10 @@ public class EventFormService {
     }
 
     /**
-     * Parses a positive integer from text.
+     * Returns the result of parse positive int.
      *
-     * @param value the text to parse
-     * @return the parsed integer, or null if invalid
+     * @param value the value
+     * @return the result of this call
      */
     public Integer parsePositiveInt(String value) {
         try {
@@ -140,10 +143,10 @@ public class EventFormService {
     }
 
     /**
-     * Formats a date using the activity's date format.
+     * Returns the result of format date.
      *
-     * @param date the date to format
-     * @return the formatted date string, or null if the date is null
+     * @param date the date
+     * @return the result of this call
      */
     public String formatDate(Date date) {
         if (date == null) {
@@ -153,10 +156,10 @@ public class EventFormService {
     }
 
     /**
-     * Formats a price value for display in the form.
+     * Returns the result of format price value.
      *
-     * @param price the price to format
-     * @return the formatted price string
+     * @param price the price
+     * @return the result of this call
      */
     public String formatPriceValue(Double price) {
         if (price == null) {
@@ -169,10 +172,10 @@ public class EventFormService {
     }
 
     /**
-     * Maps a validation error code to the message shown to the user.
+     * Returns the validation message res.
      *
-     * @param errorCode the validation code returned by this service
-     * @return the matching string resource
+     * @param errorCode the error code
+     * @return the validation message res
      */
     public int getValidationMessageRes(String errorCode) {
         if (ERROR_DATE.equals(errorCode)) {
@@ -190,11 +193,20 @@ public class EventFormService {
         return R.string.create_event_validation_required;
     }
 
+    /**
+     * Returns the result of validate form.
+     *
+     * @param formData the form data
+     * @return the result of this call
+     */
     private ValidationResult validateForm(EventFormData formData) {
         if (formData == null) {
             return ValidationResult.failure(ERROR_REQUIRED);
         }
 
+        /**
+         * Returns whether get Registration End Year.
+         */
         if (isBlank(formData.getTitle())
                 || isBlank(formData.getLocation())
                 || isBlank(formData.getPrice())
@@ -230,14 +242,32 @@ public class EventFormService {
         return ValidationResult.success(eventDate, registrationStart, registrationEnd, price, participants);
     }
 
+    /**
+     * Returns whether blank.
+     *
+     * @param value the value
+     * @return whether blank
+     */
     private boolean isBlank(String value) {
         return value == null || value.trim().isEmpty();
     }
 
+    /**
+     * Returns the result of safe string.
+     *
+     * @param value the value
+     * @return the result of this call
+     */
     private String safeString(String value) {
         return value == null ? "" : value;
     }
 
+    /**
+     * Returns the result of visibility from form.
+     *
+     * @param formData the form data
+     * @return the result of this call
+     */
     private String visibilityFromForm(EventFormData formData) {
         if (formData != null && formData.isPrivateEvent()) {
             return Event.VISIBILITY_PRIVATE;
@@ -245,6 +275,9 @@ public class EventFormService {
         return Event.VISIBILITY_PUBLIC;
     }
 
+    /**
+     * Represents the validation result.
+     */
     private static class ValidationResult {
         private final boolean success;
         private final String message;
@@ -254,6 +287,17 @@ public class EventFormService {
         private final Double price;
         private final Integer participants;
 
+        /**
+         * Creates a new ValidationResult instance.
+         *
+         * @param success the success
+         * @param message the message
+         * @param eventDate the event date
+         * @param registrationStart the registration start
+         * @param registrationEnd the registration end
+         * @param price the price
+         * @param participants the participants
+         */
         private ValidationResult(boolean success,
                                  String message,
                                  Date eventDate,
@@ -270,10 +314,26 @@ public class EventFormService {
             this.participants = participants;
         }
 
+        /**
+         * Returns the result of failure.
+         *
+         * @param message the message
+         * @return the result of this call
+         */
         private static ValidationResult failure(String message) {
             return new ValidationResult(false, message, null, null, null, null, null);
         }
 
+        /**
+         * Returns the result of success.
+         *
+         * @param eventDate the event date
+         * @param registrationStart the registration start
+         * @param registrationEnd the registration end
+         * @param price the price
+         * @param participants the participants
+         * @return the result of this call
+         */
         private static ValidationResult success(Date eventDate,
                                                 Date registrationStart,
                                                 Date registrationEnd,
@@ -282,30 +342,65 @@ public class EventFormService {
             return new ValidationResult(true, null, eventDate, registrationStart, registrationEnd, price, participants);
         }
 
+        /**
+         * Returns whether failure.
+         *
+         * @return whether failure
+         */
         private boolean isFailure() {
             return !success;
         }
 
+        /**
+         * Returns the message.
+         *
+         * @return the message
+         */
         private String getMessage() {
             return message;
         }
 
+        /**
+         * Returns the event date.
+         *
+         * @return the event date
+         */
         private Date getEventDate() {
             return eventDate;
         }
 
+        /**
+         * Returns the registration start.
+         *
+         * @return the registration start
+         */
         private Date getRegistrationStart() {
             return registrationStart;
         }
 
+        /**
+         * Returns the registration end.
+         *
+         * @return the registration end
+         */
         private Date getRegistrationEnd() {
             return registrationEnd;
         }
 
+        /**
+         * Returns the price.
+         *
+         * @return the price
+         */
         private Double getPrice() {
             return price;
         }
 
+        /**
+         * Returns the participants.
+         *
+         * @return the participants
+         */
         private Integer getParticipants() {
             return participants;
         }

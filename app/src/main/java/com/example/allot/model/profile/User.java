@@ -20,7 +20,7 @@ public class User {
     private ArrayList<String> savedEvents;
 
     /**
-     * Creates an empty User object with initialized event lists.
+     * Creates a new User instance.
      */
     public User(){
         this.history = new ArrayList<>();
@@ -29,14 +29,14 @@ public class User {
     }
 
     /**
-     * Creates a user with the provided profile information.
+     * Creates a new User instance.
      *
-     * @param deviceId the unique device ID for the user
-     * @param firstname the user's first name
-     * @param lastName the user's last name
-     * @param email the user's email address
-     * @param phone the user's phone number
-     * @param role the user's role in the application
+     * @param deviceId the device id
+     * @param firstname the firstname
+     * @param lastName the last name
+     * @param email the email
+     * @param phone the phone
+     * @param role the role
      */
     public User(String deviceId, String firstname, String lastName, String email, String phone, String role) {
         this.deviceId = deviceId;
@@ -53,63 +53,63 @@ public class User {
     }
 
     /**
-     * Returns the device ID of the user.
+     * Returns the device id.
      *
-     * @return the user's device ID
+     * @return the device id
      */
     public String getDeviceId() {
         return deviceId;
     }
 
     /**
-     * Sets the device ID of the user.
+     * Updates the device id.
      *
-     * @param deviceId the device ID to assign
+     * @param deviceId the device id
      */
     public void setDeviceId(String deviceId) {
         this.deviceId = deviceId;
     }
 
     /**
-     * Returns the first name of the user.
+     * Returns the first name.
      *
-     * @return the user's first name
+     * @return the first name
      */
     public String getFirstName() {
         return firstName;
     }
 
     /**
-     * Sets the first name of the user.
+     * Updates the first name.
      *
-     * @param firstName the first name to assign
+     * @param firstName the first name
      */
     public void setFirstName(String firstName) {
         this.firstName = firstName;
     }
 
     /**
-     * Returns the last name of the user.
+     * Returns the last name.
      *
-     * @return the user's last name
+     * @return the last name
      */
     public String getLastName() {
         return lastName;
     }
 
     /**
-     * Sets the last name of the user.
+     * Updates the last name.
      *
-     * @param lastName the last name to assign
+     * @param lastName the last name
      */
     public void setLastName(String lastName) {
         this.lastName = lastName;
     }
 
     /**
-     * Returns the full display name of the user.
+     * Returns the name.
      *
-     * @return the combined first and last name, or whichever one is available
+     * @return the name
      */
     public String getName() {
         String safeFirstName = firstName == null ? "" : firstName.trim();
@@ -127,18 +127,18 @@ public class User {
     }
 
     /**
-     * Returns the email address of the user.
+     * Returns the email.
      *
-     * @return the user's email address
+     * @return the email
      */
     public String getEmail() {
         return email;
     }
 
     /**
-     * Sets the email address of the user.
+     * Updates the email.
      *
-     * @param email the email address to assign
+     * @param email the email
      */
     @SuppressWarnings("unused")
     public void setEmail(String email) {
@@ -146,54 +146,54 @@ public class User {
     }
 
     /**
-     * Returns the phone number of the user.
+     * Returns the phone.
      *
-     * @return the user's phone number
+     * @return the phone
      */
     public String getPhone() {
         return phone;
     }
 
     /**
-     * Sets the phone number of the user.
+     * Updates the phone.
      *
-     * @param phone the phone number to assign
+     * @param phone the phone
      */
     public void setPhone(String phone) {
         this.phone = phone;
     }
 
     /**
-     * Returns the profile photo URL for this user.
+     * Returns the profile photo url.
      *
-     * @return the profile photo URL
+     * @return the profile photo url
      */
     public String getProfilePhotoUrl() {
         return profilePhotoUrl;
     }
 
     /**
-     * Sets the profile photo URL for this user.
+     * Updates the profile photo url.
      *
-     * @param profilePhotoUrl the profile photo URL to assign
+     * @param profilePhotoUrl the profile photo url
      */
     public void setProfilePhotoUrl(String profilePhotoUrl) {
         this.profilePhotoUrl = profilePhotoUrl;
     }
 
     /**
-     * Returns whether notifications are enabled for the user.
+     * Returns whether noti enabled.
      *
-     * @return true if notifications are enabled, otherwise false
+     * @return whether noti enabled
      */
     public boolean isNotiEnabled() {
         return notiEnabled;
     }
 
     /**
-     * Sets whether notifications are enabled for the user.
+     * Updates the noti enabled.
      *
-     * @param notiEnabled true to enable notifications, false otherwise
+     * @param notiEnabled the noti enabled
      */
     @SuppressWarnings("unused")
     public void setNotiEnabled(boolean notiEnabled) {
@@ -201,9 +201,9 @@ public class User {
     }
 
     /**
-     * Returns the role of the user.
+     * Returns the role.
      *
-     * @return the user's role
+     * @return the role
      */
     @SuppressWarnings("unused")
     public String getRole() {
@@ -211,9 +211,9 @@ public class User {
     }
 
     /**
-     * Sets the role of the user.
+     * Updates the role.
      *
-     * @param role the role to assign
+     * @param role the role
      */
     @SuppressWarnings("unused")
     public void setRole(String role) {
@@ -221,27 +221,27 @@ public class User {
     }
 
     /**
-     * Returns the user's FCM token.
+     * Returns the fcm token.
      *
-     * @return the user's FCM token
+     * @return the fcm token
      */
     public String getFcmToken() {
         return fcmToken;
     }
 
     /**
-     * Sets the user's FCM token.
+     * Updates the fcm token.
      *
-     * @param fcmToken the token to assign
+     * @param fcmToken the fcm token
      */
     public void setFcmToken(String fcmToken) {
         this.fcmToken = fcmToken;
     }
 
     /**
-     * Returns the user's event history.
+     * Returns the history.
      *
-     * @return the list of event IDs in the user's history
+     * @return the history
      */
     public ArrayList<String> getHistory(){
         if (history == null) {
@@ -250,11 +250,21 @@ public class User {
         return history;
     }
 
+    /**
+     * Updates the history.
+     *
+     * @param history the history
+     */
     @SuppressWarnings("unused")
     public void setHistory(ArrayList<String> history) {
         this.history = history;
     }
 
+    /**
+     * Returns the my events.
+     *
+     * @return the my events
+     */
     public ArrayList<String> getMyEvents() {
         if (myEvents == null) {
             myEvents = new ArrayList<>();
@@ -262,15 +272,20 @@ public class User {
         return myEvents;
     }
 
+    /**
+     * Updates the my events.
+     *
+     * @param myEvents the my events
+     */
     @SuppressWarnings("unused")
     public void setMyEvents(ArrayList<String> myEvents) {
         this.myEvents = myEvents;
     }
 
     /**
-     * Returns the list of saved event IDs.
+     * Returns the saved events.
      *
-     * @return the user's saved events
+     * @return the saved events
      */
     public ArrayList<String> getSavedEvents() {
         if (savedEvents == null) {
@@ -279,6 +294,11 @@ public class User {
         return savedEvents;
     }
 
+    /**
+     * Updates the saved events.
+     *
+     * @param savedEvents the saved events
+     */
     @SuppressWarnings("unused")
     public void setSavedEvents(ArrayList<String> savedEvents) {
         this.savedEvents = savedEvents;

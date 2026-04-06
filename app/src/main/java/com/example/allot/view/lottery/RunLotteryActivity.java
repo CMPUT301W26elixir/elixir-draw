@@ -40,10 +40,9 @@ public class RunLotteryActivity extends AppCompatActivity {
     private boolean isStartingDraw;
 
     /**
-     * Initializes the activity, binds views, sets listeners,
-     * and loads the lottery data for the selected event.
+     * Handles the create callback.
      *
-     * @param savedInstanceState the saved activity state
+     * @param savedInstanceState the saved instance state
      */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,7 +59,7 @@ public class RunLotteryActivity extends AppCompatActivity {
     }
 
     /**
-     * Finishes the activity without transition animation.
+     * Performs finish.
      */
     @Override
     public void finish() {
@@ -69,7 +68,7 @@ public class RunLotteryActivity extends AppCompatActivity {
     }
 
     /**
-     * Binds all view references used by the activity.
+     * Performs bind views.
      */
     private void bindViews() {
         drawDateInput = findViewById(R.id.drawDateInput);
@@ -80,7 +79,7 @@ public class RunLotteryActivity extends AppCompatActivity {
     }
 
     /**
-     * Sets up the header back button behavior.
+     * Updates the up header.
      */
     private void setupHeader() {
         ImageButton backButton = findViewById(R.id.backButton);
@@ -88,10 +87,15 @@ public class RunLotteryActivity extends AppCompatActivity {
     }
 
     /**
-     * Sets up text watchers and button listeners for the lottery form.
+     * Updates the up listeners.
      */
     private void setupListeners() {
         SimpleTextWatcher dirtyWatcher = new SimpleTextWatcher() {
+            /**
+             * Performs after text changed.
+             *
+             * @param editable the editable
+             */
             @Override
             public void afterTextChanged(Editable editable) {
                 updateActionState();
@@ -104,7 +108,7 @@ public class RunLotteryActivity extends AppCompatActivity {
     }
 
     /**
-     * Loads the lottery data for the current event from Firestore.
+     * Performs load lottery data.
      */
     private void loadLotteryData() {
         if (TextUtils.isEmpty(currentEventId)) {
@@ -133,19 +137,19 @@ public class RunLotteryActivity extends AppCompatActivity {
     }
 
     /**
-     * Binds the retrieved event snapshot to the UI.
+     * Performs bind event snapshot.
      *
-     * @param event the loaded event for the screen
+     * @param event the event
      */
     private void bindEventSnapshot(Event event) {
         currentEvent = event;
     }
 
     /**
-     * Binds the event draw form values to the UI.
+     * Performs bind form.
      *
-     * @param event the event being displayed
-     * @param storedDrawDate the saved draw date from Firestore
+     * @param event the event
+     * @param storedDrawDate the stored draw date
      */
     private void bindForm(Event event, java.util.Date storedDrawDate) {
         if (event == null) {
@@ -154,9 +158,9 @@ public class RunLotteryActivity extends AppCompatActivity {
     }
 
     /**
-     * Binds the current entrant list to the screen.
+     * Performs bind entrants.
      *
-     * @param entrantIds the list of entrant IDs to display
+     * @param entrantItems the entrant items
      */
     private void bindEntrants(java.util.List<LotteryEntrantItem> entrantItems) {
         entrantsContainer.removeAllViews();
@@ -182,7 +186,7 @@ public class RunLotteryActivity extends AppCompatActivity {
     }
 
     /**
-     * Validates the form, runs the draw, and saves the results to Firestore.
+     * Performs force start draw.
      */
     private void forceStartDraw() {
         if (isLoading || isStartingDraw || currentEvent == null) {
@@ -218,7 +222,7 @@ public class RunLotteryActivity extends AppCompatActivity {
     }
 
     /**
-     * Updates the enabled state of the main action button.
+     * Performs update action state.
      */
     private void updateActionState() {
         boolean enabled = !isLoading && !isStartingDraw;
@@ -227,10 +231,10 @@ public class RunLotteryActivity extends AppCompatActivity {
     }
 
     /**
-     * Parses the attendee count entered by the organizer.
+     * Returns the result of safe parse attendees.
      *
-     * @param value the text value to parse
-     * @return the parsed integer, or null if the value is invalid
+     * @param value the value
+     * @return the result of this call
      */
     private Integer safeParseAttendees(String value) {
         try {
@@ -241,9 +245,9 @@ public class RunLotteryActivity extends AppCompatActivity {
     }
 
     /**
-     * Renders the provided lottery screen state.
+     * Performs render state.
      *
-     * @param state the state to render
+     * @param state the state
      */
     private void renderState(RunLotteryData state) {
         if (state == null) {

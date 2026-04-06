@@ -22,24 +22,24 @@ public class EventFormData {
     private final String registrationEndYear;
 
     /**
-     * Creates a snapshot of the current event form field values.
+     * Creates a new EventFormData instance.
      *
-     * @param title the event title field
-     * @param location the event location field
-     * @param privateEvent whether the event is private
-     * @param geolocationEnabled whether geolocation is enabled
-     * @param eventMonth the selected event month
-     * @param eventDay the entered event day
-     * @param eventYear the entered event year
-     * @param price the entered event price
-     * @param description the event description field
-     * @param participants the participant limit field
-     * @param registrationStartMonth the selected registration start month
-     * @param registrationStartDay the entered registration start day
-     * @param registrationStartYear the entered registration start year
-     * @param registrationEndMonth the selected registration end month
-     * @param registrationEndDay the entered registration end day
-     * @param registrationEndYear the entered registration end year
+     * @param title the title
+     * @param location the location
+     * @param privateEvent the private event
+     * @param geolocationEnabled the geolocation enabled
+     * @param eventMonth the event month
+     * @param eventDay the event day
+     * @param eventYear the event year
+     * @param price the price
+     * @param description the description
+     * @param participants the participants
+     * @param registrationStartMonth the registration start month
+     * @param registrationStartDay the registration start day
+     * @param registrationStartYear the registration start year
+     * @param registrationEndMonth the registration end month
+     * @param registrationEndDay the registration end day
+     * @param registrationEndYear the registration end year
      */
     public EventFormData(String title,
                          String location,
@@ -76,25 +76,25 @@ public class EventFormData {
     }
 
     /**
-     * Creates a form snapshot that is safe to bind back into the UI.
+     * Returns the result of for binding.
      *
-     * @param title the event title field
-     * @param location the event location field
-     * @param privateEvent whether the event is private
-     * @param geolocationEnabled whether geolocation is enabled
-     * @param eventMonth the selected event month
-     * @param eventDay the entered event day
-     * @param eventYear the entered event year
-     * @param price the entered event price
-     * @param description the event description field
-     * @param participants the participant limit field
-     * @param registrationStartMonth the selected registration start month
-     * @param registrationStartDay the entered registration start day
-     * @param registrationStartYear the entered registration start year
-     * @param registrationEndMonth the selected registration end month
-     * @param registrationEndDay the entered registration end day
-     * @param registrationEndYear the entered registration end year
-     * @return a form data object with null values replaced by empty strings
+     * @param title the title
+     * @param location the location
+     * @param privateEvent the private event
+     * @param geolocationEnabled the geolocation enabled
+     * @param eventMonth the event month
+     * @param eventDay the event day
+     * @param eventYear the event year
+     * @param price the price
+     * @param description the description
+     * @param participants the participants
+     * @param registrationStartMonth the registration start month
+     * @param registrationStartDay the registration start day
+     * @param registrationStartYear the registration start year
+     * @param registrationEndMonth the registration end month
+     * @param registrationEndDay the registration end day
+     * @param registrationEndYear the registration end year
+     * @return the result of this call
      */
     public static EventFormData forBinding(String title,
                                            String location,
@@ -133,122 +133,154 @@ public class EventFormData {
     }
 
     /**
-     * @return the entered event title
+     * Returns the title.
+     *
+     * @return the title
      */
     public String getTitle() {
         return title;
     }
 
     /**
-     * @return the entered event location
+     * Returns the location.
+     *
+     * @return the location
      */
     public String getLocation() {
         return location;
     }
 
     /**
-     * @return true when the event is private
+     * Returns whether private event.
+     *
+     * @return whether private event
      */
     public boolean isPrivateEvent() {
         return privateEvent;
     }
 
     /**
-     * @return true when geolocation is enabled
+     * Returns whether geolocation enabled.
+     *
+     * @return whether geolocation enabled
      */
     public boolean isGeolocationEnabled() {
         return geolocationEnabled;
     }
 
     /**
-     * @return the selected event month
+     * Returns the event month.
+     *
+     * @return the event month
      */
     public String getEventMonth() {
         return eventMonth;
     }
 
     /**
-     * @return the entered event day
+     * Returns the event day.
+     *
+     * @return the event day
      */
     public String getEventDay() {
         return eventDay;
     }
 
     /**
-     * @return the entered event year
+     * Returns the event year.
+     *
+     * @return the event year
      */
     public String getEventYear() {
         return eventYear;
     }
 
     /**
-     * @return the entered event price
+     * Returns the price.
+     *
+     * @return the price
      */
     public String getPrice() {
         return price;
     }
 
     /**
-     * @return the entered event description
+     * Returns the description.
+     *
+     * @return the description
      */
     public String getDescription() {
         return description;
     }
 
     /**
-     * @return the entered participant limit
+     * Returns the participants.
+     *
+     * @return the participants
      */
     public String getParticipants() {
         return participants;
     }
 
     /**
-     * @return the selected registration start month
+     * Returns the registration start month.
+     *
+     * @return the registration start month
      */
     public String getRegistrationStartMonth() {
         return registrationStartMonth;
     }
 
     /**
-     * @return the entered registration start day
+     * Returns the registration start day.
+     *
+     * @return the registration start day
      */
     public String getRegistrationStartDay() {
         return registrationStartDay;
     }
 
     /**
-     * @return the entered registration start year
+     * Returns the registration start year.
+     *
+     * @return the registration start year
      */
     public String getRegistrationStartYear() {
         return registrationStartYear;
     }
 
     /**
-     * @return the selected registration end month
+     * Returns the registration end month.
+     *
+     * @return the registration end month
      */
     public String getRegistrationEndMonth() {
         return registrationEndMonth;
     }
 
     /**
-     * @return the entered registration end day
+     * Returns the registration end day.
+     *
+     * @return the registration end day
      */
     public String getRegistrationEndDay() {
         return registrationEndDay;
     }
 
     /**
-     * @return the entered registration end year
+     * Returns the registration end year.
+     *
+     * @return the registration end year
      */
     public String getRegistrationEndYear() {
         return registrationEndYear;
     }
 
     /**
-     * Replaces null form values so the UI never binds null text.
+     * Returns the result of safe value.
      *
-     * @param value the raw field value
-     * @return the original value, or an empty string when it is null
+     * @param value the value
+     * @return the result of this call
      */
     private static String safeValue(String value) {
         return value == null ? "" : value;

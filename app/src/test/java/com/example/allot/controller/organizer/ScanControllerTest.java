@@ -10,16 +10,25 @@ import com.example.allot.model.event.EventScanResult;
 import org.junit.Before;
 import org.junit.Test;
 
+/**
+ * Tests the scan controller.
+ */
 public class ScanControllerTest {
     private FakeEventRepository eventRepository;
     private ScanController controller;
 
+    /**
+     * Updates the up.
+     */
     @Before
     public void setUp() {
         eventRepository = new FakeEventRepository();
         controller = new ScanController(eventRepository);
     }
 
+    /**
+     * Performs validate payload accepts trimmed event id.
+     */
     @Test
     public void validatePayload_acceptsTrimmedEventId() {
         EventScanResult result = controller.validatePayload("  event-123  ");
@@ -28,6 +37,9 @@ public class ScanControllerTest {
         assertEquals("event-123", result.getEventId());
     }
 
+    /**
+     * Performs validate payload rejects blank payload.
+     */
     @Test
     public void validatePayload_rejectsBlankPayload() {
         EventScanResult result = controller.validatePayload("   ");
@@ -36,6 +48,9 @@ public class ScanControllerTest {
         assertEquals(Integer.valueOf(R.string.scan_error_invalid_qr), result.getMessageResId());
     }
 
+    /**
+     * Performs load scanned event returns open event when repository finds match.
+     */
     @Test
     public void loadScannedEvent_returnsOpenEventWhenRepositoryFindsMatch() {
         Event event = new Event();
@@ -50,6 +65,9 @@ public class ScanControllerTest {
         });
     }
 
+    /**
+     * Performs load scanned event returns not found when event missing.
+     */
     @Test
     public void loadScannedEvent_returnsNotFoundWhenEventMissing() {
         eventRepository.event = null;
@@ -62,6 +80,9 @@ public class ScanControllerTest {
         });
     }
 
+    /**
+     * Performs load scanned event returns load error when repository fails.
+     */
     @Test
     public void loadScannedEvent_returnsLoadErrorWhenRepositoryFails() {
         eventRepository.success = false;
@@ -73,14 +94,26 @@ public class ScanControllerTest {
         });
     }
 
+    /**
+     * Stores and retrieves fake event.
+     */
     private static class FakeEventRepository extends EventRepository {
         private Event event;
         private boolean success = true;
 
+        /**
+         * Creates a new FakeEventRepository instance.
+         */
         private FakeEventRepository() {
             super((com.google.firebase.firestore.FirebaseFirestore) null);
         }
 
+        /**
+         * Performs get event by id.
+         *
+         * @param eventId the event id
+         * @param listener the listener
+         */
         @Override
         public void getEventById(String eventId, com.example.allot.common.OnCompleteListener<Event> listener) {
             listener.onComplete(event, success);

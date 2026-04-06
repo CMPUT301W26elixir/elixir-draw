@@ -5,15 +5,17 @@ package com.example.allot.model.event;
  */
 public final class EventQrCodePayloadBuilder {
 
+    /**
+     * Creates a new EventQrCodePayloadBuilder instance.
+     */
     private EventQrCodePayloadBuilder() {
     }
 
     /**
-     * Builds the payload used for event QR codes.
+     * Returns the result of build event payload.
      *
-     * @param eventId the event identifier to encode
-     * @return the trimmed event identifier
-     * @throws IllegalArgumentException if the event ID is blank
+     * @param eventId the event id
+     * @return the result of this call
      */
     public static String buildEventPayload(String eventId) {
         if (eventId == null || eventId.trim().isEmpty()) {

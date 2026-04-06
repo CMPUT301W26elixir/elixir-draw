@@ -15,11 +15,17 @@ import com.example.allot.model.organizer.EntrantExportRow;
 import java.util.Date;
 import org.junit.Before;
 import org.junit.Test;
+/**
+ * Tests the event entrants controller.
+ */
 public class EventEntrantsControllerTest {
     private FakeEventRepository eventRepository;
     private FakeUserController userController;
     private EventEntrantsController controller;
 
+    /**
+     * Updates the up.
+     */
     @Before
     public void setUp() {
         eventRepository = new FakeEventRepository();
@@ -27,6 +33,9 @@ public class EventEntrantsControllerTest {
         controller = new EventEntrantsController(eventRepository, userController, new NotificationRepository(null), new EventOfferService());
     }
 
+    /**
+     * Performs load entrant items returns selected entrants for selected tab.
+     */
     @Test
     public void loadEntrantItems_returnsSelectedEntrantsForSelectedTab() {
         Event event = buildEvent();
@@ -40,6 +49,9 @@ public class EventEntrantsControllerTest {
         });
     }
 
+    /**
+     * Performs load enrolled export rows returns failure when event is null.
+     */
     @Test
     public void loadEnrolledExportRows_returnsFailureWhenEventIsNull() {
         controller.loadEnrolledExportRows(null, (rows, success) -> {
@@ -48,6 +60,9 @@ public class EventEntrantsControllerTest {
         });
     }
 
+    /**
+     * Performs load enrolled export rows returns empty success when no enrolled entrants exist.
+     */
     @Test
     public void loadEnrolledExportRows_returnsEmptySuccessWhenNoEnrolledEntrantsExist() {
         Event event = buildEvent();
@@ -58,6 +73,9 @@ public class EventEntrantsControllerTest {
         });
     }
 
+    /**
+     * Performs load enrolled export rows exports explicit enrolled entrants in order.
+     */
     @Test
     public void loadEnrolledExportRows_exportsExplicitEnrolledEntrantsInOrder() {
         Event event = buildEvent();
@@ -78,6 +96,9 @@ public class EventEntrantsControllerTest {
         });
     }
 
+    /**
+     * Performs load enrolled export rows falls back to waiting list chosen status when enrolled list is empty.
+     */
     @Test
     public void loadEnrolledExportRows_fallsBackToWaitingListChosenStatusWhenEnrolledListIsEmpty() {
         Event event = buildEvent();
@@ -96,6 +117,9 @@ public class EventEntrantsControllerTest {
         });
     }
 
+    /**
+     * Performs load enrolled export rows uses fallback row when user lookup fails.
+     */
     @Test
     public void loadEnrolledExportRows_usesFallbackRowWhenUserLookupFails() {
         Event event = buildEvent();
@@ -111,6 +135,9 @@ public class EventEntrantsControllerTest {
         });
     }
 
+    /**
+     * Performs load enrolled export rows keeps blank contact fields blank.
+     */
     @Test
     public void loadEnrolledExportRows_keepsBlankContactFieldsBlank() {
         Event event = buildEvent();
@@ -126,6 +153,11 @@ public class EventEntrantsControllerTest {
         });
     }
 
+    /**
+     * Returns the result of build event.
+     *
+     * @return the result of this call
+     */
     private Event buildEvent() {
         Event event = new Event();
         event.setTitle("Event");
@@ -139,6 +171,15 @@ public class EventEntrantsControllerTest {
         return event;
     }
 
+    /**
+     * Returns the result of build user.
+     *
+     * @param firstName the first name
+     * @param lastName the last name
+     * @param email the email
+     * @param phone the phone
+     * @return the result of this call
+     */
     private com.example.allot.model.profile.User buildUser(String firstName,
                                                            String lastName,
                                                            String email,
@@ -157,30 +198,60 @@ public class EventEntrantsControllerTest {
         return user;
     }
 
+    /**
+     * Stores and retrieves fake event.
+     */
     private static class FakeEventRepository extends EventRepository {
+        /**
+         * Creates a new FakeEventRepository instance.
+         */
         private FakeEventRepository() {
             super((com.google.firebase.firestore.FirebaseFirestore) null);
         }
 
         private Event event;
 
+        /**
+         * Performs get event by id.
+         *
+         * @param eventId the event id
+         * @param listener the listener
+         */
         @Override
         public void getEventById(String eventId, com.example.allot.common.OnCompleteListener<Event> listener) {
             listener.onComplete(event, event != null);
         }
     }
 
+    /**
+     * Coordinates fake user.
+     */
     private static class FakeUserController extends UserController {
         private final java.util.Map<String, com.example.allot.model.profile.User> users = new java.util.HashMap<>();
 
+        /**
+         * Creates a new FakeUserController instance.
+         */
         private FakeUserController() {
             super(null, new DeviceSessionManager(new FakeDeviceSessionStore("device-1")));
         }
 
+        /**
+         * Performs add user.
+         *
+         * @param deviceId the device id
+         * @param user the user
+         */
         private void addUser(String deviceId, com.example.allot.model.profile.User user) {
             users.put(deviceId, user);
         }
 
+        /**
+         * Performs get user by device id.
+         *
+         * @param deviceId the device id
+         * @param listener the listener
+         */
         @Override
         public void getUserByDeviceId(String deviceId, com.example.allot.common.OnCompleteListener<com.example.allot.model.profile.User> listener) {
             com.example.allot.model.profile.User user = users.get(deviceId);
@@ -188,16 +259,34 @@ public class EventEntrantsControllerTest {
         }
     }
 
+    /**
+     * Represents the fake device session store.
+     */
     private static class FakeDeviceSessionStore implements DeviceSessionManager.DeviceSessionStore {
         private final String deviceId;
 
+        /**
+         * Creates a new FakeDeviceSessionStore instance.
+         *
+         * @param deviceId the device id
+         */
         private FakeDeviceSessionStore(String deviceId) {
             this.deviceId = deviceId;
         }
 
+        /**
+         * Returns the device id.
+         *
+         * @return the device id
+         */
         @Override
         public String getDeviceId() { return deviceId; }
 
+        /**
+         * Performs save device id.
+         *
+         * @param deviceId the device id
+         */
         @Override
         public void saveDeviceId(String deviceId) { }
     }

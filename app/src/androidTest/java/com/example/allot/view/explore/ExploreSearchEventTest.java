@@ -27,14 +27,25 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+/**
+ * Tests the explore search event.
+ */
 @RunWith(AndroidJUnit4.class)
 public class ExploreSearchEventTest {
 
+    /**
+     * Performs disable animations.
+     */
     @Before
     public void disableAnimations() {
         SystemAnimations.disableAll();
     }
 
+    /**
+     * Returns the result of build intent.
+     *
+     * @return the result of this call
+     */
     private Intent buildIntent() {
         Intent intent = new Intent(ApplicationProvider.getApplicationContext(), ExploreActivity.class);
         intent.putStringArrayListExtra(
@@ -68,6 +79,9 @@ public class ExploreSearchEventTest {
         return intent;
     }
 
+    /**
+     * Performs search filters visible events and shows empty state.
+     */
     @Test
     public void searchFiltersVisibleEventsAndShowsEmptyState() {
         try (ActivityScenario<ExploreActivity> scenario = ActivityScenario.launch(buildIntent())) {
@@ -86,18 +100,40 @@ public class ExploreSearchEventTest {
         }
     }
 
+    /**
+     * Returns the result of wait for.
+     *
+     * @param delayMs the delay ms
+     * @return the result of this call
+     */
     private ViewAction waitFor(long delayMs) {
         return new ViewAction() {
+            /**
+             * Returns the constraints.
+             *
+             * @return the constraints
+             */
             @Override
             public Matcher<View> getConstraints() {
                 return isRoot();
             }
 
+            /**
+             * Returns the description.
+             *
+             * @return the description
+             */
             @Override
             public String getDescription() {
                 return "wait for " + delayMs + " milliseconds";
             }
 
+            /**
+             * Performs perform.
+             *
+             * @param uiController the ui controller
+             * @param view the view
+             */
             @Override
             public void perform(UiController uiController, View view) {
                 if (delayMs < 0) {

@@ -7,7 +7,13 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
+/**
+ * Tests the notification item.
+ */
 public class NotificationItemTest {
+    /**
+     * Performs constructor sets default unread state and timestamp.
+     */
     @Test
     public void constructor_setsDefaultUnreadStateAndTimestamp() {
         NotificationItem item = new NotificationItem("user-1", "event-1", "Title", "Message");
@@ -20,6 +26,9 @@ public class NotificationItemTest {
         assertNotNull(item.getCreatedAt());
     }
 
+    /**
+     * Updates the ters update fields.
+     */
     @Test
     public void setters_updateFields() {
         NotificationItem item = new NotificationItem();

@@ -5,7 +5,13 @@ import static org.junit.Assert.assertNull;
 
 import org.junit.Test;
 
+/**
+ * Tests the event.
+ */
 public class EventTest {
+    /**
+     * Performs event coordinates default to null.
+     */
     @Test
     public void eventCoordinates_defaultToNull() {
         Event event = new Event();
@@ -14,6 +20,9 @@ public class EventTest {
         assertNull(event.getEventLongitude());
     }
 
+    /**
+     * Performs event coordinates can be set and read back.
+     */
     @Test
     public void eventCoordinates_canBeSetAndReadBack() {
         Event event = new Event();

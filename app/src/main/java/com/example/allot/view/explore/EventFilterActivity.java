@@ -54,6 +54,11 @@ public class EventFilterActivity extends AppCompatActivity {
 
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("MMM d, yyyy", Locale.getDefault());
 
+    /**
+     * Handles the create callback.
+     *
+     * @param savedInstanceState the saved instance state
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -68,6 +73,9 @@ public class EventFilterActivity extends AppCompatActivity {
         maybeAutoFillCurrentLocationAddress();
     }
 
+    /**
+     * Performs bind views.
+     */
     private void bindViews() {
         dateInput = findViewById(R.id.filterDateInput);
         addressInput = findViewById(R.id.filterAddressInput);
@@ -79,6 +87,9 @@ public class EventFilterActivity extends AppCompatActivity {
         loadingIndicator = findViewById(R.id.filterLoadingIndicator);
     }
 
+    /**
+     * Performs bind initial values.
+     */
     private void bindInitialValues() {
         dateInput.setText(safeString(getIntent().getStringExtra(EXTRA_DATE_BEGIN)));
         addressInput.setText(safeString(getIntent().getStringExtra(EXTRA_ADDRESS)));
@@ -92,6 +103,9 @@ public class EventFilterActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Updates the up listeners.
+     */
     private void setupListeners() {
         ImageButton backButton = findViewById(R.id.backButton);
         backButton.setOnClickListener(view -> getOnBackPressedDispatcher().onBackPressed());
@@ -99,6 +113,9 @@ public class EventFilterActivity extends AppCompatActivity {
         saveButton.setOnClickListener(view -> saveFilters());
     }
 
+    /**
+     * Performs maybe auto fill current location address.
+     */
     private void maybeAutoFillCurrentLocationAddress() {
         if (!safeString(addressInput.getText()).isEmpty() || isAutoFillingAddress) {
             return;
@@ -116,6 +133,9 @@ public class EventFilterActivity extends AppCompatActivity {
         loadCurrentLocationAddress();
     }
 
+    /**
+     * Performs save filters.
+     */
     private void saveFilters() {
         String rawDate = safeString(dateInput.getText());
         if (!rawDate.isEmpty() && !isValidDate(rawDate)) {
@@ -147,6 +167,16 @@ public class EventFilterActivity extends AppCompatActivity {
         geocodeAndFinish(rawDate, address, distanceKm, keywords, onlyOpenSpots, minimumCapacity);
     }
 
+    /**
+     * Performs geocode and finish.
+     *
+     * @param rawDate the raw date
+     * @param address the address
+     * @param distanceKm the distance km
+     * @param keywords the keywords
+     * @param onlyOpenSpots the only open spots
+     * @param minimumCapacity the minimum capacity
+     */
     private void geocodeAndFinish(String rawDate,
                                   String address,
                                   Double distanceKm,
@@ -170,11 +200,19 @@ public class EventFilterActivity extends AppCompatActivity {
         }).start();
     }
 
+    /**
+     * Returns whether this instance has location permission.
+     *
+     * @return whether this instance has location permission
+     */
     private boolean hasLocationPermission() {
         return ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED;
     }
 
+    /**
+     * Performs load current location address.
+     */
     private void loadCurrentLocationAddress() {
         isAutoFillingAddress = true;
         setLoading(true);
@@ -193,6 +231,11 @@ public class EventFilterActivity extends AppCompatActivity {
                 .addOnFailureListener(this, exception -> finishAutoFill());
     }
 
+    /**
+     * Performs reverse geocode current location.
+     *
+     * @param location the location
+     */
     private void reverseGeocodeCurrentLocation(Location location) {
         new Thread(() -> {
             AndroidEventLocationGeocodingService geocodingService = new AndroidEventLocationGeocodingService(this);
@@ -200,6 +243,9 @@ public class EventFilterActivity extends AppCompatActivity {
                     location.getLatitude(),
                     location.getLongitude()
             );
+            /**
+             * Returns whether is Empty.
+             */
             runOnUiThread(() -> {
                 if (!isFinishing() && !isDestroyed() && safeString(addressInput.getText()).isEmpty()
                         && !TextUtils.isEmpty(resolvedAddress)) {
@@ -210,11 +256,26 @@ public class EventFilterActivity extends AppCompatActivity {
         }).start();
     }
 
+    /**
+     * Performs finish auto fill.
+     */
     private void finishAutoFill() {
         isAutoFillingAddress = false;
         setLoading(false);
     }
 
+    /**
+     * Performs finish with results.
+     *
+     * @param rawDate the raw date
+     * @param address the address
+     * @param distanceKm the distance km
+     * @param latitude the latitude
+     * @param longitude the longitude
+     * @param keywords the keywords
+     * @param onlyOpenSpots the only open spots
+     * @param minimumCapacity the minimum capacity
+     */
     private void finishWithResults(String rawDate,
                                    String address,
                                    Double distanceKm,
@@ -242,6 +303,12 @@ public class EventFilterActivity extends AppCompatActivity {
         finish();
     }
 
+    /**
+     * Returns whether valid date.
+     *
+     * @param value the value
+     * @return whether valid date
+     */
     private boolean isValidDate(String value) {
         try {
             dateFormat.parse(value.trim());
@@ -251,6 +318,12 @@ public class EventFilterActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Returns the result of parse distance km.
+     *
+     * @param value the value
+     * @return the result of this call
+     */
     private Double parseDistanceKm(String value) {
         if (TextUtils.isEmpty(value)) {
             return null;
@@ -263,6 +336,12 @@ public class EventFilterActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Returns the result of parse minimum capacity.
+     *
+     * @param value the value
+     * @return the result of this call
+     */
     private Integer parseMinimumCapacity(String value) {
         if (TextUtils.isEmpty(value)) {
             return null;
@@ -275,6 +354,11 @@ public class EventFilterActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Returns the result of read minimum capacity value.
+     *
+     * @return the result of this call
+     */
     private String readMinimumCapacityValue() {
         if (!getIntent().hasExtra(EXTRA_MINIMUM_CAPACITY)) {
             return "";
@@ -283,11 +367,23 @@ public class EventFilterActivity extends AppCompatActivity {
         return value > 0 ? String.valueOf(value) : "";
     }
 
+    /**
+     * Updates the loading.
+     *
+     * @param isLoading whether loading
+     */
     private void setLoading(boolean isLoading) {
         loadingIndicator.setVisibility(isLoading ? View.VISIBLE : View.GONE);
         saveButton.setEnabled(!isLoading);
     }
 
+    /**
+     * Handles the request permissions result callback.
+     *
+     * @param requestCode the request code
+     * @param permissions the permissions
+     * @param grantResults the grant results
+     */
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -300,6 +396,12 @@ public class EventFilterActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Returns the result of safe string.
+     *
+     * @param value the value
+     * @return the result of this call
+     */
     private String safeString(CharSequence value) {
         return value == null ? "" : value.toString().trim();
     }

@@ -11,21 +11,29 @@ import java.util.List;
 public class NotificationController {
     private final NotificationRepository notificationRepository;
 
+    /**
+     * Creates a new NotificationController instance.
+     */
     public NotificationController() {
         this.notificationRepository = new NotificationRepository();
     }
 
+    /**
+     * Creates a new NotificationController instance.
+     *
+     * @param notificationRepository the notification repository
+     */
     public NotificationController(NotificationRepository notificationRepository) {
         this.notificationRepository = notificationRepository;
     }
 
     /**
-     * Sends a "selected" notification to a list of chosen entrants.
+     * Performs notify selected entrants.
      *
-     * @param entrantIds list of device IDs of chosen entrants
-     * @param eventId    the event they were selected for
-     * @param eventName  the name of the event for the notification message
-     * @param listener   called when all notifications have been sent
+     * @param entrantIds the entrant ids
+     * @param eventId the event id
+     * @param eventName the event name
+     * @param listener the listener
      */
     public void notifySelectedEntrants(List<String> entrantIds,
                                        String eventId,
@@ -40,12 +48,12 @@ public class NotificationController {
     }
 
     /**
-     * Sends a "not selected" notification to a list of entrants.
+     * Performs notify not selected entrants.
      *
-     * @param entrantIds list of device IDs of entrants not chosen
-     * @param eventId    the event they were not selected for
-     * @param eventName  the name of the event for the notification message
-     * @param listener   called when all notifications have been sent
+     * @param entrantIds the entrant ids
+     * @param eventId the event id
+     * @param eventName the event name
+     * @param listener the listener
      */
     public void notifyNotSelectedEntrants(List<String> entrantIds,
                                           String eventId,
@@ -60,16 +68,25 @@ public class NotificationController {
     }
 
     /**
-     * Fetches all notifications for a given user.
+     * Performs get notifications for user.
      *
-     * @param userId   the device ID of the user
-     * @param listener called with the list of notifications
+     * @param userId the user id
+     * @param listener the listener
      */
     public void getNotificationsForUser(String userId,
                                         OnCompleteListener<List<NotificationItem>> listener) {
         notificationRepository.getNotificationsForUser(userId, listener);
     }
 
+    /**
+     * Performs send notifications.
+     *
+     * @param entrantIds the entrant ids
+     * @param index the index
+     * @param eventId the event id
+     * @param eventName the event name
+     * @param listener the listener
+     */
     private void sendNotifications(List<String> entrantIds,
                                    int index,
                                    String eventId,
@@ -92,6 +109,15 @@ public class NotificationController {
                 sendNotifications(entrantIds, index + 1, eventId, eventName, listener));
     }
 
+    /**
+     * Performs send not selected notifications.
+     *
+     * @param entrantIds the entrant ids
+     * @param index the index
+     * @param eventId the event id
+     * @param eventName the event name
+     * @param listener the listener
+     */
     private void sendNotSelectedNotifications(List<String> entrantIds,
                                               int index,
                                               String eventId,

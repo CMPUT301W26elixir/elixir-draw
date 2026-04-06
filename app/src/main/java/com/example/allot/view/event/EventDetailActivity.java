@@ -118,10 +118,9 @@ public class EventDetailActivity extends AppCompatActivity {
     private MaterialButton pendingJoinConfirmButton;
 
     /**
-     * Initializes the activity, binds views, shows fallback content,
-     * registers listeners, and loads the full event details.
+     * Handles the create callback.
      *
-     * @param savedInstanceState the saved activity state
+     * @param savedInstanceState the saved instance state
      */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -146,6 +145,9 @@ public class EventDetailActivity extends AppCompatActivity {
         loadEventDetails();
     }
 
+    /**
+     * Performs load admin status.
+     */
     private void loadAdminStatus() {
         eventDetailController.isCurrentUserAdmin((adminValue, success) -> {
             isAdmin = success && Boolean.TRUE.equals(adminValue);
@@ -156,7 +158,7 @@ public class EventDetailActivity extends AppCompatActivity {
     }
 
     /**
-     * Binds all view references used by this activity.
+     * Performs bind views.
      */
     private void bindViews() {
         heroImageFrame = findViewById(R.id.heroImageFrame);
@@ -185,7 +187,7 @@ public class EventDetailActivity extends AppCompatActivity {
     }
 
     /**
-     * Sets up button listeners for navigation and waitlist actions.
+     * Updates the up listeners.
      */
     private void setupListeners() {
         ImageButton backButton = findViewById(R.id.backButton);
@@ -194,14 +196,30 @@ public class EventDetailActivity extends AppCompatActivity {
         joinWaitingListButton.setOnClickListener(view -> onWaitlistButtonPressed());
         commentSubmitButton.setOnClickListener(view -> postComment(null, null));
 
+        /**
+         * Handles on Item Selected Listener.
+         */
         if (commentSortSpinner != null) {
             commentSortSpinner.setOnItemSelectedListener(new android.widget.AdapterView.OnItemSelectedListener() {
+                /**
+                 * Handles the item selected callback.
+                 *
+                 * @param parent the parent
+                 * @param view the view
+                 * @param position the position
+                 * @param id the id
+                 */
                 @Override
                 public void onItemSelected(android.widget.AdapterView<?> parent, View view, int position, long id) {
                     commentSortMode = CommentSortMode.fromPosition(position);
                     renderComments(currentEvent);
                 }
 
+                /**
+                 * Handles the nothing selected callback.
+                 *
+                 * @param parent the parent
+                 */
                 @Override
                 public void onNothingSelected(android.widget.AdapterView<?> parent) {
                 }
@@ -210,8 +228,7 @@ public class EventDetailActivity extends AppCompatActivity {
     }
 
     /**
-     * Binds fallback event content from the intent extras before
-     * the full event details are loaded from Firestore.
+     * Performs bind fallback content.
      */
     private void bindFallbackContent() {
         renderState(eventDetailController.buildFallbackState(
@@ -227,8 +244,7 @@ public class EventDetailActivity extends AppCompatActivity {
     }
 
     /**
-     * Loads the full event details for the current event ID.
-     * Shows an error state if the event cannot be loaded.
+     * Performs load event details.
      */
     private void loadEventDetails() {
         if (TextUtils.isEmpty(currentEventId)) {
@@ -250,15 +266,15 @@ public class EventDetailActivity extends AppCompatActivity {
     }
 
     /**
-     * Displays the footer action state for the event detail screen.
+     * Performs show footer state.
      *
-     * @param showWaitlistMessage true to show the waitlist status message
-     * @param buttonEnabled true to enable the action button
-     * @param buttonTextRes the string resource for the action button text
-     * @param buttonBackgroundRes the drawable resource for the button background
-     * @param buttonTextColor the text color for the button
-     * @param subtext optional subtext shown below the button
-     * @param showEntrantCount true to show the entrant count text
+     * @param showWaitlistMessage the show waitlist message
+     * @param buttonEnabled the button enabled
+     * @param buttonTextRes the button text res
+     * @param buttonBackgroundRes the button background res
+     * @param buttonTextColor the button text color
+     * @param subtext the subtext
+     * @param showEntrantCount the show entrant count
      */
     private void showFooterState(boolean showWaitlistMessage,
                                  boolean buttonEnabled,
@@ -285,8 +301,7 @@ public class EventDetailActivity extends AppCompatActivity {
     }
 
     /**
-     * Handles presses on the main action button based on the current
-     * user and event state.
+     * Handles the waitlist button pressed callback.
      */
     private void onWaitlistButtonPressed() {
         if (!joinWaitingListButton.isEnabled()) {
@@ -323,7 +338,7 @@ public class EventDetailActivity extends AppCompatActivity {
     }
 
     /**
-     * Opens the organizer event management screen for the current event.
+     * Performs open manage event screen.
      */
     private void openManageEventScreen() {
         if (TextUtils.isEmpty(currentEventId)) {
@@ -356,7 +371,7 @@ public class EventDetailActivity extends AppCompatActivity {
     }
 
     /**
-     * Opens the event offer screen for the current event.
+     * Performs open offer screen.
      */
     private void openOfferScreen() {
         if (TextUtils.isEmpty(currentEventId)) {
@@ -373,8 +388,7 @@ public class EventDetailActivity extends AppCompatActivity {
     }
 
     /**
-     * Refreshes the event details when returning from related screens
-     * that may have changed the event state.
+     * Handles the resume callback.
      */
     @Override
     protected void onResume() {
@@ -395,6 +409,9 @@ public class EventDetailActivity extends AppCompatActivity {
         loadFavoriteState();
     }
 
+    /**
+     * Performs load favorite state.
+     */
     private void loadFavoriteState() {
         isFavoriteLoading = true;
         updateFavoriteUi();
@@ -407,6 +424,9 @@ public class EventDetailActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Handles the favorite pressed callback.
+     */
     private void onFavoritePressed() {
         if (favoriteButton == null || isFavoriteLoading || isFavoriteUpdating || TextUtils.isEmpty(currentEventId)) {
             return;
@@ -418,6 +438,9 @@ public class EventDetailActivity extends AppCompatActivity {
         );
     }
 
+    /**
+     * Performs toggle favorite saved state.
+     */
     private void toggleFavoriteSavedState() {
         isFavoriteUpdating = true;
         isFavoriteSaved = !isFavoriteSaved;
@@ -436,6 +459,9 @@ public class EventDetailActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Performs update favorite ui.
+     */
     private void updateFavoriteUi() {
         if (favoriteButton == null) {
             return;
@@ -451,7 +477,7 @@ public class EventDetailActivity extends AppCompatActivity {
     }
 
     /**
-     * Shows the lottery criteria dialog before joining the waiting list.
+     * Performs show lottery criteria dialog.
      */
     private void showLotteryCriteriaDialog() {
         if (TextUtils.isEmpty(currentEventId) || isJoiningWaitlist || isLeavingWaitlist) {
@@ -476,7 +502,7 @@ public class EventDetailActivity extends AppCompatActivity {
     }
 
     /**
-     * Shows the invite response dialog for private events.
+     * Performs show invite response dialog.
      */
     private void showInviteResponseDialog() {
         if (TextUtils.isEmpty(currentEventId) || isJoiningWaitlist || isLeavingWaitlist) {
@@ -498,10 +524,10 @@ public class EventDetailActivity extends AppCompatActivity {
     }
 
     /**
-     * Attempts to join the current event's waiting list.
+     * Performs join waiting list.
      *
-     * @param dialog the dialog that initiated the join action
-     * @param confirmButton the confirmation button shown in the dialog
+     * @param dialog the dialog
+     * @param confirmButton the confirm button
      */
     private void joinWaitingList(Dialog dialog, MaterialButton confirmButton) {
         if (isJoiningWaitlist || TextUtils.isEmpty(currentEventId)) {
@@ -531,6 +557,13 @@ public class EventDetailActivity extends AppCompatActivity {
         );
     }
 
+    /**
+     * Performs accept invite.
+     *
+     * @param dialog the dialog
+     * @param acceptButton the accept button
+     * @param declineButton the decline button
+     */
     private void acceptInvite(Dialog dialog, MaterialButton acceptButton, MaterialButton declineButton) {
         if (isJoiningWaitlist || TextUtils.isEmpty(currentEventId)) {
             return;
@@ -563,6 +596,13 @@ public class EventDetailActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Performs decline invite.
+     *
+     * @param dialog the dialog
+     * @param acceptButton the accept button
+     * @param declineButton the decline button
+     */
     private void declineInvite(Dialog dialog, MaterialButton acceptButton, MaterialButton declineButton) {
         if (isLeavingWaitlist || TextUtils.isEmpty(currentEventId)) {
             return;
@@ -596,7 +636,7 @@ public class EventDetailActivity extends AppCompatActivity {
     }
 
     /**
-     * Attempts to remove the current user from the waiting list.
+     * Performs leave waiting list.
      */
     private void leaveWaitingList() {
         if (isLeavingWaitlist || TextUtils.isEmpty(currentEventId)) {
@@ -640,10 +680,10 @@ public class EventDetailActivity extends AppCompatActivity {
     }
 
     /**
-     * Sets a TextView to the provided value or hides it if the value is empty.
+     * Performs bind optional text.
      *
-     * @param view the TextView to update
-     * @param value the value to display
+     * @param view the view
+     * @param value the value
      */
     private void bindOptionalText(TextView view, String value) {
         if (UiHelper.isBlank(value)) {
@@ -656,33 +696,46 @@ public class EventDetailActivity extends AppCompatActivity {
     }
 
     /**
-     * Shows or hides the loading indicator.
+     * Updates the loading.
      *
-     * @param isLoading true to show the loading indicator, false to hide it
+     * @param isLoading whether loading
      */
     private void setLoading(boolean isLoading) {
         loadingIndicator.setVisibility(isLoading ? View.VISIBLE : View.GONE);
     }
 
     /**
-     * Shows an error message in the error text view.
+     * Performs show error state.
      *
-     * @param message the error message to display
+     * @param message the message
      */
     private void showErrorState(String message) {
         errorText.setVisibility(View.VISIBLE);
         errorText.setText(message);
     }
 
+    /**
+     * Returns whether this instance has location permission.
+     *
+     * @return whether this instance has location permission
+     */
     private boolean hasLocationPermission() {
         return ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED;
     }
 
+    /**
+     * Returns whether this instance should collect join location.
+     *
+     * @return whether this instance should collect join location
+     */
     private boolean shouldCollectJoinLocation() {
         return currentEvent != null && Boolean.TRUE.equals(currentEvent.getGeoloc());
     }
 
+    /**
+     * Performs capture location and join.
+     */
     private void captureLocationAndJoin() {
         CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
         fusedLocationProviderClient
@@ -703,6 +756,9 @@ public class EventDetailActivity extends AppCompatActivity {
                 .addOnFailureListener(this, exception -> handleUnavailableLocation());
     }
 
+    /**
+     * Performs handle unavailable location.
+     */
     private void handleUnavailableLocation() {
         if (isSyncingWaitlistLocation) {
             isSyncingWaitlistLocation = false;
@@ -713,6 +769,11 @@ public class EventDetailActivity extends AppCompatActivity {
         completeJoinWaitingList(null);
     }
 
+    /**
+     * Performs complete join waiting list.
+     *
+     * @param location the location
+     */
     private void completeJoinWaitingList(Location location) {
         Double latitude = location == null ? null : location.getLatitude();
         Double longitude = location == null ? null : location.getLongitude();
@@ -744,6 +805,11 @@ public class EventDetailActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Performs complete waitlist location sync.
+     *
+     * @param location the location
+     */
     private void completeWaitlistLocationSync(Location location) {
         Double latitude = location == null ? null : location.getLatitude();
         Double longitude = location == null ? null : location.getLongitude();
@@ -758,6 +824,11 @@ public class EventDetailActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Performs fail join waiting list.
+     *
+     * @param messageResId the message res id
+     */
     private void failJoinWaitingList(int messageResId) {
         isJoiningWaitlist = false;
         if (pendingJoinConfirmButton != null) {
@@ -768,11 +839,21 @@ public class EventDetailActivity extends AppCompatActivity {
         Toast.makeText(this, messageResId, Toast.LENGTH_SHORT).show();
     }
 
+    /**
+     * Performs clear pending join state.
+     */
     private void clearPendingJoinState() {
         pendingJoinDialog = null;
         pendingJoinConfirmButton = null;
     }
 
+    /**
+     * Handles the request permissions result callback.
+     *
+     * @param requestCode the request code
+     * @param permissions the permissions
+     * @param grantResults the grant results
+     */
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -800,9 +881,9 @@ public class EventDetailActivity extends AppCompatActivity {
     }
 
     /**
-     * Renders the provided event detail screen state.
+     * Performs render state.
      *
-     * @param state the state to render
+     * @param state the state
      */
     private void renderState(EventDetailData state) {
         if (state == null) {
@@ -859,6 +940,9 @@ public class EventDetailActivity extends AppCompatActivity {
         maybeHandleDeferredJoinAction();
     }
 
+    /**
+     * Performs maybe auto sync waitlist location.
+     */
     private void maybeAutoSyncWaitlistLocation() {
         if (!shouldAutoSyncWaitlistLocation() || hasAttemptedAutoWaitlistLocationSync || isSyncingWaitlistLocation) {
             return;
@@ -879,6 +963,11 @@ public class EventDetailActivity extends AppCompatActivity {
         );
     }
 
+    /**
+     * Returns whether this instance should auto sync waitlist location.
+     *
+     * @return whether this instance should auto sync waitlist location
+     */
     private boolean shouldAutoSyncWaitlistLocation() {
         if (currentEvent == null || !Boolean.TRUE.equals(currentEvent.getGeoloc())) {
             return false;
@@ -899,6 +988,12 @@ public class EventDetailActivity extends AppCompatActivity {
                 || joinLocation.getLongitude() == null;
     }
 
+    /**
+     * Performs require completed profile.
+     *
+     * @param onReady the on ready
+     * @param onboardingIntent the onboarding intent
+     */
     private void requireCompletedProfile(Runnable onReady, Intent onboardingIntent) {
         if (getIntent().getBooleanExtra(EXTRA_UI_TEST_BYPASS_PROFILE_GATE, false)) {
             onReady.run();
@@ -915,6 +1010,12 @@ public class EventDetailActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Returns the result of build deferred event action intent.
+     *
+     * @param action the action
+     * @return the result of this call
+     */
     private Intent buildDeferredEventActionIntent(String action) {
         return DeferredOnboardingNavigator.createEventActionIntent(
                 this,
@@ -929,12 +1030,18 @@ public class EventDetailActivity extends AppCompatActivity {
         );
     }
 
+    /**
+     * Performs maybe handle deferred join action.
+     */
     private void maybeHandleDeferredJoinAction() {
         if (!shouldAutoOpenJoinDialog || currentScreenState == null) {
             return;
         }
 
         EventDetailData.NextAction nextAction = eventDetailController.resolveNextAction(currentScreenState);
+        /**
+         * Documents if.
+         */
         if (nextAction != EventDetailData.NextAction.SHOW_JOIN_DIALOG
                 && nextAction != EventDetailData.NextAction.SHOW_INVITE_DIALOG) {
             return;
@@ -949,6 +1056,9 @@ public class EventDetailActivity extends AppCompatActivity {
         showLotteryCriteriaDialog();
     }
 
+    /**
+     * Performs maybe handle deferred favorite save.
+     */
     private void maybeHandleDeferredFavoriteSave() {
         if (!shouldAutoSaveEvent || isFavoriteLoading || isFavoriteUpdating) {
             return;
@@ -962,6 +1072,11 @@ public class EventDetailActivity extends AppCompatActivity {
         toggleFavoriteSavedState();
     }
 
+    /**
+     * Performs render hero poster.
+     *
+     * @param event the event
+     */
     private void renderHeroPoster(Event event) {
         String posterUrl = event == null ? null : event.getPosterUrl();
         if (TextUtils.isEmpty(posterUrl)) {
@@ -977,6 +1092,11 @@ public class EventDetailActivity extends AppCompatActivity {
                 .into(heroPosterImage);
     }
 
+    /**
+     * Performs render comments.
+     *
+     * @param event the event
+     */
     private void renderComments(Event event) {
         List<EventComment> comments = event == null ? null : event.getComments();
         commentsContainer.removeAllViews();
@@ -1011,6 +1131,14 @@ public class EventDetailActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Performs render comment tree.
+     *
+     * @param comment the comment
+     * @param depth the depth
+     * @param repliesByParent the replies by parent
+     * @param container the container
+     */
     private void renderCommentTree(EventComment comment,
                                    int depth,
                                    Map<String, List<EventComment>> repliesByParent,
@@ -1051,6 +1179,12 @@ public class EventDetailActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Performs bind delete button.
+     *
+     * @param deleteButton the delete button
+     * @param comment the comment
+     */
     private void bindDeleteButton(TextView deleteButton, EventComment comment) {
         if (deleteButton == null || comment == null || (!isOrganizer && !isAdmin)) {
             if (deleteButton != null) {
@@ -1063,6 +1197,12 @@ public class EventDetailActivity extends AppCompatActivity {
         deleteButton.setOnClickListener(view -> deleteCommentThread(comment.getCommentId()));
     }
 
+    /**
+     * Performs toggle reply input.
+     *
+     * @param replyInputContainer the reply input container
+     * @param parentComment the parent comment
+     */
     private void toggleReplyInput(LinearLayout replyInputContainer, EventComment parentComment) {
         if (replyInputContainer.getChildCount() > 0) {
             replyInputContainer.removeAllViews();
@@ -1078,12 +1218,21 @@ public class EventDetailActivity extends AppCompatActivity {
             if (parentComment == null) {
                 return;
             }
+            /**
+             * Documents comment Post Callback.
+             */
             postComment(parentComment.getCommentId(), new CommentPostCallback() {
+                /**
+                 * Handles the success callback.
+                 */
                 @Override
                 public void onSuccess() {
                     replyInputContainer.removeAllViews();
                 }
 
+                /**
+                 * Handles the failure callback.
+                 */
                 @Override
                 public void onFailure() {
                     replySubmit.setEnabled(true);
@@ -1094,10 +1243,24 @@ public class EventDetailActivity extends AppCompatActivity {
         replyInputContainer.addView(inputView);
     }
 
+    /**
+     * Performs post comment.
+     *
+     * @param parentId the parent id
+     * @param callback the callback
+     */
     private void postComment(String parentId, CommentPostCallback callback) {
         postComment(parentId, callback, commentInputText, commentSubmitButton);
     }
 
+    /**
+     * Performs post comment.
+     *
+     * @param parentId the parent id
+     * @param callback the callback
+     * @param inputView the input view
+     * @param submitButton the submit button
+     */
     private void postComment(String parentId,
                              CommentPostCallback callback,
                              EditText inputView,
@@ -1136,6 +1299,13 @@ public class EventDetailActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Performs bind vote buttons.
+     *
+     * @param upvoteButton the upvote button
+     * @param downvoteButton the downvote button
+     * @param comment the comment
+     */
     private void bindVoteButtons(TextView upvoteButton, TextView downvoteButton, EventComment comment) {
         if (upvoteButton == null || downvoteButton == null || comment == null) {
             return;
@@ -1147,6 +1317,13 @@ public class EventDetailActivity extends AppCompatActivity {
         downvoteButton.setOnClickListener(view -> voteOnComment(comment, false));
     }
 
+    /**
+     * Performs update vote button text.
+     *
+     * @param upvoteButton the upvote button
+     * @param downvoteButton the downvote button
+     * @param comment the comment
+     */
     private void updateVoteButtonText(TextView upvoteButton, TextView downvoteButton, EventComment comment) {
         String upvoteLabel = getString(R.string.event_comment_upvote) + " " + Math.max(0, comment.getUpvotes());
         String downvoteLabel = getString(R.string.event_comment_downvote) + " " + Math.max(0, comment.getDownvotes());
@@ -1154,6 +1331,12 @@ public class EventDetailActivity extends AppCompatActivity {
         downvoteButton.setText(downvoteLabel);
     }
 
+    /**
+     * Performs vote on comment.
+     *
+     * @param comment the comment
+     * @param isUpvote whether upvote
+     */
     private void voteOnComment(EventComment comment, boolean isUpvote) {
         if (isVotingComment || comment == null || TextUtils.isEmpty(currentEventId)) {
             return;
@@ -1171,6 +1354,11 @@ public class EventDetailActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Performs delete comment thread.
+     *
+     * @param commentId the comment id
+     */
     private void deleteCommentThread(String commentId) {
         if (TextUtils.isEmpty(currentEventId) || TextUtils.isEmpty(commentId)) {
             return;
@@ -1187,6 +1375,9 @@ public class EventDetailActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Performs refresh comments only.
+     */
     private void refreshCommentsOnly() {
         if (TextUtils.isEmpty(currentEventId)) {
             return;
@@ -1201,6 +1392,12 @@ public class EventDetailActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Returns the result of resolve author name.
+     *
+     * @param comment the comment
+     * @return the result of this call
+     */
     private String resolveAuthorName(EventComment comment) {
         if (comment == null || UiHelper.isBlank(comment.getAuthorName())) {
             return getString(R.string.event_comment_author_unknown);
@@ -1208,6 +1405,12 @@ public class EventDetailActivity extends AppCompatActivity {
         return comment.getAuthorName();
     }
 
+    /**
+     * Returns the result of format comment date.
+     *
+     * @param date the date
+     * @return the result of this call
+     */
     private String formatCommentDate(Date date) {
         if (date == null) {
             return "";
@@ -1216,6 +1419,12 @@ public class EventDetailActivity extends AppCompatActivity {
         return formatter.format(date);
     }
 
+    /**
+     * Returns the result of comment comparator.
+     *
+     * @param mode the mode
+     * @return the result of this call
+     */
     private Comparator<EventComment> commentComparator(CommentSortMode mode) {
         return (first, second) -> {
             if (mode == CommentSortMode.MOST_UPVOTED) {
@@ -1249,11 +1458,20 @@ public class EventDetailActivity extends AppCompatActivity {
         };
     }
 
+    /**
+     * Enumerates the available comment sort mode values.
+     */
     private enum CommentSortMode {
         NEWEST,
         MOST_UPVOTED,
         MOST_DOWNVOTED;
 
+        /**
+         * Returns the result of from position.
+         *
+         * @param position the position
+         * @return the result of this call
+         */
         static CommentSortMode fromPosition(int position) {
             if (position == 1) {
                 return MOST_UPVOTED;
@@ -1265,15 +1483,34 @@ public class EventDetailActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Defines the contract for a comment post callback.
+     */
     private interface CommentPostCallback {
+        /**
+         * Handles the success callback.
+         */
         void onSuccess();
+        /**
+         * Handles the failure callback.
+         */
         void onFailure();
     }
 
+    /**
+     * Returns whether ui test fallback mode.
+     *
+     * @return whether ui test fallback mode
+     */
     private boolean isUiTestFallbackMode() {
         return getIntent().getBooleanExtra(EXTRA_UI_TEST_SKIP_NETWORK_LOAD, false);
     }
 
+    /**
+     * Returns whether this instance should start ui test on waitlist.
+     *
+     * @return whether this instance should start ui test on waitlist
+     */
     private boolean shouldStartUiTestOnWaitlist() {
         return getIntent().getBooleanExtra(EXTRA_UI_TEST_START_ON_WAITLIST, false);
     }

@@ -83,6 +83,11 @@ public class CreateEventActivity extends AppCompatActivity {
                 renderPosterSelection();
             });
 
+    /**
+     * Handles the create callback.
+     *
+     * @param savedInstanceState the saved instance state
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -97,12 +102,18 @@ public class CreateEventActivity extends AppCompatActivity {
         setupListeners();
     }
 
+    /**
+     * Performs finish.
+     */
     @Override
     public void finish() {
         super.finish();
         overridePendingTransition(0, 0);
     }
 
+    /**
+     * Performs bind views.
+     */
     private void bindViews() {
         EditText eventNameInput = findViewById(R.id.eventNameInput);
         locationInput = findViewById(R.id.locationInput);
@@ -136,11 +147,17 @@ public class CreateEventActivity extends AppCompatActivity {
         );
     }
 
+    /**
+     * Updates the up header.
+     */
     private void setupHeader() {
         ImageButton backButton = findViewById(R.id.backButton);
         backButton.setOnClickListener(view -> getOnBackPressedDispatcher().onBackPressed());
     }
 
+    /**
+     * Updates the up listeners.
+     */
     private void setupListeners() {
         configureLocationPicker();
         posterUploadCard.setOnClickListener(view -> posterPickerLauncher.launch("image/*"));
@@ -152,6 +169,9 @@ public class CreateEventActivity extends AppCompatActivity {
         renderPosterSelection();
     }
 
+    /**
+     * Performs configure location picker.
+     */
     private void configureLocationPicker() {
         locationInput.setKeyListener(null);
         locationInput.setFocusable(false);
@@ -159,6 +179,9 @@ public class CreateEventActivity extends AppCompatActivity {
         locationInput.setOnClickListener(view -> openPlaceAutocomplete());
     }
 
+    /**
+     * Performs open place autocomplete.
+     */
     private void openPlaceAutocomplete() {
         if (!ensurePlacesInitialized()) {
             Toast.makeText(this, R.string.create_event_places_unavailable, Toast.LENGTH_SHORT).show();
@@ -169,6 +192,11 @@ public class CreateEventActivity extends AppCompatActivity {
         placeAutocompleteLauncher.launch(intent);
     }
 
+    /**
+     * Returns the result of ensure places initialized.
+     *
+     * @return the result of this call
+     */
     private boolean ensurePlacesInitialized() {
         if (TextUtils.isEmpty(BuildConfig.PLACES_API_KEY)) {
             return false;
@@ -180,6 +208,9 @@ public class CreateEventActivity extends AppCompatActivity {
         return true;
     }
 
+    /**
+     * Performs submit event.
+     */
     private void submitEvent() {
         if (isSaving) {
             return;
@@ -229,6 +260,9 @@ public class CreateEventActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Performs render poster selection.
+     */
     private void renderPosterSelection() {
         boolean hasPoster = selectedPosterUri != null;
         posterPreviewImage.setVisibility(hasPoster ? android.view.View.VISIBLE : android.view.View.GONE);
@@ -245,6 +279,11 @@ public class CreateEventActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Performs open event created screen.
+     *
+     * @param event the event
+     */
     private void openEventCreatedScreen(Event event) {
         if (event == null) {
             return;
@@ -263,6 +302,11 @@ public class CreateEventActivity extends AppCompatActivity {
             finish();
     }
 
+    /**
+     * Returns the result of read form data.
+     *
+     * @return the result of this call
+     */
     private EventFormData readFormData() {
         return formUiHelper.readFormData();
     }

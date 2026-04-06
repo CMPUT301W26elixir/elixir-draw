@@ -16,11 +16,11 @@ public class ExploreFilterService {
     private static final String OPEN_STATUS = "open";
 
     /**
-     * Builds a list of open events that match the given normalized filters.
+     * Returns the result of build browsable event list.
      *
-     * @param events the loaded events
-     * @param filter the active browse filter
-     * @return a sorted list of browsable events
+     * @param events the events
+     * @param filter the filter
+     * @return the result of this call
      */
     public List<Event> buildBrowsableEventList(List<Event> events, BrowseFilter filter) {
         String normalizedSearchTerm = normalize(filter == null ? null : filter.getSearchTerm());
@@ -52,6 +52,9 @@ public class ExploreFilterService {
                 continue;
             }
 
+            /**
+             * Returns whether get Distance Km.
+             */
             if (!matchesDistance(event,
                     filter == null ? null : filter.getLatitude(),
                     filter == null ? null : filter.getLongitude(),
@@ -75,10 +78,10 @@ public class ExploreFilterService {
     }
 
     /**
-     * Checks whether an event should be shown in the browsable event list.
+     * Returns whether browsable.
      *
-     * @param event the event to check
-     * @return true if the event is browsable, otherwise false
+     * @param event the event
+     * @return whether browsable
      */
     private boolean isBrowsable(Event event) {
         if (event == null) {
@@ -98,17 +101,20 @@ public class ExploreFilterService {
     }
 
     /**
-     * Checks whether an event matches the given normalized category.
+     * Returns the result of matches category.
      *
-     * @param event the event to check
-     * @param normalizedCategory the normalized category filter
-     * @return true if the event matches the category, otherwise false
+     * @param event the event
+     * @param normalizedCategory the normalized category
+     * @return the result of this call
      */
     private boolean matchesCategory(Event event, String normalizedCategory) {
         if (normalizedCategory.isEmpty()) {
             return true;
         }
 
+        /**
+         * Returns whether get Description.
+         */
         // Let the chip match the category or other event text
         if (normalize(event.getCategory()).equals(normalizedCategory)
                 || containsNormalized(event.getTitle(), normalizedCategory)
@@ -116,6 +122,9 @@ public class ExploreFilterService {
             return true;
         }
 
+        /**
+         * Returns whether get Category.
+         */
         for (String keyword : categoryKeywords(normalizedCategory)) {
             if (containsNormalized(event.getTitle(), keyword)
                     || containsNormalized(event.getDescription(), keyword)
@@ -128,11 +137,11 @@ public class ExploreFilterService {
     }
 
     /**
-     * Checks whether an event matches the given normalized search term.
+     * Returns the result of matches search.
      *
-     * @param event the event to check
+     * @param event the event
      * @param normalizedSearchTerm the normalized search term
-     * @return true if the event matches the search term, otherwise false
+     * @return the result of this call
      */
     private boolean matchesSearch(Event event, String normalizedSearchTerm) {
         if (normalizedSearchTerm.isEmpty()) {
@@ -146,16 +155,23 @@ public class ExploreFilterService {
     }
 
     /**
-     * Checks whether a string contains the given normalized search term.
+     * Returns the result of contains normalized.
      *
-     * @param value the string value to search
+     * @param value the value
      * @param normalizedSearchTerm the normalized search term
-     * @return true if the value contains the search term, otherwise false
+     * @return the result of this call
      */
     private boolean containsNormalized(String value, String normalizedSearchTerm) {
         return normalize(value).contains(normalizedSearchTerm);
     }
 
+    /**
+     * Returns the result of matches keywords.
+     *
+     * @param event the event
+     * @param keywords the keywords
+     * @return the result of this call
+     */
     private boolean matchesKeywords(Event event, String keywords) {
         String normalizedKeywords = normalize(keywords);
         if (normalizedKeywords.isEmpty()) {
@@ -167,6 +183,9 @@ public class ExploreFilterService {
             return true;
         }
 
+        /**
+         * Returns whether get Description.
+         */
         for (String token : tokens) {
             if (!containsNormalized(event.getTitle(), token)
                     && !containsNormalized(event.getDescription(), token)) {
@@ -177,6 +196,12 @@ public class ExploreFilterService {
         return true;
     }
 
+    /**
+     * Returns the result of split keywords.
+     *
+     * @param normalizedKeywords the normalized keywords
+     * @return the result of this call
+     */
     private List<String> splitKeywords(String normalizedKeywords) {
         List<String> tokens = new ArrayList<>();
         if (normalizedKeywords.isEmpty()) {
@@ -192,6 +217,13 @@ public class ExploreFilterService {
         return tokens;
     }
 
+    /**
+     * Returns the result of matches start date.
+     *
+     * @param event the event
+     * @param startDate the start date
+     * @return the result of this call
+     */
     private boolean matchesStartDate(Event event, java.util.Date startDate) {
         if (startDate == null) {
             return true;
@@ -204,6 +236,15 @@ public class ExploreFilterService {
         return !event.getEventDate().before(startDate);
     }
 
+    /**
+     * Returns the result of matches distance.
+     *
+     * @param event the event
+     * @param latitude the latitude
+     * @param longitude the longitude
+     * @param distanceKm the distance km
+     * @return the result of this call
+     */
     private boolean matchesDistance(Event event, Double latitude, Double longitude, Double distanceKm) {
         if (latitude == null || longitude == null || distanceKm == null || distanceKm <= 0) {
             return true;
@@ -225,6 +266,13 @@ public class ExploreFilterService {
         return distanceMeters <= (distanceKm * 1000.0);
     }
 
+    /**
+     * Returns the result of matches open spots.
+     *
+     * @param event the event
+     * @param onlyOpenSpots the only open spots
+     * @return the result of this call
+     */
     private boolean matchesOpenSpots(Event event, Boolean onlyOpenSpots) {
         if (!Boolean.TRUE.equals(onlyOpenSpots)) {
             return true;
@@ -243,6 +291,13 @@ public class ExploreFilterService {
         return currentEntrantCount < effectiveCapacity;
     }
 
+    /**
+     * Returns the result of matches minimum capacity.
+     *
+     * @param event the event
+     * @param minimumCapacity the minimum capacity
+     * @return the result of this call
+     */
     private boolean matchesMinimumCapacity(Event event, Integer minimumCapacity) {
         if (minimumCapacity == null || minimumCapacity <= 0) {
             return true;
@@ -252,6 +307,12 @@ public class ExploreFilterService {
         return effectiveCapacity != null && effectiveCapacity >= minimumCapacity;
     }
 
+    /**
+     * Returns the effective capacity.
+     *
+     * @param event the event
+     * @return the effective capacity
+     */
     private Integer getEffectiveCapacity(Event event) {
         if (event == null) {
             return null;
@@ -265,6 +326,12 @@ public class ExploreFilterService {
         return null;
     }
 
+    /**
+     * Returns the result of category keywords.
+     *
+     * @param normalizedCategory the normalized category
+     * @return the result of this call
+     */
     private List<String> categoryKeywords(String normalizedCategory) {
         if (normalizedCategory.isEmpty()) {
             return new ArrayList<>();
@@ -290,9 +357,9 @@ public class ExploreFilterService {
     }
 
     /**
-     * Sorts browsable events by registration deadline, event date, and title.
+     * Performs sort browsable events.
      *
-     * @param events the list of events to sort
+     * @param events the events
      */
     private void sortBrowsableEvents(List<Event> events) {
         events.sort(Comparator
@@ -302,10 +369,10 @@ public class ExploreFilterService {
     }
 
     /**
-     * Gets the value used to sort an event by registration deadline.
+     * Returns the deadline sort value.
      *
-     * @param event the event to evaluate
-     * @return the deadline time in milliseconds, or Long.MAX_VALUE if unavailable
+     * @param event the event
+     * @return the deadline sort value
      */
     private long getDeadlineSortValue(Event event) {
         if (event == null || event.getRegistrationDeadline() == null) {
@@ -316,10 +383,10 @@ public class ExploreFilterService {
     }
 
     /**
-     * Gets the value used to sort an event by event date.
+     * Returns the event date sort value.
      *
-     * @param event the event to evaluate
-     * @return the event date time in milliseconds, or Long.MAX_VALUE if unavailable
+     * @param event the event
+     * @return the event date sort value
      */
     private long getEventDateSortValue(Event event) {
         if (event == null || event.getEventDate() == null) {
@@ -330,20 +397,20 @@ public class ExploreFilterService {
     }
 
     /**
-     * Normalizes a string by trimming whitespace and converting it to lowercase.
+     * Returns the result of normalize.
      *
-     * @param value the string to normalize
-     * @return the normalized string
+     * @param value the value
+     * @return the result of this call
      */
     private String normalize(String value) {
         return safeString(value).trim().toLowerCase(Locale.getDefault());
     }
 
     /**
-     * Returns a safe string value, replacing null with an empty string.
+     * Returns the result of safe string.
      *
-     * @param value the string to sanitize
-     * @return the original string, or an empty string if null
+     * @param value the value
+     * @return the result of this call
      */
     private String safeString(String value) {
         return value == null ? "" : value;

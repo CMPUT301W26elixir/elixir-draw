@@ -7,14 +7,23 @@ import com.example.allot.model.event.EventActionState;
 import com.example.allot.model.event.WaitingList;
 import org.junit.Before;
 import org.junit.Test;
+/**
+ * Tests the event action state factory.
+ */
 public class EventActionStateFactoryTest {
     private EventActionStateFactory factory;
 
+    /**
+     * Updates the up.
+     */
     @Before
     public void setUp() {
         factory = new EventActionStateFactory();
     }
 
+    /**
+     * Performs create returns manage state for organizer.
+     */
     @Test
     public void create_returnsManageStateForOrganizer() {
         Event event = buildEvent();
@@ -25,6 +34,9 @@ public class EventActionStateFactoryTest {
         assertEquals(EventActionState.ActionType.MANAGE, state.getActionType());
     }
 
+    /**
+     * Performs create returns enrolled state.
+     */
     @Test
     public void create_returnsEnrolledState() {
         Event event = buildEvent();
@@ -35,6 +47,9 @@ public class EventActionStateFactoryTest {
         assertEquals(EventActionState.ActionType.ENROLLED, state.getActionType());
     }
 
+    /**
+     * Performs create returns offer state.
+     */
     @Test
     public void create_returnsOfferState() {
         Event event = buildEvent();
@@ -45,6 +60,9 @@ public class EventActionStateFactoryTest {
         assertEquals(EventActionState.ActionType.OFFER, state.getActionType());
     }
 
+    /**
+     * Performs create returns replacement state.
+     */
     @Test
     public void create_returnsReplacementState() {
         Event event = buildEvent();
@@ -57,6 +75,9 @@ public class EventActionStateFactoryTest {
         assertEquals(EventActionState.ActionType.NOT_SELECTED_REPLACEMENT, state.getActionType());
     }
 
+    /**
+     * Performs create returns finalized not selected state.
+     */
     @Test
     public void create_returnsFinalizedNotSelectedState() {
         Event event = buildEvent();
@@ -69,6 +90,9 @@ public class EventActionStateFactoryTest {
         assertEquals(EventActionState.ActionType.NOT_SELECTED_FINAL, state.getActionType());
     }
 
+    /**
+     * Performs create returns join and leave waitlist states.
+     */
     @Test
     public void create_returnsJoinAndLeaveWaitlistStates() {
         Event event = buildEvent();
@@ -81,6 +105,11 @@ public class EventActionStateFactoryTest {
         assertEquals(EventActionState.ActionType.LEAVE_WAITLIST, leaveState.getActionType());
     }
 
+    /**
+     * Returns the result of build event.
+     *
+     * @return the result of this call
+     */
     private Event buildEvent() {
         Event event = new Event();
         event.setWaitingList(new WaitingList());

@@ -26,6 +26,11 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     private static final String TAG = "MyFirebaseMessaging";
     private static final String CHANNEL_ID = "allot_notifications";
 
+    /**
+     * Handles the message received callback.
+     *
+     * @param remoteMessage the remote message
+     */
     @Override
     public void onMessageReceived(@NonNull RemoteMessage remoteMessage) {
         super.onMessageReceived(remoteMessage);
@@ -74,6 +79,11 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         });
     }
 
+    /**
+     * Handles the new token callback.
+     *
+     * @param token the token
+     */
     @Override
     public void onNewToken(@NonNull String token) {
         super.onNewToken(token);
@@ -86,6 +96,14 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         }
     }
 
+    /**
+     * Performs show notification.
+     *
+     * @param title the title
+     * @param body the body
+     * @param eventId the event id
+     * @param eventTitle the event title
+     */
     private void showNotification(String title, String body, String eventId, String eventTitle) {
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 

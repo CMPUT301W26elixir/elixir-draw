@@ -21,7 +21,7 @@ public class WaitingList {
     public int limit = -1;
 
     /**
-     * Creates an empty WaitingList for Firestore document deserialization.
+     * Creates a new WaitingList instance.
      */
     public WaitingList(){
         this.list = new ArrayList<>();
@@ -31,9 +31,9 @@ public class WaitingList {
     }
 
     /**
-     * Creates a WaitingList with the given maximum size.
+     * Creates a new WaitingList instance.
      *
-     * @param limit the maximum number of entrants allowed in the waiting list
+     * @param limit the limit
      */
     public WaitingList(int limit){
         this.limit = limit;
@@ -44,8 +44,7 @@ public class WaitingList {
     }
 
     /**
-     * Randomly selects entrants from the waiting list up to the limit
-     * and initializes their enrollment status to false.
+     * Performs selected list.
      */
     public void selectedList(){
         ArrayList<Integer> chosenIndex = new ArrayList<>();
@@ -70,9 +69,9 @@ public class WaitingList {
     }
 
     /**
-     * Returns the list of selected entrants who have enrolled.
+     * Returns the result of enrolled.
      *
-     * @return a list of enrolled user IDs
+     * @return the result of this call
      */
     public ArrayList<String> enrolled(){
         ArrayList<String> signed = new ArrayList<>();
@@ -86,9 +85,9 @@ public class WaitingList {
     }
 
     /**
-     * Returns the list of selected entrants who have not enrolled.
+     * Returns the result of not enrolled.
      *
-     * @return a list of not-enrolled user IDs
+     * @return the result of this call
      */
     public ArrayList<String> notEnrolled(){
         ArrayList<String> notSigned = new ArrayList<>();
@@ -101,6 +100,11 @@ public class WaitingList {
         return notSigned;
     }
 
+    /**
+     * Returns the join locations.
+     *
+     * @return the join locations
+     */
     public HashMap<String, WaitlistJoinLocation> getJoinLocations() {
         if (joinLocations == null) {
             joinLocations = new HashMap<>();
@@ -108,6 +112,11 @@ public class WaitingList {
         return joinLocations;
     }
 
+    /**
+     * Updates the join locations.
+     *
+     * @param joinLocations the join locations
+     */
     public void setJoinLocations(HashMap<String, WaitlistJoinLocation> joinLocations) {
         this.joinLocations = joinLocations;
     }

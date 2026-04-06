@@ -60,10 +60,9 @@ public class UserEventsActivity extends AppCompatActivity {
     private TopTab currentTab = TopTab.REGISTERED;
 
     /**
-     * Initializes the activity, controllers, layout inflater, views, and tab navigation.
-     * Displays either the registered tab or hosting tab depending on the provided intent extra.
+     * Handles the create callback.
      *
-     * @param savedInstanceState the previously saved instance state, if one exists
+     * @param savedInstanceState the saved instance state
      */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,7 +83,7 @@ public class UserEventsActivity extends AppCompatActivity {
     }
 
     /**
-     * Finishes the activity without applying a transition animation.
+     * Performs finish.
      */
     @Override
     public void finish() {
@@ -93,7 +92,7 @@ public class UserEventsActivity extends AppCompatActivity {
     }
 
     /**
-     * Binds all required layout views to their corresponding fields.
+     * Performs bind views.
      */
     private void bindViews() {
         bottomNavBar = findViewById(R.id.bottomNavBar);
@@ -115,7 +114,7 @@ public class UserEventsActivity extends AppCompatActivity {
     }
 
     /**
-     * Sets up click listeners for the top tab controls and the create event button.
+     * Updates the up top tabs.
      */
     private void setupTopTabs() {
         registeredTabText.setOnClickListener(view -> showRegisteredTab());
@@ -124,7 +123,7 @@ public class UserEventsActivity extends AppCompatActivity {
     }
 
     /**
-     * Configures the bottom navigation bar and assigns screen navigation handlers.
+     * Updates the up bottom nav.
      */
     private void setupBottomNav() {
         bottomNavBar.setSelectedTab(BottomNavBarView.Tab.MY_EVENTS);
@@ -135,8 +134,7 @@ public class UserEventsActivity extends AppCompatActivity {
     }
 
     /**
-     * Displays the registered events tab, updates tab styling, hides the create event button,
-     * and loads the user's registered events.
+     * Performs show registered tab.
      */
     private void showRegisteredTab() {
         currentTab = TopTab.REGISTERED;
@@ -146,8 +144,7 @@ public class UserEventsActivity extends AppCompatActivity {
     }
 
     /**
-     * Displays the hosting events tab, updates tab styling, shows the create event button,
-     * and loads the events hosted by the user.
+     * Performs show hosting tab.
      */
     private void showHostingTab() {
         currentTab = TopTab.HOSTING;
@@ -157,7 +154,7 @@ public class UserEventsActivity extends AppCompatActivity {
     }
 
     /**
-     * Updates the visual styling of the top tabs so the active tab appears highlighted.
+     * Performs update top tab styles.
      */
     private void updateTopTabStyles() {
         registeredTabText.setTextColor(ContextCompat.getColor(this,
@@ -167,10 +164,7 @@ public class UserEventsActivity extends AppCompatActivity {
     }
 
     /**
-     * Loads all events the current user has registered for.
-     *
-     * <p>If the request succeeds, the events are bound to the registered sections.
-     * If it fails, an error state is shown as long as the registered tab is still active.
+     * Performs load registered events.
      */
     private void loadRegisteredEvents() {
         setLoadingState();
@@ -197,10 +191,7 @@ public class UserEventsActivity extends AppCompatActivity {
     }
 
     /**
-     * Loads all events hosted by the current user from Firestore.
-     *
-     * <p>If an event is missing its event ID, the Firestore document ID is assigned to it.
-     * Results are only displayed if the hosting tab is still active.
+     * Performs load hosted events.
      */
     private void loadHostedEvents() {
         setLoadingState();
@@ -223,14 +214,15 @@ public class UserEventsActivity extends AppCompatActivity {
     }
 
     /**
-     * Classifies and binds registered events into their corresponding status sections:
-     * selected, waiting, not selected, and past.
+     * Performs bind registered sections.
      *
-     * @param selectedItems the selected event items to display
-     * @param waitingItems the waiting-list event items to display
-     * @param notSelectedItems the not-selected event items to display
-     * @param pastItems the past event items to display
-     * @param stateMessageRes the optional state message resource to show above the sections
+     * @param invitedItems the invited items
+     * @param coOrganizerInviteItems the co organizer invite items
+     * @param selectedItems the selected items
+     * @param waitingItems the waiting items
+     * @param notSelectedItems the not selected items
+     * @param pastItems the past items
+     * @param stateMessageRes the state message res
      */
     private void bindRegisteredSections(List<EventListItem> invitedItems,
                                         List<EventListItem> coOrganizerInviteItems,
@@ -256,11 +248,11 @@ public class UserEventsActivity extends AppCompatActivity {
     }
 
     /**
-     * Splits hosted events into ongoing and completed sections and displays them.
+     * Performs bind hosted sections.
      *
-     * @param ongoingItems the ongoing hosted event items to display
-     * @param completedItems the completed hosted event items to display
-     * @param stateMessageRes the optional state message resource to show above the sections
+     * @param ongoingItems the ongoing items
+     * @param completedItems the completed items
+     * @param stateMessageRes the state message res
      */
     private void bindHostedSections(List<EventListItem> ongoingItems,
                                     List<EventListItem> completedItems,
@@ -278,13 +270,11 @@ public class UserEventsActivity extends AppCompatActivity {
     }
 
     /**
-     * Binds a list of events to a section container.
+     * Performs bind section.
      *
-     * <p>If the list is empty, an empty-state message is shown instead.
-     *
-     * @param container the layout container that will hold the event cards
-     * @param items the event items to display in the section
-     * @param emptyMessageRes the string resource to show when the section is empty
+     * @param container the container
+     * @param items the items
+     * @param emptyMessageRes the empty message res
      */
     private void bindSection(LinearLayout container, List<EventListItem> items, int emptyMessageRes) {
         container.removeAllViews();
@@ -301,6 +291,11 @@ public class UserEventsActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Performs bind co organizer invite section.
+     *
+     * @param items the items
+     */
     private void bindCoOrganizerInviteSection(List<EventListItem> items) {
         coOrganizerInvitesContainer.removeAllViews();
 
@@ -317,10 +312,10 @@ public class UserEventsActivity extends AppCompatActivity {
     }
 
     /**
-     * Creates a styled text view used for section empty states.
+     * Returns the result of create empty text view.
      *
-     * @param textRes the string resource to display
-     * @return a configured empty-state text view
+     * @param textRes the text res
+     * @return the result of this call
      */
     private View createEmptyTextView(int textRes) {
         TextView emptyView = new TextView(this);
@@ -332,11 +327,10 @@ public class UserEventsActivity extends AppCompatActivity {
     }
 
     /**
-     * Populates an event card view with event information and assigns a click listener
-     * to open the event detail screen.
+     * Performs bind card.
      *
-     * @param cardView the card view to populate
-     * @param eventItem the event item whose information should be displayed
+     * @param cardView the card view
+     * @param eventItem the event item
      */
     private void bindCard(View cardView, EventListItem eventItem) {
         ImageView posterImage = cardView.findViewById(R.id.eventPosterImage);
@@ -362,6 +356,12 @@ public class UserEventsActivity extends AppCompatActivity {
         cardView.setOnClickListener(view -> openEventDetailScreen(eventItem));
     }
 
+    /**
+     * Performs bind co organizer invite card.
+     *
+     * @param cardView the card view
+     * @param eventItem the event item
+     */
     private void bindCoOrganizerInviteCard(View cardView, EventListItem eventItem) {
         TextView titleText = cardView.findViewById(R.id.titleText);
         TextView locationText = cardView.findViewById(R.id.locationText);
@@ -377,6 +377,12 @@ public class UserEventsActivity extends AppCompatActivity {
         declineButton.setOnClickListener(view -> handleCoOrganizerInvite(eventItem, false));
     }
 
+    /**
+     * Performs handle co organizer invite.
+     *
+     * @param eventItem the event item
+     * @param isAccepting whether accepting
+     */
     private void handleCoOrganizerInvite(EventListItem eventItem, boolean isAccepting) {
         if (eventItem == null || TextUtils.isEmpty(eventItem.eventId)) {
             return;
@@ -404,7 +410,7 @@ public class UserEventsActivity extends AppCompatActivity {
     }
 
     /**
-     * Updates the UI to a loading state while event data is being fetched.
+     * Updates the loading state.
      */
     private void setLoadingState() {
         loadingIndicator.setVisibility(View.VISIBLE);
@@ -415,7 +421,7 @@ public class UserEventsActivity extends AppCompatActivity {
     }
 
     /**
-     * Updates the UI to show an error state when event data cannot be loaded.
+     * Updates the error state.
      */
     private void setErrorState() {
         loadingIndicator.setVisibility(View.GONE);
@@ -426,12 +432,9 @@ public class UserEventsActivity extends AppCompatActivity {
     }
 
     /**
-     * Opens the event detail screen for a given event.
+     * Performs open event detail screen.
      *
-     * <p>If the event is null or does not contain a valid event ID, the method returns
-     * without doing anything.
-     *
-     * @param eventItem the event item to display in detail
+     * @param eventItem the event item
      */
     private void openEventDetailScreen(EventListItem eventItem) {
         if (eventItem == null || TextUtils.isEmpty(eventItem.eventId)) {
@@ -450,7 +453,7 @@ public class UserEventsActivity extends AppCompatActivity {
     }
 
     /**
-     * Opens the screen used to create a new event.
+     * Performs open create event screen.
      */
     private void openCreateEventScreen() {
         startActivity(new Intent(this, CreateEventActivity.class));
@@ -458,10 +461,10 @@ public class UserEventsActivity extends AppCompatActivity {
     }
 
     /**
-     * Converts a density-independent pixel (dp) value to pixels (px).
+     * Returns the result of dp to px.
      *
-     * @param dp the dp value to convert
-     * @return the equivalent pixel value
+     * @param dp the dp
+     * @return the result of this call
      */
     private int dpToPx(int dp) {
         return UiHelper.dpToPx(this, dp);
@@ -475,6 +478,12 @@ public class UserEventsActivity extends AppCompatActivity {
         HOSTING
     }
 
+    /**
+     * Returns the result of are all registered sections empty.
+     *
+     * @param groups the groups
+     * @return the result of this call
+     */
     private boolean areAllRegisteredSectionsEmpty(UserEventsController.RegisteredEventGroups groups) {
         return groups.getInvitedItems().isEmpty()
                 && groups.getCoOrganizerInviteItems().isEmpty()
@@ -484,6 +493,12 @@ public class UserEventsActivity extends AppCompatActivity {
                 && groups.getPastItems().isEmpty();
     }
 
+    /**
+     * Returns the result of are all hosted sections empty.
+     *
+     * @param groups the groups
+     * @return the result of this call
+     */
     private boolean areAllHostedSectionsEmpty(UserEventsController.HostedEventGroups groups) {
         return groups.getOngoingItems().isEmpty() && groups.getCompletedItems().isEmpty();
     }

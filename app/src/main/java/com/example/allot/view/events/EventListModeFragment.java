@@ -39,9 +39,9 @@ public class EventListModeFragment extends Fragment {
     private ArrayList<String> userSavedIds = new ArrayList<>();
 
     /**
-     * Creates a fragment configured to show the user's own events.
+     * Returns the result of new my events instance.
      *
-     * @return a fragment instance for the My Events mode
+     * @return the result of this call
      */
     public static EventListModeFragment newMyEventsInstance() {
         EventListModeFragment fragment = new EventListModeFragment();
@@ -52,10 +52,10 @@ public class EventListModeFragment extends Fragment {
     }
 
     /**
-     * Creates a fragment configured to show saved events.
+     * Returns the result of new saved events instance.
      *
-     * @param savedIds the saved event IDs to load
-     * @return a fragment instance for the Saved Events mode
+     * @param savedIds the saved ids
+     * @return the result of this call
      */
     public static EventListModeFragment newSavedEventsInstance(ArrayList<String> savedIds) {
         EventListModeFragment fragment = new EventListModeFragment();
@@ -67,12 +67,12 @@ public class EventListModeFragment extends Fragment {
     }
 
     /**
-     * Inflates the fragment layout and loads the requested event list.
+     * Returns the result of on create view.
      *
-     * @param inflater the inflater used to create the view
-     * @param container the optional parent view group
-     * @param savedInstanceState the previously saved state bundle
-     * @return the fragment root view
+     * @param inflater the inflater
+     * @param container the container
+     * @param savedInstanceState the saved instance state
+     * @return the result of this call
      */
     @Nullable
     @Override
@@ -84,12 +84,26 @@ public class EventListModeFragment extends Fragment {
         recyclerView = view.findViewById(R.id.recyclerView);
         emptyStateText = view.findViewById(R.id.emptyStateText);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        /**
+         * Handles on Event Click Listener.
+         */
         adapter = new EventListAdapter(new ArrayList<>(), new EventListAdapter.OnEventClickListener() {
+            /**
+             * Handles the event click callback.
+             *
+             * @param event the event
+             */
             @Override
             public void onEventClick(EventListItem event) {
                 openEventDetail(event);
             }
 
+            /**
+             * Handles the heart click callback.
+             *
+             * @param event the event
+             * @param position the position
+             */
             @Override
             public void onHeartClick(EventListItem event, int position) {
                 if (event == null || event.getEventId() == null) {
@@ -119,6 +133,9 @@ public class EventListModeFragment extends Fragment {
         return view;
     }
 
+    /**
+     * Handles the resume callback.
+     */
     @Override
     public void onResume() {
         super.onResume();
@@ -127,6 +144,9 @@ public class EventListModeFragment extends Fragment {
         }
     }
 
+    /**
+     * Performs refresh saved ids and load.
+     */
     private void refreshSavedIdsAndLoad() {
         exploreController.loadSavedEventIds((savedEventIds, success) -> {
             userSavedIds = new ArrayList<>(savedEventIds == null ? new ArrayList<>() : savedEventIds);
@@ -135,7 +155,7 @@ public class EventListModeFragment extends Fragment {
     }
 
     /**
-     * Loads either the hosted events list or the saved events list based on the current mode.
+     * Performs load items.
      */
     private void loadItems() {
         if (MODE_MY_EVENTS.equals(getMode())) {
@@ -147,9 +167,9 @@ public class EventListModeFragment extends Fragment {
     }
 
     /**
-     * Updates the empty state and list visibility after items are loaded.
+     * Performs update ui.
      *
-     * @param items the items returned by the controller
+     * @param items the items
      */
     private void updateUi(List<EventListItem> items) {
         if (items == null || items.isEmpty()) {
@@ -165,9 +185,9 @@ public class EventListModeFragment extends Fragment {
     }
 
     /**
-     * Reads the current fragment mode from the arguments bundle.
+     * Returns the mode.
      *
-     * @return the active list mode
+     * @return the mode
      */
     private String getMode() {
         Bundle args = getArguments();
@@ -175,9 +195,9 @@ public class EventListModeFragment extends Fragment {
     }
 
     /**
-     * Builds the empty-state message for the current list mode.
+     * Returns the empty message.
      *
-     * @return the empty-state text shown when no events are available
+     * @return the empty message
      */
     private String getEmptyMessage() {
         return MODE_SAVED_EVENTS.equals(getMode())
@@ -185,6 +205,11 @@ public class EventListModeFragment extends Fragment {
                 : "You have no events.";
     }
 
+    /**
+     * Performs open event detail.
+     *
+     * @param event the event
+     */
     private void openEventDetail(EventListItem event) {
         if (event == null || event.getEventId() == null || event.getEventId().trim().isEmpty() || getContext() == null) {
             return;

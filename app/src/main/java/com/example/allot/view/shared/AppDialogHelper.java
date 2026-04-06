@@ -12,18 +12,18 @@ import android.view.Window;
 public final class AppDialogHelper {
 
     /**
-     * Prevents this utility class from being instantiated.
+     * Creates a new AppDialogHelper instance.
      */
     private AppDialogHelper() {
     }
 
     /**
-     * Creates a dialog from a layout resource.
+     * Returns the result of create dialog.
      *
-     * @param context the context used to build the dialog
-     * @param layoutResId the layout resource inflated inside the dialog
-     * @param cancelable true when the dialog may be dismissed by the user
-     * @return the configured dialog instance
+     * @param context the context
+     * @param layoutResId the layout res id
+     * @param cancelable the cancelable
+     * @return the result of this call
      */
     public static Dialog createDialog(Context context, int layoutResId, boolean cancelable) {
         Dialog dialog = new Dialog(context);
@@ -34,11 +34,11 @@ public final class AppDialogHelper {
     }
 
     /**
-     * Shows a dialog with the requested size and transparent background.
+     * Performs show.
      *
-     * @param dialog the dialog to show
-     * @param widthPx the target width in pixels
-     * @param heightPx the target height in pixels
+     * @param dialog the dialog
+     * @param widthPx the width px
+     * @param heightPx the height px
      */
     public static void show(Dialog dialog, int widthPx, int heightPx) {
         dialog.show();
@@ -50,10 +50,10 @@ public final class AppDialogHelper {
     }
 
     /**
-     * Shows a dialog with a fixed width and wrap-content height.
+     * Performs show wrap content.
      *
-     * @param dialog the dialog to show
-     * @param widthPx the target width in pixels
+     * @param dialog the dialog
+     * @param widthPx the width px
      */
     public static void showWrapContent(Dialog dialog, int widthPx) {
         show(dialog, widthPx, ViewGroup.LayoutParams.WRAP_CONTENT);

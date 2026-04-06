@@ -45,9 +45,9 @@ public class BottomNavBarView extends LinearLayout {
     private TextView profileLabel;
 
     /**
-     * Creates a BottomNavBarView with the given context.
+     * Creates a new BottomNavBarView instance.
      *
-     * @param context the context used to create the view
+     * @param context the context
      */
     public BottomNavBarView(Context context) {
         super(context);
@@ -55,10 +55,10 @@ public class BottomNavBarView extends LinearLayout {
     }
 
     /**
-     * Creates a BottomNavBarView with the given context and attribute set.
+     * Creates a new BottomNavBarView instance.
      *
-     * @param context the context used to create the view
-     * @param attrs the XML attributes for the view
+     * @param context the context
+     * @param attrs the attrs
      */
     public BottomNavBarView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
@@ -66,12 +66,11 @@ public class BottomNavBarView extends LinearLayout {
     }
 
     /**
-     * Creates a BottomNavBarView with the given context, attribute set,
-     * and default style attribute.
+     * Creates a new BottomNavBarView instance.
      *
-     * @param context the context used to create the view
-     * @param attrs the XML attributes for the view
-     * @param defStyleAttr the default style attribute
+     * @param context the context
+     * @param attrs the attrs
+     * @param defStyleAttr the def style attr
      */
     public BottomNavBarView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
@@ -79,10 +78,9 @@ public class BottomNavBarView extends LinearLayout {
     }
 
     /**
-     * Initializes the bottom navigation bar, inflates its layout,
-     * binds its views, disables tabs by default, and selects the explore tab.
+     * Performs init.
      *
-     * @param context the context used to inflate and initialize the view
+     * @param context the context
      */
     private void init(Context context) {
         setOrientation(VERTICAL);
@@ -115,9 +113,9 @@ public class BottomNavBarView extends LinearLayout {
     }
 
     /**
-     * Updates the navigation bar to visually mark the given tab as selected.
+     * Updates the selected tab.
      *
-     * @param selectedTab the tab to mark as selected
+     * @param selectedTab the selected tab
      */
     public void setSelectedTab(Tab selectedTab) {
         updateTabState(exploreTab, exploreIcon, exploreLabel, selectedTab == Tab.EXPLORE);
@@ -128,11 +126,10 @@ public class BottomNavBarView extends LinearLayout {
     }
 
     /**
-     * Sets a click listener for the given tab and enables or disables the tab
-     * depending on whether a listener is provided.
+     * Updates the on tab click listener.
      *
-     * @param tab the tab to configure
-     * @param listener the click listener for the tab, or null to disable it
+     * @param tab the tab
+     * @param listener the listener
      */
     public void setOnTabClickListener(Tab tab, @Nullable OnClickListener listener) {
         LinearLayout tabView = getTabView(tab);
@@ -141,10 +138,9 @@ public class BottomNavBarView extends LinearLayout {
     }
 
     /**
-     * Sets a tab selection listener for all tabs in the navigation bar.
+     * Updates the on tab selected listener.
      *
-     * @param listener the listener to notify when a tab is selected,
-     *                 or null to disable tab selection
+     * @param listener the listener
      */
     public void setOnTabSelectedListener(@Nullable OnTabSelectedListener listener) {
         setOnTabClickListener(Tab.EXPLORE,
@@ -160,10 +156,10 @@ public class BottomNavBarView extends LinearLayout {
     }
 
     /**
-     * Enables or disables interaction for the given tab view.
+     * Updates the tab enabled.
      *
-     * @param tabView the tab view to update
-     * @param enabled true to enable the tab, false to disable it
+     * @param tabView the tab view
+     * @param enabled the enabled
      */
     private void setTabEnabled(LinearLayout tabView, boolean enabled) {
         tabView.setEnabled(enabled);
@@ -172,10 +168,10 @@ public class BottomNavBarView extends LinearLayout {
     }
 
     /**
-     * Returns the view associated with the given tab.
+     * Returns the tab view.
      *
-     * @param tab the tab whose view should be returned
-     * @return the layout view for the specified tab
+     * @param tab the tab
+     * @return the tab view
      */
     private LinearLayout getTabView(Tab tab) {
         switch (tab) {
@@ -194,12 +190,12 @@ public class BottomNavBarView extends LinearLayout {
     }
 
     /**
-     * Updates the visual selected state of a tab.
+     * Performs update tab state.
      *
-     * @param tabView the tab layout view
-     * @param iconView the icon shown for the tab
-     * @param labelView the label shown for the tab
-     * @param selected true if the tab is selected, false otherwise
+     * @param tabView the tab view
+     * @param iconView the icon view
+     * @param labelView the label view
+     * @param selected the selected
      */
     private void updateTabState(LinearLayout tabView, ImageView iconView, TextView labelView, boolean selected) {
         int color = ContextCompat.getColor(
@@ -218,9 +214,9 @@ public class BottomNavBarView extends LinearLayout {
     public interface OnTabSelectedListener {
 
         /**
-         * Called when a tab is selected.
+         * Handles the tab selected callback.
          *
-         * @param tab the selected tab
+         * @param tab the tab
          */
         void onTabSelected(Tab tab);
     }

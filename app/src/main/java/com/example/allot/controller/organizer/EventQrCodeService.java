@@ -25,13 +25,11 @@ import java.util.Map;
 public class EventQrCodeService {
 
     /**
-     * Generates a QR bitmap for the provided payload.
+     * Returns the result of generate.
      *
-     * @param payload the value to encode
-     * @param sizePx the output width and height in pixels
-     * @return a square bitmap containing the QR code
-     * @throws IllegalArgumentException if the payload is blank or size is invalid
-     * @throws IllegalStateException if encoding fails
+     * @param payload the payload
+     * @param sizePx the size px
+     * @return the result of this call
      */
     public Bitmap generate(String payload, int sizePx) {
         if (payload == null || payload.trim().isEmpty()) {
@@ -58,14 +56,12 @@ public class EventQrCodeService {
     }
 
     /**
-     * Saves the provided QR code bitmap to the Pictures gallery.
+     * Performs save to gallery.
      *
-     * @param context the Android context used to access MediaStore
-     * @param bitmap the QR bitmap to save
-     * @param eventTitle the event title used in the file name when available
-     * @param eventId the event ID used as a fallback file name
-     * @throws IOException if the image cannot be written
-     * @throws SecurityException if the media store cannot be accessed
+     * @param context the context
+     * @param bitmap the bitmap
+     * @param eventTitle the event title
+     * @param eventId the event id
      */
     public void saveToGallery(Context context,
                               Bitmap bitmap,
@@ -95,6 +91,13 @@ public class EventQrCodeService {
         }
     }
 
+    /**
+     * Returns the result of create image uri.
+     *
+     * @param context the context
+     * @param fileName the file name
+     * @return the result of this call
+     */
     private Uri createImageUri(Context context, String fileName) {
         ContentValues values = new ContentValues();
         values.put(MediaStore.Images.Media.DISPLAY_NAME, fileName);
@@ -105,6 +108,13 @@ public class EventQrCodeService {
         return context.getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
     }
 
+    /**
+     * Returns the result of build file name.
+     *
+     * @param eventTitle the event title
+     * @param eventId the event id
+     * @return the result of this call
+     */
     private String buildFileName(String eventTitle, String eventId) {
         String baseName = !TextUtils.isEmpty(eventTitle) ? eventTitle : eventId;
         String normalizedName = baseName == null ? "event" : baseName.trim().toLowerCase(Locale.US);
@@ -116,6 +126,12 @@ public class EventQrCodeService {
         return "allot_qr_" + normalizedName + ".png";
     }
 
+    /**
+     * Returns the result of to bitmap.
+     *
+     * @param bitMatrix the bit matrix
+     * @return the result of this call
+     */
     private Bitmap toBitmap(BitMatrix bitMatrix) {
         int width = bitMatrix.getWidth();
         int height = bitMatrix.getHeight();

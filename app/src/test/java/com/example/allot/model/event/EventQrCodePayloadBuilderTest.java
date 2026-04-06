@@ -4,12 +4,21 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
+/**
+ * Tests the event qr code payload builder.
+ */
 public class EventQrCodePayloadBuilderTest {
+    /**
+     * Performs build event payload trims event id.
+     */
     @Test
     public void buildEventPayload_trimsEventId() {
         assertEquals("event-1", EventQrCodePayloadBuilder.buildEventPayload("  event-1  "));
     }
 
+    /**
+     * Performs build event payload rejects blank event id.
+     */
     @Test(expected = IllegalArgumentException.class)
     public void buildEventPayload_rejectsBlankEventId() {
         EventQrCodePayloadBuilder.buildEventPayload("   ");

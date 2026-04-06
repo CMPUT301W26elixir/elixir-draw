@@ -16,29 +16,29 @@ public class EventListItem {
     public boolean isSaved;
 
     /**
-     * Creates an EventListItem without an event ID, category, or poster URL.
+     * Creates a new EventListItem instance.
      *
-     * @param title the event title
-     * @param street the event location text
-     * @param date the formatted event date
-     * @param price the formatted event price
-     * @param daysLeft the formatted registration deadline text
+     * @param title the title
+     * @param street the street
+     * @param date the date
+     * @param price the price
+     * @param daysLeft the days left
      */
     public EventListItem(String title, String street, String date, String price, String daysLeft) {
         this(null, title, street, date, price, daysLeft, null, null);
     }
 
     /**
-     * Creates a fully populated EventListItem.
+     * Creates a new EventListItem instance.
      *
-     * @param eventId the event ID
-     * @param title the event title
-     * @param street the event location text
-     * @param date the formatted event date
-     * @param price the formatted event price
-     * @param daysLeft the formatted registration deadline text
-     * @param category the event category
-     * @param posterUrl the poster image URL for the event
+     * @param eventId the event id
+     * @param title the title
+     * @param street the street
+     * @param date the date
+     * @param price the price
+     * @param daysLeft the days left
+     * @param category the category
+     * @param posterUrl the poster url
      */
     public EventListItem(String eventId, String title, String street, String date, String price,
                          String daysLeft, String category, String posterUrl) {
@@ -53,10 +53,10 @@ public class EventListItem {
     }
 
     /**
-     * Creates an EventListItem from an Event model using display-formatted values.
+     * Returns the result of from event.
      *
-     * @param event the event model to convert
-     * @return a formatted EventListItem for UI display
+     * @param event the event
+     * @return the result of this call
      */
     public static EventListItem fromEvent(Event event) {
         return new EventListItem(
@@ -71,38 +71,83 @@ public class EventListItem {
         );
     }
 
+    /**
+     * Returns the event id.
+     *
+     * @return the event id
+     */
     public String getEventId() {
         return eventId;
     }
 
+    /**
+     * Returns the title.
+     *
+     * @return the title
+     */
     public String getTitle() {
         return title;
     }
 
+    /**
+     * Returns the street.
+     *
+     * @return the street
+     */
     public String getStreet() {
         return street;
     }
 
+    /**
+     * Returns the date.
+     *
+     * @return the date
+     */
     public String getDate() {
         return date;
     }
 
+    /**
+     * Returns the price.
+     *
+     * @return the price
+     */
     public String getPrice() {
         return price;
     }
 
+    /**
+     * Returns the days left.
+     *
+     * @return the days left
+     */
     public String getDaysLeft() {
         return daysLeft;
     }
 
+    /**
+     * Returns the category.
+     *
+     * @return the category
+     */
     public String getCategory() {
         return category;
     }
 
+    /**
+     * Returns the poster url.
+     *
+     * @return the poster url
+     */
     public String getPosterUrl() {
         return posterUrl;
     }
 
+    /**
+     * Returns whether saved.
+     *
+     * @return whether saved
+     */
     public boolean isSaved() {
         return isSaved;
     }

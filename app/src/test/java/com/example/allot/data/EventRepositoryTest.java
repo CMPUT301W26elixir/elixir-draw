@@ -9,7 +9,13 @@ import java.util.Date;
 import java.util.Map;
 import org.junit.Test;
 
+/**
+ * Tests the event repository.
+ */
 public class EventRepositoryTest {
+    /**
+     * Performs build join waiting list updates adds waitlist and join location entries.
+     */
     @Test
     public void buildJoinWaitingListUpdates_addsWaitlistAndJoinLocationEntries() {
         EventRepository repository = new EventRepository(null);
@@ -26,6 +32,9 @@ public class EventRepositoryTest {
         assertEquals(joinedAt, joinLocation.getJoinedAt());
     }
 
+    /**
+     * Performs build leave waiting list updates removes waitlist and join location entries.
+     */
     @Test
     public void buildLeaveWaitingListUpdates_removesWaitlistAndJoinLocationEntries() {
         EventRepository repository = new EventRepository(null);
@@ -38,6 +47,9 @@ public class EventRepositoryTest {
         assertNotNull(updates.get("waitingList.joinLocations.device-1"));
     }
 
+    /**
+     * Performs build join waiting list updates skips join location when coordinates missing.
+     */
     @Test
     public void buildJoinWaitingListUpdates_skipsJoinLocationWhenCoordinatesMissing() {
         EventRepository repository = new EventRepository(null);

@@ -15,11 +15,17 @@ import java.util.HashMap;
 import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
+/**
+ * Tests the edit event controller.
+ */
 public class EditEventControllerTest {
     private FakeEventRepository eventRepository;
     private FakeGeocodingService geocodingService;
     private EditEventController controller;
 
+    /**
+     * Updates the up.
+     */
     @Before
     public void setUp() {
         eventRepository = new FakeEventRepository();
@@ -33,6 +39,9 @@ public class EditEventControllerTest {
         );
     }
 
+    /**
+     * Performs is save enabled disables save when snapshot matches.
+     */
     @Test
     public void isSaveEnabled_disablesSaveWhenSnapshotMatches() {
         EventFormData formData = buildFormData("Sample Event");
@@ -41,6 +50,9 @@ public class EditEventControllerTest {
         assertFalse(controller.isSaveEnabled(formData, originalSnapshot, false, false));
     }
 
+    /**
+     * Performs is save enabled enables save when form changes.
+     */
     @Test
     public void isSaveEnabled_enablesSaveWhenFormChanges() {
         EventFormData originalFormData = buildFormData("Sample Event");
@@ -50,6 +62,9 @@ public class EditEventControllerTest {
         assertTrue(controller.isSaveEnabled(currentFormData, originalSnapshot, false, false));
     }
 
+    /**
+     * Performs save changes updates coordinates when geocoding succeeds.
+     */
     @Test
     public void saveChanges_updatesCoordinatesWhenGeocodingSucceeds() {
         geocodingService.coordinates = new EventLocationCoordinates(53.5232, -113.5263);
@@ -63,6 +78,9 @@ public class EditEventControllerTest {
         });
     }
 
+    /**
+     * Performs save changes clears coordinates when geocoding fails.
+     */
     @Test
     public void saveChanges_clearsCoordinatesWhenGeocodingFails() {
         geocodingService.coordinates = null;
@@ -76,6 +94,12 @@ public class EditEventControllerTest {
         });
     }
 
+    /**
+     * Returns the result of build form data.
+     *
+     * @param title the title
+     * @return the result of this call
+     */
     private EventFormData buildFormData(String title) {
         return new EventFormData(
                 title,
@@ -97,30 +121,58 @@ public class EditEventControllerTest {
         );
     }
 
+    /**
+     * Stores and retrieves fake event.
+     */
     private static class FakeEventRepository extends EventRepository {
         private Event event;
         private boolean updateSuccess;
         private Map<String, Object> lastUpdates = new HashMap<>();
 
+        /**
+         * Creates a new FakeEventRepository instance.
+         */
         private FakeEventRepository() {
             super((com.google.firebase.firestore.FirebaseFirestore) null);
         }
 
+        /**
+         * Performs update event.
+         *
+         * @param eventId the event id
+         * @param updates the updates
+         * @param listener the listener
+         */
         @Override
         public void updateEvent(String eventId, Map<String, Object> updates, com.example.allot.common.OnCompleteListener<Boolean> listener) {
             lastUpdates = new HashMap<>(updates);
             listener.onComplete(updateSuccess, updateSuccess);
         }
 
+        /**
+         * Performs get event by id.
+         *
+         * @param eventId the event id
+         * @param listener the listener
+         */
         @Override
         public void getEventById(String eventId, com.example.allot.common.OnCompleteListener<Event> listener) {
             listener.onComplete(event, event != null);
         }
     }
 
+    /**
+     * Provides fake geocoding operations.
+     */
     private static class FakeGeocodingService implements EventLocationGeocodingService {
         private EventLocationCoordinates coordinates;
 
+        /**
+         * Returns the result of geocode.
+         *
+         * @param location the location
+         * @return the result of this call
+         */
         @Override
         public EventLocationCoordinates geocode(String location) {
             return coordinates;

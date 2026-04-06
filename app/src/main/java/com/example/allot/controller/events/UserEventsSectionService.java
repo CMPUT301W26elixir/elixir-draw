@@ -29,26 +29,56 @@ public class UserEventsSectionService {
         private final List<Event> pastEvents = new ArrayList<>();
         private final List<Event> coOrganizerInvites = new ArrayList<>();
 
+        /**
+         * Returns the invited events.
+         *
+         * @return the invited events
+         */
         public List<Event> getInvitedEvents() {
             return invitedEvents;
         }
 
+        /**
+         * Returns the selected events.
+         *
+         * @return the selected events
+         */
         public List<Event> getSelectedEvents() {
             return selectedEvents;
         }
 
+        /**
+         * Returns the waiting events.
+         *
+         * @return the waiting events
+         */
         public List<Event> getWaitingEvents() {
             return waitingEvents;
         }
 
+        /**
+         * Returns the not selected events.
+         *
+         * @return the not selected events
+         */
         public List<Event> getNotSelectedEvents() {
             return notSelectedEvents;
         }
 
+        /**
+         * Returns the past events.
+         *
+         * @return the past events
+         */
         public List<Event> getPastEvents() {
             return pastEvents;
         }
 
+        /**
+         * Returns the co organizer invites.
+         *
+         * @return the co organizer invites
+         */
         public List<Event> getCoOrganizerInvites() {
             return coOrganizerInvites;
         }
@@ -61,22 +91,31 @@ public class UserEventsSectionService {
         private final List<Event> ongoingEvents = new ArrayList<>();
         private final List<Event> completedEvents = new ArrayList<>();
 
+        /**
+         * Returns the ongoing events.
+         *
+         * @return the ongoing events
+         */
         public List<Event> getOngoingEvents() {
             return ongoingEvents;
         }
 
+        /**
+         * Returns the completed events.
+         *
+         * @return the completed events
+         */
         public List<Event> getCompletedEvents() {
             return completedEvents;
         }
     }
 
     /**
-     * Classifies and groups registered events into their corresponding status sections:
-     * selected, waiting, not selected, and past.
+     * Returns the result of group registered events.
      *
-     * @param events the list of registered events to categorize and display
-     * @param deviceId the current user's device ID
-     * @return the grouped registered sections
+     * @param events the events
+     * @param deviceId the device id
+     * @return the result of this call
      */
     public RegisteredSections groupRegisteredEvents(List<Event> events, String deviceId) {
         RegisteredSections sections = new RegisteredSections();
@@ -115,10 +154,10 @@ public class UserEventsSectionService {
     }
 
     /**
-     * Splits hosted events into ongoing and completed sections and displays them.
+     * Returns the result of group hosted events.
      *
-     * @param events the list of hosted events to bind
-     * @return the grouped hosted sections
+     * @param events the events
+     * @return the result of this call
      */
     public HostedSections groupHostedEvents(List<Event> events) {
         HostedSections sections = new HostedSections();
@@ -139,11 +178,11 @@ public class UserEventsSectionService {
     }
 
     /**
-     * Determines which registered section an event belongs to.
+     * Returns the result of classify registered event.
      *
-     * @param event the event to classify
-     * @param deviceId the current user's device ID
-     * @return the matching section for the event
+     * @param event the event
+     * @param deviceId the device id
+     * @return the result of this call
      */
     public RegisteredSection classifyRegisteredEvent(Event event, String deviceId) {
         if (isPastEvent(event)) {
@@ -165,6 +204,13 @@ public class UserEventsSectionService {
         return RegisteredSection.NOT_SELECTED;
     }
 
+    /**
+     * Returns whether invited.
+     *
+     * @param event the event
+     * @param deviceId the device id
+     * @return whether invited
+     */
     private boolean isInvited(Event event, String deviceId) {
         if (event == null || !event.isPrivate()) {
             return false;
@@ -177,10 +223,10 @@ public class UserEventsSectionService {
     }
 
     /**
-     * Determines whether an event has already occurred.
+     * Returns whether past event.
      *
-     * @param event the event to evaluate
-     * @return true if the event date is in the past; false otherwise
+     * @param event the event
+     * @return whether past event
      */
     public boolean isPastEvent(Event event) {
         return event != null
@@ -189,14 +235,11 @@ public class UserEventsSectionService {
     }
 
     /**
-     * Determines whether the current user has been selected or enrolled in an event.
+     * Returns whether selected.
      *
-     * <p>A user is considered selected if their device ID appears in the enrolled list,
-     * chosen list, or waiting list chosen list.
-     *
-     * @param event the event to check
-     * @param deviceId the current user's device ID
-     * @return true if the current user is selected; false otherwise
+     * @param event the event
+     * @param deviceId the device id
+     * @return whether selected
      */
     public boolean isSelected(Event event, String deviceId) {
         return containsUser(event == null ? null : event.getEnrolled(), deviceId)
@@ -205,11 +248,11 @@ public class UserEventsSectionService {
     }
 
     /**
-     * Determines whether the current user has been invited to co-organize the event.
+     * Returns whether invited co organizer.
      *
-     * @param event the event to check
-     * @param deviceId the current user's device ID
-     * @return true if the user has a co-organizer invite
+     * @param event the event
+     * @param deviceId the device id
+     * @return whether invited co organizer
      */
     public boolean isInvitedCoOrganizer(Event event, String deviceId) {
         return event != null
@@ -220,13 +263,10 @@ public class UserEventsSectionService {
     }
 
     /**
-     * Determines whether the event should be shown in the waiting section.
+     * Returns whether waiting.
      *
-     * <p>An event is considered waiting if the registration deadline has not passed yet,
-     * or if the deadline has passed but selection results have not yet been published.
-     *
-     * @param event the event to evaluate
-     * @return true if the event is still waiting for selection results; false otherwise
+     * @param event the event
+     * @return whether waiting
      */
     public boolean isWaiting(Event event) {
         if (event == null) {
@@ -241,10 +281,10 @@ public class UserEventsSectionService {
     }
 
     /**
-     * Determines whether an event's registration deadline has passed.
+     * Returns whether deadline passed.
      *
-     * @param event the event to check
-     * @return true if the registration deadline is in the past or exactly now; false otherwise
+     * @param event the event
+     * @return whether deadline passed
      */
     public boolean isDeadlinePassed(Event event) {
         return event != null
@@ -253,10 +293,10 @@ public class UserEventsSectionService {
     }
 
     /**
-     * Determines whether any selection-related result lists have been published for the event.
+     * Returns whether this instance has published selection results.
      *
-     * @param event the event to inspect
-     * @return true if at least one result list contains data; false otherwise
+     * @param event the event
+     * @return whether this instance has published selection results
      */
     public boolean hasPublishedSelectionResults(Event event) {
         return (event != null && event.getChosen() != null && !event.getChosen().isEmpty())
@@ -267,11 +307,11 @@ public class UserEventsSectionService {
     }
 
     /**
-     * Checks whether a given device ID appears in a list of users.
+     * Returns the result of contains user.
      *
-     * @param users the list of user device IDs
-     * @param deviceId the device ID to search for
-     * @return true if the device ID is in the list; false otherwise
+     * @param users the users
+     * @param deviceId the device id
+     * @return the result of this call
      */
     private boolean containsUser(List<String> users, String deviceId) {
         return users != null && users.contains(deviceId);

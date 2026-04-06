@@ -9,10 +9,10 @@ import java.util.HashMap;
  */
 public class LotteryDrawService {
     /**
-     * Checks whether the event already has draw results.
+     * Returns whether this instance has draw results.
      *
-     * @param event the event to check
-     * @return true if the event already has selected or processed entrants, false otherwise
+     * @param event the event
+     * @return whether this instance has draw results
      */
     public boolean hasDrawResults(Event event) {
         return event != null
@@ -24,11 +24,11 @@ public class LotteryDrawService {
     }
 
     /**
-     * Validates the form, runs the draw, and saves the results to Firestore.
+     * Returns the result of build draw result.
      *
-     * @param event the current event state
-     * @param attendeesToSelect the attendee count for the draw
-     * @return the updated event, or null if the draw cannot be created
+     * @param event the event
+     * @param attendeesToSelect the attendees to select
+     * @return the result of this call
      */
     public Event buildDrawResult(Event event, int attendeesToSelect) {
         if (event == null) {

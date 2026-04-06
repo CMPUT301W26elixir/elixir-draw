@@ -19,14 +19,25 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+/**
+ * Tests the explore leave event flow.
+ */
 @RunWith(AndroidJUnit4.class)
 public class ExploreLeaveEventFlowTest {
 
+    /**
+     * Performs disable animations.
+     */
     @Before
     public void disableAnimations() {
         SystemAnimations.disableAll();
     }
 
+    /**
+     * Returns the result of build intent.
+     *
+     * @return the result of this call
+     */
     private Intent buildIntent() {
         Intent intent = new Intent(ApplicationProvider.getApplicationContext(), ExploreActivity.class);
         intent.putExtra(ExploreActivity.EXTRA_UI_TEST_EVENT_ID, "ui-test-event-1");
@@ -42,6 +53,9 @@ public class ExploreLeaveEventFlowTest {
         return intent;
     }
 
+    /**
+     * Performs explore to event detail to leave waitlist flow works.
+     */
     @Test
     public void exploreToEventDetailToLeaveWaitlist_flowWorks() {
         try (ActivityScenario<ExploreActivity> scenario = ActivityScenario.launch(buildIntent())) {

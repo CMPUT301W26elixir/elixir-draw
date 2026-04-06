@@ -10,15 +10,27 @@ import java.io.IOException;
  */
 public final class SystemAnimations {
 
+    /**
+     * Creates a new SystemAnimations instance.
+     */
     private SystemAnimations() {
     }
 
+    /**
+     * Performs disable all.
+     */
     public static void disableAll() {
         setAnimationScale("window_animation_scale", 0f);
         setAnimationScale("transition_animation_scale", 0f);
         setAnimationScale("animator_duration_scale", 0f);
     }
 
+    /**
+     * Updates the animation scale.
+     *
+     * @param setting the setting
+     * @param value the value
+     */
     private static void setAnimationScale(String setting, float value) {
         UiAutomation automation = InstrumentationRegistry.getInstrumentation().getUiAutomation();
         ParcelFileDescriptor descriptor = automation.executeShellCommand(

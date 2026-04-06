@@ -30,6 +30,11 @@ public class ProfilePhotoCropActivity extends AppCompatActivity {
     private TextView usePhotoButton;
     private Uri inputUri;
 
+    /**
+     * Handles the create callback.
+     *
+     * @param savedInstanceState the saved instance state
+     */
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -57,6 +62,9 @@ public class ProfilePhotoCropActivity extends AppCompatActivity {
         loadCropImage();
     }
 
+    /**
+     * Performs load crop image.
+     */
     private void loadCropImage() {
         usePhotoButton.setEnabled(false);
         new Thread(() -> {
@@ -84,6 +92,9 @@ public class ProfilePhotoCropActivity extends AppCompatActivity {
         }).start();
     }
 
+    /**
+     * Performs export cropped photo.
+     */
     private void exportCroppedPhoto() {
         usePhotoButton.setEnabled(false);
         new Thread(() -> {
@@ -109,6 +120,12 @@ public class ProfilePhotoCropActivity extends AppCompatActivity {
         }).start();
     }
 
+    /**
+     * Returns the result of write bitmap to cache.
+     *
+     * @param bitmap the bitmap
+     * @return the result of this call
+     */
     @Nullable
     private Uri writeBitmapToCache(Bitmap bitmap) {
         File outputFile = new File(getCacheDir(), "profile-photo-crop.jpg");
@@ -122,6 +139,12 @@ public class ProfilePhotoCropActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Returns the result of load bitmap.
+     *
+     * @param imageUri the image uri
+     * @return the result of this call
+     */
     @Nullable
     private Bitmap loadBitmap(Uri imageUri) throws IOException {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
@@ -150,6 +173,13 @@ public class ProfilePhotoCropActivity extends AppCompatActivity {
         );
     }
 
+    /**
+     * Returns the result of calculate sample size.
+     *
+     * @param width the width
+     * @param height the height
+     * @return the result of this call
+     */
     private int calculateSampleSize(int width, int height) {
         int largestDimension = Math.max(width, height);
         int sampleSize = 1;

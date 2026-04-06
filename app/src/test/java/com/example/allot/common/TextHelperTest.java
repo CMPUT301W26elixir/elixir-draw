@@ -5,14 +5,23 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
+/**
+ * Tests the text helper.
+ */
 public class TextHelperTest {
 
+    /**
+     * Performs clean text trims whitespace and handles null.
+     */
     @Test
     public void cleanText_trimsWhitespaceAndHandlesNull() {
         assertEquals("", TextHelper.cleanText(null));
         assertEquals("hello", TextHelper.cleanText("  hello  "));
     }
 
+    /**
+     * Performs is blank returns true for null and whitespace only values.
+     */
     @Test
     public void isBlank_returnsTrueForNullAndWhitespaceOnlyValues() {
         assertTrue(TextHelper.isBlank(null));
@@ -20,6 +29,9 @@ public class TextHelperTest {
         assertFalse(TextHelper.isBlank(" value "));
     }
 
+    /**
+     * Performs default text returns fallback when value is blank.
+     */
     @Test
     public void defaultText_returnsFallbackWhenValueIsBlank() {
         assertEquals("fallback", TextHelper.defaultText(" ", "fallback"));

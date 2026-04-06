@@ -28,27 +28,27 @@ public class EventRepository {
     private final EventOfferService eventOfferService = new EventOfferService();
 
     /**
-     * Creates an EventRepository and connects it to Firestore.
+     * Creates a new EventRepository instance.
      */
     public EventRepository() {
         this(FirebaseFirestore.getInstance());
     }
 
     /**
-     * Creates an EventRepository with a provided Firestore instance.
+     * Creates a new EventRepository instance.
      *
-     * @param database the Firestore instance to use
+     * @param database the database
      */
     public EventRepository(FirebaseFirestore database) {
         this.database = database;
     }
 
     /**
-     * Saves a new event and links it to the organizer's event list.
+     * Performs create new event for user.
      *
-     * @param event the event to create
-     * @param organizerId the organizer creating the event
-     * @param listener the listener that receives the result
+     * @param event the event
+     * @param organizerId the organizer id
+     * @param listener the listener
      */
     public void createNewEventForUser(Event event, String organizerId, OnCompleteListener<Boolean> listener) {
         WriteBatch batch = database.batch();
@@ -61,14 +61,14 @@ public class EventRepository {
     }
 
     /**
-     * Adds a user to the waiting list for an event.
+     * Performs join waiting list.
      *
-     * @param eventId the event ID
-     * @param deviceId the user device ID
-     * @param latitude the temporary join latitude captured by the client
-     * @param longitude the temporary join longitude captured by the client
-     * @param joinedAt the temporary join timestamp captured by the client
-     * @param listener the listener that receives the result
+     * @param eventId the event id
+     * @param deviceId the device id
+     * @param latitude the latitude
+     * @param longitude the longitude
+     * @param joinedAt the joined at
+     * @param listener the listener
      */
     public void joinWaitingList(String eventId,
                                 String deviceId,
@@ -84,11 +84,11 @@ public class EventRepository {
     }
 
     /**
-     * Removes a user from the waiting list for an event.
+     * Performs leave waiting list.
      *
-     * @param eventId the event ID
-     * @param deviceId the user device ID
-     * @param listener the listener that receives the result
+     * @param eventId the event id
+     * @param deviceId the device id
+     * @param listener the listener
      */
     public void leaveWaitingList(String eventId, String deviceId, OnCompleteListener<Boolean> listener) {
         database.collection("events")
@@ -99,14 +99,14 @@ public class EventRepository {
     }
 
     /**
-     * Saves or refreshes the stored join location for a user already on the waiting list.
+     * Performs update waitlist location.
      *
-     * @param eventId the event ID
-     * @param deviceId the user device ID
-     * @param latitude the captured latitude
-     * @param longitude the captured longitude
-     * @param joinedAt the timestamp recorded with the saved location
-     * @param listener the listener that receives the result
+     * @param eventId the event id
+     * @param deviceId the device id
+     * @param latitude the latitude
+     * @param longitude the longitude
+     * @param joinedAt the joined at
+     * @param listener the listener
      */
     public void updateWaitlistLocation(String eventId,
                                        String deviceId,
@@ -130,6 +130,15 @@ public class EventRepository {
                 .addOnFailureListener(exception -> listener.onComplete(false, false));
     }
 
+    /**
+     * Returns the result of build join waiting list updates.
+     *
+     * @param deviceId the device id
+     * @param latitude the latitude
+     * @param longitude the longitude
+     * @param joinedAt the joined at
+     * @return the result of this call
+     */
     Map<String, Object> buildJoinWaitingListUpdates(String deviceId,
                                                     Double latitude,
                                                     Double longitude,
@@ -143,6 +152,12 @@ public class EventRepository {
         return updates;
     }
 
+    /**
+     * Returns the result of build leave waiting list updates.
+     *
+     * @param deviceId the device id
+     * @return the result of this call
+     */
     Map<String, Object> buildLeaveWaitingListUpdates(String deviceId) {
         Map<String, Object> updates = new HashMap<>();
         updates.put("waitingList.list", FieldValue.arrayRemove(deviceId));
@@ -151,11 +166,11 @@ public class EventRepository {
     }
 
     /**
-     * Adds a comment or reply to the given event.
+     * Performs add comment.
      *
-     * @param eventId the event ID
-     * @param comment the comment to add
-     * @param listener the listener that receives the result
+     * @param eventId the event id
+     * @param comment the comment
+     * @param listener the listener
      */
     public void addComment(String eventId, EventComment comment, OnCompleteListener<Boolean> listener) {
         database.collection("events")
@@ -169,6 +184,13 @@ public class EventRepository {
      * @param eventId the event ID
      * @param deviceId the user device ID to invite
      * @param listener the listener that receives the result
+     */
+    /**
+     * Performs invite user to event.
+     *
+     * @param eventId the event id
+     * @param deviceId the device id
+     * @param listener the listener
      */
     public void inviteUserToEvent(String eventId, String deviceId, OnCompleteListener<Boolean> listener) {
         if (isBlank(eventId) || isBlank(deviceId)) {
@@ -199,11 +221,11 @@ public class EventRepository {
     }
 
     /**
-     * Accepts a private event invite and joins the waiting list.
+     * Performs accept invite.
      *
-     * @param eventId the event ID
-     * @param deviceId the user device ID accepting the invite
-     * @param listener the listener that receives the result
+     * @param eventId the event id
+     * @param deviceId the device id
+     * @param listener the listener
      */
     public void acceptInvite(String eventId, String deviceId, OnCompleteListener<Boolean> listener) {
         if (isBlank(eventId) || isBlank(deviceId)) {
@@ -236,11 +258,11 @@ public class EventRepository {
     }
 
     /**
-     * Declines a private event invite and removes it from the user's My Events list.
+     * Performs decline invite.
      *
-     * @param eventId the event ID
-     * @param deviceId the user device ID declining the invite
-     * @param listener the listener that receives the result
+     * @param eventId the event id
+     * @param deviceId the device id
+     * @param listener the listener
      */
     public void declineInvite(String eventId, String deviceId, OnCompleteListener<Boolean> listener) {
         if (isBlank(eventId) || isBlank(deviceId)) {
@@ -259,10 +281,10 @@ public class EventRepository {
     }
 
     /**
-     * Loads an event by its ID.
+     * Performs get event by id.
      *
-     * @param eventId the event ID
-     * @param listener the listener that receives the event
+     * @param eventId the event id
+     * @param listener the listener
      */
     public void getEventById(String eventId, OnCompleteListener<Event> listener) {
         database.collection("events")
@@ -293,9 +315,9 @@ public class EventRepository {
     }
 
     /**
-     * Loads all events in the collection.
+     * Performs get all events.
      *
-     * @param listener the listener that receives the events
+     * @param listener the listener
      */
     public void getAllEvents(OnCompleteListener<List<Event>> listener) {
         database.collection("events")
@@ -320,9 +342,9 @@ public class EventRepository {
     }
 
     /**
-     * Loads all open events in the collection.
+     * Performs get open events.
      *
-     * @param listener the listener that receives the events
+     * @param listener the listener
      */
     public void getOpenEvents(OnCompleteListener<List<Event>> listener) {
         database.collection("events")
@@ -348,10 +370,10 @@ public class EventRepository {
     }
 
     /**
-     * Loads all events hosted by the given organizer.
+     * Performs get hosted events.
      *
-     * @param organizerId the organizer device ID
-     * @param listener the listener that receives the events
+     * @param organizerId the organizer id
+     * @param listener the listener
      */
     public void getHostedEvents(String organizerId, OnCompleteListener<List<Event>> listener) {
         database.collection("events")
@@ -376,10 +398,10 @@ public class EventRepository {
     }
 
     /**
-     * Loads all events managed by the given organizer or co-organizer.
+     * Performs get managed events.
      *
-     * @param deviceId the organizer or co-organizer device ID
-     * @param listener the listener that receives the events
+     * @param deviceId the device id
+     * @param listener the listener
      */
     public void getManagedEvents(String deviceId, OnCompleteListener<List<Event>> listener) {
         getAllEvents((events, success) -> {
@@ -393,6 +415,9 @@ public class EventRepository {
                 if (event == null) {
                     continue;
                 }
+                /**
+                 * Returns whether contains.
+                 */
                 if (deviceId != null
                         && (deviceId.equals(event.getOrganizerId())
                         || (event.getCoOrganizers() != null && event.getCoOrganizers().contains(deviceId)))) {
@@ -404,11 +429,11 @@ public class EventRepository {
     }
 
     /**
-     * Invites a user to co-organize an event.
+     * Performs invite co organizer.
      *
-     * @param eventId the event ID
-     * @param deviceId the user device ID to invite
-     * @param listener the listener that receives the result
+     * @param eventId the event id
+     * @param deviceId the device id
+     * @param listener the listener
      */
     public void inviteCoOrganizer(String eventId, String deviceId, OnCompleteListener<Boolean> listener) {
         database.collection("events")
@@ -419,11 +444,11 @@ public class EventRepository {
     }
 
     /**
-     * Accepts a co-organizer invitation.
+     * Performs accept co organizer invite.
      *
-     * @param eventId the event ID
-     * @param deviceId the user device ID accepting
-     * @param listener the listener that receives the result
+     * @param eventId the event id
+     * @param deviceId the device id
+     * @param listener the listener
      */
     public void acceptCoOrganizerInvite(String eventId, String deviceId, OnCompleteListener<Boolean> listener) {
         database.collection("events")
@@ -437,11 +462,11 @@ public class EventRepository {
     }
 
     /**
-     * Declines a co-organizer invitation.
+     * Performs decline co organizer invite.
      *
-     * @param eventId the event ID
-     * @param deviceId the user device ID declining
-     * @param listener the listener that receives the result
+     * @param eventId the event id
+     * @param deviceId the device id
+     * @param listener the listener
      */
     public void declineCoOrganizerInvite(String eventId, String deviceId, OnCompleteListener<Boolean> listener) {
         database.collection("events")
@@ -452,11 +477,11 @@ public class EventRepository {
     }
 
     /**
-     * Updates the given event using a Firestore update map.
+     * Performs update event.
      *
-     * @param eventId the event ID to update
-     * @param updates the update payload
-     * @param listener the listener that receives the result
+     * @param eventId the event id
+     * @param updates the updates
+     * @param listener the listener
      */
     public void updateEvent(String eventId, Map<String, Object> updates, OnCompleteListener<Boolean> listener) {
         database.collection("events")
@@ -466,11 +491,11 @@ public class EventRepository {
     }
 
     /**
-     * Saves the accepted-offer state for the current user.
+     * Performs accept offer.
      *
-     * @param eventId the event ID
-     * @param deviceId the user device ID
-     * @param listener the listener that receives the result
+     * @param eventId the event id
+     * @param deviceId the device id
+     * @param listener the listener
      */
     public void acceptOffer(String eventId, String deviceId, OnCompleteListener<Boolean> listener) {
         database.collection("events")
@@ -486,11 +511,11 @@ public class EventRepository {
     }
 
     /**
-     * Declines the current user's offer and saves any replacement selection atomically.
+     * Performs decline offer.
      *
-     * @param eventId the event ID
-     * @param deviceId the user device ID
-     * @param listener the listener that receives the result
+     * @param eventId the event id
+     * @param deviceId the device id
+     * @param listener the listener
      */
     public void declineOffer(String eventId, String deviceId, OnCompleteListener<Boolean> listener) {
         database.runTransaction((Transaction.Function<Boolean>) transaction -> {
@@ -526,11 +551,10 @@ public class EventRepository {
     }
 
     /**
-     * Deletes an event and removes all references from user documents.
-     * This is an admin operation that completely removes the event from the system.
+     * Performs delete event as admin.
      *
-     * @param eventId the event ID to delete
-     * @param listener the listener that receives the result
+     * @param eventId the event id
+     * @param listener the listener
      */
     public void deleteEventAsAdmin(String eventId, OnCompleteListener<Boolean> listener) {
         getEventById(eventId, (event, eventLoaded) -> {
@@ -544,11 +568,11 @@ public class EventRepository {
     }
 
     /**
-     * Deletes an event owned by the given organizer and removes all user references.
+     * Performs delete event as organizer.
      *
-     * @param eventId the event ID to delete
-     * @param organizerId the organizer device ID requesting deletion
-     * @param listener the listener that receives the result
+     * @param eventId the event id
+     * @param organizerId the organizer id
+     * @param listener the listener
      */
     public void deleteEventAsOrganizer(String eventId, String organizerId, OnCompleteListener<Boolean> listener) {
         if (isBlank(eventId) || isBlank(organizerId)) {
@@ -572,11 +596,11 @@ public class EventRepository {
     }
 
     /**
-     * Removes an entrant from the selected list and records them as not selected.
+     * Performs cancel selected entrant.
      *
-     * @param eventId the event ID
-     * @param entrantId the entrant device ID
-     * @param listener the listener that receives the result
+     * @param eventId the event id
+     * @param entrantId the entrant id
+     * @param listener the listener
      */
     public void cancelSelectedEntrant(String eventId, String entrantId, OnCompleteListener<Boolean> listener) {
         if (isBlank(eventId) || isBlank(entrantId)) {
@@ -616,6 +640,12 @@ public class EventRepository {
                 .addOnFailureListener(exception -> listener.onComplete(false, false));
     }
 
+    /**
+     * Performs delete event with cleanup.
+     *
+     * @param event the event
+     * @param listener the listener
+     */
     private void deleteEventWithCleanup(Event event, OnCompleteListener<Boolean> listener) {
         if (event == null) {
             listener.onComplete(false, false);
@@ -658,12 +688,21 @@ public class EventRepository {
                 });
     }
 
+    /**
+     * Performs delete poster from storage.
+     *
+     * @param posterUrl the poster url
+     * @param listener the listener
+     */
     private void deletePosterFromStorage(String posterUrl, OnCompleteListener<Boolean> listener) {
         if (posterUrl == null || posterUrl.trim().isEmpty()) {
             listener.onComplete(true, true);
             return;
         }
 
+        /**
+         * Returns whether get Error Code.
+         */
         try {
             FirebaseStorage.getInstance()
                     .getReferenceFromUrl(posterUrl)
@@ -682,6 +721,14 @@ public class EventRepository {
         }
     }
 
+    /**
+     * Performs commit event cleanup operations.
+     *
+     * @param database the database
+     * @param batches the batches
+     * @param startIndex the start index
+     * @param listener the listener
+     */
     void commitEventCleanupOperations(FirebaseFirestore database,
                                       List<List<CleanupOperation>> batches,
                                       int startIndex,
@@ -706,6 +753,13 @@ public class EventRepository {
         });
     }
 
+    /**
+     * Returns the result of build event cleanup operations.
+     *
+     * @param eventId the event id
+     * @param cleanupTargets the cleanup targets
+     * @return the result of this call
+     */
     static List<CleanupOperation> buildEventCleanupOperations(String eventId, Iterable<UserCleanupTarget> cleanupTargets) {
         List<CleanupOperation> operations = new ArrayList<>();
         for (UserCleanupTarget cleanupTarget : cleanupTargets) {
@@ -714,6 +768,12 @@ public class EventRepository {
         return operations;
     }
 
+    /**
+     * Returns the result of chunk cleanup operations.
+     *
+     * @param operations the operations
+     * @return the result of this call
+     */
     static List<List<CleanupOperation>> chunkCleanupOperations(List<CleanupOperation> operations) {
         List<List<CleanupOperation>> batches = new ArrayList<>();
         for (int i = 0; i < operations.size(); i += MAX_BATCH_OPERATIONS) {
@@ -723,7 +783,13 @@ public class EventRepository {
         return batches;
     }
 
+    /**
+     * Represents the cleanup operation.
+     */
     static final class CleanupOperation {
+        /**
+         * Enumerates the available type values.
+         */
         enum Type {
             REMOVE_EVENT_FROM_USER,
             DELETE_EVENT
@@ -733,32 +799,73 @@ public class EventRepository {
         private final String documentPath;
         private final String eventId;
 
+        /**
+         * Creates a new CleanupOperation instance.
+         *
+         * @param type the type
+         * @param documentPath the document path
+         * @param eventId the event id
+         */
         private CleanupOperation(Type type, String documentPath, String eventId) {
             this.type = type;
             this.documentPath = documentPath;
             this.eventId = eventId;
         }
 
+        /**
+         * Returns the result of remove event from user.
+         *
+         * @param documentPath the document path
+         * @param eventId the event id
+         * @return the result of this call
+         */
         static CleanupOperation removeEventFromUser(String documentPath, String eventId) {
             return new CleanupOperation(Type.REMOVE_EVENT_FROM_USER, documentPath, eventId);
         }
 
+        /**
+         * Returns the result of delete event.
+         *
+         * @param eventId the event id
+         * @return the result of this call
+         */
         static CleanupOperation deleteEvent(String eventId) {
             return new CleanupOperation(Type.DELETE_EVENT, null, eventId);
         }
 
+        /**
+         * Returns the type.
+         *
+         * @return the type
+         */
         Type getType() {
             return type;
         }
 
+        /**
+         * Returns the document path.
+         *
+         * @return the document path
+         */
         String getDocumentPath() {
             return documentPath;
         }
 
+        /**
+         * Returns the event id.
+         *
+         * @return the event id
+         */
         String getEventId() {
             return eventId;
         }
 
+        /**
+         * Performs apply.
+         *
+         * @param batch the batch
+         * @param database the database
+         */
         void apply(WriteBatch batch, FirebaseFirestore database) {
             if (type == Type.REMOVE_EVENT_FROM_USER) {
                 DocumentReference reference = database.document(documentPath);
@@ -775,24 +882,49 @@ public class EventRepository {
         }
     }
 
+    /**
+     * Represents the user cleanup target.
+     */
     static final class UserCleanupTarget {
         private final String documentPath;
         private final String userId;
 
+        /**
+         * Creates a new UserCleanupTarget instance.
+         *
+         * @param documentPath the document path
+         * @param userId the user id
+         */
         UserCleanupTarget(String documentPath, String userId) {
             this.documentPath = documentPath;
             this.userId = userId;
         }
 
+        /**
+         * Returns the document path.
+         *
+         * @return the document path
+         */
         String getDocumentPath() {
             return documentPath;
         }
 
+        /**
+         * Returns the user id.
+         *
+         * @return the user id
+         */
         String getUserId() {
             return userId;
         }
     }
 
+    /**
+     * Returns whether blank.
+     *
+     * @param value the value
+     * @return whether blank
+     */
     private boolean isBlank(String value) {
         return value == null || value.trim().isEmpty();
     }

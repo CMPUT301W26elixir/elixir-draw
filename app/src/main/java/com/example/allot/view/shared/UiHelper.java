@@ -14,47 +14,47 @@ import java.util.Locale;
 public final class UiHelper {
 
     /**
-     * Prevents this utility class from being instantiated.
+     * Creates a new UiHelper instance.
      */
     private UiHelper() {
     }
 
     /**
-     * Trims text and replaces null with an empty string.
+     * Returns the result of clean text.
      *
-     * @param value the value to clean
-     * @return a cleaned string value
+     * @param value the value
+     * @return the result of this call
      */
     public static String cleanText(String value) {
         return TextHelper.cleanText(value);
     }
 
     /**
-     * Checks whether a string is blank after trimming.
+     * Returns whether blank.
      *
-     * @param value the value to check
-     * @return true when the value has no content
+     * @param value the value
+     * @return whether blank
      */
     public static boolean isBlank(String value) {
         return TextHelper.isBlank(value);
     }
 
     /**
-     * Returns a fallback value when the main value is blank.
+     * Returns the result of default text.
      *
-     * @param value the preferred value
-     * @param fallback the value to use when the preferred value is blank
-     * @return the preferred value when it has content, otherwise the fallback
+     * @param value the value
+     * @param fallback the fallback
+     * @return the result of this call
      */
     public static String defaultText(String value, String fallback) {
         return TextHelper.defaultText(value, fallback);
     }
 
     /**
-     * Reads trimmed text from an EditText safely.
+     * Returns the result of read text.
      *
-     * @param editText the field to read
-     * @return the field text, or an empty string when the field is missing
+     * @param editText the edit text
+     * @return the result of this call
      */
     public static String readText(EditText editText) {
         if (editText == null || editText.getText() == null) {
@@ -64,11 +64,11 @@ public final class UiHelper {
     }
 
     /**
-     * Converts density-independent pixels into physical pixels.
+     * Returns the result of dp to px.
      *
-     * @param context the context used to read display density
-     * @param dp the density-independent pixel value
-     * @return the matching pixel value
+     * @param context the context
+     * @param dp the dp
+     * @return the result of this call
      */
     public static int dpToPx(Context context, int dp) {
         float density = context.getResources().getDisplayMetrics().density;
@@ -76,21 +76,21 @@ public final class UiHelper {
     }
 
     /**
-     * Picks one of the shared event-image backgrounds from the category text.
+     * Returns the result of event image background res.
      *
-     * @param category the event category
-     * @return the drawable resource for the event background
+     * @param category the category
+     * @return the result of this call
      */
     public static int eventImageBackgroundRes(String category) {
         return R.drawable.no_image;
     }
 
     /**
-     * Formats a date using the provided pattern.
+     * Returns the result of format date.
      *
-     * @param date the date to format
-     * @param pattern the pattern used by SimpleDateFormat
-     * @return the formatted date string, or null when the date is null
+     * @param date the date
+     * @param pattern the pattern
+     * @return the result of this call
      */
     public static String formatDate(Date date, String pattern) {
         if (date == null) {

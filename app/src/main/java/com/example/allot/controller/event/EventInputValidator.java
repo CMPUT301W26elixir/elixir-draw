@@ -7,10 +7,10 @@ import java.util.Date;
  */
 public class EventInputValidator {
     /**
-     * Validates create-event input.
+     * Returns whether valid.
      *
-     * @param input the input to validate
-     * @return true if the input is valid, otherwise false
+     * @param input the input
+     * @return whether valid
      */
     public boolean isValid(EventSubmissionInput input) {
         if (input == null) {
@@ -30,17 +30,17 @@ public class EventInputValidator {
     }
 
     /**
-     * Validates the common input used when creating or updating events.
+     * Returns the result of validate event input.
      *
-     * @param title the event title
-     * @param location the event location
-     * @param price the event price
-     * @param description the event description
-     * @param participants the participant count
+     * @param title the title
+     * @param location the location
+     * @param price the price
+     * @param description the description
+     * @param participants the participants
      * @param eventDate the event date
-     * @param registrationStart the registration opening date
-     * @param registrationEnd the registration closing date
-     * @return true if the input is valid, otherwise false
+     * @param registrationStart the registration start
+     * @param registrationEnd the registration end
+     * @return the result of this call
      */
     private boolean validateEventInput(String title,
                                        String location,
@@ -65,20 +65,20 @@ public class EventInputValidator {
     }
 
     /**
-     * Checks whether a string is blank after trimming whitespace.
+     * Returns whether this instance has text.
      *
-     * @param value the string to check
-     * @return true if the string is blank, otherwise false
+     * @param value the value
+     * @return whether this instance has text
      */
     private boolean hasText(String value) {
         return !safeString(value).trim().isEmpty();
     }
 
     /**
-     * Returns a safe string value, replacing null with an empty string.
+     * Returns the result of safe string.
      *
-     * @param value the string to sanitize
-     * @return the original string, or an empty string if null
+     * @param value the value
+     * @return the result of this call
      */
     private String safeString(String value) {
         return value == null ? "" : value;

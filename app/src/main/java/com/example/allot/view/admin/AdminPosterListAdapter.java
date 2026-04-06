@@ -20,15 +20,37 @@ public class AdminPosterListAdapter extends RecyclerView.Adapter<AdminPosterList
     private final List<Event> posterEvents;
     private final OnDeleteClickListener onDeleteClickListener;
 
+    /**
+     * Defines the contract for an on delete click listener.
+     */
     public interface OnDeleteClickListener {
+        /**
+         * Handles the delete click callback.
+         *
+         * @param event the event
+         * @param position the position
+         */
         void onDeleteClick(Event event, int position);
     }
 
+    /**
+     * Creates a new AdminPosterListAdapter instance.
+     *
+     * @param posterEvents the poster events
+     * @param onDeleteClickListener the on delete click listener
+     */
     public AdminPosterListAdapter(List<Event> posterEvents, OnDeleteClickListener onDeleteClickListener) {
         this.posterEvents = posterEvents;
         this.onDeleteClickListener = onDeleteClickListener;
     }
 
+    /**
+     * Returns the result of on create view holder.
+     *
+     * @param parent the parent
+     * @param viewType the view type
+     * @return the result of this call
+     */
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -37,23 +59,42 @@ public class AdminPosterListAdapter extends RecyclerView.Adapter<AdminPosterList
         return new ViewHolder(view);
     }
 
+    /**
+     * Handles the bind view holder callback.
+     *
+     * @param holder the holder
+     * @param position the position
+     */
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Event event = posterEvents.get(position);
         holder.bind(event, position, onDeleteClickListener);
     }
 
+    /**
+     * Returns the item count.
+     *
+     * @return the item count
+     */
     @Override
     public int getItemCount() {
         return posterEvents.size();
     }
 
+    /**
+     * Represents the view holder.
+     */
     static class ViewHolder extends RecyclerView.ViewHolder {
         private final ImageView posterImageView;
         private final TextView eventTitleText;
         private final TextView eventOrganizerText;
         private final Button deleteButton;
 
+        /**
+         * Creates a new ViewHolder instance.
+         *
+         * @param itemView the item view
+         */
         ViewHolder(@NonNull View itemView) {
             super(itemView);
             posterImageView = itemView.findViewById(R.id.posterImageView);
@@ -62,6 +103,13 @@ public class AdminPosterListAdapter extends RecyclerView.Adapter<AdminPosterList
             deleteButton = itemView.findViewById(R.id.deleteButton);
         }
 
+        /**
+         * Performs bind.
+         *
+         * @param event the event
+         * @param position the position
+         * @param listener the listener
+         */
         void bind(Event event, int position, OnDeleteClickListener listener) {
             eventTitleText.setText(event.getTitle());
             eventOrganizerText.setText("Event ID: " + event.getEventId());

@@ -22,10 +22,23 @@ public class ExploreController {
     private List<Event> cachedOpenEvents = new ArrayList<>();
     private boolean hasLoadedOpenEvents;
 
+    /**
+     * Creates a new ExploreController instance.
+     *
+     * @param context the context
+     */
     public ExploreController(Context context) {
         this(new EventRepository(), new UserController(context), new ExploreFilterService(), new EventListItemMapper());
     }
 
+    /**
+     * Creates a new ExploreController instance.
+     *
+     * @param eventRepository the event repository
+     * @param userController the user controller
+     * @param exploreFilterService the explore filter service
+     * @param eventListItemMapper the event list item mapper
+     */
     ExploreController(EventRepository eventRepository,
                       UserController userController,
                       ExploreFilterService exploreFilterService,
@@ -37,9 +50,9 @@ public class ExploreController {
     }
 
     /**
-     * Loads the current user's saved event IDs.
+     * Performs load saved event ids.
      *
-     * @param listener the listener that receives the saved event IDs
+     * @param listener the listener
      */
     public void loadSavedEventIds(OnCompleteListener<List<String>> listener) {
         userController.loadCurrentUser((User user, boolean success) -> {
@@ -56,7 +69,9 @@ public class ExploreController {
     }
 
     /**
-     * Fetches open events from Firestore and stores them in memory for instant filtering.
+     * Performs refresh open events.
+     *
+     * @param listener the listener
      */
     public void refreshOpenEvents(OnCompleteListener<List<Event>> listener) {
         eventRepository.getOpenEvents((events, success) -> {
@@ -72,7 +87,19 @@ public class ExploreController {
     }
 
     /**
-     * Loads and filters open events. If data is not cached, it fetches from repository first.
+     * Performs load browse events.
+     *
+     * @param searchTerm the search term
+     * @param selectedChipFilter the selected chip filter
+     * @param keywords the keywords
+     * @param startDate the start date
+     * @param latitude the latitude
+     * @param longitude the longitude
+     * @param distanceKm the distance km
+     * @param onlyOpenSpots the only open spots
+     * @param minimumCapacity the minimum capacity
+     * @param savedEventIds the saved event ids
+     * @param listener the listener
      */
     public void loadBrowseEvents(String searchTerm,
                                  String selectedChipFilter,
@@ -101,7 +128,19 @@ public class ExploreController {
     }
 
     /**
-     * Filters the cached open events and maps them into display items.
+     * Performs filter cached browse events.
+     *
+     * @param searchTerm the search term
+     * @param selectedChipFilter the selected chip filter
+     * @param keywords the keywords
+     * @param startDate the start date
+     * @param latitude the latitude
+     * @param longitude the longitude
+     * @param distanceKm the distance km
+     * @param onlyOpenSpots the only open spots
+     * @param minimumCapacity the minimum capacity
+     * @param savedEventIds the saved event ids
+     * @param listener the listener
      */
     public void filterCachedBrowseEvents(String searchTerm,
                                          String selectedChipFilter,
@@ -137,17 +176,22 @@ public class ExploreController {
         listener.onComplete(eventListItemMapper.mapEvents(filteredEvents, savedEventIds), true);
     }
 
+    /**
+     * Returns whether this instance has cached open events.
+     *
+     * @return whether this instance has cached open events
+     */
     public boolean hasCachedOpenEvents() {
         return hasLoadedOpenEvents;
     }
 
     /**
-     * Saves or unsaves an event and returns the next saved-event state.
+     * Performs toggle saved event.
      *
-     * @param currentSavedEventIds the current saved event IDs
-     * @param eventId the event being toggled
-     * @param isSaving true to save, false to unsave
-     * @param listener the listener that receives the next saved event IDs
+     * @param currentSavedEventIds the current saved event ids
+     * @param eventId the event id
+     * @param isSaving whether saving
+     * @param listener the listener
      */
     public void toggleSavedEvent(List<String> currentSavedEventIds,
                                  String eventId,

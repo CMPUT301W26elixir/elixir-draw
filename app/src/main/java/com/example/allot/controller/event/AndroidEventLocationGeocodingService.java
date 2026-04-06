@@ -14,10 +14,21 @@ import java.util.Locale;
 public class AndroidEventLocationGeocodingService implements EventLocationGeocodingService {
     private final Context context;
 
+    /**
+     * Creates a new AndroidEventLocationGeocodingService instance.
+     *
+     * @param context the context
+     */
     public AndroidEventLocationGeocodingService(Context context) {
         this.context = context == null ? null : context.getApplicationContext();
     }
 
+    /**
+     * Returns the result of geocode.
+     *
+     * @param location the location
+     * @return the result of this call
+     */
     @Override
     public EventLocationCoordinates geocode(String location) {
         if (context == null || TextHelper.isBlank(location) || !Geocoder.isPresent()) {
@@ -38,6 +49,13 @@ public class AndroidEventLocationGeocodingService implements EventLocationGeocod
         }
     }
 
+    /**
+     * Returns the result of reverse geocode.
+     *
+     * @param latitude the latitude
+     * @param longitude the longitude
+     * @return the result of this call
+     */
     public String reverseGeocode(double latitude, double longitude) {
         if (context == null || !Geocoder.isPresent()) {
             return null;
@@ -68,6 +86,12 @@ public class AndroidEventLocationGeocodingService implements EventLocationGeocod
         }
     }
 
+    /**
+     * Performs append address part.
+     *
+     * @param builder the builder
+     * @param value the value
+     */
     private void appendAddressPart(StringBuilder builder, String value) {
         if (TextHelper.isBlank(value)) {
             return;

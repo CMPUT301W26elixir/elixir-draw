@@ -111,6 +111,14 @@ public class ExploreActivity extends AppCompatActivity {
     private boolean isUiTestInjectedExploreMode;
     private List<EventListItem> uiTestInjectedEvents = new ArrayList<>();
 
+    /**
+     * Handles the create callback.
+     *
+     * <p>AI usage note: This Javadoc was drafted with AI assistance and then reviewed
+     * against the implementation by the development team.
+     *
+     * @param savedInstanceState the saved instance state
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -129,12 +137,26 @@ public class ExploreActivity extends AppCompatActivity {
         currentHomeTab = resolveInitialTab(getIntent());
         setupBottomNavigation();
 
+        /**
+         * Handles on Event Click Listener.
+         */
         eventListAdapter = new EventListAdapter(new ArrayList<>(), new EventListAdapter.OnEventClickListener() {
+            /**
+             * Handles the event click callback.
+             *
+             * @param event the event
+             */
             @Override
             public void onEventClick(EventListItem event) {
                 openEventDetailScreen(event);
             }
 
+            /**
+             * Handles the heart click callback.
+             *
+             * @param event the event
+             * @param position the position
+             */
             @Override
             public void onHeartClick(EventListItem event, int position) {
                 if (event == null) {
@@ -159,6 +181,9 @@ public class ExploreActivity extends AppCompatActivity {
         refreshSavedEventsAndVisibleContent();
     }
 
+    /**
+     * Performs bind views.
+     */
     private void bindViews() {
         recyclerView = findViewById(R.id.eventsRecyclerView);
         searchInput = findViewById(R.id.searchInput);
@@ -172,15 +197,40 @@ public class ExploreActivity extends AppCompatActivity {
         exploreContainer = findViewById(R.id.exploreContainer);
     }
 
+    /**
+     * Updates the up search input.
+     *
+     * <p>AI usage note: This Javadoc was drafted with AI assistance and then reviewed
+     * against the implementation by the development team.
+     */
     private void setupSearchInput() {
         searchInput.setFocusable(true);
         searchInput.setFocusableInTouchMode(true);
         searchInput.setOnClickListener(null);
+        /**
+         * Documents text Watcher.
+         */
         searchInput.addTextChangedListener(new TextWatcher() {
+            /**
+             * Performs before text changed.
+             *
+             * @param s the s
+             * @param start the start
+             * @param count the count
+             * @param after the after
+             */
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
             }
 
+            /**
+             * Handles the text changed callback.
+             *
+             * @param s the s
+             * @param start the start
+             * @param before the before
+             * @param count the count
+             */
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 String query = s == null ? "" : s.toString().trim();
@@ -191,12 +241,20 @@ public class ExploreActivity extends AppCompatActivity {
                 searchHandler.postDelayed(searchRunnable, SEARCH_DEBOUNCE_MS);
             }
 
+            /**
+             * Performs after text changed.
+             *
+             * @param s the s
+             */
             @Override
             public void afterTextChanged(Editable s) {
             }
         });
     }
 
+    /**
+     * Updates the up filter menu.
+     */
     private void setupFilterMenu() {
         if (filterMenuButton == null) {
             return;
@@ -222,6 +280,11 @@ public class ExploreActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Handles the new intent callback.
+     *
+     * @param intent the intent
+     */
     @Override
     protected void onNewIntent(@NonNull Intent intent) {
         super.onNewIntent(intent);
@@ -237,6 +300,9 @@ public class ExploreActivity extends AppCompatActivity {
         refreshSavedEventsAndVisibleContent();
     }
 
+    /**
+     * Handles the resume callback.
+     */
     @Override
     protected void onResume() {
         super.onResume();
@@ -247,6 +313,9 @@ public class ExploreActivity extends AppCompatActivity {
         refreshSavedEventsAndVisibleContent();
     }
 
+    /**
+     * Handles the destroy callback.
+     */
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -258,6 +327,9 @@ public class ExploreActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Updates the up bottom navigation.
+     */
     private void setupBottomNavigation() {
         bottomNavBar.setSelectedTab(currentHomeTab);
         bottomNavBar.setOnTabClickListener(BottomNavBarView.Tab.EXPLORE, v -> showExploreTab());
@@ -267,12 +339,24 @@ public class ExploreActivity extends AppCompatActivity {
         bottomNavBar.setOnTabClickListener(BottomNavBarView.Tab.SCAN, view -> AppNavigator.openScan(this, false));
     }
 
+    /**
+     * Returns whether this instance has injected ui test event.
+     *
+     * @param intent the intent
+     * @return whether this instance has injected ui test event
+     */
     private boolean hasInjectedUiTestEvent(Intent intent) {
         return intent != null
                 && (!UiHelper.isBlank(intent.getStringExtra(EXTRA_UI_TEST_EVENT_ID))
                 || hasInjectedUiTestEventList(intent));
     }
 
+    /**
+     * Performs show injected ui test event.
+     *
+     * <p>AI usage note: This Javadoc was drafted with AI assistance and then reviewed
+     * against the implementation by the development team.
+     */
     private void showInjectedUiTestEvent() {
         currentHomeTab = BottomNavBarView.Tab.EXPLORE;
         bottomNavBar.setSelectedTab(BottomNavBarView.Tab.EXPLORE);
@@ -295,6 +379,9 @@ public class ExploreActivity extends AppCompatActivity {
         renderInjectedUiTestItems(uiTestInjectedEvents, "");
     }
 
+    /**
+     * Performs show explore tab.
+     */
     private void showExploreTab() {
         currentHomeTab = BottomNavBarView.Tab.EXPLORE;
         bottomNavBar.setSelectedTab(BottomNavBarView.Tab.EXPLORE);
@@ -308,6 +395,9 @@ public class ExploreActivity extends AppCompatActivity {
         refreshBrowseEvents(false);
     }
 
+    /**
+     * Performs open saved tab.
+     */
     private void openSavedTab() {
         currentHomeTab = BottomNavBarView.Tab.SAVED;
         bottomNavBar.setSelectedTab(BottomNavBarView.Tab.SAVED);
@@ -324,6 +414,12 @@ public class ExploreActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Performs refresh saved events and visible content.
+     *
+     * <p>AI usage note: This Javadoc was drafted with AI assistance and then reviewed
+     * against the implementation by the development team.
+     */
     private void refreshSavedEventsAndVisibleContent() {
         browseController.loadSavedEventIds((savedEventIds, success) -> {
             if (!success) {
@@ -342,12 +438,21 @@ public class ExploreActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Returns the result of resolve initial tab.
+     *
+     * @param intent the intent
+     * @return the result of this call
+     */
     private BottomNavBarView.Tab resolveInitialTab(Intent intent) {
         return intent != null && "saved".equals(intent.getStringExtra("navigate_to"))
                 ? BottomNavBarView.Tab.SAVED
                 : BottomNavBarView.Tab.EXPLORE;
     }
 
+    /**
+     * Performs maybe initialize default location filter.
+     */
     private void maybeInitializeDefaultLocationFilter() {
         if (hasInitializedDefaultLocationFilter || isInitializingDefaultLocationFilter) {
             return;
@@ -369,11 +474,19 @@ public class ExploreActivity extends AppCompatActivity {
         initializeDefaultLocationFilter();
     }
 
+    /**
+     * Returns whether this instance has location permission.
+     *
+     * @return whether this instance has location permission
+     */
     private boolean hasLocationPermission() {
         return ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED;
     }
 
+    /**
+     * Performs initialize default location filter.
+     */
     private void initializeDefaultLocationFilter() {
         isInitializingDefaultLocationFilter = true;
         CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
@@ -389,6 +502,11 @@ public class ExploreActivity extends AppCompatActivity {
                 .addOnFailureListener(this, exception -> finishDefaultLocationInitialization());
     }
 
+    /**
+     * Performs reverse geocode default location.
+     *
+     * @param location the location
+     */
     private void reverseGeocodeDefaultLocation(Location location) {
         new Thread(() -> {
             AndroidEventLocationGeocodingService geocodingService = new AndroidEventLocationGeocodingService(this);
@@ -396,6 +514,9 @@ public class ExploreActivity extends AppCompatActivity {
                     location.getLatitude(),
                     location.getLongitude()
             );
+            /**
+             * Returns whether is Blank.
+             */
             runOnUiThread(() -> {
                 if (!isFinishing()
                         && !isDestroyed()
@@ -413,6 +534,9 @@ public class ExploreActivity extends AppCompatActivity {
         }).start();
     }
 
+    /**
+     * Performs finish default location initialization.
+     */
     private void finishDefaultLocationInitialization() {
         isInitializingDefaultLocationFilter = false;
         hasInitializedDefaultLocationFilter = true;
@@ -424,6 +548,11 @@ public class ExploreActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Performs refresh browse events.
+     *
+     * @param showLoadingState the show loading state
+     */
     private void refreshBrowseEvents(boolean showLoadingState) {
         if (showLoadingState) {
             showBrowseLoadingState();
@@ -442,6 +571,11 @@ public class ExploreActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Performs apply browse filters.
+     *
+     * @param searchTerm the search term
+     */
     private void applyBrowseFilters(String searchTerm) {
         if (isUiTestInjectedExploreMode) {
             renderInjectedUiTestItems(uiTestInjectedEvents, searchTerm);
@@ -481,6 +615,9 @@ public class ExploreActivity extends AppCompatActivity {
         );
     }
 
+    /**
+     * Performs show browse loading state.
+     */
     private void showBrowseLoadingState() {
         recyclerView.setVisibility(View.GONE);
         loadingIndicator.setVisibility(View.VISIBLE);
@@ -488,6 +625,11 @@ public class ExploreActivity extends AppCompatActivity {
         stateText.setText(R.string.browse_state_loading);
     }
 
+    /**
+     * Performs show browse message state.
+     *
+     * @param message the message
+     */
     private void showBrowseMessageState(String message) {
         eventListAdapter.updateEvents(new ArrayList<>());
         recyclerView.setVisibility(View.GONE);
@@ -496,6 +638,12 @@ public class ExploreActivity extends AppCompatActivity {
         stateText.setText(message);
     }
 
+    /**
+     * Returns the result of build empty state message.
+     *
+     * @param searchTerm the search term
+     * @return the result of this call
+     */
     private String buildEmptyStateMessage(String searchTerm) {
         String trimmedSearch = normalize(searchTerm);
         if (!trimmedSearch.isEmpty()) {
@@ -504,6 +652,13 @@ public class ExploreActivity extends AppCompatActivity {
         return getString(R.string.browse_state_empty);
     }
 
+    /**
+     * Handles the activity result callback.
+     *
+     * @param requestCode the request code
+     * @param resultCode the result code
+     * @param data the data
+     */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -535,6 +690,13 @@ public class ExploreActivity extends AppCompatActivity {
         applyBrowseFilters(searchInput.getText() == null ? "" : searchInput.getText().toString());
     }
 
+    /**
+     * Handles the request permissions result callback.
+     *
+     * @param requestCode the request code
+     * @param permissions the permissions
+     * @param grantResults the grant results
+     */
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -552,6 +714,9 @@ public class ExploreActivity extends AppCompatActivity {
         refreshSavedEventsAndVisibleContent();
     }
 
+    /**
+     * Performs rebuild filter pills.
+     */
     private void rebuildFilterPills() {
         if (filterPillsContainer == null || filterPillsScrollView == null) {
             return;
@@ -569,6 +734,12 @@ public class ExploreActivity extends AppCompatActivity {
         filterPillsScrollView.setVisibility(filterPillsContainer.getChildCount() > 0 ? View.VISIBLE : View.GONE);
     }
 
+    /**
+     * Performs add filter pill.
+     *
+     * @param label the label
+     * @param onClick the on click
+     */
     private void addFilterPill(String label, Runnable onClick) {
         if (UiHelper.isBlank(label) || filterPillsContainer == null) {
             return;
@@ -599,18 +770,29 @@ public class ExploreActivity extends AppCompatActivity {
         filterPillsContainer.addView(pillView);
     }
 
+    /**
+     * Performs clear date filter.
+     */
     private void clearDateFilter() {
         filterDateText = "";
         rebuildFilterPills();
         applyBrowseFilters(searchInput.getText() == null ? "" : searchInput.getText().toString());
     }
 
+    /**
+     * Performs clear distance filter.
+     */
     private void clearDistanceFilter() {
         filterDistanceKm = null;
         rebuildFilterPills();
         applyBrowseFilters(searchInput.getText() == null ? "" : searchInput.getText().toString());
     }
 
+    /**
+     * Performs remove keyword filter.
+     *
+     * @param keywordToRemove the keyword to remove
+     */
     private void removeKeywordFilter(String keywordToRemove) {
         List<String> remainingKeywords = new ArrayList<>();
         for (String keyword : splitKeywords(filterKeywords)) {
@@ -623,18 +805,29 @@ public class ExploreActivity extends AppCompatActivity {
         applyBrowseFilters(searchInput.getText() == null ? "" : searchInput.getText().toString());
     }
 
+    /**
+     * Performs clear open spots filter.
+     */
     private void clearOpenSpotsFilter() {
         filterOnlyOpenSpots = false;
         rebuildFilterPills();
         applyBrowseFilters(searchInput.getText() == null ? "" : searchInput.getText().toString());
     }
 
+    /**
+     * Performs clear minimum capacity filter.
+     */
     private void clearMinimumCapacityFilter() {
         filterMinimumCapacity = null;
         rebuildFilterPills();
         applyBrowseFilters(searchInput.getText() == null ? "" : searchInput.getText().toString());
     }
 
+    /**
+     * Returns the result of build date pill label.
+     *
+     * @return the result of this call
+     */
     private String buildDatePillLabel() {
         if (UiHelper.isBlank(filterDateText)) {
             return "";
@@ -646,6 +839,11 @@ public class ExploreActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Returns the result of build distance pill label.
+     *
+     * @return the result of this call
+     */
     private String buildDistancePillLabel() {
         if (filterDistanceKm == null || filterDistanceKm <= 0) {
             return "";
@@ -656,10 +854,20 @@ public class ExploreActivity extends AppCompatActivity {
         return String.format(Locale.getDefault(), "%.1f km", filterDistanceKm);
     }
 
+    /**
+     * Returns the result of build open spots pill label.
+     *
+     * @return the result of this call
+     */
     private String buildOpenSpotsPillLabel() {
         return filterOnlyOpenSpots ? getString(R.string.filter_open_spots_pill) : "";
     }
 
+    /**
+     * Returns the result of build minimum capacity pill label.
+     *
+     * @return the result of this call
+     */
     private String buildMinimumCapacityPillLabel() {
         if (filterMinimumCapacity == null || filterMinimumCapacity <= 0) {
             return "";
@@ -667,6 +875,12 @@ public class ExploreActivity extends AppCompatActivity {
         return getString(R.string.filter_min_capacity_pill, filterMinimumCapacity);
     }
 
+    /**
+     * Returns the result of split keywords.
+     *
+     * @param rawKeywords the raw keywords
+     * @return the result of this call
+     */
     private List<String> splitKeywords(String rawKeywords) {
         String normalizedKeywords = normalize(rawKeywords);
         if (normalizedKeywords.isEmpty()) {
@@ -683,6 +897,12 @@ public class ExploreActivity extends AppCompatActivity {
         return tokens;
     }
 
+    /**
+     * Returns the result of parse filter date.
+     *
+     * @param rawDate the raw date
+     * @return the result of this call
+     */
     private java.util.Date parseFilterDate(String rawDate) {
         if (UiHelper.isBlank(rawDate)) {
             return null;
@@ -696,14 +916,31 @@ public class ExploreActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Returns the result of normalize.
+     *
+     * @param value the value
+     * @return the result of this call
+     */
     private String normalize(String value) {
         return value == null ? "" : value.trim();
     }
 
+    /**
+     * Returns the result of safe string.
+     *
+     * @param value the value
+     * @return the result of this call
+     */
     private String safeString(String value) {
         return value == null ? "" : value.trim();
     }
 
+    /**
+     * Performs open event detail screen.
+     *
+     * @param eventItem the event item
+     */
     private void openEventDetailScreen(EventListItem eventItem) {
         if (eventItem == null || UiHelper.isBlank(eventItem.getEventId())) {
             return;
@@ -729,6 +966,12 @@ public class ExploreActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
+    /**
+     * Performs toggle saved event.
+     *
+     * @param event the event
+     * @param position the position
+     */
     private void toggleSavedEvent(EventListItem event, int position) {
         boolean nextSavedState = event.isSaved;
         browseController.toggleSavedEvent(userSavedEvents, event.getEventId(), nextSavedState, (savedEventIds, success) -> {
@@ -738,11 +981,23 @@ public class ExploreActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Returns whether this instance has injected ui test event list.
+     *
+     * @param intent the intent
+     * @return whether this instance has injected ui test event list
+     */
     private boolean hasInjectedUiTestEventList(Intent intent) {
         ArrayList<String> eventIds = intent.getStringArrayListExtra(EXTRA_UI_TEST_EVENT_IDS);
         return eventIds != null && !eventIds.isEmpty();
     }
 
+    /**
+     * Returns the result of build injected ui test events.
+     *
+     * @param intent the intent
+     * @return the result of this call
+     */
     private List<EventListItem> buildInjectedUiTestEvents(Intent intent) {
         List<EventListItem> injectedItems = new ArrayList<>();
         ArrayList<String> eventIds = intent.getStringArrayListExtra(EXTRA_UI_TEST_EVENT_IDS);
@@ -782,6 +1037,12 @@ public class ExploreActivity extends AppCompatActivity {
         return injectedItems;
     }
 
+    /**
+     * Performs render injected ui test items.
+     *
+     * @param sourceItems the source items
+     * @param searchTerm the search term
+     */
     private void renderInjectedUiTestItems(List<EventListItem> sourceItems, String searchTerm) {
         List<EventListItem> filteredItems = new ArrayList<>();
         String normalizedSearch = normalize(searchTerm).toLowerCase(Locale.getDefault());
@@ -789,6 +1050,9 @@ public class ExploreActivity extends AppCompatActivity {
             if (item == null) {
                 continue;
             }
+            /**
+             * Returns whether contains.
+             */
             if (normalizedSearch.isEmpty()
                     || item.getTitle().toLowerCase(Locale.getDefault()).contains(normalizedSearch)
                     || item.getStreet().toLowerCase(Locale.getDefault()).contains(normalizedSearch)
@@ -808,6 +1072,13 @@ public class ExploreActivity extends AppCompatActivity {
         stateText.setVisibility(View.GONE);
     }
 
+    /**
+     * Returns the result of value at.
+     *
+     * @param values the values
+     * @param index the index
+     * @return the result of this call
+     */
     private String valueAt(ArrayList<String> values, int index) {
         if (values == null || index < 0 || index >= values.size()) {
             return "";
@@ -815,6 +1086,12 @@ public class ExploreActivity extends AppCompatActivity {
         return values.get(index);
     }
 
+    /**
+     * Performs require completed profile.
+     *
+     * @param onReady the on ready
+     * @param onboardingIntent the onboarding intent
+     */
     private void requireCompletedProfile(Runnable onReady, Intent onboardingIntent) {
         if (getIntent().getBooleanExtra(EXTRA_UI_TEST_BYPASS_PROFILE_GATE, false)) {
             onReady.run();
@@ -831,6 +1108,12 @@ public class ExploreActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Returns the result of build deferred save intent.
+     *
+     * @param eventItem the event item
+     * @return the result of this call
+     */
     private Intent buildDeferredSaveIntent(EventListItem eventItem) {
         return DeferredOnboardingNavigator.createEventActionIntent(
                 this,

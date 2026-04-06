@@ -20,14 +20,25 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+/**
+ * Tests the event qr code activity.
+ */
 @RunWith(AndroidJUnit4.class)
 public class EventQrCodeActivityTest {
 
+    /**
+     * Performs disable animations.
+     */
     @Before
     public void disableAnimations() {
         SystemAnimations.disableAll();
     }
 
+    /**
+     * Returns the result of build intent.
+     *
+     * @return the result of this call
+     */
     private Intent buildIntent() {
         Intent intent = new Intent(ApplicationProvider.getApplicationContext(), EventQrCodeActivity.class);
         intent.putExtra(EventCreatedActivity.EXTRA_EVENT_ID, "ui-test-event-qr-1");
@@ -40,6 +51,9 @@ public class EventQrCodeActivityTest {
         return intent;
     }
 
+    /**
+     * Performs event qr screen renders generated qr code.
+     */
     @Test
     public void eventQrScreen_rendersGeneratedQrCode() {
         try (ActivityScenario<EventQrCodeActivity> scenario = ActivityScenario.launch(buildIntent())) {

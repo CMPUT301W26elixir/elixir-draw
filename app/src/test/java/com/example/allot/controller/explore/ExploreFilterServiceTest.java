@@ -9,14 +9,23 @@ import java.util.Date;
 import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
+/**
+ * Tests the explore filter service.
+ */
 public class ExploreFilterServiceTest {
     private ExploreFilterService service;
 
+    /**
+     * Updates the up.
+     */
     @Before
     public void setUp() {
         service = new ExploreFilterService();
     }
 
+    /**
+     * Performs build browsable event list filters by search term.
+     */
     @Test
     public void buildBrowsableEventList_filtersBySearchTerm() {
         long now = System.currentTimeMillis();
@@ -32,6 +41,9 @@ public class ExploreFilterServiceTest {
         assertEquals("2", result.get(0).getEventId());
     }
 
+    /**
+     * Performs build browsable event list filters by category chip.
+     */
     @Test
     public void buildBrowsableEventList_filtersByCategoryChip() {
         long now = System.currentTimeMillis();
@@ -47,6 +59,9 @@ public class ExploreFilterServiceTest {
         assertEquals("1", result.get(0).getEventId());
     }
 
+    /**
+     * Performs build browsable event list excludes non open events.
+     */
     @Test
     public void buildBrowsableEventList_excludesNonOpenEvents() {
         long now = System.currentTimeMillis();
@@ -62,6 +77,9 @@ public class ExploreFilterServiceTest {
         assertEquals("2", result.get(0).getEventId());
     }
 
+    /**
+     * Performs build browsable event list sorts by deadline date and title.
+     */
     @Test
     public void buildBrowsableEventList_sortsByDeadlineDateAndTitle() {
         long now = System.currentTimeMillis();
@@ -78,6 +96,18 @@ public class ExploreFilterServiceTest {
                 Arrays.asList(result.get(0).getEventId(), result.get(1).getEventId(), result.get(2).getEventId()));
     }
 
+    /**
+     * Returns the result of build event.
+     *
+     * @param id the id
+     * @param title the title
+     * @param category the category
+     * @param description the description
+     * @param eventTime the event time
+     * @param deadlineTime the deadline time
+     * @param status the status
+     * @return the result of this call
+     */
     private Event buildEvent(String id, String title, String category, String description, long eventTime, long deadlineTime, String status) {
         Event event = new Event();
         event.setEventId(id);

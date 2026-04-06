@@ -11,23 +11,23 @@ public class AppResult<T> {
     private final Integer messageResId;
 
     /**
-     * Creates a result object for an application operation.
+     * Creates a new AppResult instance.
      *
-     * @param success true if the operation succeeded, otherwise false
-     * @param data the returned data, or null if none is available
-     * @param message an optional message describing the result
+     * @param success the success
+     * @param data the data
+     * @param message the message
      */
     public AppResult(boolean success, T data, String message) {
         this(success, data, message, null);
     }
 
     /**
-     * Creates a result object for an application operation using a string resource message.
+     * Creates a new AppResult instance.
      *
-     * @param success true if the operation succeeded, otherwise false
-     * @param data the returned data, or null if none is available
-     * @param message the optional literal result message
-     * @param messageResId the optional string resource ID describing the result
+     * @param success the success
+     * @param data the data
+     * @param message the message
+     * @param messageResId the message res id
      */
     public AppResult(boolean success, T data, String message, Integer messageResId) {
         this.success = success;
@@ -37,81 +37,81 @@ public class AppResult<T> {
     }
 
     /**
-     * Creates a successful result.
+     * Returns the result of success.
      *
-     * @param data the returned data
-     * @param <T> the type of data returned
-     * @return a successful result object
+     * @param <T> the t type parameter
+     * @param data the data
+     * @return the result of this call
      */
     public static <T> AppResult<T> success(T data) {
         return new AppResult<>(true, data, null);
     }
 
     /**
-     * Creates a successful result with a string resource message.
+     * Returns the result of success.
      *
-     * @param data the returned data
-     * @param messageResId the result message resource
-     * @param <T> the type of data returned
-     * @return a successful result object
+     * @param <T> the t type parameter
+     * @param data the data
+     * @param messageResId the message res id
+     * @return the result of this call
      */
     public static <T> AppResult<T> success(T data, int messageResId) {
         return new AppResult<>(true, data, null, messageResId);
     }
 
     /**
-     * Creates a failed result.
+     * Returns the result of failure.
      *
-     * @param message the message describing the failure
-     * @param <T> the type of data returned
-     * @return a failed result object
+     * @param <T> the t type parameter
+     * @param message the message
+     * @return the result of this call
      */
     public static <T> AppResult<T> failure(String message) {
         return new AppResult<>(false, null, message);
     }
 
     /**
-     * Creates a failed result with a string resource message.
+     * Returns the result of failure.
      *
-     * @param messageResId the message resource describing the failure
-     * @param <T> the type of data returned
-     * @return a failed result object
+     * @param <T> the t type parameter
+     * @param messageResId the message res id
+     * @return the result of this call
      */
     public static <T> AppResult<T> failure(int messageResId) {
         return new AppResult<>(false, null, null, messageResId);
     }
 
     /**
-     * Returns whether the operation succeeded.
+     * Returns whether success.
      *
-     * @return true if the operation succeeded, otherwise false
+     * @return whether success
      */
     public boolean isSuccess() {
         return success;
     }
 
     /**
-     * Returns the result data.
+     * Returns the data.
      *
-     * @return the returned data, or null if none is available
+     * @return the data
      */
     public T getData() {
         return data;
     }
 
     /**
-     * Returns the result message.
+     * Returns the message.
      *
-     * @return the optional result message
+     * @return the message
      */
     public String getMessage() {
         return message;
     }
 
     /**
-     * Returns the result message resource ID when one is available.
+     * Returns the message res id.
      *
-     * @return the optional result message resource ID
+     * @return the message res id
      */
     public Integer getMessageResId() {
         return messageResId;

@@ -14,12 +14,18 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 
+/**
+ * Tests the admin event controller.
+ */
 public class AdminEventControllerTest {
     private FakeEventRepository eventRepository;
     private FakePosterController posterController;
     private FakeUserController userController;
     private AdminEventController controller;
 
+    /**
+     * Updates the up.
+     */
     @Before
     public void setUp() {
         eventRepository = new FakeEventRepository();
@@ -28,6 +34,9 @@ public class AdminEventControllerTest {
         controller = new AdminEventController(eventRepository, posterController, userController);
     }
 
+    /**
+     * Performs load all events requires admin and delegates when authorized.
+     */
     @Test
     public void loadAllEvents_requiresAdminAndDelegatesWhenAuthorized() {
         userController.isAdmin = false;
@@ -46,6 +55,9 @@ public class AdminEventControllerTest {
         });
     }
 
+    /**
+     * Performs load all events returns failure when admin lookup fails.
+     */
     @Test
     public void loadAllEvents_returnsFailureWhenAdminLookupFails() {
         userController.adminLookupSuccess = false;
@@ -57,6 +69,9 @@ public class AdminEventControllerTest {
         });
     }
 
+    /**
+     * Performs load all events propagates repository failure.
+     */
     @Test
     public void loadAllEvents_propagatesRepositoryFailure() {
         userController.isAdmin = true;
@@ -68,6 +83,9 @@ public class AdminEventControllerTest {
         });
     }
 
+    /**
+     * Performs delete event fails without admin or when poster delete fails.
+     */
     @Test
     public void deleteEvent_failsWithoutAdminOrWhenPosterDeleteFails() {
         userController.isAdmin = false;
@@ -90,6 +108,9 @@ public class AdminEventControllerTest {
         });
     }
 
+    /**
+     * Performs delete event fails when admin lookup fails.
+     */
     @Test
     public void deleteEvent_failsWhenAdminLookupFails() {
         userController.adminLookupSuccess = false;
@@ -100,6 +121,9 @@ public class AdminEventControllerTest {
         });
     }
 
+    /**
+     * Performs delete event fails when event lookup fails.
+     */
     @Test
     public void deleteEvent_failsWhenEventLookupFails() {
         userController.isAdmin = true;
@@ -111,6 +135,9 @@ public class AdminEventControllerTest {
         });
     }
 
+    /**
+     * Performs delete event propagates repository delete failure after poster delete.
+     */
     @Test
     public void deleteEvent_propagatesRepositoryDeleteFailureAfterPosterDelete() {
         userController.isAdmin = true;
@@ -130,6 +157,9 @@ public class AdminEventControllerTest {
         });
     }
 
+    /**
+     * Performs delete event uses current poster behavior for blank poster url.
+     */
     @Test
     public void deleteEvent_usesCurrentPosterBehaviorForBlankPosterUrl() {
         userController.isAdmin = true;
@@ -149,6 +179,9 @@ public class AdminEventControllerTest {
         });
     }
 
+    /**
+     * Performs delete event uses current poster behavior for null poster url.
+     */
     @Test
     public void deleteEvent_usesCurrentPosterBehaviorForNullPosterUrl() {
         userController.isAdmin = true;
@@ -167,6 +200,9 @@ public class AdminEventControllerTest {
         });
     }
 
+    /**
+     * Performs delete event deletes poster then event when authorized.
+     */
     @Test
     public void deleteEvent_deletesPosterThenEventWhenAuthorized() {
         userController.isAdmin = true;
@@ -186,6 +222,9 @@ public class AdminEventControllerTest {
         });
     }
 
+    /**
+     * Stores and retrieves fake event.
+     */
     private static class FakeEventRepository extends EventRepository {
         private List<Event> allEvents;
         private Event event;
@@ -195,20 +234,40 @@ public class AdminEventControllerTest {
         private boolean getEventSuccess = true;
         private boolean deleteEventSuccess;
 
+        /**
+         * Creates a new FakeEventRepository instance.
+         */
         private FakeEventRepository() {
             super((com.google.firebase.firestore.FirebaseFirestore) null);
         }
 
+        /**
+         * Performs get all events.
+         *
+         * @param listener the listener
+         */
         @Override
         public void getAllEvents(com.example.allot.common.OnCompleteListener<List<Event>> listener) {
             listener.onComplete(allEvents, getAllEventsSuccess);
         }
 
+        /**
+         * Performs get event by id.
+         *
+         * @param eventId the event id
+         * @param listener the listener
+         */
         @Override
         public void getEventById(String eventId, com.example.allot.common.OnCompleteListener<Event> listener) {
             listener.onComplete(event, getEventSuccess && event != null);
         }
 
+        /**
+         * Performs delete event as admin.
+         *
+         * @param eventId the event id
+         * @param listener the listener
+         */
         @Override
         public void deleteEventAsAdmin(String eventId, com.example.allot.common.OnCompleteListener<Boolean> listener) {
             deletedEventId = eventId;
@@ -216,15 +275,27 @@ public class AdminEventControllerTest {
         }
     }
 
+    /**
+     * Coordinates fake poster.
+     */
     private static class FakePosterController extends EventPosterController {
         private String lastPosterUrl;
         private Boolean deleteResult;
         private boolean deleteSuccess;
 
+        /**
+         * Creates a new FakePosterController instance.
+         */
         private FakePosterController() {
             super(null, null);
         }
 
+        /**
+         * Performs delete poster file.
+         *
+         * @param posterUrl the poster url
+         * @param listener the listener
+         */
         @Override
         public void deletePosterFile(String posterUrl, com.example.allot.common.OnCompleteListener<Boolean> listener) {
             lastPosterUrl = posterUrl;
@@ -232,32 +303,61 @@ public class AdminEventControllerTest {
         }
     }
 
+    /**
+     * Coordinates fake user.
+     */
     private static class FakeUserController extends UserController {
         private boolean isAdmin;
         private boolean adminLookupSuccess = true;
 
+        /**
+         * Creates a new FakeUserController instance.
+         */
         private FakeUserController() {
             super(null, new DeviceSessionManager(new FakeDeviceSessionStore("device-1")));
         }
 
+        /**
+         * Performs is current user admin.
+         *
+         * @param listener the listener
+         */
         @Override
         public void isCurrentUserAdmin(com.example.allot.common.OnCompleteListener<Boolean> listener) {
             listener.onComplete(isAdmin, adminLookupSuccess);
         }
     }
 
+    /**
+     * Represents the fake device session store.
+     */
     private static class FakeDeviceSessionStore implements DeviceSessionManager.DeviceSessionStore {
         private final String deviceId;
 
+        /**
+         * Creates a new FakeDeviceSessionStore instance.
+         *
+         * @param deviceId the device id
+         */
         private FakeDeviceSessionStore(String deviceId) {
             this.deviceId = deviceId;
         }
 
+        /**
+         * Returns the device id.
+         *
+         * @return the device id
+         */
         @Override
         public String getDeviceId() {
             return deviceId;
         }
 
+        /**
+         * Performs save device id.
+         *
+         * @param deviceId the device id
+         */
         @Override
         public void saveDeviceId(String deviceId) {
         }

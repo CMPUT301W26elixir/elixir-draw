@@ -37,10 +37,9 @@ public class EventQrCodeActivity extends AppCompatActivity {
     private EventQrCodeService qrCodeService;
 
     /**
-     * Initializes the activity, reads event data from the intent,
-     * binds views, generates the QR code, and sets up the bottom navigation bar.
+     * Handles the create callback.
      *
-     * @param savedInstanceState the saved activity state
+     * @param savedInstanceState the saved instance state
      */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,7 +54,7 @@ public class EventQrCodeActivity extends AppCompatActivity {
     }
 
     /**
-     * Finishes the activity without transition animation.
+     * Performs finish.
      */
     @Override
     public void finish() {
@@ -64,7 +63,7 @@ public class EventQrCodeActivity extends AppCompatActivity {
     }
 
     /**
-     * Reads the event details passed into the activity through intent extras.
+     * Performs read extras.
      */
     private void readExtras() {
         Intent intent = getIntent();
@@ -76,7 +75,7 @@ public class EventQrCodeActivity extends AppCompatActivity {
     }
 
     /**
-     * Binds all view references used by the activity and sets button listeners.
+     * Performs bind views.
      */
     private void bindViews() {
         bottomNavBar = findViewById(R.id.bottomNavBar);
@@ -94,7 +93,7 @@ public class EventQrCodeActivity extends AppCompatActivity {
     }
 
     /**
-     * Generates and binds the QR code for the current event.
+     * Performs bind qr code.
      */
     private void bindQrCode() {
         try {
@@ -116,6 +115,9 @@ public class EventQrCodeActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Performs save qr to gallery.
+     */
     private void saveQrToGallery() {
         if (currentQrBitmap == null) {
             Toast.makeText(this, R.string.event_qr_save_failure, Toast.LENGTH_SHORT).show();
@@ -131,7 +133,7 @@ public class EventQrCodeActivity extends AppCompatActivity {
     }
 
     /**
-     * Configures the bottom navigation bar and assigns click actions for each tab.
+     * Updates the up bottom nav.
      */
     private void setupBottomNav() {
         bottomNavBar.setSelectedTab(BottomNavBarView.Tab.MY_EVENTS);
@@ -143,8 +145,7 @@ public class EventQrCodeActivity extends AppCompatActivity {
     }
 
     /**
-     * Opens the event detail page for the current event.
-     * Shows an error message if the event ID is missing.
+     * Performs open event page.
      */
     private void openEventPage() {
         if (TextUtils.isEmpty(currentEventId)) {

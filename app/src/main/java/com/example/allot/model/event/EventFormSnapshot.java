@@ -18,17 +18,18 @@ public class EventFormSnapshot {
     private final boolean privateEvent;
 
     /**
-     * Creates a snapshot of the event form values.
+     * Creates a new EventFormSnapshot instance.
      *
-     * @param title the title value
-     * @param location the location value
-     * @param price the price value
-     * @param description the description value
-     * @param participants the participant count value
-     * @param eventDate the formatted event date
-     * @param registrationStart the formatted registration start date
-     * @param registrationEnd the formatted registration end date
-     * @param geolocationEnabled whether geolocation is enabled
+     * @param title the title
+     * @param location the location
+     * @param price the price
+     * @param description the description
+     * @param participants the participants
+     * @param eventDate the event date
+     * @param registrationStart the registration start
+     * @param registrationEnd the registration end
+     * @param geolocationEnabled the geolocation enabled
+     * @param privateEvent the private event
      */
     public EventFormSnapshot(String title,
                              String location,
@@ -53,10 +54,10 @@ public class EventFormSnapshot {
     }
 
     /**
-     * Compares two snapshots to see whether any visible form value changed.
+     * Compares this event form snapshot with another object.
      *
-     * @param other the object to compare against
-     * @return true when both snapshots hold the same values
+     * @param other the other
+     * @return whether the supplied object matches this instance
      */
     @Override
     public boolean equals(Object other) {
@@ -80,9 +81,9 @@ public class EventFormSnapshot {
     }
 
     /**
-     * Builds a hash code that matches the snapshot equality rules.
+     * Returns the hash code for this event form snapshot.
      *
-     * @return the hash code for this snapshot
+     * @return the hash code for this instance
      */
     @Override
     public int hashCode() {

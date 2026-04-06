@@ -29,19 +29,19 @@ public class EventFormUiHelper {
     private final RegistrationRangePickerView registrationRangePickerView;
 
     /**
-     * Creates a helper around the event form widgets.
+     * Creates a new EventFormUiHelper instance.
      *
-     * @param titleInput the title field
-     * @param locationInput the location field
+     * @param titleInput the title input
+     * @param locationInput the location input
      * @param privateEventCheckbox the private event checkbox
      * @param geolocationCheckbox the geolocation checkbox
      * @param eventMonthSpinner the event month spinner
-     * @param eventDayInput the event day field
-     * @param eventYearInput the event year field
-     * @param priceInput the price field
-     * @param descriptionInput the description field
-     * @param participantsInput the participant field
-     * @param registrationRangePickerView the registration range picker
+     * @param eventDayInput the event day input
+     * @param eventYearInput the event year input
+     * @param priceInput the price input
+     * @param descriptionInput the description input
+     * @param participantsInput the participants input
+     * @param registrationRangePickerView the registration range picker view
      */
     public EventFormUiHelper(EditText titleInput,
                              EditText locationInput,
@@ -68,18 +68,18 @@ public class EventFormUiHelper {
     }
 
     /**
-     * Applies the shared month options to each month spinner in the form.
+     * Updates the up month spinners.
      *
-     * @param context the context used to load resources
+     * @param context the context
      */
     public void setupMonthSpinners(Context context) {
         setupMonthSpinner(context, eventMonthSpinner);
     }
 
     /**
-     * Reads the current widget values into a form data object.
+     * Returns the result of read form data.
      *
-     * @return the current event form data
+     * @return the result of this call
      */
     public EventFormData readFormData() {
         return new EventFormData(
@@ -103,9 +103,9 @@ public class EventFormUiHelper {
     }
 
     /**
-     * Writes saved form values back into the widgets.
+     * Performs bind form.
      *
-     * @param formData the data to bind into the form
+     * @param formData the form data
      */
     public void bindForm(EventFormData formData) {
         if (formData == null) {
@@ -137,14 +137,14 @@ public class EventFormUiHelper {
     }
 
     /**
-     * Binds one logical date across a month spinner and two text fields.
+     * Performs bind date.
      *
-     * @param monthSpinner the spinner that holds the month
-     * @param dayInput the field that holds the day
-     * @param yearInput the field that holds the year
-     * @param month the month value to select
-     * @param day the day value to show
-     * @param year the year value to show
+     * @param monthSpinner the month spinner
+     * @param dayInput the day input
+     * @param yearInput the year input
+     * @param month the month
+     * @param day the day
+     * @param year the year
      */
     private void bindDate(Spinner monthSpinner,
                           EditText dayInput,
@@ -161,10 +161,10 @@ public class EventFormUiHelper {
     }
 
     /**
-     * Configures a month spinner with the app's shared month labels and colors.
+     * Updates the up month spinner.
      *
-     * @param context the context used to load resources
-     * @param spinner the spinner being configured
+     * @param context the context
+     * @param spinner the spinner
      */
     private void setupMonthSpinner(Context context, Spinner spinner) {
         ArrayAdapter<CharSequence> adapter = new ArrayAdapter<CharSequence>(
@@ -172,6 +172,14 @@ public class EventFormUiHelper {
                 android.R.layout.simple_spinner_item,
                 context.getResources().getTextArray(R.array.create_event_months)
         ) {
+            /**
+             * Returns the view.
+             *
+             * @param position the position
+             * @param convertView the convert view
+             * @param parent the parent
+             * @return the view
+             */
             @Override
             public View getView(int position, View convertView, android.view.ViewGroup parent) {
                 View view = super.getView(position, convertView, parent);
@@ -186,6 +194,14 @@ public class EventFormUiHelper {
                 return view;
             }
 
+            /**
+             * Returns the drop down view.
+             *
+             * @param position the position
+             * @param convertView the convert view
+             * @param parent the parent
+             * @return the drop down view
+             */
             @Override
             public View getDropDownView(int position, View convertView, android.view.ViewGroup parent) {
                 View view = super.getDropDownView(position, convertView, parent);
@@ -201,10 +217,10 @@ public class EventFormUiHelper {
     }
 
     /**
-     * Selects the requested month value in a spinner when it is present.
+     * Updates the spinner to month.
      *
-     * @param spinner the spinner to update
-     * @param month the month value to select
+     * @param spinner the spinner
+     * @param month the month
      */
     private void setSpinnerToMonth(Spinner spinner, String month) {
         String normalizedMonth = UiHelper.cleanText(month);
@@ -222,20 +238,20 @@ public class EventFormUiHelper {
     }
 
     /**
-     * Reads trimmed text from an input field.
+     * Returns the result of read text.
      *
-     * @param editText the field to read
-     * @return the trimmed field value, or an empty string when the field is empty
+     * @param editText the edit text
+     * @return the result of this call
      */
     private String readText(EditText editText) {
         return editText.getText() == null ? "" : editText.getText().toString().trim();
     }
 
     /**
-     * Reads the selected month from a spinner, skipping the placeholder option.
+     * Returns the result of read month.
      *
-     * @param spinner the spinner to read
-     * @return the selected month, or an empty string when no real month is selected
+     * @param spinner the spinner
+     * @return the result of this call
      */
     private String readMonth(Spinner spinner) {
         return spinner.getSelectedItemPosition() <= 0 ? "" : spinner.getSelectedItem().toString();

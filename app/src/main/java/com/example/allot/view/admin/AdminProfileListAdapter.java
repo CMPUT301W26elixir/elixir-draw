@@ -23,25 +23,32 @@ public class AdminProfileListAdapter extends RecyclerView.Adapter<AdminProfileLi
      */
     public interface OnDeleteClickListener {
         /**
-         * Called when the delete button is clicked for a profile.
+         * Handles the delete click callback.
          *
-         * @param user the user profile to delete
-         * @param position the position in the list
+         * @param user the user
+         * @param position the position
          */
         void onDeleteClick(User user, int position);
     }
 
     /**
-     * Creates an AdminProfileListAdapter with the given profiles and click listener.
+     * Creates a new AdminProfileListAdapter instance.
      *
-     * @param profiles the list of user profiles to display
-     * @param onDeleteClickListener the listener for delete button clicks
+     * @param profiles the profiles
+     * @param onDeleteClickListener the on delete click listener
      */
     public AdminProfileListAdapter(List<User> profiles, OnDeleteClickListener onDeleteClickListener) {
         this.profiles = profiles;
         this.onDeleteClickListener = onDeleteClickListener;
     }
 
+    /**
+     * Returns the result of on create view holder.
+     *
+     * @param parent the parent
+     * @param viewType the view type
+     * @return the result of this call
+     */
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -50,12 +57,23 @@ public class AdminProfileListAdapter extends RecyclerView.Adapter<AdminProfileLi
         return new ViewHolder(view);
     }
 
+    /**
+     * Handles the bind view holder callback.
+     *
+     * @param holder the holder
+     * @param position the position
+     */
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         User user = profiles.get(position);
         holder.bind(user, position, onDeleteClickListener);
     }
 
+    /**
+     * Returns the item count.
+     *
+     * @return the item count
+     */
     @Override
     public int getItemCount() {
         return profiles.size();
@@ -71,6 +89,11 @@ public class AdminProfileListAdapter extends RecyclerView.Adapter<AdminProfileLi
         private final TextView userRoleText;
         private final Button deleteButton;
 
+        /**
+         * Creates a new ViewHolder instance.
+         *
+         * @param itemView the item view
+         */
         ViewHolder(@NonNull View itemView) {
             super(itemView);
             userNameText = itemView.findViewById(R.id.userNameText);
@@ -81,11 +104,11 @@ public class AdminProfileListAdapter extends RecyclerView.Adapter<AdminProfileLi
         }
 
         /**
-         * Binds a user profile to the view holder.
+         * Performs bind.
          *
-         * @param user the user profile to bind
-         * @param position the position in the list
-         * @param listener the delete click listener
+         * @param user the user
+         * @param position the position
+         * @param listener the listener
          */
         void bind(User user, int position, OnDeleteClickListener listener) {
             String displayName = (user.getFirstName() != null && !user.getFirstName().isEmpty() ?

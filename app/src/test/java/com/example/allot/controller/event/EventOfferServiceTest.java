@@ -10,14 +10,23 @@ import com.example.allot.model.event.WaitingList;
 import java.util.Arrays;
 import org.junit.Before;
 import org.junit.Test;
+/**
+ * Tests the event offer service.
+ */
 public class EventOfferServiceTest {
     private EventOfferService service;
 
+    /**
+     * Updates the up.
+     */
     @Before
     public void setUp() {
         service = new EventOfferService();
     }
 
+    /**
+     * Performs build declined offer state removes declining user from chosen and enrolled.
+     */
     @Test
     public void buildDeclinedOfferState_removesDecliningUserFromChosenAndEnrolled() {
         Event event = buildOpenEvent();
@@ -36,6 +45,9 @@ public class EventOfferServiceTest {
         assertTrue(result.getCancelled().contains("user1"));
     }
 
+    /**
+     * Performs build declined offer state adds replacement only from eligible users.
+     */
     @Test
     public void buildDeclinedOfferState_addsReplacementOnlyFromEligibleUsers() {
         Event event = buildOpenEvent();
@@ -52,6 +64,9 @@ public class EventOfferServiceTest {
         assertEquals("user3", result.getWaitingList().chosen.get(0));
     }
 
+    /**
+     * Performs build declined offer state does not add replacement when no candidates exist.
+     */
     @Test
     public void buildDeclinedOfferState_doesNotAddReplacementWhenNoCandidatesExist() {
         Event event = buildOpenEvent();
@@ -66,6 +81,11 @@ public class EventOfferServiceTest {
         assertTrue(result.getWaitingList().chosen.isEmpty());
     }
 
+    /**
+     * Returns the result of build open event.
+     *
+     * @return the result of this call
+     */
     private Event buildOpenEvent() {
         Event event = new Event();
         event.setStatus("open");

@@ -9,11 +9,11 @@ public class LotteryEntrantItem {
     private final int subtitleRes;
 
     /**
-     * Creates a simple display model for a lottery entrant.
+     * Creates a new LotteryEntrantItem instance.
      *
-     * @param entrantId the entrant identifier
-     * @param displayName the name shown in the list
-     * @param subtitleRes the string resource shown under the name
+     * @param entrantId the entrant id
+     * @param displayName the display name
+     * @param subtitleRes the subtitle res
      */
     public LotteryEntrantItem(String entrantId, String displayName, int subtitleRes) {
         this.entrantId = entrantId;
@@ -22,15 +22,21 @@ public class LotteryEntrantItem {
     }
 
     /**
-     * @return the entrant identifier
+     * Returns the entrant id.
+     *
+     * @return the entrant id
      */
     public String getEntrantId() { return entrantId; }
     /**
-     * @return the display name shown in the list
+     * Returns the display name.
+     *
+     * @return the display name
      */
     public String getDisplayName() { return displayName; }
     /**
-     * @return the subtitle string resource
+     * Returns the subtitle res.
+     *
+     * @return the subtitle res
      */
     public int getSubtitleRes() { return subtitleRes; }
 }

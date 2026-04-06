@@ -49,31 +49,31 @@ public class EventDetailData {
     private final NextAction nextAction;
 
     /**
-     * Creates an event detail state object for the screen.
+     * Creates a new EventDetailData instance.
      *
-     * @param status the overall screen state
-     * @param title the event title to show
-     * @param priceText the formatted event price
-     * @param locationText the location text shown in the header
-     * @param dateText the formatted event date
-     * @param heroDeadlineText the deadline text shown in the hero section
-     * @param organizerText the organizer name to display
-     * @param descriptionText the event description
-     * @param registrationOpenText the formatted registration open date
-     * @param registrationDeadlineText the formatted registration close date
-     * @param heroBackgroundRes the background resource used for the hero image
-     * @param entrantCount the number of entrants to display
-     * @param showWaitlistMessage true when the waitlist helper message should be shown
-     * @param buttonEnabled true when the primary action button should be enabled
-     * @param buttonTextRes the string resource used for the primary button label
-     * @param buttonBackgroundRes the drawable resource used for the primary button background
-     * @param buttonTextColorRes the color resource used for the button text
-     * @param subtext the supporting text shown under the primary action
-     * @param showEntrantCount true when the entrant count should be visible
-     * @param errorMessage the message shown when the screen is in an error state
-     * @param currentEvent the backing event model for follow-up actions
-     * @param currentDetailState the computed action state for the current user
-     * @param nextAction the action the view should take after a button press
+     * @param status the status
+     * @param title the title
+     * @param priceText the price text
+     * @param locationText the location text
+     * @param dateText the date text
+     * @param heroDeadlineText the hero deadline text
+     * @param organizerText the organizer text
+     * @param descriptionText the description text
+     * @param registrationOpenText the registration open text
+     * @param registrationDeadlineText the registration deadline text
+     * @param heroBackgroundRes the hero background res
+     * @param entrantCount the entrant count
+     * @param showWaitlistMessage the show waitlist message
+     * @param buttonEnabled the button enabled
+     * @param buttonTextRes the button text res
+     * @param buttonBackgroundRes the button background res
+     * @param buttonTextColorRes the button text color res
+     * @param subtext the subtext
+     * @param showEntrantCount the show entrant count
+     * @param errorMessage the error message
+     * @param currentEvent the current event
+     * @param currentDetailState the current detail state
+     * @param nextAction the next action
      */
     public EventDetailData(Status status,
                                   String title,
@@ -124,95 +124,141 @@ public class EventDetailData {
     }
 
     /**
-     * @return the overall screen status
+     * Returns the status.
+     *
+     * @return the status
      */
     public Status getStatus() { return status; }
     /**
-     * @return the event title
+     * Returns the title.
+     *
+     * @return the title
      */
     public String getTitle() { return title; }
     /**
-     * @return the formatted price text
+     * Returns the price text.
+     *
+     * @return the price text
      */
     public String getPriceText() { return priceText; }
     /**
-     * @return the formatted location text
+     * Returns the location text.
+     *
+     * @return the location text
      */
     public String getLocationText() { return locationText; }
     /**
-     * @return the formatted event date text
+     * Returns the date text.
+     *
+     * @return the date text
      */
     public String getDateText() { return dateText; }
     /**
+     * Returns the hero deadline text.
+     *
      * @return the hero deadline text
      */
     public String getHeroDeadlineText() { return heroDeadlineText; }
     /**
-     * @return the organizer name shown on screen
+     * Returns the organizer text.
+     *
+     * @return the organizer text
      */
     public String getOrganizerText() { return organizerText; }
     /**
-     * @return the event description text
+     * Returns the description text.
+     *
+     * @return the description text
      */
     public String getDescriptionText() { return descriptionText; }
     /**
-     * @return the formatted registration open text
+     * Returns the registration open text.
+     *
+     * @return the registration open text
      */
     public String getRegistrationOpenText() { return registrationOpenText; }
     /**
-     * @return the formatted registration deadline text
+     * Returns the registration deadline text.
+     *
+     * @return the registration deadline text
      */
     public String getRegistrationDeadlineText() { return registrationDeadlineText; }
     /**
-     * @return the hero background drawable resource
+     * Returns the hero background res.
+     *
+     * @return the hero background res
      */
     public int getHeroBackgroundRes() { return heroBackgroundRes; }
     /**
-     * @return the entrant count to display
+     * Returns the entrant count.
+     *
+     * @return the entrant count
      */
     public int getEntrantCount() { return entrantCount; }
     /**
-     * @return true when the waitlist helper message should be shown
+     * Returns whether this instance should show waitlist message.
+     *
+     * @return whether this instance should show waitlist message
      */
     public boolean shouldShowWaitlistMessage() { return showWaitlistMessage; }
     /**
-     * @return true when the primary action button is enabled
+     * Returns whether button enabled.
+     *
+     * @return whether button enabled
      */
     public boolean isButtonEnabled() { return buttonEnabled; }
     /**
-     * @return the button label resource
+     * Returns the button text res.
+     *
+     * @return the button text res
      */
     public int getButtonTextRes() { return buttonTextRes; }
     /**
-     * @return the button background resource
+     * Returns the button background res.
+     *
+     * @return the button background res
      */
     public int getButtonBackgroundRes() { return buttonBackgroundRes; }
     /**
-     * @return the button text color resource
+     * Returns the button text color res.
+     *
+     * @return the button text color res
      */
     public int getButtonTextColorRes() { return buttonTextColorRes; }
     /**
-     * @return the supporting subtext under the action button
+     * Returns the subtext.
+     *
+     * @return the subtext
      */
     public String getSubtext() { return subtext; }
     /**
-     * @return true when the entrant count should be visible
+     * Returns whether this instance should show entrant count.
+     *
+     * @return whether this instance should show entrant count
      */
     public boolean shouldShowEntrantCount() { return showEntrantCount; }
     /**
-     * @return the error message for an error state
+     * Returns the error message.
+     *
+     * @return the error message
      */
     public String getErrorMessage() { return errorMessage; }
     /**
-     * @return the current event model
+     * Returns the current event.
+     *
+     * @return the current event
      */
     public Event getCurrentEvent() { return currentEvent; }
     /**
-     * @return the action state computed for the current viewer
+     * Returns the current detail state.
+     *
+     * @return the current detail state
      */
     public EventActionState getCurrentDetailState() { return currentDetailState; }
     /**
-     * @return the next action the view should perform
+     * Returns the next action.
+     *
+     * @return the next action
      */
     public NextAction getNextAction() { return nextAction; }
 }

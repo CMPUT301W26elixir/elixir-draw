@@ -10,14 +10,23 @@ import com.example.allot.model.event.WaitingList;
 import java.util.Arrays;
 import org.junit.Before;
 import org.junit.Test;
+/**
+ * Tests the lottery draw service.
+ */
 public class LotteryDrawServiceTest {
     private LotteryDrawService service;
 
+    /**
+     * Updates the up.
+     */
     @Before
     public void setUp() {
         service = new LotteryDrawService();
     }
 
+    /**
+     * Performs has draw results detects existing chosen entrants.
+     */
     @Test
     public void hasDrawResults_detectsExistingChosenEntrants() {
         Event event = buildEventWithEntrants("user1");
@@ -26,6 +35,9 @@ public class LotteryDrawServiceTest {
         assertTrue(service.hasDrawResults(event));
     }
 
+    /**
+     * Performs build draw result builds chosen lists and resets processed state.
+     */
     @Test
     public void buildDrawResult_buildsChosenListsAndResetsProcessedState() {
         Event event = buildEventWithEntrants("user1", "user2", "user3");
@@ -47,6 +59,9 @@ public class LotteryDrawServiceTest {
         assertEquals(result.getChosen().size(), result.getWaitingList().status.size());
     }
 
+    /**
+     * Performs build draw result returns null when no entrants exist.
+     */
     @Test
     public void buildDrawResult_returnsNullWhenNoEntrantsExist() {
         Event event = buildEventWithEntrants();
@@ -58,6 +73,12 @@ public class LotteryDrawServiceTest {
         assertTrue(result == null);
     }
 
+    /**
+     * Returns the result of build event with entrants.
+     *
+     * @param entrants the entrants
+     * @return the result of this call
+     */
     private Event buildEventWithEntrants(String... entrants) {
         Event event = new Event();
         event.setWaitingList(new WaitingList());

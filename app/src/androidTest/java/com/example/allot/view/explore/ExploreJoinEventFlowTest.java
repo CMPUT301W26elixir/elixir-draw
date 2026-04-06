@@ -19,14 +19,25 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+/**
+ * Tests the explore join event flow.
+ */
 @RunWith(AndroidJUnit4.class)
 public class ExploreJoinEventFlowTest {
 
+    /**
+     * Performs disable animations.
+     */
     @Before
     public void disableAnimations() {
         SystemAnimations.disableAll();
     }
 
+    /**
+     * Returns the result of build intent.
+     *
+     * @return the result of this call
+     */
     private Intent buildIntent() {
         Intent intent = new Intent(ApplicationProvider.getApplicationContext(), ExploreActivity.class);
         intent.putExtra(ExploreActivity.EXTRA_UI_TEST_EVENT_ID, "ui-test-event-1");
@@ -41,6 +52,9 @@ public class ExploreJoinEventFlowTest {
         return intent;
     }
 
+    /**
+     * Performs explore to event detail to join dialog flow works.
+     */
     @Test
     public void exploreToEventDetailToJoinDialog_flowWorks() {
         try (ActivityScenario<ExploreActivity> scenario = ActivityScenario.launch(buildIntent())) {

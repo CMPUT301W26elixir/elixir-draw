@@ -99,10 +99,9 @@ public class ProfileActivity extends AppCompatActivity {
             });
 
     /**
-     * Initializes the activity, binds views, sets up listeners and navigation,
-     * and loads the user's profile data.
+     * Handles the create callback.
      *
-     * @param savedInstanceState the previously saved activity state, if one exists
+     * @param savedInstanceState the saved instance state
      */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -129,7 +128,7 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     /**
-     * Finishes the activity without any transition animation.
+     * Performs finish.
      */
     @Override
     public void finish() {
@@ -138,7 +137,7 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     /**
-     * Binds all layout views to their corresponding fields.
+     * Performs bind views.
      */
     private void bindViews() {
         bottomNavBar = findViewById(R.id.bottomNavBar);
@@ -155,6 +154,9 @@ public class ProfileActivity extends AppCompatActivity {
         deleteProfileText = findViewById(R.id.deleteProfileText);
     }
 
+    /**
+     * Updates the up profile photo picker.
+     */
     private void setupProfilePhotoPicker() {
         profileAvatarContainer.setOnClickListener(view -> {
             if (isDeleting || isUploadingPhoto) {
@@ -164,6 +166,11 @@ public class ProfileActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Performs open profile photo cropper.
+     *
+     * @param sourceUri the source uri
+     */
     private void openProfilePhotoCropper(Uri sourceUri) {
         if (sourceUri == null) {
             return;
@@ -176,8 +183,7 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     /**
-     * Configures the bottom navigation bar and assigns click handlers
-     * for switching to other app screens.
+     * Updates the up bottom nav.
      */
     private void setupBottomNav() {
         bottomNavBar.setSelectedTab(BottomNavBarView.Tab.PROFILE);
@@ -188,16 +194,14 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     /**
-     * Sets up listeners for form inputs, the notification checkbox,
-     * the save button, and the delete profile action.
+     * Updates the up form listeners.
      */
     private void setupFormListeners() {
         SimpleTextWatcher dirtyStateWatcher = new SimpleTextWatcher() {
             /**
-             * Updates the save button state after text changes,
-             * unless the profile is currently being bound to the UI.
+             * Performs after text changed.
              *
-             * @param editable the editable text after the change
+             * @param editable the editable
              */
             @Override
             public void afterTextChanged(Editable editable) {
@@ -223,10 +227,7 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     /**
-     * Loads the current user's profile data and binds it to the UI.
-     *
-     * <p>If loading fails, an error message is shown and the save button
-     * state is refreshed.
+     * Performs load profile.
      */
     private void loadProfile() {
         isBindingProfile = true;
@@ -244,6 +245,9 @@ public class ProfileActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Performs load profile photo.
+     */
     private void loadProfilePhoto() {
         userController.loadCurrentUser((user, success) -> {
             if (!success || user == null) {
@@ -256,6 +260,11 @@ public class ProfileActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Performs upload profile photo.
+     *
+     * @param photoUri the photo uri
+     */
     private void uploadProfilePhoto(Uri photoUri) {
         if (photoUri == null || isUploadingPhoto) {
             return;
@@ -276,6 +285,11 @@ public class ProfileActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Performs render profile photo.
+     *
+     * @param profilePhotoUrl the profile photo url
+     */
     private void renderProfilePhoto(String profilePhotoUrl) {
         if (TextUtils.isEmpty(profilePhotoUrl)) {
             profileAvatarPlaceholder.setVisibility(View.VISIBLE);
@@ -293,7 +307,7 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     /**
-     * Checks if the current user has admin role and shows/hides the admin panel button accordingly.
+     * Performs check admin status.
      */
     private void checkAdminStatus() {
         userController.isCurrentUserAdmin((isAdmin, success) -> {
@@ -306,7 +320,7 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     /**
-     * Opens the admin panel activity.
+     * Performs open admin panel.
      */
     private void openAdminPanel() {
         Intent intent = new Intent(this, com.example.allot.view.admin.AdminActivity.class);
@@ -315,10 +329,9 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     /**
-     * Binds a user's profile information to the form fields and records
-     * the original values for dirty-state tracking.
+     * Performs bind profile.
      *
-     * @param user the user whose profile data should be displayed
+     * @param user the user
      */
     private void bindProfile(User user) {
         isBindingProfile = true;
@@ -336,11 +349,7 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     /**
-     * Saves the current profile data if there are unsaved changes and
-     * no save or delete operation is already in progress.
-     *
-     * <p>If the save succeeds, the UI is rebound with the updated profile.
-     * If it fails, an error message is shown.
+     * Performs save profile.
      */
     private void saveProfile() {
         if (isSaving || isDeleting || !hasUnsavedChanges()) {
@@ -374,11 +383,9 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     /**
-     * Determines whether the form contains unsaved changes compared to
-     * the original loaded profile values.
+     * Returns whether this instance has unsaved changes.
      *
-     * @return true if at least one profile field or preference has changed;
-     * false otherwise
+     * @return whether this instance has unsaved changes
      */
     private boolean hasUnsavedChanges() {
         return profileController.isSaveAvailable(
@@ -390,8 +397,7 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     /**
-     * Updates the save button appearance and enables or disables controls
-     * based on the current save/delete state and whether unsaved changes exist.
+     * Performs update save button state.
      */
     private void updateSaveButtonState() {
         boolean saveAvailable = profileController.isSaveAvailable(
@@ -409,9 +415,7 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     /**
-     * Displays the delete profile confirmation dialog.
-     *
-     * <p>The dialog allows the user to cancel or confirm profile deletion.
+     * Performs show delete profile dialog.
      */
     private void showDeleteProfileDialog() {
         if (isDeleting) {
@@ -433,15 +437,11 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     /**
-     * Deletes the current user's profile after confirmation from the dialog.
+     * Performs delete profile.
      *
-     * <p>While deletion is in progress, the dialog buttons are disabled.
-     * On success, the user is returned to the splash screen. On failure,
-     * the dialog remains open and an error message is shown.
-     *
-     * @param dialog the confirmation dialog being displayed
-     * @param stayButton the button used to cancel deletion
-     * @param confirmDeleteButton the button used to confirm deletion
+     * @param dialog the dialog
+     * @param stayButton the stay button
+     * @param confirmDeleteButton the confirm delete button
      */
     private void deleteProfile(Dialog dialog, Button stayButton, Button confirmDeleteButton) {
         if (isDeleting) {
@@ -479,9 +479,9 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     /**
-     * Creates a snapshot of the profile values currently shown in the form.
+     * Returns the result of build current profile snapshot.
      *
-     * @return the current profile form snapshot
+     * @return the result of this call
      */
     private ProfileFormSnapshot buildCurrentProfileSnapshot() {
         return new ProfileFormSnapshot(
@@ -494,9 +494,9 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     /**
-     * Binds a controller-provided profile screen state to the UI.
+     * Performs bind profile state.
      *
-     * @param state the profile screen state to display
+     * @param snapshot the snapshot
      */
     private void bindProfileState(ProfileFormSnapshot snapshot) {
         if (snapshot == null) {
@@ -517,10 +517,20 @@ public class ProfileActivity extends AppCompatActivity {
         updateSaveButtonState();
     }
 
+    /**
+     * Returns whether ui test profile mode.
+     *
+     * @return whether ui test profile mode
+     */
     private boolean isUiTestProfileMode() {
         return getIntent().getBooleanExtra(EXTRA_UI_TEST_PROFILE_MODE, false);
     }
 
+    /**
+     * Returns the result of build ui test profile snapshot.
+     *
+     * @return the result of this call
+     */
     private ProfileFormSnapshot buildUiTestProfileSnapshot() {
         return new ProfileFormSnapshot(
                 getIntent().getStringExtra(EXTRA_UI_TEST_FIRST_NAME),

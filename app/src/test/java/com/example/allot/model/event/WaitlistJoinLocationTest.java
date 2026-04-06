@@ -6,7 +6,13 @@ import static org.junit.Assert.assertNull;
 import java.util.Date;
 import org.junit.Test;
 
+/**
+ * Tests the waitlist join location.
+ */
 public class WaitlistJoinLocationTest {
+    /**
+     * Performs waitlist join location defaults to null.
+     */
     @Test
     public void waitlistJoinLocation_defaultsToNull() {
         WaitlistJoinLocation joinLocation = new WaitlistJoinLocation();
@@ -16,6 +22,9 @@ public class WaitlistJoinLocationTest {
         assertNull(joinLocation.getJoinedAt());
     }
 
+    /**
+     * Performs waitlist join location can be set and read back.
+     */
     @Test
     public void waitlistJoinLocation_canBeSetAndReadBack() {
         WaitlistJoinLocation joinLocation = new WaitlistJoinLocation();

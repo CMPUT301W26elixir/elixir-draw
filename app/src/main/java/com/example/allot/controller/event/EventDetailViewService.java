@@ -19,6 +19,17 @@ public class EventDetailViewService {
         private final String subtext;
         private final boolean showEntrantCount;
 
+        /**
+         * Creates a new FooterState instance.
+         *
+         * @param showWaitlistMessage the show waitlist message
+         * @param buttonEnabled the button enabled
+         * @param buttonTextRes the button text res
+         * @param buttonBackgroundRes the button background res
+         * @param buttonTextColorRes the button text color res
+         * @param subtext the subtext
+         * @param showEntrantCount the show entrant count
+         */
         public FooterState(boolean showWaitlistMessage,
                            boolean buttonEnabled,
                            int buttonTextRes,
@@ -35,41 +46,75 @@ public class EventDetailViewService {
             this.showEntrantCount = showEntrantCount;
         }
 
+        /**
+         * Returns whether this instance should show waitlist message.
+         *
+         * @return whether this instance should show waitlist message
+         */
         public boolean shouldShowWaitlistMessage() {
             return showWaitlistMessage;
         }
 
+        /**
+         * Returns whether button enabled.
+         *
+         * @return whether button enabled
+         */
         public boolean isButtonEnabled() {
             return buttonEnabled;
         }
 
+        /**
+         * Returns the button text res.
+         *
+         * @return the button text res
+         */
         public int getButtonTextRes() {
             return buttonTextRes;
         }
 
+        /**
+         * Returns the button background res.
+         *
+         * @return the button background res
+         */
         public int getButtonBackgroundRes() {
             return buttonBackgroundRes;
         }
 
+        /**
+         * Returns the button text color res.
+         *
+         * @return the button text color res
+         */
         public int getButtonTextColorRes() {
             return buttonTextColorRes;
         }
 
+        /**
+         * Returns the subtext.
+         *
+         * @return the subtext
+         */
         public String getSubtext() {
             return subtext;
         }
 
+        /**
+         * Returns whether this instance should show entrant count.
+         *
+         * @return whether this instance should show entrant count
+         */
         public boolean shouldShowEntrantCount() {
             return showEntrantCount;
         }
     }
 
     /**
-     * Updates the footer and action button based on the current user's
-     * relationship to the event.
+     * Returns the result of build footer state.
      *
-     * @param state the event detail state whose waitlist and offer state should be shown
-     * @return the derived footer presentation state
+     * @param state the state
+     * @return the result of this call
      */
     public FooterState buildFooterState(EventActionState state) {
         if (state == null) {
@@ -177,10 +222,10 @@ public class EventDetailViewService {
     }
 
     /**
-     * Displays the current number of entrants on the waiting list.
+     * Returns the entrant count.
      *
-     * @param event the event whose entrant count should be shown
-     * @return the current entrant count
+     * @param event the event
+     * @return the entrant count
      */
     public int getEntrantCount(Event event) {
         if (event != null && event.getWaitingList() != null && event.getWaitingList().list != null) {
@@ -190,40 +235,40 @@ public class EventDetailViewService {
     }
 
     /**
-     * Checks whether the current user is the organizer of the event.
+     * Returns whether manage action.
      *
-     * @param state the detail state to inspect
-     * @return true if the current user is the organizer, otherwise false
+     * @param state the state
+     * @return whether manage action
      */
     public boolean isManageAction(EventActionState state) {
         return state != null && state.getActionType() == EventActionState.ActionType.MANAGE;
     }
 
     /**
-     * Checks whether the current user has an active offer for the event.
+     * Returns whether this instance has active offer.
      *
-     * @param state the detail state to inspect
-     * @return true if the current user is selected but not yet enrolled
+     * @param state the state
+     * @return whether this instance has active offer
      */
     public boolean hasActiveOffer(EventActionState state) {
         return state != null && state.getActionType() == EventActionState.ActionType.OFFER;
     }
 
     /**
-     * Checks whether the current user is on the event waiting list.
+     * Returns whether on waiting list.
      *
-     * @param state the detail state to inspect
-     * @return true if the current user is on the waiting list, otherwise false
+     * @param state the state
+     * @return whether on waiting list
      */
     public boolean isOnWaitingList(EventActionState state) {
         return state != null && state.getActionType() == EventActionState.ActionType.LEAVE_WAITLIST;
     }
 
     /**
-     * Builds the selection criteria text shown in the waiting list dialog.
+     * Returns the selection criteria count.
      *
-     * @param event the event being displayed
-     * @return the attendee count used by the selection criteria text
+     * @param event the event
+     * @return the selection criteria count
      */
     public int getSelectionCriteriaCount(Event event) {
         if (event != null) {

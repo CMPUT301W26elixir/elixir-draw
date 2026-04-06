@@ -27,16 +27,16 @@ public class RunLotteryData {
     private final Event currentEvent;
 
     /**
-     * Creates the state object shown by the lottery screen.
+     * Creates a new RunLotteryData instance.
      *
-     * @param status the overall screen status
-     * @param drawDateValue the formatted draw date
-     * @param attendeesValue the formatted attendee count
-     * @param entrantItems the entrant rows to display
-     * @param stateMessageRes the string resource for the empty or status message
-     * @param actionEnabled true when the main action button should be enabled
-     * @param shouldRedirectToEntrants true when the screen should navigate to the entrants page
-     * @param currentEvent the event currently being managed
+     * @param status the status
+     * @param drawDateValue the draw date value
+     * @param attendeesValue the attendees value
+     * @param entrantItems the entrant items
+     * @param stateMessageRes the state message res
+     * @param actionEnabled the action enabled
+     * @param shouldRedirectToEntrants whether redirect to entrants
+     * @param currentEvent the current event
      */
     public RunLotteryData(Status status,
                                     String drawDateValue,
@@ -57,35 +57,51 @@ public class RunLotteryData {
     }
 
     /**
-     * @return the overall screen status
+     * Returns the status.
+     *
+     * @return the status
      */
     public Status getStatus() { return status; }
     /**
-     * @return the formatted draw date
+     * Returns the draw date value.
+     *
+     * @return the draw date value
      */
     public String getDrawDateValue() { return drawDateValue; }
     /**
-     * @return the formatted attendee count
+     * Returns the attendees value.
+     *
+     * @return the attendees value
      */
     public String getAttendeesValue() { return attendeesValue; }
     /**
-     * @return a copy of the entrant items shown on screen
+     * Returns the entrant items.
+     *
+     * @return the entrant items
      */
     public List<LotteryEntrantItem> getEntrantItems() { return new ArrayList<>(entrantItems); }
     /**
-     * @return the state message resource
+     * Returns the state message res.
+     *
+     * @return the state message res
      */
     public int getStateMessageRes() { return stateMessageRes; }
     /**
-     * @return true when the main action is enabled
+     * Returns whether action enabled.
+     *
+     * @return whether action enabled
      */
     public boolean isActionEnabled() { return actionEnabled; }
     /**
-     * @return true when the screen should redirect to the entrants page
+     * Returns whether this instance should redirect to entrants.
+     *
+     * @return whether this instance should redirect to entrants
      */
     public boolean shouldRedirectToEntrants() { return shouldRedirectToEntrants; }
     /**
-     * @return the current event model
+     * Returns the current event.
+     *
+     * @return the current event
      */
     public Event getCurrentEvent() { return currentEvent; }
 }

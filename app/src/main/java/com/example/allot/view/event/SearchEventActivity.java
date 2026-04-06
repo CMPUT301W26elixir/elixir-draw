@@ -40,6 +40,11 @@ public class SearchEventActivity extends AppCompatActivity {
     private final Handler searchHandler = new Handler();
     private Runnable searchRunnable;
 
+    /**
+     * Handles the create callback.
+     *
+     * @param savedInstanceState the saved instance state
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -52,7 +57,7 @@ public class SearchEventActivity extends AppCompatActivity {
     }
 
     /**
-     * Binds all view references used by this activity.
+     * Performs bind views.
      */
     private void bindViews() {
         searchInput = findViewById(R.id.searchInput);
@@ -65,16 +70,35 @@ public class SearchEventActivity extends AppCompatActivity {
     }
 
     /**
-     * Sets up the back button and search input text watcher.
+     * Updates the up listeners.
      */
     private void setupListeners() {
         ImageButton backButton = findViewById(R.id.backButton);
         backButton.setOnClickListener(view -> getOnBackPressedDispatcher().onBackPressed());
 
+        /**
+         * Documents text Watcher.
+         */
         searchInput.addTextChangedListener(new TextWatcher() {
+            /**
+             * Performs before text changed.
+             *
+             * @param s the s
+             * @param start the start
+             * @param count the count
+             * @param after the after
+             */
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
 
+            /**
+             * Handles the text changed callback.
+             *
+             * @param s the s
+             * @param start the start
+             * @param before the before
+             * @param count the count
+             */
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 String query = s.toString().trim();
@@ -93,15 +117,20 @@ public class SearchEventActivity extends AppCompatActivity {
                 }
             }
 
+            /**
+             * Performs after text changed.
+             *
+             * @param s the s
+             */
             @Override
             public void afterTextChanged(Editable s) {}
         });
     }
 
     /**
-     * Performs a search with the given keyword and updates the UI.
+     * Performs perform search.
      *
-     * @param keyword the search keyword entered by the user
+     * @param keyword the keyword
      */
     private void performSearch(String keyword) {
         runOnUiThread(() -> {
@@ -110,7 +139,15 @@ public class SearchEventActivity extends AppCompatActivity {
             emptyText.setVisibility(View.GONE);
         });
 
+        /**
+         * Documents search Callback.
+         */
         searchEventController.searchEvents(keyword, new SearchEventController.SearchCallback() {
+            /**
+             * Handles the results callback.
+             *
+             * @param results the results
+             */
             @Override
             public void onResults(List<Event> results) {
                 runOnUiThread(() -> {
@@ -126,6 +163,11 @@ public class SearchEventActivity extends AppCompatActivity {
                 });
             }
 
+            /**
+             * Handles the error callback.
+             *
+             * @param e the e
+             */
             @Override
             public void onError(Exception e) {
                 runOnUiThread(() -> {
@@ -138,9 +180,9 @@ public class SearchEventActivity extends AppCompatActivity {
     }
 
     /**
-     * Binds search results to the RecyclerView.
+     * Performs show results.
      *
-     * @param results the list of matching events
+     * @param results the results
      */
     private void showResults(List<Event> results) {
         List<EventListItem> items = new ArrayList<>();
@@ -148,12 +190,26 @@ public class SearchEventActivity extends AppCompatActivity {
             items.add(EventListItem.fromEvent(event));
         }
 
+        /**
+         * Handles on Event Click Listener.
+         */
         resultsRecyclerView.setAdapter(new EventListAdapter(items, new EventListAdapter.OnEventClickListener() {
+            /**
+             * Handles the event click callback.
+             *
+             * @param event the event
+             */
             @Override
             public void onEventClick(EventListItem event) {
                 openEventDetail(event);
             }
 
+            /**
+             * Handles the heart click callback.
+             *
+             * @param event the event
+             * @param position the position
+             */
             @Override
             public void onHeartClick(EventListItem event, int position) {
                 // not needed for search
@@ -162,9 +218,9 @@ public class SearchEventActivity extends AppCompatActivity {
     }
 
     /**
-     * Navigates to the event detail screen for the selected event.
+     * Performs open event detail.
      *
-     * @param event the event that was tapped
+     * @param event the event
      */
     private void openEventDetail(EventListItem event) {
         Intent intent = new Intent(this, EventDetailActivity.class);
@@ -175,7 +231,7 @@ public class SearchEventActivity extends AppCompatActivity {
     }
 
     /**
-     * Clears the results list and resets the UI to its empty state.
+     * Performs clear results.
      */
     private void clearResults() {
         resultsRecyclerView.setVisibility(View.GONE);
@@ -184,14 +240,17 @@ public class SearchEventActivity extends AppCompatActivity {
     }
 
     /**
-     * Shows or hides the loading indicator.
+     * Updates the loading.
      *
-     * @param isLoading true to show loading, false to hide
+     * @param isLoading whether loading
      */
     private void setLoading(boolean isLoading) {
         loadingIndicator.setVisibility(isLoading ? View.VISIBLE : View.GONE);
     }
 
+    /**
+     * Handles the destroy callback.
+     */
     @Override
     protected void onDestroy() {
         super.onDestroy();

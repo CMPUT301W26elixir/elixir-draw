@@ -10,13 +10,13 @@ public class ProfileFormSnapshot {
     private final boolean notificationsEnabled;
 
     /**
-     * Creates a snapshot from the provided profile form values.
+     * Creates a new ProfileFormSnapshot instance.
      *
-     * @param firstName the current first name value
-     * @param lastName the current last name value
-     * @param email the current email value
-     * @param phone the current phone value
-     * @param notificationsEnabled whether notifications are enabled
+     * @param firstName the first name
+     * @param lastName the last name
+     * @param email the email
+     * @param phone the phone
+     * @param notificationsEnabled the notifications enabled
      */
     public ProfileFormSnapshot(String firstName,
                                String lastName,
@@ -31,10 +31,10 @@ public class ProfileFormSnapshot {
     }
 
     /**
-     * Creates a profile snapshot using the values currently stored on the user model.
+     * Returns the result of from user.
      *
-     * @param user the user whose profile values should be copied
-     * @return a snapshot containing the user's current profile values
+     * @param user the user
+     * @return the result of this call
      */
     public static ProfileFormSnapshot fromUser(User user) {
         if (user == null) {
@@ -51,65 +51,65 @@ public class ProfileFormSnapshot {
     }
 
     /**
-     * Returns the first name value stored in the snapshot.
+     * Returns the first name.
      *
-     * @return the first name value
+     * @return the first name
      */
     public String getFirstName() {
         return firstName;
     }
 
     /**
-     * Returns the last name value stored in the snapshot.
+     * Returns the last name.
      *
-     * @return the last name value
+     * @return the last name
      */
     public String getLastName() {
         return lastName;
     }
 
     /**
-     * Returns the email value stored in the snapshot.
+     * Returns the email.
      *
-     * @return the email value
+     * @return the email
      */
     public String getEmail() {
         return email;
     }
 
     /**
-     * Returns the phone value stored in the snapshot.
+     * Returns the phone.
      *
-     * @return the phone value
+     * @return the phone
      */
     public String getPhone() {
         return phone;
     }
 
     /**
-     * Returns whether notifications are enabled in the snapshot.
+     * Returns whether notifications enabled.
      *
-     * @return true if notifications are enabled, otherwise false
+     * @return whether notifications enabled
      */
     public boolean isNotificationsEnabled() {
         return notificationsEnabled;
     }
 
     /**
-     * Returns a safe, trimmed string value.
+     * Returns the result of normalize.
      *
-     * @param value the string to normalize
-     * @return an empty string if the value is null; otherwise the trimmed string
+     * @param value the value
+     * @return the result of this call
      */
     private static String normalize(String value) {
         return value == null ? "" : value.trim();
     }
 
     /**
-     * Compares the snapshot against another snapshot.
+     * Compares this profile form snapshot with another object.
      *
-     * @param other the other snapshot to compare
-     * @return true if all tracked values match, otherwise false
+     * @param other the other
+     * @return whether the supplied object matches this instance
      */
     @Override
     public boolean equals(Object other) {
@@ -130,9 +130,9 @@ public class ProfileFormSnapshot {
     }
 
     /**
-     * Returns the hash code for this snapshot.
+     * Returns the hash code for this profile form snapshot.
      *
-     * @return the hash code
+     * @return the hash code for this instance
      */
     @Override
     public int hashCode() {

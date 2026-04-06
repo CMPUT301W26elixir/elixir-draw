@@ -18,18 +18,19 @@ public class AdminEventController {
     private final UserController userController;
 
     /**
-     * Creates an AdminEventController with default dependencies.
+     * Creates a new AdminEventController instance.
      *
-     * @param context the context used to access shared preferences
+     * @param context the context
      */
     public AdminEventController(Context context) {
         this(new EventRepository(), new EventPosterController(), new UserController(context));
     }
 
     /**
-     * Creates an AdminEventController with provided dependencies.
+     * Creates a new AdminEventController instance.
      *
      * @param eventRepository the event repository
+     * @param eventPosterController the event poster controller
      * @param userController the user controller
      */
     public AdminEventController(EventRepository eventRepository,
@@ -41,10 +42,9 @@ public class AdminEventController {
     }
 
     /**
-     * Loads all events for admin browsing.
-     * Only admin users can access this operation.
+     * Performs load all events.
      *
-     * @param listener the listener that receives the events list and success result
+     * @param listener the listener
      */
     public void loadAllEvents(OnCompleteListener<List<Event>> listener) {
         userController.isCurrentUserAdmin((isAdmin, success) -> {
@@ -57,12 +57,10 @@ public class AdminEventController {
     }
 
     /**
-     * Deletes an event with admin privileges.
-     * Removes the event document and all references from user documents.
-     * Only admin users can access this operation.
+     * Performs delete event.
      *
-     * @param eventId the event ID to delete
-     * @param listener the listener that receives the deletion success result
+     * @param eventId the event id
+     * @param listener the listener
      */
     public void deleteEvent(String eventId, OnCompleteListener<Boolean> listener) {
         userController.isCurrentUserAdmin((isAdmin, success) -> {

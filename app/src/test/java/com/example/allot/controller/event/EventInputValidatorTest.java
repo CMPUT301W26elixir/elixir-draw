@@ -8,12 +8,18 @@ import com.example.allot.model.event.EventSubmissionInput;
 import java.util.Date;
 import org.junit.Before;
 import org.junit.Test;
+/**
+ * Tests the event input validator.
+ */
 public class EventInputValidatorTest {
     private EventInputValidator validator;
     private Date registrationStart;
     private Date registrationEnd;
     private Date eventDate;
 
+    /**
+     * Updates the up.
+     */
     @Before
     public void setUp() {
         validator = new EventInputValidator();
@@ -22,6 +28,9 @@ public class EventInputValidatorTest {
         eventDate = new Date(3_000L);
     }
 
+    /**
+     * Performs is valid create event input accepts valid input.
+     */
     @Test
     public void isValidCreateEventInput_acceptsValidInput() {
         EventSubmissionInput input = new EventSubmissionInput(
@@ -41,6 +50,9 @@ public class EventInputValidatorTest {
         assertTrue(validator.isValid(input));
     }
 
+    /**
+     * Performs is valid create event input rejects missing required fields.
+     */
     @Test
     public void isValidCreateEventInput_rejectsMissingRequiredFields() {
         EventSubmissionInput input = new EventSubmissionInput(
@@ -60,6 +72,9 @@ public class EventInputValidatorTest {
         assertFalse(validator.isValid(input));
     }
 
+    /**
+     * Performs is valid update event input rejects negative price.
+     */
     @Test
     public void isValidUpdateEventInput_rejectsNegativePrice() {
         EventSubmissionInput input = new EventSubmissionInput(
@@ -79,6 +94,9 @@ public class EventInputValidatorTest {
         assertFalse(validator.isValid(input));
     }
 
+    /**
+     * Performs is valid update event input rejects invalid participant count.
+     */
     @Test
     public void isValidUpdateEventInput_rejectsInvalidParticipantCount() {
         EventSubmissionInput input = new EventSubmissionInput(
@@ -98,6 +116,9 @@ public class EventInputValidatorTest {
         assertFalse(validator.isValid(input));
     }
 
+    /**
+     * Performs is valid update event input rejects invalid date ordering.
+     */
     @Test
     public void isValidUpdateEventInput_rejectsInvalidDateOrdering() {
         EventSubmissionInput input = new EventSubmissionInput(

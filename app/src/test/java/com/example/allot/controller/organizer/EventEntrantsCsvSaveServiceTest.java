@@ -7,14 +7,23 @@ import static org.junit.Assert.fail;
 import org.junit.Before;
 import org.junit.Test;
 
+/**
+ * Tests the event entrants csv save service.
+ */
 public class EventEntrantsCsvSaveServiceTest {
     private EventEntrantsCsvSaveService service;
 
+    /**
+     * Updates the up.
+     */
     @Before
     public void setUp() {
         service = new EventEntrantsCsvSaveService();
     }
 
+    /**
+     * Performs build file name uses event title when present.
+     */
     @Test
     public void buildFileName_usesEventTitleWhenPresent() {
         assertEquals(
@@ -23,6 +32,9 @@ public class EventEntrantsCsvSaveServiceTest {
         );
     }
 
+    /**
+     * Performs build file name falls back to event id.
+     */
     @Test
     public void buildFileName_fallsBackToEventId() {
         assertEquals(
@@ -31,6 +43,9 @@ public class EventEntrantsCsvSaveServiceTest {
         );
     }
 
+    /**
+     * Performs build file name falls back to default when inputs are blank.
+     */
     @Test
     public void buildFileName_fallsBackToDefaultWhenInputsAreBlank() {
         assertEquals(
@@ -39,6 +54,9 @@ public class EventEntrantsCsvSaveServiceTest {
         );
     }
 
+    /**
+     * Performs build file name normalizes punctuation and spacing.
+     */
     @Test
     public void buildFileName_normalizesPunctuationAndSpacing() {
         assertEquals(
@@ -47,6 +65,9 @@ public class EventEntrantsCsvSaveServiceTest {
         );
     }
 
+    /**
+     * Performs build file name ends with csv extension.
+     */
     @Test
     public void buildFileName_endsWithCsvExtension() {
         assertFalse(service.buildFileName("Sample Event", null).isEmpty());
@@ -54,6 +75,9 @@ public class EventEntrantsCsvSaveServiceTest {
                 .substring(service.buildFileName("Sample Event", null).length() - 4));
     }
 
+    /**
+     * Performs save to downloads rejects null context.
+     */
     @Test
     public void saveToDownloads_rejectsNullContext() {
         try {
@@ -66,6 +90,9 @@ public class EventEntrantsCsvSaveServiceTest {
         }
     }
 
+    /**
+     * Performs save to downloads rejects blank csv content.
+     */
     @Test
     public void saveToDownloads_rejectsBlankCsvContent() {
         try {
@@ -78,6 +105,9 @@ public class EventEntrantsCsvSaveServiceTest {
         }
     }
 
+    /**
+     * Performs build download spec sets csv metadata for android q and above.
+     */
     @Test
     public void buildDownloadSpec_setsCsvMetadataForAndroidQAndAbove() {
         EventEntrantsCsvSaveService.CsvDownloadSpec spec =
@@ -88,6 +118,9 @@ public class EventEntrantsCsvSaveServiceTest {
         assertEquals("Download/allot", spec.getRelativePath());
     }
 
+    /**
+     * Performs build download spec omits relative path before android q.
+     */
     @Test
     public void buildDownloadSpec_omitsRelativePathBeforeAndroidQ() {
         EventEntrantsCsvSaveService.CsvDownloadSpec spec =

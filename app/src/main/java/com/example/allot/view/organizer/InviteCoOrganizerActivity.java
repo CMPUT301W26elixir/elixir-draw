@@ -35,6 +35,11 @@ public class InviteCoOrganizerActivity extends AppCompatActivity {
     private TextView emptyText;
     private ProgressBar loadingIndicator;
 
+    /**
+     * Handles the create callback.
+     *
+     * @param savedInstanceState the saved instance state
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -49,6 +54,9 @@ public class InviteCoOrganizerActivity extends AppCompatActivity {
         loadEvent();
     }
 
+    /**
+     * Performs bind views.
+     */
     private void bindViews() {
         searchInput = findViewById(R.id.searchInput);
         searchButton = findViewById(R.id.searchButton);
@@ -57,15 +65,24 @@ public class InviteCoOrganizerActivity extends AppCompatActivity {
         loadingIndicator = findViewById(R.id.loadingIndicator);
     }
 
+    /**
+     * Updates the up header.
+     */
     private void setupHeader() {
         ImageButton backButton = findViewById(R.id.backButton);
         backButton.setOnClickListener(view -> getOnBackPressedDispatcher().onBackPressed());
     }
 
+    /**
+     * Updates the up listeners.
+     */
     private void setupListeners() {
         searchButton.setOnClickListener(view -> performSearch());
     }
 
+    /**
+     * Performs load event.
+     */
     private void loadEvent() {
         if (getIntent().getBooleanExtra(EXTRA_UI_TEST_MODE, false)) {
             currentEvent = new Event();
@@ -98,6 +115,9 @@ public class InviteCoOrganizerActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Performs perform search.
+     */
     private void performSearch() {
         String query = searchInput.getText().toString().trim();
         if (query.isEmpty()) {
@@ -117,6 +137,12 @@ public class InviteCoOrganizerActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Returns the result of filter candidates.
+     *
+     * @param users the users
+     * @return the result of this call
+     */
     private List<User> filterCandidates(List<User> users) {
         List<User> filtered = new ArrayList<>();
         if (users == null) {
@@ -135,10 +161,16 @@ public class InviteCoOrganizerActivity extends AppCompatActivity {
                 if (user.getDeviceId().equals(currentEvent.getOrganizerId())) {
                     continue;
                 }
+                /**
+                 * Returns whether get Device Id.
+                 */
                 if (currentEvent.getCoOrganizers() != null
                         && currentEvent.getCoOrganizers().contains(user.getDeviceId())) {
                     continue;
                 }
+                /**
+                 * Returns whether get Device Id.
+                 */
                 if (currentEvent.getCoOrganizerInvites() != null
                         && currentEvent.getCoOrganizerInvites().contains(user.getDeviceId())) {
                     continue;
@@ -149,6 +181,11 @@ public class InviteCoOrganizerActivity extends AppCompatActivity {
         return filtered;
     }
 
+    /**
+     * Performs bind results.
+     *
+     * @param users the users
+     */
     private void bindResults(List<User> users) {
         resultsContainer.removeAllViews();
 
@@ -172,6 +209,12 @@ public class InviteCoOrganizerActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Performs invite user.
+     *
+     * @param user the user
+     * @param inviteButton the invite button
+     */
     private void inviteUser(User user, TextView inviteButton) {
         if (user == null || TextUtils.isEmpty(currentEventId)) {
             return;
@@ -192,6 +235,12 @@ public class InviteCoOrganizerActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Returns the result of resolve contact.
+     *
+     * @param user the user
+     * @return the result of this call
+     */
     private String resolveContact(User user) {
         if (user == null) {
             return "";
@@ -205,10 +254,20 @@ public class InviteCoOrganizerActivity extends AppCompatActivity {
         return "";
     }
 
+    /**
+     * Updates the loading.
+     *
+     * @param isLoading whether loading
+     */
     private void setLoading(boolean isLoading) {
         loadingIndicator.setVisibility(isLoading ? View.VISIBLE : View.GONE);
     }
 
+    /**
+     * Performs show empty state.
+     *
+     * @param show the show
+     */
     private void showEmptyState(boolean show) {
         emptyText.setVisibility(show ? View.VISIBLE : View.GONE);
     }

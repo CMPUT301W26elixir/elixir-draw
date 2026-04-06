@@ -6,7 +6,13 @@ import static org.junit.Assert.assertNull;
 import java.util.Date;
 import org.junit.Test;
 
+/**
+ * Tests the browse filter.
+ */
 public class BrowseFilterTest {
+    /**
+     * Performs two argument constructor sets only search and category.
+     */
     @Test
     public void twoArgumentConstructor_setsOnlySearchAndCategory() {
         BrowseFilter filter = new BrowseFilter("music", "Sports");
@@ -17,6 +23,9 @@ public class BrowseFilterTest {
         assertNull(filter.getMinimumCapacity());
     }
 
+    /**
+     * Performs full constructor exposes advanced filter values.
+     */
     @Test
     public void fullConstructor_exposesAdvancedFilterValues() {
         Date startDate = new Date(1000L);

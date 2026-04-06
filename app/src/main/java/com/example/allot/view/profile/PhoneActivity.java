@@ -15,10 +15,9 @@ import com.example.allot.view.shared.DeferredOnboardingNavigator;
 public class PhoneActivity extends AppCompatActivity {
 
     /**
-     * Initializes the activity, binds the phone input and action buttons,
-     * and sets click listeners for continuing or skipping phone entry.
+     * Handles the create callback.
      *
-     * @param savedInstanceState the previously saved activity state, if one exists
+     * @param savedInstanceState the saved instance state
      */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,10 +37,9 @@ public class PhoneActivity extends AppCompatActivity {
     }
 
     /**
-     * Opens the notifications setup screen and passes along the profile data
-     * collected from previous steps, including the provided phone number.
+     * Performs open notifications screen.
      *
-     * @param phone the phone number entered by the user, or an empty string if skipped
+     * @param phone the phone
      */
     private void openNotificationsScreen(String phone) {
         Intent intent = new Intent(PhoneActivity.this, NotificationsActivity.class);

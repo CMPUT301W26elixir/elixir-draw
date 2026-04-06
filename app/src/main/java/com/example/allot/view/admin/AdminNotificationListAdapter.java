@@ -22,12 +22,19 @@ public class AdminNotificationListAdapter extends RecyclerView.Adapter<AdminNoti
     private final List<NotificationItem> notifications;
     private final Map<String, String> userNamesById = new HashMap<>();
 
+    /**
+     * Creates a new AdminNotificationListAdapter instance.
+     *
+     * @param notifications the notifications
+     */
     public AdminNotificationListAdapter(List<NotificationItem> notifications) {
         this.notifications = notifications;
     }
 
     /**
-     * Replaces the user ID to display-name mapping used by this adapter.
+     * Updates the user names by id.
+     *
+     * @param namesById the names by id
      */
     public void setUserNamesById(Map<String, String> namesById) {
         userNamesById.clear();
@@ -36,6 +43,13 @@ public class AdminNotificationListAdapter extends RecyclerView.Adapter<AdminNoti
         }
     }
 
+    /**
+     * Returns the result of on create view holder.
+     *
+     * @param parent the parent
+     * @param viewType the view type
+     * @return the result of this call
+     */
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -44,16 +58,30 @@ public class AdminNotificationListAdapter extends RecyclerView.Adapter<AdminNoti
         return new ViewHolder(view);
     }
 
+    /**
+     * Handles the bind view holder callback.
+     *
+     * @param holder the holder
+     * @param position the position
+     */
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         holder.bind(notifications.get(position), userNamesById);
     }
 
+    /**
+     * Returns the item count.
+     *
+     * @return the item count
+     */
     @Override
     public int getItemCount() {
         return notifications.size();
     }
 
+    /**
+     * Represents the view holder.
+     */
     static class ViewHolder extends RecyclerView.ViewHolder {
         private final TextView titleText;
         private final TextView messageText;
@@ -61,6 +89,11 @@ public class AdminNotificationListAdapter extends RecyclerView.Adapter<AdminNoti
         private final TextView eventIdText;
         private final TextView sentAtText;
 
+        /**
+         * Creates a new ViewHolder instance.
+         *
+         * @param itemView the item view
+         */
         ViewHolder(@NonNull View itemView) {
             super(itemView);
             titleText = itemView.findViewById(R.id.notificationTitleText);
@@ -70,6 +103,12 @@ public class AdminNotificationListAdapter extends RecyclerView.Adapter<AdminNoti
             sentAtText = itemView.findViewById(R.id.notificationSentAtText);
         }
 
+        /**
+         * Performs bind.
+         *
+         * @param item the item
+         * @param userNamesById the user names by id
+         */
         void bind(NotificationItem item, Map<String, String> userNamesById) {
             String safeTitle = item == null || isBlank(item.getTitle()) ? "Notification" : item.getTitle();
             String safeMessage = item == null || isBlank(item.getMessage()) ? "No message" : item.getMessage();
@@ -87,6 +126,12 @@ public class AdminNotificationListAdapter extends RecyclerView.Adapter<AdminNoti
             sentAtText.setText("Sent: " + formatTimestamp(item));
         }
 
+        /**
+         * Returns the result of format timestamp.
+         *
+         * @param item the item
+         * @return the result of this call
+         */
         private String formatTimestamp(NotificationItem item) {
             if (item == null || item.getCreatedAt() == null || item.getCreatedAt().toDate() == null) {
                 return "Unknown";
@@ -95,6 +140,12 @@ public class AdminNotificationListAdapter extends RecyclerView.Adapter<AdminNoti
             return new SimpleDateFormat("MMM d, yyyy h:mm a", Locale.getDefault()).format(date);
         }
 
+        /**
+         * Returns whether blank.
+         *
+         * @param value the value
+         * @return whether blank
+         */
         private boolean isBlank(String value) {
             return value == null || value.trim().isEmpty();
         }

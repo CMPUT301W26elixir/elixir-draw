@@ -14,16 +14,25 @@ import com.example.allot.model.profile.User;
 import org.junit.Before;
 import org.junit.Test;
 
+/**
+ * Tests the profile controller.
+ */
 public class ProfileControllerTest {
     private FakeUserController userController;
     private ProfileController controller;
 
+    /**
+     * Updates the up.
+     */
     @Before
     public void setUp() {
         userController = new FakeUserController();
         controller = new ProfileController(userController);
     }
 
+    /**
+     * Performs load profile returns snapshot from loaded user.
+     */
     @Test
     public void loadProfile_returnsSnapshotFromLoadedUser() {
         User user = new User();
@@ -44,6 +53,9 @@ public class ProfileControllerTest {
         });
     }
 
+    /**
+     * Performs load profile returns failure when user missing.
+     */
     @Test
     public void loadProfile_returnsFailureWhenUserMissing() {
         userController.userToLoad = null;
@@ -55,6 +67,9 @@ public class ProfileControllerTest {
         });
     }
 
+    /**
+     * Performs is save available only when changed and idle.
+     */
     @Test
     public void isSaveAvailable_onlyWhenChangedAndIdle() {
         ProfileFormSnapshot original = new ProfileFormSnapshot("A", "B", "a@example.com", "", true);
@@ -66,6 +81,9 @@ public class ProfileControllerTest {
         assertFalse(controller.isSaveAvailable(original, changed, false, true));
     }
 
+    /**
+     * Performs save profile returns saved snapshot on success.
+     */
     @Test
     public void saveProfile_returnsSavedSnapshotOnSuccess() {
         User savedUser = new User();
@@ -84,6 +102,9 @@ public class ProfileControllerTest {
                 });
     }
 
+    /**
+     * Performs save profile returns failure message when update fails.
+     */
     @Test
     public void saveProfile_returnsFailureMessageWhenUpdateFails() {
         userController.updatedUser = null;
@@ -97,6 +118,9 @@ public class ProfileControllerTest {
                 });
     }
 
+    /**
+     * Performs delete profile returns success and failure messages.
+     */
     @Test
     public void deleteProfile_returnsSuccessAndFailureMessages() {
         userController.deleteResult = true;
@@ -118,6 +142,9 @@ public class ProfileControllerTest {
         });
     }
 
+    /**
+     * Coordinates fake user.
+     */
     private static class FakeUserController extends UserController {
         private User userToLoad;
         private boolean loadSuccess;
@@ -126,39 +153,80 @@ public class ProfileControllerTest {
         private Boolean deleteResult;
         private boolean deleteSuccess;
 
+        /**
+         * Creates a new FakeUserController instance.
+         */
         private FakeUserController() {
             super(null, new DeviceSessionManager(new FakeDeviceSessionStore("device-1")));
         }
 
+        /**
+         * Performs load current user.
+         *
+         * @param listener the listener
+         */
         @Override
         public void loadCurrentUser(com.example.allot.common.OnCompleteListener<User> listener) {
             listener.onComplete(userToLoad, loadSuccess);
         }
 
+        /**
+         * Performs update user profile.
+         *
+         * @param firstName the first name
+         * @param lastName the last name
+         * @param email the email
+         * @param phone the phone
+         * @param notiEnabled the noti enabled
+         * @param listener the listener
+         */
         @Override
         public void updateUserProfile(String firstName, String lastName, String email, String phone,
                                       boolean notiEnabled, com.example.allot.common.OnCompleteListener<User> listener) {
             listener.onComplete(updatedUser, updateSuccess);
         }
 
+        /**
+         * Performs delete current user.
+         *
+         * @param listener the listener
+         */
         @Override
         public void deleteCurrentUser(com.example.allot.common.OnCompleteListener<Boolean> listener) {
             listener.onComplete(deleteResult, deleteSuccess);
         }
     }
 
+    /**
+     * Represents the fake device session store.
+     */
     private static class FakeDeviceSessionStore implements DeviceSessionManager.DeviceSessionStore {
         private final String deviceId;
 
+        /**
+         * Creates a new FakeDeviceSessionStore instance.
+         *
+         * @param deviceId the device id
+         */
         private FakeDeviceSessionStore(String deviceId) {
             this.deviceId = deviceId;
         }
 
+        /**
+         * Returns the device id.
+         *
+         * @return the device id
+         */
         @Override
         public String getDeviceId() {
             return deviceId;
         }
 
+        /**
+         * Performs save device id.
+         *
+         * @param deviceId the device id
+         */
         @Override
         public void saveDeviceId(String deviceId) {
         }

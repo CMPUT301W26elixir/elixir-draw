@@ -21,10 +21,10 @@ import java.util.Map;
 public class ScanDecoderService {
 
     /**
-     * Decodes a QR payload from a camera frame.
+     * Returns the result of decode image proxy.
      *
-     * @param imageProxy the frame to inspect
-     * @return the decoded QR text, or null when no QR code is found
+     * @param imageProxy the image proxy
+     * @return the result of this call
      */
     public String decodeImageProxy(ImageProxy imageProxy) {
         if (imageProxy == null || imageProxy.getPlanes().length == 0) {
@@ -55,10 +55,10 @@ public class ScanDecoderService {
     }
 
     /**
-     * Decodes a QR payload from a bitmap image.
+     * Returns the result of decode bitmap.
      *
-     * @param bitmap the bitmap to inspect
-     * @return the decoded QR text, or null when no QR code is found
+     * @param bitmap the bitmap
+     * @return the result of this call
      */
     public String decodeBitmap(Bitmap bitmap) {
         if (bitmap == null) {
@@ -73,6 +73,12 @@ public class ScanDecoderService {
         return decodeBinaryBitmap(new BinaryBitmap(new HybridBinarizer(source)));
     }
 
+    /**
+     * Returns the result of decode binary bitmap.
+     *
+     * @param bitmap the bitmap
+     * @return the result of this call
+     */
     private String decodeBinaryBitmap(BinaryBitmap bitmap) {
         MultiFormatReader reader = new MultiFormatReader();
         try {
@@ -85,6 +91,11 @@ public class ScanDecoderService {
         }
     }
 
+    /**
+     * Returns the result of build hints.
+     *
+     * @return the result of this call
+     */
     private Map<DecodeHintType, Object> buildHints() {
         Map<DecodeHintType, Object> hints = new EnumMap<>(DecodeHintType.class);
         hints.put(DecodeHintType.POSSIBLE_FORMATS, Collections.singletonList(BarcodeFormat.QR_CODE));
@@ -92,6 +103,12 @@ public class ScanDecoderService {
         return hints;
     }
 
+    /**
+     * Returns the result of extract luminance plane.
+     *
+     * @param imageProxy the image proxy
+     * @return the result of this call
+     */
     private byte[] extractLuminancePlane(ImageProxy imageProxy) {
         ImageProxy.PlaneProxy plane = imageProxy.getPlanes()[0];
         ByteBuffer buffer = plane.getBuffer();
@@ -120,6 +137,15 @@ public class ScanDecoderService {
         return luminance;
     }
 
+    /**
+     * Returns the result of rotate luminance.
+     *
+     * @param source the source
+     * @param width the width
+     * @param height the height
+     * @param rotationDegrees the rotation degrees
+     * @return the result of this call
+     */
     private RotatedLuminance rotateLuminance(byte[] source, int width, int height, int rotationDegrees) {
         if (rotationDegrees == 90) {
             byte[] rotated = new byte[source.length];
@@ -154,11 +180,21 @@ public class ScanDecoderService {
         return new RotatedLuminance(source, width, height);
     }
 
+    /**
+     * Represents the rotated luminance.
+     */
     private static class RotatedLuminance {
         private final byte[] data;
         private final int width;
         private final int height;
 
+        /**
+         * Creates a new RotatedLuminance instance.
+         *
+         * @param data the data
+         * @param width the width
+         * @param height the height
+         */
         private RotatedLuminance(byte[] data, int width, int height) {
             this.data = data;
             this.width = width;

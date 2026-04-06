@@ -21,14 +21,25 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+/**
+ * Tests the edit profile flow.
+ */
 @RunWith(AndroidJUnit4.class)
 public class EditProfileFlowTest {
 
+    /**
+     * Performs disable animations.
+     */
     @Before
     public void disableAnimations() {
         SystemAnimations.disableAll();
     }
 
+    /**
+     * Returns the result of build intent.
+     *
+     * @return the result of this call
+     */
     private Intent buildIntent() {
         Intent intent = new Intent(ApplicationProvider.getApplicationContext(), ProfileActivity.class);
         intent.putExtra(ProfileActivity.EXTRA_UI_TEST_PROFILE_MODE, true);
@@ -40,6 +51,9 @@ public class EditProfileFlowTest {
         return intent;
     }
 
+    /**
+     * Performs edit profile updates form and clears dirty state after save.
+     */
     @Test
     public void editProfile_updatesFormAndClearsDirtyStateAfterSave() {
         try (ActivityScenario<ProfileActivity> scenario = ActivityScenario.launch(buildIntent())) {

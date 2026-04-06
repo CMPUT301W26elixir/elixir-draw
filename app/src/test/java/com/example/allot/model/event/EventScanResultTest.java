@@ -7,7 +7,13 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
+/**
+ * Tests the event scan result.
+ */
 public class EventScanResultTest {
+    /**
+     * Performs open event should open when event present.
+     */
     @Test
     public void openEvent_shouldOpenWhenEventPresent() {
         Event event = new Event();
@@ -21,6 +27,9 @@ public class EventScanResultTest {
         assertTrue(result.shouldOpenEvent());
     }
 
+    /**
+     * Performs invalid and error results do not open event.
+     */
     @Test
     public void invalidAndErrorResults_doNotOpenEvent() {
         EventScanResult invalid = EventScanResult.invalidPayload("bad", 1);

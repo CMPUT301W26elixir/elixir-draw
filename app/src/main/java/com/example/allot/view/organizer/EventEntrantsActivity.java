@@ -79,10 +79,9 @@ public class EventEntrantsActivity extends AppCompatActivity {
     private java.util.ArrayList<String> uiTestAll;
 
     /**
-     * Initializes the activity, binds views, sets up the header and tabs,
-     * and loads the event data.
+     * Handles the create callback.
      *
-     * @param savedInstanceState the saved activity state
+     * @param savedInstanceState the saved instance state
      */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -105,7 +104,7 @@ public class EventEntrantsActivity extends AppCompatActivity {
     }
 
     /**
-     * Finishes the activity without transition animation.
+     * Performs finish.
      */
     @Override
     public void finish() {
@@ -114,7 +113,7 @@ public class EventEntrantsActivity extends AppCompatActivity {
     }
 
     /**
-     * Binds all view references used by the activity.
+     * Performs bind views.
      */
     private void bindViews() {
         drawDateValueText = findViewById(R.id.drawDateValueText);
@@ -132,7 +131,7 @@ public class EventEntrantsActivity extends AppCompatActivity {
     }
 
     /**
-     * Sets up the header back button behavior.
+     * Updates the up header.
      */
     private void setupHeader() {
         ImageButton backButton = findViewById(R.id.backButton);
@@ -140,7 +139,7 @@ public class EventEntrantsActivity extends AppCompatActivity {
     }
 
     /**
-     * Sets up tab click behavior and the export action.
+     * Updates the up tabs.
      */
     private void setupTabs() {
         selectedTabText.setOnClickListener(view -> showTab(Tab.SELECTED));
@@ -155,8 +154,7 @@ public class EventEntrantsActivity extends AppCompatActivity {
     }
 
     /**
-     * Loads the current event from Firestore.
-     * Shows an error and finishes if the event ID is missing.
+     * Performs load event.
      */
     private void loadEvent() {
         if (isUiTestMode()) {
@@ -202,9 +200,9 @@ public class EventEntrantsActivity extends AppCompatActivity {
     }
 
     /**
-     * Switches the currently selected entrant tab and refreshes the displayed content.
+     * Performs show tab.
      *
-     * @param tab the tab to show
+     * @param tab the tab
      */
     private void showTab(Tab tab) {
         selectedTab = tab;
@@ -213,7 +211,7 @@ public class EventEntrantsActivity extends AppCompatActivity {
     }
 
     /**
-     * Updates the visual selected state of the tabs and export button.
+     * Performs update tab state.
      */
     private void updateTabState() {
         applyTabStyle(selectedTabText, selectedTab == Tab.SELECTED);
@@ -232,10 +230,10 @@ public class EventEntrantsActivity extends AppCompatActivity {
     }
 
     /**
-     * Applies the selected or unselected style to a tab view.
+     * Performs apply tab style.
      *
-     * @param tabView the tab text view to style
-     * @param isSelected true if the tab is selected
+     * @param tabView the tab view
+     * @param isSelected whether selected
      */
     private void applyTabStyle(TextView tabView, boolean isSelected) {
         tabView.setBackgroundResource(isSelected ? R.drawable.bg_manage_entrant_tab_selected : R.drawable.bg_manage_entrant_tab_unselected);
@@ -243,10 +241,10 @@ public class EventEntrantsActivity extends AppCompatActivity {
     }
 
     /**
-     * Binds a list of entrants into the entrant container.
+     * Performs bind entrants.
      *
-     * @param entrantItems the entrant items to display
-     * @param emptyMessageRes the message to show if the list is empty
+     * @param entrantItems the entrant items
+     * @param emptyMessageRes the empty message res
      */
     private void bindEntrants(List<LotteryEntrantItem> entrantItems, int emptyMessageRes) {
         entrantsContainer.removeAllViews();
@@ -280,10 +278,18 @@ public class EventEntrantsActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Returns whether ui test mode.
+     *
+     * @return whether ui test mode
+     */
     private boolean isUiTestMode() {
         return getIntent().getBooleanExtra(EXTRA_UI_TEST_MODE, false);
     }
 
+    /**
+     * Performs load ui test lists.
+     */
     private void loadUiTestLists() {
         uiTestSelected = getIntent().getStringArrayListExtra(EXTRA_UI_TEST_SELECTED);
         uiTestCancelled = getIntent().getStringArrayListExtra(EXTRA_UI_TEST_CANCELLED);
@@ -304,6 +310,9 @@ public class EventEntrantsActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Performs bind ui test event.
+     */
     private void bindUiTestEvent() {
         currentEvent = new Event();
         currentEvent.setEventId(currentEventId);
@@ -317,6 +326,12 @@ public class EventEntrantsActivity extends AppCompatActivity {
         bindEntrants(buildUiTestEntrants(selectedTab), getEmptyMessageRes(selectedTab));
     }
 
+    /**
+     * Returns the result of build ui test entrants.
+     *
+     * @param tab the tab
+     * @return the result of this call
+     */
     private List<LotteryEntrantItem> buildUiTestEntrants(Tab tab) {
         List<String> names = getUiTestNamesForTab(tab);
         List<LotteryEntrantItem> items = new java.util.ArrayList<>();
@@ -328,6 +343,12 @@ public class EventEntrantsActivity extends AppCompatActivity {
         return items;
     }
 
+    /**
+     * Returns the ui test names for tab.
+     *
+     * @param tab the tab
+     * @return the ui test names for tab
+     */
     private List<String> getUiTestNamesForTab(Tab tab) {
         switch (tab) {
             case CANCELLED:
@@ -344,6 +365,12 @@ public class EventEntrantsActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Returns the subtitle res for tab.
+     *
+     * @param tab the tab
+     * @return the subtitle res for tab
+     */
     private int getSubtitleResForTab(Tab tab) {
         switch (tab) {
             case CANCELLED:
@@ -360,10 +387,22 @@ public class EventEntrantsActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Returns the result of safe string.
+     *
+     * @param value the value
+     * @param fallback the fallback
+     * @return the result of this call
+     */
     private String safeString(String value, String fallback) {
         return TextUtils.isEmpty(value) ? fallback : value;
     }
 
+    /**
+     * Performs prompt cancel entrant.
+     *
+     * @param entrantItem the entrant item
+     */
     private void promptCancelEntrant(LotteryEntrantItem entrantItem) {
         if (entrantItem == null || isCancellingEntrant) {
             return;
@@ -378,6 +417,11 @@ public class EventEntrantsActivity extends AppCompatActivity {
                 .show();
     }
 
+    /**
+     * Performs cancel entrant.
+     *
+     * @param entrantItem the entrant item
+     */
     private void cancelEntrant(LotteryEntrantItem entrantItem) {
         if (entrantItem == null || isCancellingEntrant) {
             return;
@@ -415,6 +459,9 @@ public class EventEntrantsActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Performs draw replacement entrant.
+     */
     private void drawReplacementEntrant() {
         if (isDrawingReplacement || TextUtils.isEmpty(currentEventId)) {
             return;
@@ -441,6 +488,12 @@ public class EventEntrantsActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Returns the result of map tab.
+     *
+     * @param tab the tab
+     * @return the result of this call
+     */
     private EventEntrantsController.Tab mapTab(Tab tab) {
         switch (tab) {
             case CANCELLED:
@@ -457,6 +510,12 @@ public class EventEntrantsActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Returns the empty message res.
+     *
+     * @param tab the tab
+     * @return the empty message res
+     */
     private int getEmptyMessageRes(Tab tab) {
         switch (tab) {
             case CANCELLED:
@@ -473,6 +532,12 @@ public class EventEntrantsActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Returns the result of build draw date text.
+     *
+     * @param event the event
+     * @return the result of this call
+     */
     private String buildDrawDateText(Event event) {
         if (event == null) {
             return "";
@@ -484,6 +549,12 @@ public class EventEntrantsActivity extends AppCompatActivity {
         return new SimpleDateFormat("MMMM d, yyyy", Locale.getDefault()).format(effectiveDrawDate);
     }
 
+    /**
+     * Returns the result of build attendees text.
+     *
+     * @param event the event
+     * @return the result of this call
+     */
     private String buildAttendeesText(Event event) {
         if (event == null) {
             return "20";
@@ -493,6 +564,9 @@ public class EventEntrantsActivity extends AppCompatActivity {
         return attendeesToSelect > 0 ? String.valueOf(attendeesToSelect) : "20";
     }
 
+    /**
+     * Performs open entrant map.
+     */
     private void openEntrantMap() {
         if (TextUtils.isEmpty(currentEventId) || currentEvent == null) {
             Toast.makeText(this, R.string.manage_entrants_load_failure, Toast.LENGTH_SHORT).show();
@@ -504,10 +578,18 @@ public class EventEntrantsActivity extends AppCompatActivity {
         overridePendingTransition(0, 0);
     }
 
+    /**
+     * Performs update map button visibility.
+     *
+     * @param event the event
+     */
     private void updateMapButtonVisibility(Event event) {
         viewEntrantMapButton.setVisibility(event == null ? View.GONE : View.VISIBLE);
     }
 
+    /**
+     * Performs export final list.
+     */
     private void exportFinalList() {
         if (isExporting) {
             return;
@@ -533,6 +615,11 @@ public class EventEntrantsActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Performs save export rows.
+     *
+     * @param rows the rows
+     */
     private void saveExportRows(List<EntrantExportRow> rows) {
         try {
             String csvContent = csvFormatter.format(rows);
@@ -545,6 +632,11 @@ public class EventEntrantsActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Updates the exporting.
+     *
+     * @param exporting the exporting
+     */
     private void setExporting(boolean exporting) {
         isExporting = exporting;
         updateTabState();

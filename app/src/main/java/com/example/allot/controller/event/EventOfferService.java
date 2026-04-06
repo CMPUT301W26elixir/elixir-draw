@@ -11,12 +11,11 @@ import java.util.Random;
  */
 public class EventOfferService {
     /**
-     * Handles the loaded event snapshot for a declined offer, updates the event state,
-     * and optionally assigns a replacement offer.
+     * Returns the result of build declined offer state.
      *
-     * @param event the loaded event state
-     * @param declinedDeviceId the device ID of the user declining the offer
-     * @return the updated event state, or null if the event cannot be updated
+     * @param event the event
+     * @param declinedDeviceId the declined device id
+     * @return the result of this call
      */
     public Event buildDeclinedOfferState(Event event, String declinedDeviceId) {
         if (event == null) {
@@ -66,10 +65,10 @@ public class EventOfferService {
     }
 
     /**
-     * Draws a replacement entrant from the waiting list for an event.
+     * Returns the result of build replacement draw state.
      *
-     * @param event the event to update
-     * @return the updated event state, or null if no replacement could be drawn
+     * @param event the event
+     * @return the result of this call
      */
     public Event buildReplacementDrawState(Event event) {
         if (event == null) {
@@ -120,11 +119,10 @@ public class EventOfferService {
     }
 
     /**
-     * Adds a replacement offer to the event by randomly selecting
-     * an eligible entrant from the waiting list.
+     * Performs add replacement offer.
      *
-     * @param event the event whose replacement offer should be assigned
-     * @param declinedDeviceId the device ID of the user who declined the offer
+     * @param event the event
+     * @param declinedDeviceId the declined device id
      */
     private void addReplacementOffer(Event event, String declinedDeviceId) {
         if (event == null) {
@@ -163,11 +161,11 @@ public class EventOfferService {
     }
 
     /**
-     * Removes a selected entrant from the event and marks them as cancelled.
+     * Returns the result of build manual cancellation state.
      *
-     * @param event the event to update
-     * @param entrantId the entrant to cancel
-     * @return the updated event state, or null if inputs are invalid
+     * @param event the event
+     * @param entrantId the entrant id
+     * @return the result of this call
      */
     public Event buildManualCancellationState(Event event, String entrantId) {
         if (event == null || isBlank(entrantId)) {
@@ -211,20 +209,20 @@ public class EventOfferService {
     }
 
     /**
-     * Checks whether a string is blank after trimming whitespace.
+     * Returns whether blank.
      *
-     * @param value the string to check
-     * @return true if the string is blank, otherwise false
+     * @param value the value
+     * @return whether blank
      */
     private boolean isBlank(String value) {
         return value == null || value.trim().isEmpty();
     }
 
     /**
-     * Returns a trimmed string value, or null if the value is null.
+     * Returns the result of normalize nullable.
      *
-     * @param value the string to normalize
-     * @return the normalized string
+     * @param value the value
+     * @return the result of this call
      */
     private String normalizeNullable(String value) {
         return value == null ? null : value.trim();

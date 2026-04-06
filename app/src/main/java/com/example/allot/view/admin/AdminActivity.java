@@ -34,6 +34,9 @@ import java.util.Map;
  * Allows admins to browse and delete events and profiles.
  */
 public class AdminActivity extends AppCompatActivity {
+    /**
+     * Enumerates the available admin tab values.
+     */
     private enum AdminTab {
         EVENTS,
         PROFILES,
@@ -100,10 +103,9 @@ public class AdminActivity extends AppCompatActivity {
     private AdminTab currentTab = AdminTab.EVENTS;
 
     /**
-     * Initializes the activity, binds views, sets up navigation,
-     * and loads all events.
+     * Handles the create callback.
      *
-     * @param savedInstanceState the previously saved activity state, if one exists
+     * @param savedInstanceState the saved instance state
      */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -134,7 +136,7 @@ public class AdminActivity extends AppCompatActivity {
     }
 
     /**
-     * Finishes the activity without any transition animation.
+     * Performs finish.
      */
     @Override
     public void finish() {
@@ -143,7 +145,7 @@ public class AdminActivity extends AppCompatActivity {
     }
 
     /**
-     * Binds all layout views to their corresponding fields.
+     * Performs bind views.
      */
     private void bindViews() {
         bottomNavBar = findViewById(R.id.bottomNavBar);
@@ -186,8 +188,7 @@ public class AdminActivity extends AppCompatActivity {
     }
 
     /**
-     * Configures the bottom navigation bar.
-     * No tab is selected since Admin is a separate screen.
+     * Updates the up bottom nav.
      */
     private void setupBottomNav() {
         bottomNavBar.setOnTabClickListener(BottomNavBarView.Tab.EXPLORE, view -> AppNavigator.openExplore(this, true));
@@ -198,7 +199,7 @@ public class AdminActivity extends AppCompatActivity {
     }
 
     /**
-     * Sets up the tab buttons for switching between events and profiles.
+     * Updates the up tab buttons.
      */
     private void setupTabButtons() {
         eventsTabText.setOnClickListener(view -> showEventsTab());
@@ -210,7 +211,7 @@ public class AdminActivity extends AppCompatActivity {
     }
 
     /**
-     * Updates the tab text colors to show which tab is active.
+     * Performs update tab styles.
      */
     private void updateTabStyles() {
         int activeColor = ContextCompat.getColor(this, R.color.text_primary);
@@ -224,7 +225,7 @@ public class AdminActivity extends AppCompatActivity {
     }
 
     /**
-     * Sets up both RecyclerViews with their respective adapters.
+     * Updates the up recycler views.
      */
     private void setupRecyclerViews() {
         // Events RecyclerView
@@ -254,16 +255,24 @@ public class AdminActivity extends AppCompatActivity {
     }
 
     /**
-     * Sets up the back button to finish the activity.
+     * Updates the up back button.
      */
     private void setupBackButton() {
         backButton.setOnClickListener(view -> finish());
     }
 
+    /**
+     * Returns whether ui test mode.
+     *
+     * @return whether ui test mode
+     */
     private boolean isUiTestMode() {
         return getIntent().getBooleanExtra(EXTRA_UI_TEST_MODE, false);
     }
 
+    /**
+     * Performs seed ui test data.
+     */
     private void seedUiTestData() {
         eventsList.clear();
         profilesList.clear();
@@ -326,7 +335,7 @@ public class AdminActivity extends AppCompatActivity {
     }
 
     /**
-     * Shows the events tab and loads events if not already loaded.
+     * Performs show events tab.
      */
     private void showEventsTab() {
         currentTab = AdminTab.EVENTS;
@@ -343,7 +352,7 @@ public class AdminActivity extends AppCompatActivity {
     }
 
     /**
-     * Shows the profiles tab and loads profiles if not already loaded.
+     * Performs show profiles tab.
      */
     private void showProfilesTab() {
         currentTab = AdminTab.PROFILES;
@@ -360,7 +369,7 @@ public class AdminActivity extends AppCompatActivity {
     }
 
     /**
-     * Shows the profile pictures tab and loads profile pictures if not already loaded.
+     * Performs show profile pics tab.
      */
     private void showProfilePicsTab() {
         currentTab = AdminTab.PROFILE_PIC;
@@ -377,7 +386,7 @@ public class AdminActivity extends AppCompatActivity {
     }
 
     /**
-     * Shows the notifications tab and loads notifications if not already loaded.
+     * Performs show notifications tab.
      */
     private void showNotificationsTab() {
         currentTab = AdminTab.NOTIFICATIONS;
@@ -394,7 +403,7 @@ public class AdminActivity extends AppCompatActivity {
     }
 
     /**
-     * Shows the posters tab and loads poster list if not already loaded.
+     * Performs show posters tab.
      */
     private void showPostersTab() {
         currentTab = AdminTab.POSTERS;
@@ -411,8 +420,7 @@ public class AdminActivity extends AppCompatActivity {
     }
 
     /**
-     * Loads all events from the database.
-     * Shows loading state while loading, then displays events or empty state.
+     * Performs load events.
      */
     private void loadEvents() {
         setEventsLoadingState();
@@ -436,8 +444,7 @@ public class AdminActivity extends AppCompatActivity {
     }
 
     /**
-     * Loads all profiles from the database.
-     * Shows loading state while loading, then displays profiles or empty state.
+     * Performs load profiles.
      */
     private void loadProfiles() {
         setProfilesLoadingState();
@@ -461,7 +468,7 @@ public class AdminActivity extends AppCompatActivity {
     }
 
     /**
-     * Loads all users with uploaded profile pictures.
+     * Performs load profile pics.
      */
     private void loadProfilePics() {
         setProfilePicsLoadingState();
@@ -491,7 +498,7 @@ public class AdminActivity extends AppCompatActivity {
     }
 
     /**
-     * Loads all sent notifications for admin review.
+     * Performs load notifications.
      */
     private void loadNotifications() {
         setNotificationsLoadingState();
@@ -533,7 +540,7 @@ public class AdminActivity extends AppCompatActivity {
     }
 
     /**
-     * Loads all events with poster URLs for admin poster moderation.
+     * Performs load posters.
      */
     private void loadPosters() {
         setPostersLoadingState();
@@ -565,7 +572,7 @@ public class AdminActivity extends AppCompatActivity {
     // ============== Event state management ==============
 
     /**
-     * Shows the events loading state.
+     * Updates the events loading state.
      */
     private void setEventsLoadingState() {
         eventsRecyclerView.setVisibility(View.GONE);
@@ -574,7 +581,7 @@ public class AdminActivity extends AppCompatActivity {
     }
 
     /**
-     * Shows the events visible state (RecyclerView is displayed).
+     * Updates the events visible state.
      */
     private void setEventsVisibleState() {
         eventsRecyclerView.setVisibility(View.VISIBLE);
@@ -583,9 +590,9 @@ public class AdminActivity extends AppCompatActivity {
     }
 
     /**
-     * Shows the events empty state.
+     * Updates the events empty state.
      *
-     * @param message the message to display
+     * @param message the message
      */
     private void setEventsEmptyState(String message) {
         eventsRecyclerView.setVisibility(View.GONE);
@@ -597,7 +604,7 @@ public class AdminActivity extends AppCompatActivity {
     // ============== Profile state management ==============
 
     /**
-     * Shows the profiles loading state.
+     * Updates the profiles loading state.
      */
     private void setProfilesLoadingState() {
         profilesRecyclerView.setVisibility(View.GONE);
@@ -606,7 +613,7 @@ public class AdminActivity extends AppCompatActivity {
     }
 
     /**
-     * Shows the profiles visible state (RecyclerView is displayed).
+     * Updates the profiles visible state.
      */
     private void setProfilesVisibleState() {
         profilesRecyclerView.setVisibility(View.VISIBLE);
@@ -615,9 +622,9 @@ public class AdminActivity extends AppCompatActivity {
     }
 
     /**
-     * Shows the profiles empty state.
+     * Updates the profiles empty state.
      *
-     * @param message the message to display
+     * @param message the message
      */
     private void setProfilesEmptyState(String message) {
         profilesRecyclerView.setVisibility(View.GONE);
@@ -629,7 +636,7 @@ public class AdminActivity extends AppCompatActivity {
     // ============== Profile picture state management ==============
 
     /**
-     * Shows the profile picture loading state.
+     * Updates the profile pics loading state.
      */
     private void setProfilePicsLoadingState() {
         profilePicsRecyclerView.setVisibility(View.GONE);
@@ -638,7 +645,7 @@ public class AdminActivity extends AppCompatActivity {
     }
 
     /**
-     * Shows the profile picture visible state.
+     * Updates the profile pics visible state.
      */
     private void setProfilePicsVisibleState() {
         profilePicsRecyclerView.setVisibility(View.VISIBLE);
@@ -647,7 +654,9 @@ public class AdminActivity extends AppCompatActivity {
     }
 
     /**
-     * Shows the profile picture empty state.
+     * Updates the profile pics empty state.
+     *
+     * @param message the message
      */
     private void setProfilePicsEmptyState(String message) {
         profilePicsRecyclerView.setVisibility(View.GONE);
@@ -659,7 +668,7 @@ public class AdminActivity extends AppCompatActivity {
     // ============== Notification state management ==============
 
     /**
-     * Shows the notifications loading state.
+     * Updates the notifications loading state.
      */
     private void setNotificationsLoadingState() {
         notificationsRecyclerView.setVisibility(View.GONE);
@@ -668,7 +677,7 @@ public class AdminActivity extends AppCompatActivity {
     }
 
     /**
-     * Shows the notifications visible state.
+     * Updates the notifications visible state.
      */
     private void setNotificationsVisibleState() {
         notificationsRecyclerView.setVisibility(View.VISIBLE);
@@ -677,7 +686,9 @@ public class AdminActivity extends AppCompatActivity {
     }
 
     /**
-     * Shows the notifications empty state.
+     * Updates the notifications empty state.
+     *
+     * @param message the message
      */
     private void setNotificationsEmptyState(String message) {
         notificationsRecyclerView.setVisibility(View.GONE);
@@ -689,7 +700,7 @@ public class AdminActivity extends AppCompatActivity {
     // ============== Poster state management ==============
 
     /**
-     * Shows the posters loading state.
+     * Updates the posters loading state.
      */
     private void setPostersLoadingState() {
         postersRecyclerView.setVisibility(View.GONE);
@@ -698,7 +709,7 @@ public class AdminActivity extends AppCompatActivity {
     }
 
     /**
-     * Shows the posters visible state.
+     * Updates the posters visible state.
      */
     private void setPostersVisibleState() {
         postersRecyclerView.setVisibility(View.VISIBLE);
@@ -707,7 +718,9 @@ public class AdminActivity extends AppCompatActivity {
     }
 
     /**
-     * Shows the posters empty state.
+     * Updates the posters empty state.
+     *
+     * @param message the message
      */
     private void setPostersEmptyState(String message) {
         postersRecyclerView.setVisibility(View.GONE);
@@ -719,29 +732,30 @@ public class AdminActivity extends AppCompatActivity {
     // ============== Delete handlers ==============
 
     /**
-     * Handles delete button click for an event.
-     * Shows confirmation dialog before deleting.
+     * Handles the event delete click callback.
      *
-     * @param event the event to delete
-     * @param position the position in the list
+     * @param event the event
+     * @param position the position
      */
     private void onEventDeleteClick(Event event, int position) {
         showEventDeleteConfirmationDialog(event, position);
     }
 
     /**
-     * Handles delete button click for a profile.
-     * Shows confirmation dialog before deleting.
+     * Handles the profile delete click callback.
      *
-     * @param user the user profile to delete
-     * @param position the position in the list
+     * @param user the user
+     * @param position the position
      */
     private void onProfileDeleteClick(User user, int position) {
         showProfileDeleteConfirmationDialog(user, position);
     }
 
     /**
-     * Handles delete button click for a poster.
+     * Handles the poster delete click callback.
+     *
+     * @param event the event
+     * @param position the position
      */
     private void onPosterDeleteClick(Event event, int position) {
         if (event == null) {
@@ -774,10 +788,10 @@ public class AdminActivity extends AppCompatActivity {
     }
 
     /**
-     * Shows the delete confirmation dialog for an event.
+     * Performs show event delete confirmation dialog.
      *
-     * @param event the event to delete
-     * @param position the position in the list
+     * @param event the event
+     * @param position the position
      */
     private void showEventDeleteConfirmationDialog(Event event, int position) {
         Dialog dialog = AppDialogHelper.createDialog(this, R.layout.dialog_admin_delete_event, true);
@@ -796,10 +810,10 @@ public class AdminActivity extends AppCompatActivity {
     }
 
     /**
-     * Shows the delete confirmation dialog for a profile.
+     * Performs show profile delete confirmation dialog.
      *
-     * @param user the user profile to delete
-     * @param position the position in the list
+     * @param user the user
+     * @param position the position
      */
     private void showProfileDeleteConfirmationDialog(User user, int position) {
         Dialog dialog = AppDialogHelper.createDialog(this, R.layout.dialog_admin_delete_profile, true);
@@ -821,11 +835,11 @@ public class AdminActivity extends AppCompatActivity {
     }
 
     /**
-     * Deletes an event after confirmation.
+     * Performs delete event.
      *
-     * @param event the event to delete
-     * @param position the position in the list
-     * @param dialog the confirmation dialog
+     * @param event the event
+     * @param position the position
+     * @param dialog the dialog
      * @param cancelButton the cancel button
      * @param deleteButton the delete button
      */
@@ -862,11 +876,11 @@ public class AdminActivity extends AppCompatActivity {
     }
 
     /**
-     * Deletes a profile after confirmation.
+     * Performs delete profile.
      *
-     * @param user the user profile to delete
-     * @param position the position in the list
-     * @param dialog the confirmation dialog
+     * @param user the user
+     * @param position the position
+     * @param dialog the dialog
      * @param cancelButton the cancel button
      * @param deleteButton the delete button
      */
@@ -895,6 +909,11 @@ public class AdminActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Performs remove event from list.
+     *
+     * @param position the position
+     */
     private void removeEventFromList(int position) {
         if (position < 0 || position >= eventsList.size()) {
             return;
@@ -908,6 +927,12 @@ public class AdminActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Performs remove profile from list.
+     *
+     * @param user the user
+     * @param position the position
+     */
     private void removeProfileFromList(User user, int position) {
         if (position >= 0 && position < profilesList.size()) {
             profilesList.remove(position);

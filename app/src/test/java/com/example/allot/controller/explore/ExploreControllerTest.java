@@ -20,6 +20,9 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 
+/**
+ * Tests the explore controller.
+ */
 public class ExploreControllerTest {
     private FakeEventRepository eventRepository;
     private FakeUserController userController;
@@ -27,6 +30,9 @@ public class ExploreControllerTest {
     private FakeEventListItemMapper mapper;
     private ExploreController controller;
 
+    /**
+     * Updates the up.
+     */
     @Before
     public void setUp() {
         eventRepository = new FakeEventRepository();
@@ -36,6 +42,9 @@ public class ExploreControllerTest {
         controller = new ExploreController(eventRepository, userController, exploreFilterService, mapper);
     }
 
+    /**
+     * Performs load saved event ids returns user saved events or empty list.
+     */
     @Test
     public void loadSavedEventIds_returnsUserSavedEventsOrEmptyList() {
         User user = new User();
@@ -57,6 +66,9 @@ public class ExploreControllerTest {
         });
     }
 
+    /**
+     * Performs refresh open events caches results.
+     */
     @Test
     public void refreshOpenEvents_cachesResults() {
         Event event = buildEvent("event-1");
@@ -70,6 +82,9 @@ public class ExploreControllerTest {
         });
     }
 
+    /**
+     * Performs filter cached browse events fails when cache missing.
+     */
     @Test
     public void filterCachedBrowseEvents_failsWhenCacheMissing() {
         controller.filterCachedBrowseEvents("music", null, null, null, null, null, null,
@@ -79,6 +94,9 @@ public class ExploreControllerTest {
                 });
     }
 
+    /**
+     * Performs load browse events refreshes then filters and maps.
+     */
     @Test
     public void loadBrowseEvents_refreshesThenFiltersAndMaps() {
         Event event = buildEvent("event-1");
@@ -101,6 +119,9 @@ public class ExploreControllerTest {
                 });
     }
 
+    /**
+     * Performs toggle saved event returns next state on success and original state on failure.
+     */
     @Test
     public void toggleSavedEvent_returnsNextStateOnSuccessAndOriginalStateOnFailure() {
         userController.toggleSavedSuccess = true;
@@ -118,6 +139,12 @@ public class ExploreControllerTest {
         });
     }
 
+    /**
+     * Returns the result of build event.
+     *
+     * @param eventId the event id
+     * @return the result of this call
+     */
     private Event buildEvent(String eventId) {
         Event event = new Event();
         event.setEventId(eventId);
@@ -127,34 +154,63 @@ public class ExploreControllerTest {
         return event;
     }
 
+    /**
+     * Stores and retrieves fake event.
+     */
     private static class FakeEventRepository extends EventRepository {
         private List<Event> openEvents = new ArrayList<>();
         private boolean openEventsSuccess;
 
+        /**
+         * Creates a new FakeEventRepository instance.
+         */
         private FakeEventRepository() {
             super((com.google.firebase.firestore.FirebaseFirestore) null);
         }
 
+        /**
+         * Performs get open events.
+         *
+         * @param listener the listener
+         */
         @Override
         public void getOpenEvents(com.example.allot.common.OnCompleteListener<List<Event>> listener) {
             listener.onComplete(openEvents, openEventsSuccess);
         }
     }
 
+    /**
+     * Coordinates fake user.
+     */
     private static class FakeUserController extends UserController {
         private User currentUser;
         private boolean loadCurrentUserSuccess;
         private boolean toggleSavedSuccess;
 
+        /**
+         * Creates a new FakeUserController instance.
+         */
         private FakeUserController() {
             super(null, new DeviceSessionManager(new FakeDeviceSessionStore("device-1")));
         }
 
+        /**
+         * Performs load current user.
+         *
+         * @param listener the listener
+         */
         @Override
         public void loadCurrentUser(com.example.allot.common.OnCompleteListener<User> listener) {
             listener.onComplete(currentUser, loadCurrentUserSuccess);
         }
 
+        /**
+         * Performs toggle saved event.
+         *
+         * @param eventId the event id
+         * @param isSaving whether saving
+         * @param listener the listener
+         */
         @Override
         public void toggleSavedEvent(String eventId, boolean isSaving,
                                      com.example.allot.common.OnCompleteListener<Boolean> listener) {
@@ -162,10 +218,20 @@ public class ExploreControllerTest {
         }
     }
 
+    /**
+     * Provides fake explore filter operations.
+     */
     private static class FakeExploreFilterService extends ExploreFilterService {
         private List<Event> filteredEvents = new ArrayList<>();
         private BrowseFilter lastFilter;
 
+        /**
+         * Returns the result of build browsable event list.
+         *
+         * @param events the events
+         * @param filter the filter
+         * @return the result of this call
+         */
         @Override
         public List<Event> buildBrowsableEventList(List<Event> events, BrowseFilter filter) {
             lastFilter = filter;
@@ -173,10 +239,20 @@ public class ExploreControllerTest {
         }
     }
 
+    /**
+     * Represents the fake event list item mapper.
+     */
     private static class FakeEventListItemMapper extends EventListItemMapper {
         private List<EventListItem> itemsToReturn = new ArrayList<>();
         private List<String> lastSavedEventIds;
 
+        /**
+         * Returns the result of map events.
+         *
+         * @param events the events
+         * @param savedEventIds the saved event ids
+         * @return the result of this call
+         */
         @Override
         public List<EventListItem> mapEvents(List<Event> events, List<String> savedEventIds) {
             lastSavedEventIds = savedEventIds;
@@ -184,18 +260,36 @@ public class ExploreControllerTest {
         }
     }
 
+    /**
+     * Represents the fake device session store.
+     */
     private static class FakeDeviceSessionStore implements DeviceSessionManager.DeviceSessionStore {
         private final String deviceId;
 
+        /**
+         * Creates a new FakeDeviceSessionStore instance.
+         *
+         * @param deviceId the device id
+         */
         private FakeDeviceSessionStore(String deviceId) {
             this.deviceId = deviceId;
         }
 
+        /**
+         * Returns the device id.
+         *
+         * @return the device id
+         */
         @Override
         public String getDeviceId() {
             return deviceId;
         }
 
+        /**
+         * Performs save device id.
+         *
+         * @param deviceId the device id
+         */
         @Override
         public void saveDeviceId(String deviceId) {
         }

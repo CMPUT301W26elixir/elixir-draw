@@ -1,4 +1,7 @@
 import java.util.Properties
+import org.gradle.api.tasks.javadoc.Javadoc
+import org.gradle.external.javadoc.StandardJavadocDocletOptions
+import org.gradle.api.tasks.compile.JavaCompile
 
 plugins {
     alias(libs.plugins.android.application)
@@ -79,4 +82,51 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
+}
+
+tasks.register<Javadoc>("projectJavadocs") {
+    group = "documentation"
+    description = "Generates Javadocs for the app, unit tests, and instrumentation tests."
+
+    val mainSourceSet = android.sourceSets.getByName("main")
+    val testSourceSet = android.sourceSets.getByName("test")
+    val androidTestSourceSet = android.sourceSets.getByName("androidTest")
+
+    val javaSources = files(
+        mainSourceSet.java.srcDirs,
+        testSourceSet.java.srcDirs,
+        androidTestSourceSet.java.srcDirs
+    ).asFileTree.matching {
+        include("**/*.java")
+        exclude("**/R.java")
+        exclude("**/BuildConfig.java")
+        exclude("**/Manifest.java")
+    }
+
+    setSource(javaSources)
+
+    val mainCompileTask = tasks.named<JavaCompile>("compileDebugJavaWithJavac")
+    val unitTestCompileTask = tasks.named<JavaCompile>("compileDebugUnitTestJavaWithJavac")
+    val androidTestCompileTask = tasks.named<JavaCompile>("compileDebugAndroidTestJavaWithJavac")
+
+    dependsOn(mainCompileTask, unitTestCompileTask, androidTestCompileTask)
+
+    classpath = files(
+        android.bootClasspath,
+        mainCompileTask.map { it.classpath },
+        unitTestCompileTask.map { it.classpath },
+        androidTestCompileTask.map { it.classpath }
+    )
+
+    destinationDir = layout.buildDirectory.dir("docs/javadocs").get().asFile
+    isFailOnError = false
+
+    (options as StandardJavadocDocletOptions).apply {
+        encoding = "UTF-8"
+        memberLevel = org.gradle.external.javadoc.JavadocMemberLevel.PROTECTED
+        addStringOption("Xdoclint:none", "-quiet")
+        links("https://docs.oracle.com/en/java/javase/11/docs/api/")
+        title = "Allot Project Javadocs"
+        windowTitle = "Allot Project Javadocs"
+    }
 }

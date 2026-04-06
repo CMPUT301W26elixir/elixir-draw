@@ -11,16 +11,25 @@ import com.example.allot.model.profile.User;
 import org.junit.Before;
 import org.junit.Test;
 
+/**
+ * Tests the user controller.
+ */
 public class UserControllerTest {
     private FakeUserRepository userRepository;
     private UserController controller;
 
+    /**
+     * Updates the up.
+     */
     @Before
     public void setUp() {
         userRepository = new FakeUserRepository();
         controller = new UserController(userRepository, new DeviceSessionManager(new FakeDeviceSessionStore("device-1")));
     }
 
+    /**
+     * Performs load current user backfills missing device id on loaded user.
+     */
     @Test
     public void loadCurrentUser_backfillsMissingDeviceIdOnLoadedUser() {
         User user = new User();
@@ -34,6 +43,9 @@ public class UserControllerTest {
         });
     }
 
+    /**
+     * Performs load current user returns null when missing but successful.
+     */
     @Test
     public void loadCurrentUser_returnsNullWhenMissingButSuccessful() {
         userRepository.findUser = null;
@@ -45,6 +57,9 @@ public class UserControllerTest {
         });
     }
 
+    /**
+     * Performs load or create user returns existing user and backfills device id.
+     */
     @Test
     public void loadOrCreateUser_returnsExistingUserAndBackfillsDeviceId() {
         User user = new User();
@@ -58,6 +73,9 @@ public class UserControllerTest {
         });
     }
 
+    /**
+     * Performs load or create user creates new user when missing.
+     */
     @Test
     public void loadOrCreateUser_createsNewUserWhenMissing() {
         userRepository.getUser = null;
@@ -73,6 +91,9 @@ public class UserControllerTest {
         });
     }
 
+    /**
+     * Performs update user profile rejects invalid fields.
+     */
     @Test
     public void updateUserProfile_rejectsInvalidFields() {
         controller.updateUserProfile(" ", "Lane", "bad-email", "", true, (user, success) -> {
@@ -82,6 +103,9 @@ public class UserControllerTest {
         assertNull(userRepository.updateProfileDeviceId);
     }
 
+    /**
+     * Performs has completed profile requires name and email.
+     */
     @Test
     public void hasCompletedProfile_requiresNameAndEmail() {
         User complete = new User();
@@ -98,6 +122,9 @@ public class UserControllerTest {
         assertFalse(controller.hasCompletedProfile(null));
     }
 
+    /**
+     * Performs toggle saved event and admin check delegate to repository.
+     */
     @Test
     public void toggleSavedEvent_andAdminCheck_delegateToRepository() {
         userRepository.toggleSavedResult = true;
@@ -119,6 +146,9 @@ public class UserControllerTest {
         });
     }
 
+    /**
+     * Stores and retrieves fake user.
+     */
     private static class FakeUserRepository extends UserRepository {
         private User findUser;
         private boolean findSuccess;
@@ -137,31 +167,68 @@ public class UserControllerTest {
         private String toggleSavedEventId;
         private Boolean toggleSavedResult;
 
+        /**
+         * Creates a new FakeUserRepository instance.
+         */
         private FakeUserRepository() {
             super((com.google.firebase.firestore.FirebaseFirestore) null);
         }
 
+        /**
+         * Performs find user by device id.
+         *
+         * @param deviceId the device id
+         * @param listener the listener
+         */
         @Override
         public void findUserByDeviceId(String deviceId, com.example.allot.common.OnCompleteListener<User> listener) {
             listener.onComplete(findUser, findSuccess);
         }
 
+        /**
+         * Performs get user by device id.
+         *
+         * @param deviceId the device id
+         * @param listener the listener
+         */
         @Override
         public void getUserByDeviceId(String deviceId, com.example.allot.common.OnCompleteListener<User> listener) {
             listener.onComplete(getUser, getUserSuccess);
         }
 
+        /**
+         * Performs backfill device id.
+         *
+         * @param deviceId the device id
+         */
         @Override
         public void backfillDeviceId(String deviceId) {
             backfilledDeviceId = deviceId;
         }
 
+        /**
+         * Performs create new user.
+         *
+         * @param deviceId the device id
+         * @param listener the listener
+         */
         @Override
         public void createNewUser(String deviceId, com.example.allot.common.OnCompleteListener<User> listener) {
             createdDeviceId = deviceId;
             listener.onComplete(createdUser, createdUser != null);
         }
 
+        /**
+         * Performs update user profile.
+         *
+         * @param deviceId the device id
+         * @param firstName the first name
+         * @param lastName the last name
+         * @param email the email
+         * @param phone the phone
+         * @param notiEnabled the noti enabled
+         * @param listener the listener
+         */
         @Override
         public void updateUserProfile(String deviceId, String firstName, String lastName, String email,
                                       String phone, boolean notiEnabled,
@@ -173,6 +240,14 @@ public class UserControllerTest {
             listener.onComplete(updatedUser, updateProfileSuccess);
         }
 
+        /**
+         * Performs toggle saved event.
+         *
+         * @param deviceId the device id
+         * @param eventId the event id
+         * @param isSaving whether saving
+         * @param listener the listener
+         */
         @Override
         public void toggleSavedEvent(String deviceId, String eventId, boolean isSaving,
                                      com.example.allot.common.OnCompleteListener<Boolean> listener) {
@@ -182,18 +257,36 @@ public class UserControllerTest {
         }
     }
 
+    /**
+     * Represents the fake device session store.
+     */
     private static class FakeDeviceSessionStore implements DeviceSessionManager.DeviceSessionStore {
         private final String deviceId;
 
+        /**
+         * Creates a new FakeDeviceSessionStore instance.
+         *
+         * @param deviceId the device id
+         */
         private FakeDeviceSessionStore(String deviceId) {
             this.deviceId = deviceId;
         }
 
+        /**
+         * Returns the device id.
+         *
+         * @return the device id
+         */
         @Override
         public String getDeviceId() {
             return deviceId;
         }
 
+        /**
+         * Performs save device id.
+         *
+         * @param deviceId the device id
+         */
         @Override
         public void saveDeviceId(String deviceId) {
         }

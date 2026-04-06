@@ -20,40 +20,63 @@ public class EventEntrantsCsvSaveService {
     private static final String MIME_TYPE = "text/csv";
     private static final String RELATIVE_PATH = "Download/allot";
 
+    /**
+     * Represents the csv download spec.
+     */
     static final class CsvDownloadSpec {
         private final String displayName;
         private final String mimeType;
         private final String relativePath;
 
+        /**
+         * Creates a new CsvDownloadSpec instance.
+         *
+         * @param displayName the display name
+         * @param mimeType the mime type
+         * @param relativePath the relative path
+         */
         CsvDownloadSpec(String displayName, String mimeType, String relativePath) {
             this.displayName = displayName;
             this.mimeType = mimeType;
             this.relativePath = relativePath;
         }
 
+        /**
+         * Returns the display name.
+         *
+         * @return the display name
+         */
         String getDisplayName() {
             return displayName;
         }
 
+        /**
+         * Returns the mime type.
+         *
+         * @return the mime type
+         */
         String getMimeType() {
             return mimeType;
         }
 
+        /**
+         * Returns the relative path.
+         *
+         * @return the relative path
+         */
         String getRelativePath() {
             return relativePath;
         }
     }
 
     /**
-     * Saves CSV text into the device downloads collection and returns the saved URI.
+     * Returns the result of save to downloads.
      *
-     * @param context the Android context used to access MediaStore
-     * @param csvContent the generated CSV text to save
-     * @param eventTitle the event title used in the filename when available
-     * @param eventId the event ID used as a fallback filename
-     * @return the URI of the saved CSV file
-     * @throws IOException if the file cannot be created or written
-     * @throws SecurityException if the media store cannot be accessed
+     * @param context the context
+     * @param csvContent the csv content
+     * @param eventTitle the event title
+     * @param eventId the event id
+     * @return the result of this call
      */
     public Uri saveToDownloads(Context context,
                                String csvContent,
@@ -82,6 +105,12 @@ public class EventEntrantsCsvSaveService {
         return savedUri;
     }
 
+    /**
+     * Performs validate inputs.
+     *
+     * @param context the context
+     * @param csvContent the csv content
+     */
     void validateInputs(Context context, String csvContent) {
         if (context == null) {
             throw new IllegalArgumentException("context must not be null");
@@ -89,12 +118,25 @@ public class EventEntrantsCsvSaveService {
         validateCsvContent(csvContent);
     }
 
+    /**
+     * Performs validate csv content.
+     *
+     * @param csvContent the csv content
+     */
     void validateCsvContent(String csvContent) {
         if (isBlank(csvContent)) {
             throw new IllegalArgumentException("csvContent must not be blank");
         }
     }
 
+    /**
+     * Returns the result of create download values.
+     *
+     * @param eventTitle the event title
+     * @param eventId the event id
+     * @param sdkInt the sdk int
+     * @return the result of this call
+     */
     ContentValues createDownloadValues(String eventTitle, String eventId, int sdkInt) {
         CsvDownloadSpec spec = buildDownloadSpec(eventTitle, eventId, sdkInt);
         ContentValues values = new ContentValues();
@@ -106,6 +148,13 @@ public class EventEntrantsCsvSaveService {
         return values;
     }
 
+    /**
+     * Returns the result of build file name.
+     *
+     * @param eventTitle the event title
+     * @param eventId the event id
+     * @return the result of this call
+     */
     String buildFileName(String eventTitle, String eventId) {
         String baseName = !isBlank(eventTitle) ? eventTitle : eventId;
         String normalizedName = baseName == null ? DEFAULT_EVENT_NAME : baseName.trim().toLowerCase(Locale.US);
@@ -117,11 +166,25 @@ public class EventEntrantsCsvSaveService {
         return FILE_PREFIX + normalizedName + FILE_EXTENSION;
     }
 
+    /**
+     * Returns the result of build download spec.
+     *
+     * @param eventTitle the event title
+     * @param eventId the event id
+     * @param sdkInt the sdk int
+     * @return the result of this call
+     */
     CsvDownloadSpec buildDownloadSpec(String eventTitle, String eventId, int sdkInt) {
         String relativePath = sdkInt >= Build.VERSION_CODES.Q ? RELATIVE_PATH : null;
         return new CsvDownloadSpec(buildFileName(eventTitle, eventId), MIME_TYPE, relativePath);
     }
 
+    /**
+     * Returns whether blank.
+     *
+     * @param value the value
+     * @return whether blank
+     */
     private boolean isBlank(String value) {
         return value == null || value.trim().isEmpty();
     }

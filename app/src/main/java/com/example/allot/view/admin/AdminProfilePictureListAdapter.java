@@ -19,10 +19,22 @@ import java.util.List;
 public class AdminProfilePictureListAdapter extends RecyclerView.Adapter<AdminProfilePictureListAdapter.ViewHolder> {
     private final List<User> users;
 
+    /**
+     * Creates a new AdminProfilePictureListAdapter instance.
+     *
+     * @param users the users
+     */
     public AdminProfilePictureListAdapter(List<User> users) {
         this.users = users;
     }
 
+    /**
+     * Returns the result of on create view holder.
+     *
+     * @param parent the parent
+     * @param viewType the view type
+     * @return the result of this call
+     */
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -31,21 +43,40 @@ public class AdminProfilePictureListAdapter extends RecyclerView.Adapter<AdminPr
         return new ViewHolder(view);
     }
 
+    /**
+     * Handles the bind view holder callback.
+     *
+     * @param holder the holder
+     * @param position the position
+     */
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         holder.bind(users.get(position));
     }
 
+    /**
+     * Returns the item count.
+     *
+     * @return the item count
+     */
     @Override
     public int getItemCount() {
         return users.size();
     }
 
+    /**
+     * Represents the view holder.
+     */
     static class ViewHolder extends RecyclerView.ViewHolder {
         private final ImageView profilePictureImage;
         private final TextView userNameText;
         private final TextView userDeviceIdText;
 
+        /**
+         * Creates a new ViewHolder instance.
+         *
+         * @param itemView the item view
+         */
         ViewHolder(@NonNull View itemView) {
             super(itemView);
             profilePictureImage = itemView.findViewById(R.id.profilePictureImage);
@@ -53,6 +84,11 @@ public class AdminProfilePictureListAdapter extends RecyclerView.Adapter<AdminPr
             userDeviceIdText = itemView.findViewById(R.id.userDeviceIdText);
         }
 
+        /**
+         * Performs bind.
+         *
+         * @param user the user
+         */
         void bind(User user) {
             String displayName = user == null ? null : user.getName();
             if (TextUtils.isEmpty(displayName)) {
