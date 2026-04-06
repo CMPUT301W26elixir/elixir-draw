@@ -13,6 +13,8 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.SetOptions;
 import com.google.firebase.firestore.WriteBatch;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -186,7 +188,14 @@ public class UserRepository {
                     List<CleanupOperation> cleanupOperations = buildCleanupOperations(deviceId, cleanupTargets);
                     cleanupOperations.add(CleanupOperation.deleteUser(deviceId));
                     List<List<CleanupOperation>> batches = chunkCleanupOperations(cleanupOperations);
-                    commitCleanupOperations(database, batches, 0, listener);
+                    commitCleanupOperations(database, batches, 0, (result, success) -> {
+                        if (!success || result == null || !result) {
+                            listener.onComplete(false, false);
+                            return;
+                        }
+
+                        deleteProfilePhotoFromStorage(deviceId, listener);
+                    });
                 });
     }
 
@@ -371,7 +380,39 @@ public class UserRepository {
                     List<CleanupOperation> cleanupOperations = buildCleanupOperations(deviceId, cleanupTargets);
                     cleanupOperations.add(CleanupOperation.deleteUser(deviceId));
                     List<List<CleanupOperation>> batches = chunkCleanupOperations(cleanupOperations);
-                    commitCleanupOperations(database, batches, 0, listener);
+                    commitCleanupOperations(database, batches, 0, (result, success) -> {
+                        if (!success || result == null || !result) {
+                            listener.onComplete(false, false);
+                            return;
+                        }
+
+                        deleteProfilePhotoFromStorage(deviceId, listener);
+                    });
+                });
+    }
+
+    private void deleteProfilePhotoFromStorage(String deviceId, OnCompleteListener<Boolean> listener) {
+        if (isBlank(deviceId)) {
+            listener.onComplete(true, true);
+            return;
+        }
+
+        FirebaseStorage.getInstance()
+                .getReference()
+                .child("user_profiles")
+                .child(deviceId)
+                .child("photo.jpg")
+                .delete()
+                .addOnSuccessListener(unused -> listener.onComplete(true, true))
+                .addOnFailureListener(exception -> {
+                    if (exception instanceof StorageException
+                            && ((StorageException) exception).getErrorCode() == StorageException.ERROR_OBJECT_NOT_FOUND) {
+                        listener.onComplete(true, true);
+                        return;
+                    }
+
+                    Log.w(TAG, "Failed to delete profile photo from Storage for user " + deviceId, exception);
+                    listener.onComplete(false, false);
                 });
     }
 }

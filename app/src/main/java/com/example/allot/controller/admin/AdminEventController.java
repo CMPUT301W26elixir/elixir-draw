@@ -2,6 +2,7 @@ package com.example.allot.controller.admin;
 
 import android.content.Context;
 import com.example.allot.common.OnCompleteListener;
+import com.example.allot.controller.event.EventPosterController;
 import com.example.allot.controller.shared.UserController;
 import com.example.allot.data.EventRepository;
 import com.example.allot.model.event.Event;
@@ -13,6 +14,7 @@ import java.util.List;
  */
 public class AdminEventController {
     private final EventRepository eventRepository;
+    private final EventPosterController eventPosterController;
     private final UserController userController;
 
     /**
@@ -21,7 +23,7 @@ public class AdminEventController {
      * @param context the context used to access shared preferences
      */
     public AdminEventController(Context context) {
-        this(new EventRepository(), new UserController(context));
+        this(new EventRepository(), new EventPosterController(), new UserController(context));
     }
 
     /**
@@ -30,8 +32,11 @@ public class AdminEventController {
      * @param eventRepository the event repository
      * @param userController the user controller
      */
-    public AdminEventController(EventRepository eventRepository, UserController userController) {
+    public AdminEventController(EventRepository eventRepository,
+                                EventPosterController eventPosterController,
+                                UserController userController) {
         this.eventRepository = eventRepository;
+        this.eventPosterController = eventPosterController;
         this.userController = userController;
     }
 
@@ -65,7 +70,22 @@ public class AdminEventController {
                 listener.onComplete(false, false);
                 return;
             }
-            eventRepository.deleteEventAsAdmin(eventId, listener);
+
+            eventRepository.getEventById(eventId, (event, eventLoaded) -> {
+                if (!eventLoaded || event == null) {
+                    listener.onComplete(false, false);
+                    return;
+                }
+
+                eventPosterController.deletePosterFile(event.getPosterUrl(), (posterDeleted, posterSuccess) -> {
+                    if (!posterSuccess || !posterDeleted) {
+                        listener.onComplete(false, false);
+                        return;
+                    }
+
+                    eventRepository.deleteEventAsAdmin(eventId, listener);
+                });
+            });
         });
     }
 }
