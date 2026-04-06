@@ -30,6 +30,14 @@ import java.util.Locale;
  */
 public class EventEntrantsActivity extends AppCompatActivity {
     public static final String EXTRA_EVENT_ID = "event_id";
+    public static final String EXTRA_UI_TEST_MODE = "ui_test_mode";
+    public static final String EXTRA_UI_TEST_EVENT_ID = "ui_test_event_id";
+    public static final String EXTRA_UI_TEST_EVENT_TITLE = "ui_test_event_title";
+    public static final String EXTRA_UI_TEST_SELECTED = "ui_test_selected";
+    public static final String EXTRA_UI_TEST_CANCELLED = "ui_test_cancelled";
+    public static final String EXTRA_UI_TEST_NOT_ENROLLED = "ui_test_not_enrolled";
+    public static final String EXTRA_UI_TEST_ENROLLED = "ui_test_enrolled";
+    public static final String EXTRA_UI_TEST_ALL = "ui_test_all";
 
     /**
      * Represents the available entrant tabs in the manage entrants screen.
@@ -62,6 +70,11 @@ public class EventEntrantsActivity extends AppCompatActivity {
     private Tab selectedTab = Tab.SELECTED;
     private boolean isExporting;
     private boolean isCancellingEntrant;
+    private java.util.ArrayList<String> uiTestSelected;
+    private java.util.ArrayList<String> uiTestCancelled;
+    private java.util.ArrayList<String> uiTestNotEnrolled;
+    private java.util.ArrayList<String> uiTestEnrolled;
+    private java.util.ArrayList<String> uiTestAll;
 
     /**
      * Initializes the activity, binds views, sets up the header and tabs,
@@ -78,6 +91,10 @@ public class EventEntrantsActivity extends AppCompatActivity {
         csvFormatter = new EventEntrantsCsvFormatter();
         csvSaveService = new EventEntrantsCsvSaveService();
         currentEventId = getIntent().getStringExtra(EXTRA_EVENT_ID);
+        if (isUiTestMode()) {
+            loadUiTestLists();
+            currentEventId = safeString(getIntent().getStringExtra(EXTRA_UI_TEST_EVENT_ID), "ui-test-event");
+        }
 
         bindViews();
         setupHeader();
@@ -138,6 +155,11 @@ public class EventEntrantsActivity extends AppCompatActivity {
      * Shows an error and finishes if the event ID is missing.
      */
     private void loadEvent() {
+        if (isUiTestMode()) {
+            bindUiTestEvent();
+            return;
+        }
+
         if (TextUtils.isEmpty(currentEventId)) {
             Toast.makeText(this, R.string.manage_entrants_load_failure, Toast.LENGTH_SHORT).show();
             finish();
@@ -250,6 +272,89 @@ public class EventEntrantsActivity extends AppCompatActivity {
         }
     }
 
+    private boolean isUiTestMode() {
+        return getIntent().getBooleanExtra(EXTRA_UI_TEST_MODE, false);
+    }
+
+    private void loadUiTestLists() {
+        uiTestSelected = getIntent().getStringArrayListExtra(EXTRA_UI_TEST_SELECTED);
+        uiTestCancelled = getIntent().getStringArrayListExtra(EXTRA_UI_TEST_CANCELLED);
+        uiTestNotEnrolled = getIntent().getStringArrayListExtra(EXTRA_UI_TEST_NOT_ENROLLED);
+        uiTestEnrolled = getIntent().getStringArrayListExtra(EXTRA_UI_TEST_ENROLLED);
+        uiTestAll = getIntent().getStringArrayListExtra(EXTRA_UI_TEST_ALL);
+
+        if (uiTestSelected == null) uiTestSelected = new java.util.ArrayList<>();
+        if (uiTestCancelled == null) uiTestCancelled = new java.util.ArrayList<>();
+        if (uiTestNotEnrolled == null) uiTestNotEnrolled = new java.util.ArrayList<>();
+        if (uiTestEnrolled == null) uiTestEnrolled = new java.util.ArrayList<>();
+        if (uiTestAll == null) {
+            uiTestAll = new java.util.ArrayList<>();
+            uiTestAll.addAll(uiTestSelected);
+            uiTestAll.addAll(uiTestCancelled);
+            uiTestAll.addAll(uiTestNotEnrolled);
+            uiTestAll.addAll(uiTestEnrolled);
+        }
+    }
+
+    private void bindUiTestEvent() {
+        currentEvent = new Event();
+        currentEvent.setEventId(currentEventId);
+        currentEvent.setTitle(safeString(getIntent().getStringExtra(EXTRA_UI_TEST_EVENT_TITLE), "UI Test Event"));
+
+        viewEntrantMapButton.setVisibility(View.VISIBLE);
+        drawDateValueText.setText("April 12, 2026");
+        attendeesValueText.setText("20");
+
+        bindEntrants(buildUiTestEntrants(selectedTab), getEmptyMessageRes(selectedTab));
+    }
+
+    private List<LotteryEntrantItem> buildUiTestEntrants(Tab tab) {
+        List<String> names = getUiTestNamesForTab(tab);
+        List<LotteryEntrantItem> items = new java.util.ArrayList<>();
+        int subtitleRes = getSubtitleResForTab(tab);
+        for (String name : names) {
+            String safeName = safeString(name, "Entrant");
+            items.add(new LotteryEntrantItem(safeName, safeName, subtitleRes));
+        }
+        return items;
+    }
+
+    private List<String> getUiTestNamesForTab(Tab tab) {
+        switch (tab) {
+            case CANCELLED:
+                return uiTestCancelled;
+            case NOT_ENROLLED:
+                return uiTestNotEnrolled;
+            case ENROLLED:
+                return uiTestEnrolled;
+            case ALL:
+                return uiTestAll;
+            case SELECTED:
+            default:
+                return uiTestSelected;
+        }
+    }
+
+    private int getSubtitleResForTab(Tab tab) {
+        switch (tab) {
+            case CANCELLED:
+                return R.string.manage_entrants_cancelled_subtitle;
+            case NOT_ENROLLED:
+                return R.string.manage_entrants_not_enrolled_subtitle;
+            case ENROLLED:
+                return R.string.manage_entrants_enrolled_subtitle;
+            case ALL:
+                return R.string.manage_entrants_all_subtitle;
+            case SELECTED:
+            default:
+                return R.string.manage_entrants_selected_subtitle;
+        }
+    }
+
+    private String safeString(String value, String fallback) {
+        return TextUtils.isEmpty(value) ? fallback : value;
+    }
+
     private void promptCancelEntrant(LotteryEntrantItem entrantItem) {
         if (entrantItem == null || isCancellingEntrant) {
             return;
@@ -275,6 +380,21 @@ public class EventEntrantsActivity extends AppCompatActivity {
         }
 
         isCancellingEntrant = true;
+        if (isUiTestMode()) {
+            String name = entrantItem.getDisplayName();
+            uiTestSelected.remove(name);
+            if (!uiTestCancelled.contains(name)) {
+                uiTestCancelled.add(name);
+            }
+            if (!uiTestAll.contains(name)) {
+                uiTestAll.add(name);
+            }
+            isCancellingEntrant = false;
+            Toast.makeText(this, R.string.manage_entrants_cancel_success, Toast.LENGTH_SHORT).show();
+            loadEvent();
+            return;
+        }
+
         entrantsController.cancelSelectedEntrant(currentEventId, entrantItem.getEntrantId(), (result, success) -> {
             isCancellingEntrant = false;
             if (!success || result == null || !result) {
@@ -352,6 +472,10 @@ public class EventEntrantsActivity extends AppCompatActivity {
 
     private void exportFinalList() {
         if (isExporting) {
+            return;
+        }
+        if (isUiTestMode()) {
+            Toast.makeText(this, R.string.manage_entrants_export_success, Toast.LENGTH_SHORT).show();
             return;
         }
         if (selectedTab != Tab.ENROLLED || currentEvent == null || TextUtils.isEmpty(currentEventId)) {

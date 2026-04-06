@@ -67,6 +67,17 @@ public class EditEventActivity extends AppCompatActivity {
     public static final String EXTRA_REGISTRATION_START = "registration_start";
     public static final String EXTRA_REGISTRATION_END = "registration_end";
     public static final String EXTRA_EVENT_CATEGORY = "event_category";
+    public static final String EXTRA_UI_TEST_MODE = "ui_test_mode";
+    public static final String EXTRA_UI_TEST_PRIVATE_EVENT = "ui_test_private_event";
+    public static final String EXTRA_UI_TEST_EVENT_ID = "ui_test_event_id";
+    public static final String EXTRA_UI_TEST_EVENT_TITLE = "ui_test_event_title";
+    public static final String EXTRA_UI_TEST_EVENT_LOCATION = "ui_test_event_location";
+    public static final String EXTRA_UI_TEST_EVENT_DATE = "ui_test_event_date";
+    public static final String EXTRA_UI_TEST_EVENT_PRICE = "ui_test_event_price";
+    public static final String EXTRA_UI_TEST_EVENT_DESCRIPTION = "ui_test_event_description";
+    public static final String EXTRA_UI_TEST_EVENT_PARTICIPANTS = "ui_test_event_participants";
+    public static final String EXTRA_UI_TEST_EVENT_CATEGORY = "ui_test_event_category";
+    public static final String EXTRA_UI_TEST_ORGANIZER_ID = "ui_test_organizer_id";
 
     private EditEventController manageEventController;
 
@@ -160,6 +171,10 @@ public class EditEventActivity extends AppCompatActivity {
         populateUiFromIntent();
         captureOriginalState();
         updateSaveButtonState();
+        if (isUiTestMode()) {
+            bindUiTestEvent();
+            return;
+        }
         loadEventFromFirestore();
     }
 
@@ -334,6 +349,79 @@ public class EditEventActivity extends AppCompatActivity {
                 getIntent().getStringExtra(EXTRA_EVENT_DATE),
                 currentCategory
         );
+    }
+
+    private boolean isUiTestMode() {
+        return getIntent().getBooleanExtra(EXTRA_UI_TEST_MODE, false);
+    }
+
+    private void bindUiTestEvent() {
+        String title = safeString(getIntent().getStringExtra(EXTRA_UI_TEST_EVENT_TITLE), "UI Test Event");
+        String location = safeString(getIntent().getStringExtra(EXTRA_UI_TEST_EVENT_LOCATION), "Test Location");
+        String dateText = safeString(getIntent().getStringExtra(EXTRA_UI_TEST_EVENT_DATE), "Apr 12");
+        String price = safeString(getIntent().getStringExtra(EXTRA_UI_TEST_EVENT_PRICE), "0");
+        String description = safeString(getIntent().getStringExtra(EXTRA_UI_TEST_EVENT_DESCRIPTION), "Test description");
+        String participants = safeString(getIntent().getStringExtra(EXTRA_UI_TEST_EVENT_PARTICIPANTS), "20");
+        String category = safeString(getIntent().getStringExtra(EXTRA_UI_TEST_EVENT_CATEGORY), "General");
+        String eventId = safeString(getIntent().getStringExtra(EXTRA_UI_TEST_EVENT_ID), "ui-test-event");
+        boolean isPrivateEvent = getIntent().getBooleanExtra(EXTRA_UI_TEST_PRIVATE_EVENT, false);
+        String organizerId = safeString(getIntent().getStringExtra(EXTRA_UI_TEST_ORGANIZER_ID),
+                userController == null ? "" : userController.getCurrentDeviceId());
+
+        EventFormData viewModel = EventFormData.forBinding(
+                title,
+                location,
+                isPrivateEvent,
+                false,
+                "",
+                "",
+                "",
+                price,
+                description,
+                participants,
+                "",
+                "",
+                "",
+                "",
+                "",
+                ""
+        );
+        bindFormViewModel(viewModel);
+        updateSummary(title, location, dateText, category);
+
+        Event event = new Event();
+        event.setEventId(eventId);
+        event.setOrganizerId(organizerId);
+        event.setTitle(title);
+        event.setLocation(location);
+        event.setDescription(description);
+        event.setCategory(category);
+        event.setCapacity(parseParticipants(participants));
+        event.setVisibility(isPrivateEvent ? Event.VISIBILITY_PRIVATE : Event.VISIBILITY_PUBLIC);
+
+        currentEvent = event;
+        currentCategory = category;
+        updateInviteButtonVisibility(event);
+        updateDeleteButtonVisibility(event);
+        renderPosterState();
+
+        originalFormSnapshot = manageEventController.buildSnapshot(readFormData());
+        updateSaveButtonState();
+    }
+
+    private int parseParticipants(String participants) {
+        if (TextUtils.isEmpty(participants)) {
+            return 0;
+        }
+        try {
+            return Integer.parseInt(participants.trim());
+        } catch (NumberFormatException exception) {
+            return 0;
+        }
+    }
+
+    private String safeString(String value, String fallback) {
+        return TextUtils.isEmpty(value) ? fallback : value;
     }
 
     private void loadEventFromFirestore() {

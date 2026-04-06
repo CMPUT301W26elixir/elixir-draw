@@ -23,6 +23,7 @@ import java.util.List;
  */
 public class InviteCoOrganizerActivity extends AppCompatActivity {
     public static final String EXTRA_EVENT_ID = "event_id";
+    public static final String EXTRA_UI_TEST_MODE = "ui_test_mode";
 
     private InviteCoOrganizerController controller;
     private String currentEventId;
@@ -66,6 +67,12 @@ public class InviteCoOrganizerActivity extends AppCompatActivity {
     }
 
     private void loadEvent() {
+        if (getIntent().getBooleanExtra(EXTRA_UI_TEST_MODE, false)) {
+            currentEvent = new Event();
+            showEmptyState(true);
+            return;
+        }
+
         if (TextUtils.isEmpty(currentEventId)) {
             Toast.makeText(this, R.string.manage_event_load_failure, Toast.LENGTH_SHORT).show();
             finish();

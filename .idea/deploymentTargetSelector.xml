@@ -26,6 +26,7 @@
           </targets>
         </DialogSelection>
       </SelectionState>
+      <SelectionState runConfigName="OrganizerUiTest">
       <SelectionState runConfigName="ExploreJoinEventFlowTest">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
