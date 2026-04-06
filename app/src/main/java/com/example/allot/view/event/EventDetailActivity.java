@@ -63,6 +63,7 @@ public class EventDetailActivity extends AppCompatActivity {
     public static final String EXTRA_AUTO_SAVE_EVENT = "auto_save_event";
     public static final String EXTRA_UI_TEST_SKIP_NETWORK_LOAD = "ui_test_skip_network_load";
     public static final String EXTRA_UI_TEST_BYPASS_PROFILE_GATE = "ui_test_bypass_profile_gate";
+    public static final String EXTRA_UI_TEST_START_ON_WAITLIST = "ui_test_start_on_waitlist";
     private static final int LOCATION_PERMISSION_REQUEST = 1002;
 
     private EventDetailController eventDetailController;
@@ -219,7 +220,8 @@ public class EventDetailActivity extends AppCompatActivity {
                 getIntent().getStringExtra(EXTRA_EVENT_LOCATION),
                 getIntent().getStringExtra(EXTRA_EVENT_DATE),
                 getIntent().getStringExtra(EXTRA_EVENT_DEADLINE),
-                getIntent().getStringExtra(EXTRA_EVENT_CATEGORY)
+                getIntent().getStringExtra(EXTRA_EVENT_CATEGORY),
+                shouldStartUiTestOnWaitlist()
         ));
         updateFavoriteUi();
     }
@@ -593,6 +595,20 @@ public class EventDetailActivity extends AppCompatActivity {
      */
     private void leaveWaitingList() {
         if (isLeavingWaitlist || TextUtils.isEmpty(currentEventId)) {
+            return;
+        }
+
+        if (isUiTestFallbackMode()) {
+            renderState(eventDetailController.buildFallbackState(
+                    getIntent().getStringExtra(EXTRA_EVENT_TITLE),
+                    getIntent().getStringExtra(EXTRA_EVENT_PRICE),
+                    getIntent().getStringExtra(EXTRA_EVENT_LOCATION),
+                    getIntent().getStringExtra(EXTRA_EVENT_DATE),
+                    getIntent().getStringExtra(EXTRA_EVENT_DEADLINE),
+                    getIntent().getStringExtra(EXTRA_EVENT_CATEGORY),
+                    false
+            ));
+            Toast.makeText(this, R.string.event_detail_leave_success, Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -1208,6 +1224,10 @@ public class EventDetailActivity extends AppCompatActivity {
 
     private boolean isUiTestFallbackMode() {
         return getIntent().getBooleanExtra(EXTRA_UI_TEST_SKIP_NETWORK_LOAD, false);
+    }
+
+    private boolean shouldStartUiTestOnWaitlist() {
+        return getIntent().getBooleanExtra(EXTRA_UI_TEST_START_ON_WAITLIST, false);
     }
 }
 

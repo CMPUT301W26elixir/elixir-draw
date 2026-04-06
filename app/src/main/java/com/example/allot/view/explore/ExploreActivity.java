@@ -71,6 +71,7 @@ public class ExploreActivity extends AppCompatActivity {
     public static final String EXTRA_UI_TEST_EVENT_CATEGORIES = "ui_test_event_categories";
     public static final String EXTRA_UI_TEST_BYPASS_PROFILE_GATE = "ui_test_bypass_profile_gate";
     public static final String EXTRA_UI_TEST_SKIP_DETAIL_NETWORK_LOAD = "ui_test_skip_detail_network_load";
+    public static final String EXTRA_UI_TEST_START_ON_WAITLIST = "ui_test_start_on_waitlist";
 
     private ExploreController browseController;
     private NotificationService notificationService;
@@ -721,6 +722,9 @@ public class ExploreActivity extends AppCompatActivity {
         }
         if (getIntent().getBooleanExtra(EXTRA_UI_TEST_SKIP_DETAIL_NETWORK_LOAD, false)) {
             intent.putExtra(EventDetailActivity.EXTRA_UI_TEST_SKIP_NETWORK_LOAD, true);
+        }
+        if (getIntent().getBooleanExtra(EXTRA_UI_TEST_START_ON_WAITLIST, false)) {
+            intent.putExtra(EventDetailActivity.EXTRA_UI_TEST_START_ON_WAITLIST, true);
         }
         startActivity(intent);
     }
