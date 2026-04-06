@@ -13,6 +13,8 @@ import com.example.allot.view.profile.ProfileActivity;
  * Builds deferred onboarding intents and post-onboarding destinations.
  */
 public final class DeferredOnboardingNavigator {
+    public static final String EXTRA_UI_TEST_COMPLETE_DEFERRED_ONBOARDING =
+            "ui_test_complete_deferred_onboarding";
     public static final String EXTRA_POST_ONBOARDING_DESTINATION = "post_onboarding_destination";
     public static final String EXTRA_POST_ONBOARDING_ACTION = "post_onboarding_action";
     public static final String EXTRA_POST_MY_EVENTS_INITIAL_TAB = "post_my_events_initial_tab";
@@ -86,6 +88,7 @@ public final class DeferredOnboardingNavigator {
         copyStringExtra(source, target, EXTRA_POST_EVENT_PRICE);
         copyStringExtra(source, target, EXTRA_POST_EVENT_DEADLINE);
         copyStringExtra(source, target, EXTRA_POST_EVENT_CATEGORY);
+        copyBooleanExtra(source, target, EXTRA_UI_TEST_COMPLETE_DEFERRED_ONBOARDING);
     }
 
     public static Intent buildPostOnboardingIntent(Context context, Intent sourceIntent) {
@@ -139,6 +142,12 @@ public final class DeferredOnboardingNavigator {
     private static void copyStringExtra(Intent source, Intent target, String key) {
         if (source.hasExtra(key)) {
             target.putExtra(key, source.getStringExtra(key));
+        }
+    }
+
+    private static void copyBooleanExtra(Intent source, Intent target, String key) {
+        if (source.hasExtra(key)) {
+            target.putExtra(key, source.getBooleanExtra(key, false));
         }
     }
 }
