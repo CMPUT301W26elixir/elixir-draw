@@ -7,22 +7,27 @@ import static org.junit.Assert.assertTrue;
 import com.example.allot.controller.shared.UserController;
 import com.example.allot.data.DeviceSessionManager;
 import com.example.allot.data.EventRepository;
+import com.example.allot.data.NotificationRepository;
 import com.example.allot.model.event.Event;
 import com.example.allot.model.event.WaitingList;
 import com.example.allot.model.organizer.EntrantExportRow;
 import java.util.Date;
 import org.junit.Before;
 import org.junit.Test;
+
 public class EventEntrantsControllerTest {
     private FakeEventRepository eventRepository;
     private FakeUserController userController;
+    private FakeNotificationRepository notificationRepository;
     private EventEntrantsController controller;
 
     @Before
     public void setUp() {
         eventRepository = new FakeEventRepository();
         userController = new FakeUserController();
-        controller = new EventEntrantsController(eventRepository, userController);
+        notificationRepository = new FakeNotificationRepository();
+        // Updated to use the correct 4-parameter constructor
+        controller = new EventEntrantsController(null, eventRepository, userController, notificationRepository);
     }
 
     @Test
@@ -186,6 +191,12 @@ public class EventEntrantsControllerTest {
         }
     }
 
+    private static class FakeNotificationRepository extends NotificationRepository {
+        private FakeNotificationRepository() {
+            super(null);
+        }
+    }
+
     private static class FakeDeviceSessionStore implements DeviceSessionManager.DeviceSessionStore {
         private final String deviceId;
 
@@ -201,12 +212,3 @@ public class EventEntrantsControllerTest {
     }
 
 }
-
-
-
-
-
-
-
-
-
