@@ -14,6 +14,9 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 
+/**
+ * Tests the admin notification controller.
+ */
 public class AdminNotificationControllerTest {
     private FakeNotificationRepository notificationRepository;
     private FakeUserController userController;
@@ -83,6 +86,9 @@ public class AdminNotificationControllerTest {
         });
     }
 
+    /**
+     * Stores and retrieves fake notification.
+     */
     private static class FakeNotificationRepository extends NotificationRepository {
         private List<NotificationItem> notifications;
         private boolean getAllNotificationsSuccess = true;
@@ -105,6 +111,9 @@ public class AdminNotificationControllerTest {
         }
     }
 
+    /**
+     * Coordinates fake user.
+     */
     private static class FakeUserController extends UserController {
         private boolean isAdmin;
         private boolean adminLookupSuccess = true;
@@ -127,6 +136,9 @@ public class AdminNotificationControllerTest {
         }
     }
 
+    /**
+     * Represents the fake device session store.
+     */
     private static class FakeDeviceSessionStore implements DeviceSessionManager.DeviceSessionStore {
         private final String deviceId;
 

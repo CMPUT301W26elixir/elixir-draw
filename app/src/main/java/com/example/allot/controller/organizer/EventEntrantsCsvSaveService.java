@@ -20,6 +20,9 @@ public class EventEntrantsCsvSaveService {
     private static final String MIME_TYPE = "text/csv";
     private static final String RELATIVE_PATH = "Download/allot";
 
+    /**
+     * Represents the csv download spec.
+     */
     static final class CsvDownloadSpec {
         private final String displayName;
         private final String mimeType;

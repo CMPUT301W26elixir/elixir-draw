@@ -328,7 +328,13 @@ public class UserRepository {
         return batches;
     }
 
+    /**
+     * Represents the cleanup operation.
+     */
     public static final class CleanupOperation {
+        /**
+         * Enumerates the available type values.
+         */
         public enum Type { REMOVE_USER_FROM_EVENT, DELETE_EVENT, DELETE_USER }
         private final Type type;
         private final String documentPath;
@@ -427,6 +433,9 @@ public class UserRepository {
         }
     }
 
+    /**
+     * Represents the event cleanup target.
+     */
     static final class EventCleanupTarget {
         private final String documentPath;
         private final String organizerId;

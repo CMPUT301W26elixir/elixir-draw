@@ -4,6 +4,9 @@ package com.example.allot.model.event;
  * Represents the outcome of scanning an event QR code.
  */
 public class EventScanResult {
+    /**
+     * Enumerates the available status values.
+     */
     public enum Status {
         OPEN_EVENT,
         INVALID_PAYLOAD,

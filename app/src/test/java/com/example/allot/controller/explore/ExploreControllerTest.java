@@ -20,6 +20,9 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 
+/**
+ * Tests the explore controller.
+ */
 public class ExploreControllerTest {
     private FakeEventRepository eventRepository;
     private FakeUserController userController;
@@ -151,6 +154,9 @@ public class ExploreControllerTest {
         return event;
     }
 
+    /**
+     * Stores and retrieves fake event.
+     */
     private static class FakeEventRepository extends EventRepository {
         private List<Event> openEvents = new ArrayList<>();
         private boolean openEventsSuccess;
@@ -173,6 +179,9 @@ public class ExploreControllerTest {
         }
     }
 
+    /**
+     * Coordinates fake user.
+     */
     private static class FakeUserController extends UserController {
         private User currentUser;
         private boolean loadCurrentUserSuccess;
@@ -209,6 +218,9 @@ public class ExploreControllerTest {
         }
     }
 
+    /**
+     * Provides fake explore filter operations.
+     */
     private static class FakeExploreFilterService extends ExploreFilterService {
         private List<Event> filteredEvents = new ArrayList<>();
         private BrowseFilter lastFilter;
@@ -227,6 +239,9 @@ public class ExploreControllerTest {
         }
     }
 
+    /**
+     * Represents the fake event list item mapper.
+     */
     private static class FakeEventListItemMapper extends EventListItemMapper {
         private List<EventListItem> itemsToReturn = new ArrayList<>();
         private List<String> lastSavedEventIds;
@@ -245,6 +260,9 @@ public class ExploreControllerTest {
         }
     }
 
+    /**
+     * Represents the fake device session store.
+     */
     private static class FakeDeviceSessionStore implements DeviceSessionManager.DeviceSessionStore {
         private final String deviceId;
 

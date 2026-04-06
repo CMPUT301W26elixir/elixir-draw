@@ -8,6 +8,9 @@ import java.util.Arrays;
 import java.util.Date;
 import org.junit.Before;
 import org.junit.Test;
+/**
+ * Tests the user events section service.
+ */
 public class UserEventsSectionServiceTest {
     private UserEventsSectionService service;
 

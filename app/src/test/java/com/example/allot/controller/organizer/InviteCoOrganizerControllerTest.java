@@ -15,6 +15,9 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 
+/**
+ * Tests the invite co organizer controller.
+ */
 public class InviteCoOrganizerControllerTest {
     private FakeEventRepository eventRepository;
     private FakeUserController userController;
@@ -81,6 +84,9 @@ public class InviteCoOrganizerControllerTest {
         assertFalse(controller.isOrganizerOrCoOrganizer(null));
     }
 
+    /**
+     * Stores and retrieves fake event.
+     */
     private static class FakeEventRepository extends EventRepository {
         private Event event;
         private String inviteEventId;
@@ -120,6 +126,9 @@ public class InviteCoOrganizerControllerTest {
         }
     }
 
+    /**
+     * Coordinates fake user.
+     */
     private static class FakeUserController extends UserController {
         private List<User> searchResults;
 
@@ -142,6 +151,9 @@ public class InviteCoOrganizerControllerTest {
         }
     }
 
+    /**
+     * Represents the fake device session store.
+     */
     private static class FakeDeviceSessionStore implements DeviceSessionManager.DeviceSessionStore {
         private final String deviceId;
 

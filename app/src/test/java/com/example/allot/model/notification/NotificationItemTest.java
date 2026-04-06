@@ -7,6 +7,9 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
+/**
+ * Tests the notification item.
+ */
 public class NotificationItemTest {
     /**
      * Performs constructor sets default unread state and timestamp.

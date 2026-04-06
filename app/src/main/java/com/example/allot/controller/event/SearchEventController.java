@@ -5,6 +5,9 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Coordinates search event.
+ */
 public class SearchEventController {
 
     private FirebaseFirestore db;
@@ -16,6 +19,9 @@ public class SearchEventController {
         db = FirebaseFirestore.getInstance();
     }
 
+    /**
+     * Defines the contract for a search callback.
+     */
     public interface SearchCallback {
         /**
          * Handles the results callback.

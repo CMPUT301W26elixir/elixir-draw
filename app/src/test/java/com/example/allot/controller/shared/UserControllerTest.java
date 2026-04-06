@@ -11,6 +11,9 @@ import com.example.allot.model.profile.User;
 import org.junit.Before;
 import org.junit.Test;
 
+/**
+ * Tests the user controller.
+ */
 public class UserControllerTest {
     private FakeUserRepository userRepository;
     private UserController controller;
@@ -143,6 +146,9 @@ public class UserControllerTest {
         });
     }
 
+    /**
+     * Stores and retrieves fake user.
+     */
     private static class FakeUserRepository extends UserRepository {
         private User findUser;
         private boolean findSuccess;
@@ -251,6 +257,9 @@ public class UserControllerTest {
         }
     }
 
+    /**
+     * Represents the fake device session store.
+     */
     private static class FakeDeviceSessionStore implements DeviceSessionManager.DeviceSessionStore {
         private final String deviceId;
 

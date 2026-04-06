@@ -783,7 +783,13 @@ public class EventRepository {
         return batches;
     }
 
+    /**
+     * Represents the cleanup operation.
+     */
     static final class CleanupOperation {
+        /**
+         * Enumerates the available type values.
+         */
         enum Type {
             REMOVE_EVENT_FROM_USER,
             DELETE_EVENT
@@ -876,6 +882,9 @@ public class EventRepository {
         }
     }
 
+    /**
+     * Represents the user cleanup target.
+     */
     static final class UserCleanupTarget {
         private final String documentPath;
         private final String userId;

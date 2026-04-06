@@ -8,6 +8,9 @@ import com.example.allot.model.event.EventSubmissionInput;
 import java.util.Date;
 import org.junit.Before;
 import org.junit.Test;
+/**
+ * Tests the event input validator.
+ */
 public class EventInputValidatorTest {
     private EventInputValidator validator;
     private Date registrationStart;

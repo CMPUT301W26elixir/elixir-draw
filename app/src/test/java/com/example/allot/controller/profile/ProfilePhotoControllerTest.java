@@ -8,6 +8,9 @@ import com.google.firebase.storage.FirebaseStorage;
 import org.junit.Before;
 import org.junit.Test;
 
+/**
+ * Tests the profile photo controller.
+ */
 public class ProfilePhotoControllerTest {
     private FakeUserRepository userRepository;
     private ProfilePhotoController controller;
@@ -62,6 +65,9 @@ public class ProfilePhotoControllerTest {
         });
     }
 
+    /**
+     * Stores and retrieves fake user.
+     */
     private static class FakeUserRepository extends UserRepository {
         private boolean updateFieldsSuccess;
         private boolean updatedFieldsCalled;

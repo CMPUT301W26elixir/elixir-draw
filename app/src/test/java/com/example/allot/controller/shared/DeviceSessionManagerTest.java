@@ -7,6 +7,9 @@ import static org.junit.Assert.assertTrue;
 
 import com.example.allot.data.DeviceSessionManager;
 import org.junit.Test;
+/**
+ * Tests the device session manager.
+ */
 public class DeviceSessionManagerTest {
     /**
      * Performs returns existing saved device id.
@@ -51,6 +54,9 @@ public class DeviceSessionManagerTest {
         assertTrue(manager.isNewDeviceId());
     }
 
+    /**
+     * Represents the fake device session store.
+     */
     private static class FakeDeviceSessionStore implements DeviceSessionManager.DeviceSessionStore {
         private String savedDeviceId;
 

@@ -180,6 +180,9 @@ public class ScanDecoderService {
         return new RotatedLuminance(source, width, height);
     }
 
+    /**
+     * Represents the rotated luminance.
+     */
     private static class RotatedLuminance {
         private final byte[] data;
         private final int width;

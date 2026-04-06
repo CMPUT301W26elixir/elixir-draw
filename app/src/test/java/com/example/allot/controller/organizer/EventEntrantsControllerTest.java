@@ -15,6 +15,9 @@ import com.example.allot.model.organizer.EntrantExportRow;
 import java.util.Date;
 import org.junit.Before;
 import org.junit.Test;
+/**
+ * Tests the event entrants controller.
+ */
 public class EventEntrantsControllerTest {
     private FakeEventRepository eventRepository;
     private FakeUserController userController;
@@ -195,6 +198,9 @@ public class EventEntrantsControllerTest {
         return user;
     }
 
+    /**
+     * Stores and retrieves fake event.
+     */
     private static class FakeEventRepository extends EventRepository {
         /**
          * Creates a new FakeEventRepository instance.
@@ -217,6 +223,9 @@ public class EventEntrantsControllerTest {
         }
     }
 
+    /**
+     * Coordinates fake user.
+     */
     private static class FakeUserController extends UserController {
         private final java.util.Map<String, com.example.allot.model.profile.User> users = new java.util.HashMap<>();
 
@@ -250,6 +259,9 @@ public class EventEntrantsControllerTest {
         }
     }
 
+    /**
+     * Represents the fake device session store.
+     */
     private static class FakeDeviceSessionStore implements DeviceSessionManager.DeviceSessionStore {
         private final String deviceId;
 

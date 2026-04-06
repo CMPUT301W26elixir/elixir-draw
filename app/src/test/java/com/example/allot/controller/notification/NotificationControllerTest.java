@@ -14,6 +14,9 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 
+/**
+ * Tests the notification controller.
+ */
 public class NotificationControllerTest {
     private FakeNotificationRepository notificationRepository;
     private NotificationController controller;
@@ -87,6 +90,9 @@ public class NotificationControllerTest {
         });
     }
 
+    /**
+     * Stores and retrieves fake notification.
+     */
     private static class FakeNotificationRepository extends NotificationRepository {
         private final List<NotificationItem> savedNotifications = new ArrayList<>();
         private List<NotificationItem> notificationsToReturn = new ArrayList<>();

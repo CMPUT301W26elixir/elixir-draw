@@ -24,6 +24,9 @@ import java.util.Locale;
  * Inline two-tap calendar widget for choosing a registration date range.
  */
 public class RegistrationRangePickerView extends LinearLayout {
+    /**
+     * Defines the contract for an on range changed listener.
+     */
     public interface OnRangeChangedListener {
         /**
          * Handles the range changed callback.

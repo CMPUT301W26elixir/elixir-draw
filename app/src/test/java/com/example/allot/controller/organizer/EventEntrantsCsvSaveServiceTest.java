@@ -7,6 +7,9 @@ import static org.junit.Assert.fail;
 import org.junit.Before;
 import org.junit.Test;
 
+/**
+ * Tests the event entrants csv save service.
+ */
 public class EventEntrantsCsvSaveServiceTest {
     private EventEntrantsCsvSaveService service;
 

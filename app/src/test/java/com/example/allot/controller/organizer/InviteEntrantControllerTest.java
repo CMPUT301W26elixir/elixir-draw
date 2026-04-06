@@ -13,6 +13,9 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 
+/**
+ * Tests the invite entrant controller.
+ */
 public class InviteEntrantControllerTest {
     private FakeEventRepository eventRepository;
     private FakeUserController userController;
@@ -59,6 +62,9 @@ public class InviteEntrantControllerTest {
         assertEquals("device-1", controller.getCurrentDeviceId());
     }
 
+    /**
+     * Stores and retrieves fake event.
+     */
     private static class FakeEventRepository extends EventRepository {
         private Event event;
         private String inviteEventId;
@@ -98,6 +104,9 @@ public class InviteEntrantControllerTest {
         }
     }
 
+    /**
+     * Coordinates fake user.
+     */
     private static class FakeUserController extends UserController {
         private List<User> searchResults;
 
@@ -120,6 +129,9 @@ public class InviteEntrantControllerTest {
         }
     }
 
+    /**
+     * Represents the fake device session store.
+     */
     private static class FakeDeviceSessionStore implements DeviceSessionManager.DeviceSessionStore {
         private final String deviceId;
 

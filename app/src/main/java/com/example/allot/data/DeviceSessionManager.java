@@ -75,6 +75,9 @@ public class DeviceSessionManager {
         return newDeviceId;
     }
 
+    /**
+     * Defines the contract for a device session store.
+     */
     public interface DeviceSessionStore {
         /**
          * Returns the device id.
@@ -90,6 +93,9 @@ public class DeviceSessionManager {
         void saveDeviceId(String deviceId);
     }
 
+    /**
+     * Represents the shared preferences device session store.
+     */
     private static class SharedPreferencesDeviceSessionStore implements DeviceSessionStore {
         private final SharedPreferences prefs;
 
@@ -123,6 +129,9 @@ public class DeviceSessionManager {
         }
     }
 
+    /**
+     * Represents the device id result.
+     */
     static class DeviceIdResult {
         private final String deviceId;
         private final boolean wasCreated;

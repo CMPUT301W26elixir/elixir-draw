@@ -7,6 +7,9 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
+/**
+ * Tests the event scan result.
+ */
 public class EventScanResultTest {
     /**
      * Performs open event should open when event present.

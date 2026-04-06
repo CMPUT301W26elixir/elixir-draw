@@ -10,6 +10,9 @@ import com.example.allot.model.event.EventFormData;
 import com.example.allot.model.event.EventSubmissionInput;
 import org.junit.Before;
 import org.junit.Test;
+/**
+ * Tests the event form service.
+ */
 public class EventFormServiceTest {
     private EventFormService service;
 

@@ -64,6 +64,9 @@ public class AdminProfilePictureListAdapter extends RecyclerView.Adapter<AdminPr
         return users.size();
     }
 
+    /**
+     * Represents the view holder.
+     */
     static class ViewHolder extends RecyclerView.ViewHolder {
         private final ImageView profilePictureImage;
         private final TextView userNameText;

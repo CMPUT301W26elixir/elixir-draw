@@ -34,6 +34,9 @@ import java.util.Map;
  * Allows admins to browse and delete events and profiles.
  */
 public class AdminActivity extends AppCompatActivity {
+    /**
+     * Enumerates the available admin tab values.
+     */
     private enum AdminTab {
         EVENTS,
         PROFILES,

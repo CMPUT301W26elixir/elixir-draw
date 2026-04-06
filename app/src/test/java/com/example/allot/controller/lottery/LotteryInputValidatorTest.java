@@ -7,6 +7,9 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Before;
 import org.junit.Test;
+/**
+ * Tests the lottery input validator.
+ */
 public class LotteryInputValidatorTest {
     private LotteryInputValidator validator;
 

@@ -12,6 +12,9 @@ import com.example.allot.model.event.EventFormData;
 import org.junit.Before;
 import org.junit.Test;
 
+/**
+ * Tests the create event controller.
+ */
 public class CreateEventControllerTest {
     private FakeEventRepository eventRepository;
     private FakeGeocodingService geocodingService;
@@ -91,6 +94,9 @@ public class CreateEventControllerTest {
         );
     }
 
+    /**
+     * Stores and retrieves fake event.
+     */
     private static class FakeEventRepository extends EventRepository {
         private Event savedEvent;
         private boolean createSuccess;
@@ -116,6 +122,9 @@ public class CreateEventControllerTest {
         }
     }
 
+    /**
+     * Provides fake geocoding operations.
+     */
     private static class FakeGeocodingService implements EventLocationGeocodingService {
         private EventLocationCoordinates coordinates;
 
@@ -131,6 +140,9 @@ public class CreateEventControllerTest {
         }
     }
 
+    /**
+     * Represents the fake device session store.
+     */
     private static class FakeDeviceSessionStore implements DeviceSessionManager.DeviceSessionStore {
         private final String deviceId;
 

@@ -12,6 +12,9 @@ import java.util.Arrays;
 import java.util.Date;
 import org.junit.Before;
 import org.junit.Test;
+/**
+ * Tests the user events controller.
+ */
 public class UserEventsControllerTest {
     private FakeEventRepository eventRepository;
     private FakeUserController userController;
@@ -79,6 +82,9 @@ public class UserEventsControllerTest {
         return event;
     }
 
+    /**
+     * Stores and retrieves fake event.
+     */
     private static class FakeEventRepository extends EventRepository {
         /**
          * Creates a new FakeEventRepository instance.
@@ -123,6 +129,9 @@ public class UserEventsControllerTest {
         }
     }
 
+    /**
+     * Coordinates fake user.
+     */
     private static class FakeUserController extends UserController {
         /**
          * Creates a new FakeUserController instance.
@@ -142,6 +151,9 @@ public class UserEventsControllerTest {
         }
     }
 
+    /**
+     * Represents the fake device session store.
+     */
     private static class FakeDeviceSessionStore implements DeviceSessionManager.DeviceSessionStore {
         private final String deviceId;
 

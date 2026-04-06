@@ -5,6 +5,9 @@ import static org.junit.Assert.assertEquals;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.Test;
+/**
+ * Tests the user repository.
+ */
 public class UserRepositoryTest {
     /**
      * Performs build cleanup operations deletes organizer events and removes user from others.

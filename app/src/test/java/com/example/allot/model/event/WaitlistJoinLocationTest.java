@@ -6,6 +6,9 @@ import static org.junit.Assert.assertNull;
 import java.util.Date;
 import org.junit.Test;
 
+/**
+ * Tests the waitlist join location.
+ */
 public class WaitlistJoinLocationTest {
     /**
      * Performs waitlist join location defaults to null.

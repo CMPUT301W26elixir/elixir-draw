@@ -13,6 +13,9 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 
+/**
+ * Tests the admin profile controller.
+ */
 public class AdminProfileControllerTest {
     private FakeUserRepository userRepository;
     private FakeUserController userController;
@@ -129,6 +132,9 @@ public class AdminProfileControllerTest {
         });
     }
 
+    /**
+     * Stores and retrieves fake user.
+     */
     private static class FakeUserRepository extends UserRepository {
         private List<User> allUsers;
         private String deletedDeviceId;
@@ -166,6 +172,9 @@ public class AdminProfileControllerTest {
         }
     }
 
+    /**
+     * Coordinates fake user.
+     */
     private static class FakeUserController extends UserController {
         private boolean isAdmin;
         private boolean adminLookupSuccess = true;
@@ -188,6 +197,9 @@ public class AdminProfileControllerTest {
         }
     }
 
+    /**
+     * Represents the fake device session store.
+     */
     private static class FakeDeviceSessionStore implements DeviceSessionManager.DeviceSessionStore {
         private final String deviceId;
 

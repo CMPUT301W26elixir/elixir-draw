@@ -20,6 +20,9 @@ public class AdminPosterListAdapter extends RecyclerView.Adapter<AdminPosterList
     private final List<Event> posterEvents;
     private final OnDeleteClickListener onDeleteClickListener;
 
+    /**
+     * Defines the contract for an on delete click listener.
+     */
     public interface OnDeleteClickListener {
         /**
          * Handles the delete click callback.
@@ -78,6 +81,9 @@ public class AdminPosterListAdapter extends RecyclerView.Adapter<AdminPosterList
         return posterEvents.size();
     }
 
+    /**
+     * Represents the view holder.
+     */
     static class ViewHolder extends RecyclerView.ViewHolder {
         private final ImageView posterImageView;
         private final TextView eventTitleText;

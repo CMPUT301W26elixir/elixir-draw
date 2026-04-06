@@ -10,6 +10,9 @@ import com.example.allot.model.event.WaitingList;
 import java.util.Arrays;
 import org.junit.Before;
 import org.junit.Test;
+/**
+ * Tests the event offer service.
+ */
 public class EventOfferServiceTest {
     private EventOfferService service;
 

@@ -15,6 +15,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
+/**
+ * Tests the example instrumented.
+ */
 @RunWith(AndroidJUnit4.class)
 public class ExampleInstrumentedTest {
     private final EventQrCodeService qrCodeService = new EventQrCodeService();

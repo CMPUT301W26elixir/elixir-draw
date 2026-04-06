@@ -6,6 +6,9 @@ import static org.junit.Assert.assertSame;
 import java.util.Date;
 import org.junit.Test;
 
+/**
+ * Tests the waiting list.
+ */
 public class WaitingListTest {
     /**
      * Performs join locations defaults to empty map.

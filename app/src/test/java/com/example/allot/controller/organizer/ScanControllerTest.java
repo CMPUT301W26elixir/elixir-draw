@@ -10,6 +10,9 @@ import com.example.allot.model.event.EventScanResult;
 import org.junit.Before;
 import org.junit.Test;
 
+/**
+ * Tests the scan controller.
+ */
 public class ScanControllerTest {
     private FakeEventRepository eventRepository;
     private ScanController controller;
@@ -91,6 +94,9 @@ public class ScanControllerTest {
         });
     }
 
+    /**
+     * Stores and retrieves fake event.
+     */
     private static class FakeEventRepository extends EventRepository {
         private Event event;
         private boolean success = true;

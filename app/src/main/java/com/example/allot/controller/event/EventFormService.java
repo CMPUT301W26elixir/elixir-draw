@@ -275,6 +275,9 @@ public class EventFormService {
         return Event.VISIBILITY_PUBLIC;
     }
 
+    /**
+     * Represents the validation result.
+     */
     private static class ValidationResult {
         private final boolean success;
         private final String message;

@@ -79,6 +79,9 @@ public class AdminNotificationListAdapter extends RecyclerView.Adapter<AdminNoti
         return notifications.size();
     }
 
+    /**
+     * Represents the view holder.
+     */
     static class ViewHolder extends RecyclerView.ViewHolder {
         private final TextView titleText;
         private final TextView messageText;

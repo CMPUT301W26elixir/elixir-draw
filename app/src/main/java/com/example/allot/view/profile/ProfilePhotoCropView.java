@@ -283,6 +283,9 @@ public class ProfilePhotoCropView extends AppCompatImageView {
         return dp * getResources().getDisplayMetrics().density;
     }
 
+    /**
+     * Represents the scale listener.
+     */
     private class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {
         /**
          * Returns the result of on scale.

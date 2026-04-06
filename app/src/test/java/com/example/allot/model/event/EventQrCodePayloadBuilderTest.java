@@ -4,6 +4,9 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
+/**
+ * Tests the event qr code payload builder.
+ */
 public class EventQrCodePayloadBuilderTest {
     /**
      * Performs build event payload trims event id.

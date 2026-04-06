@@ -14,6 +14,9 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 
+/**
+ * Tests the admin event controller.
+ */
 public class AdminEventControllerTest {
     private FakeEventRepository eventRepository;
     private FakePosterController posterController;
@@ -219,6 +222,9 @@ public class AdminEventControllerTest {
         });
     }
 
+    /**
+     * Stores and retrieves fake event.
+     */
     private static class FakeEventRepository extends EventRepository {
         private List<Event> allEvents;
         private Event event;
@@ -269,6 +275,9 @@ public class AdminEventControllerTest {
         }
     }
 
+    /**
+     * Coordinates fake poster.
+     */
     private static class FakePosterController extends EventPosterController {
         private String lastPosterUrl;
         private Boolean deleteResult;
@@ -294,6 +303,9 @@ public class AdminEventControllerTest {
         }
     }
 
+    /**
+     * Coordinates fake user.
+     */
     private static class FakeUserController extends UserController {
         private boolean isAdmin;
         private boolean adminLookupSuccess = true;
@@ -316,6 +328,9 @@ public class AdminEventControllerTest {
         }
     }
 
+    /**
+     * Represents the fake device session store.
+     */
     private static class FakeDeviceSessionStore implements DeviceSessionManager.DeviceSessionStore {
         private final String deviceId;
 

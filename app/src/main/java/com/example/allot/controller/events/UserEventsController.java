@@ -13,6 +13,9 @@ import java.util.List;
  * Loads and builds the event lists used by the user's event screens.
  */
 public class UserEventsController {
+    /**
+     * Represents the registered event groups.
+     */
     public static class RegisteredEventGroups {
         private final List<EventListItem> invitedItems;
         private final List<EventListItem> selectedItems;
@@ -83,6 +86,9 @@ public class UserEventsController {
         public List<EventListItem> getCoOrganizerInviteItems() { return copyItems(coOrganizerInviteItems); }
     }
 
+    /**
+     * Represents the hosted event groups.
+     */
     public static class HostedEventGroups {
         private final List<EventListItem> ongoingItems;
         private final List<EventListItem> completedItems;

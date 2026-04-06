@@ -8,6 +8,9 @@ import java.util.Collections;
 import org.junit.Before;
 import org.junit.Test;
 
+/**
+ * Tests the event entrants csv formatter.
+ */
 public class EventEntrantsCsvFormatterTest {
     private EventEntrantsCsvFormatter formatter;
 

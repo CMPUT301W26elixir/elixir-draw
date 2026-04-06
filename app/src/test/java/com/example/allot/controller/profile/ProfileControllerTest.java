@@ -14,6 +14,9 @@ import com.example.allot.model.profile.User;
 import org.junit.Before;
 import org.junit.Test;
 
+/**
+ * Tests the profile controller.
+ */
 public class ProfileControllerTest {
     private FakeUserController userController;
     private ProfileController controller;
@@ -139,6 +142,9 @@ public class ProfileControllerTest {
         });
     }
 
+    /**
+     * Coordinates fake user.
+     */
     private static class FakeUserController extends UserController {
         private User userToLoad;
         private boolean loadSuccess;
@@ -191,6 +197,9 @@ public class ProfileControllerTest {
         }
     }
 
+    /**
+     * Represents the fake device session store.
+     */
     private static class FakeDeviceSessionStore implements DeviceSessionManager.DeviceSessionStore {
         private final String deviceId;
 

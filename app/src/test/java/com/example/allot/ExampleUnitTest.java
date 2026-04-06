@@ -4,6 +4,9 @@ import static org.junit.Assert.assertEquals;
 
 import com.example.allot.model.event.EventQrCodePayloadBuilder;
 import org.junit.Test;
+/**
+ * Tests the example unit.
+ */
 public class ExampleUnitTest {
     /**
      * Performs build event payload returns trimmed event id.

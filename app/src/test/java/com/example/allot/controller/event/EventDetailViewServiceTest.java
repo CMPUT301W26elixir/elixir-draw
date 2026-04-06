@@ -10,6 +10,9 @@ import com.example.allot.model.event.EventActionState;
 import com.example.allot.model.event.WaitingList;
 import org.junit.Before;
 import org.junit.Test;
+/**
+ * Tests the event detail view service.
+ */
 public class EventDetailViewServiceTest {
     private EventDetailViewService service;
 

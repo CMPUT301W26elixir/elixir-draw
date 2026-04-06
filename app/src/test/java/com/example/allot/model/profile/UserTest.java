@@ -7,6 +7,9 @@ import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import org.junit.Test;
 
+/**
+ * Tests the user.
+ */
 public class UserTest {
     /**
      * Performs default constructor initializes event lists.

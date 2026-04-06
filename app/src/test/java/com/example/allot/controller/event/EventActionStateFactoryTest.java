@@ -7,6 +7,9 @@ import com.example.allot.model.event.EventActionState;
 import com.example.allot.model.event.WaitingList;
 import org.junit.Before;
 import org.junit.Test;
+/**
+ * Tests the event action state factory.
+ */
 public class EventActionStateFactoryTest {
     private EventActionStateFactory factory;
 

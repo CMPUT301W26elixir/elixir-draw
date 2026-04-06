@@ -1458,6 +1458,9 @@ public class EventDetailActivity extends AppCompatActivity {
         };
     }
 
+    /**
+     * Enumerates the available comment sort mode values.
+     */
     private enum CommentSortMode {
         NEWEST,
         MOST_UPVOTED,
@@ -1480,6 +1483,9 @@ public class EventDetailActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Defines the contract for a comment post callback.
+     */
     private interface CommentPostCallback {
         /**
          * Handles the success callback.

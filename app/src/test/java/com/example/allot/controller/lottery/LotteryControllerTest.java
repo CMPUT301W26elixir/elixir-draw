@@ -19,6 +19,9 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 
+/**
+ * Tests the lottery controller.
+ */
 public class LotteryControllerTest {
     private FakeEventRepository eventRepository;
     private FakeUserController userController;
@@ -87,6 +90,9 @@ public class LotteryControllerTest {
         return event;
     }
 
+    /**
+     * Stores and retrieves fake event.
+     */
     private static class FakeEventRepository extends EventRepository {
         /**
          * Creates a new FakeEventRepository instance.
@@ -109,6 +115,9 @@ public class LotteryControllerTest {
         }
     }
 
+    /**
+     * Coordinates fake user.
+     */
     private static class FakeUserController extends UserController {
         /**
          * Creates a new FakeUserController instance.
@@ -169,6 +178,9 @@ public class LotteryControllerTest {
         }
     }
 
+    /**
+     * Represents the fake device session store.
+     */
     private static class FakeDeviceSessionStore implements DeviceSessionManager.DeviceSessionStore {
         private final String deviceId;
 

@@ -23,6 +23,9 @@ import java.util.Map;
  * Loads entrant data and actions for the event entrants screen.
  */
 public class EventEntrantsController {
+    /**
+     * Enumerates the available tab values.
+     */
     public enum Tab {
         SELECTED,
         CANCELLED,

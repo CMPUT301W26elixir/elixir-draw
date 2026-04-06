@@ -5,6 +5,9 @@ import static org.junit.Assert.assertNull;
 
 import org.junit.Test;
 
+/**
+ * Tests the event.
+ */
 public class EventTest {
     /**
      * Performs event coordinates default to null.

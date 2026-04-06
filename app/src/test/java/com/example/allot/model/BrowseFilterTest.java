@@ -6,6 +6,9 @@ import static org.junit.Assert.assertNull;
 import java.util.Date;
 import org.junit.Test;
 
+/**
+ * Tests the browse filter.
+ */
 public class BrowseFilterTest {
     /**
      * Performs two argument constructor sets only search and category.

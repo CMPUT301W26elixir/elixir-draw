@@ -15,6 +15,9 @@ import java.util.HashMap;
 import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
+/**
+ * Tests the edit event controller.
+ */
 public class EditEventControllerTest {
     private FakeEventRepository eventRepository;
     private FakeGeocodingService geocodingService;
@@ -118,6 +121,9 @@ public class EditEventControllerTest {
         );
     }
 
+    /**
+     * Stores and retrieves fake event.
+     */
     private static class FakeEventRepository extends EventRepository {
         private Event event;
         private boolean updateSuccess;
@@ -155,6 +161,9 @@ public class EditEventControllerTest {
         }
     }
 
+    /**
+     * Provides fake geocoding operations.
+     */
     private static class FakeGeocodingService implements EventLocationGeocodingService {
         private EventLocationCoordinates coordinates;
 

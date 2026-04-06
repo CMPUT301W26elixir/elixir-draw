@@ -9,6 +9,9 @@ import java.util.Date;
 import java.util.Map;
 import org.junit.Test;
 
+/**
+ * Tests the event repository.
+ */
 public class EventRepositoryTest {
     /**
      * Performs build join waiting list updates adds waitlist and join location entries.
