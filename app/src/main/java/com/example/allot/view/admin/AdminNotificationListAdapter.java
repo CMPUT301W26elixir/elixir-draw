@@ -73,6 +73,9 @@ public class AdminNotificationListAdapter extends RecyclerView.Adapter<AdminNoti
         private final TextView eventIdText;
         private final TextView sentAtText;
 
+        /**
+         * Documents view Holder.
+         */
         ViewHolder(@NonNull View itemView) {
             super(itemView);
             titleText = itemView.findViewById(R.id.notificationTitleText);

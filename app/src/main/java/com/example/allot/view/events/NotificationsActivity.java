@@ -54,6 +54,9 @@ public class NotificationsActivity extends AppCompatActivity {
     private void saveProfileAndOpenExplore(boolean notificationsEnabled) {
         setButtonsEnabled(false);
 
+        /**
+         * Returns whether get Boolean Extra.
+         */
         if (getIntent().getBooleanExtra(
                 DeferredOnboardingNavigator.EXTRA_UI_TEST_COMPLETE_DEFERRED_ONBOARDING,
                 false

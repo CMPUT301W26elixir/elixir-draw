@@ -326,8 +326,17 @@ public class UserRepository {
             return new CleanupOperation(Type.DELETE_USER, null, deviceId);
         }
 
+        /**
+         * Returns whether get Type.
+         */
         public Type getType() { return type; }
+        /**
+         * Returns whether get Document Path.
+         */
         public String getDocumentPath() { return documentPath; }
+        /**
+         * Returns whether get Device Id.
+         */
         public String getDeviceId() { return deviceId; }
 
         /**
@@ -359,11 +368,20 @@ public class UserRepository {
     static final class EventCleanupTarget {
         private final String documentPath;
         private final String organizerId;
+        /**
+         * Documents event Cleanup Target.
+         */
         EventCleanupTarget(String documentPath, String organizerId) {
             this.documentPath = documentPath;
             this.organizerId = organizerId;
         }
+        /**
+         * Returns whether get Document Path.
+         */
         String getDocumentPath() { return documentPath; }
+        /**
+         * Returns whether get Organizer Id.
+         */
         String getOrganizerId() { return organizerId; }
     }
 
@@ -406,8 +424,17 @@ public class UserRepository {
         });
     }
 
+    /**
+     * Returns whether is Blank.
+     */
     private boolean isBlank(String value) { return TextHelper.isBlank(value); }
+    /**
+     * Documents to Lower Case.
+     */
     private String safeString(String value) { return value == null ? "" : value.trim().toLowerCase(); }
+    /**
+     * Documents trim.
+     */
     private String normalizePhone(String phone) { return phone == null ? "" : phone.trim(); }
 
     /**
@@ -473,6 +500,9 @@ public class UserRepository {
             return;
         }
 
+        /**
+         * Returns whether get Error Code.
+         */
         FirebaseStorage.getInstance()
                 .getReference()
                 .child("user_profiles")
@@ -482,6 +512,9 @@ public class UserRepository {
                 .addOnSuccessListener(unused -> listener.onComplete(true, true))
                 .addOnFailureListener(exception -> {
                     if (exception instanceof StorageException
+                            /**
+                             * Returns whether get Error Code.
+                             */
                             && ((StorageException) exception).getErrorCode() == StorageException.ERROR_OBJECT_NOT_FOUND) {
                         listener.onComplete(true, true);
                         return;

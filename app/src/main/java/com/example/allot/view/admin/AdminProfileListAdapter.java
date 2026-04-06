@@ -80,6 +80,9 @@ public class AdminProfileListAdapter extends RecyclerView.Adapter<AdminProfileLi
         private final TextView userRoleText;
         private final Button deleteButton;
 
+        /**
+         * Documents view Holder.
+         */
         ViewHolder(@NonNull View itemView) {
             super(itemView);
             userNameText = itemView.findViewById(R.id.userNameText);

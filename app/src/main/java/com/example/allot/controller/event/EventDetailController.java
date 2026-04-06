@@ -743,6 +743,9 @@ public class EventDetailController {
                 if (comment == null || isBlank(comment.getParentId())) {
                     continue;
                 }
+                /**
+                 * Returns whether get Comment Id.
+                 */
                 if (deleteIds.contains(comment.getParentId())
                         && !deleteIds.contains(comment.getCommentId())) {
                     deleteIds.add(comment.getCommentId());

@@ -243,6 +243,9 @@ public class EventEntrantsControllerTest {
             this.deviceId = deviceId;
         }
 
+        /**
+         * Returns whether get Device Id.
+         */
         @Override
         public String getDeviceId() { return deviceId; }
 

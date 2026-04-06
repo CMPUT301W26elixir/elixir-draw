@@ -74,6 +74,9 @@ public class SearchEventActivity extends AppCompatActivity {
         ImageButton backButton = findViewById(R.id.backButton);
         backButton.setOnClickListener(view -> getOnBackPressedDispatcher().onBackPressed());
 
+        /**
+         * Documents text Watcher.
+         */
         searchInput.addTextChangedListener(new TextWatcher() {
             /**
              * Handles before Text Changed.
@@ -122,6 +125,9 @@ public class SearchEventActivity extends AppCompatActivity {
             emptyText.setVisibility(View.GONE);
         });
 
+        /**
+         * Documents search Callback.
+         */
         searchEventController.searchEvents(keyword, new SearchEventController.SearchCallback() {
             /**
              * Handles on Results.
@@ -166,6 +172,9 @@ public class SearchEventActivity extends AppCompatActivity {
             items.add(EventListItem.fromEvent(event));
         }
 
+        /**
+         * Handles on Event Click Listener.
+         */
         resultsRecyclerView.setAdapter(new EventListAdapter(items, new EventListAdapter.OnEventClickListener() {
             /**
              * Handles on Event Click.

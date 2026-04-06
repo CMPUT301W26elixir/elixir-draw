@@ -399,6 +399,9 @@ public class EventRepository {
                 if (event == null) {
                     continue;
                 }
+                /**
+                 * Returns whether contains.
+                 */
                 if (deviceId != null
                         && (deviceId.equals(event.getOrganizerId())
                         || (event.getCoOrganizers() != null && event.getCoOrganizers().contains(deviceId)))) {
@@ -676,6 +679,9 @@ public class EventRepository {
             return;
         }
 
+        /**
+         * Returns whether get Error Code.
+         */
         try {
             FirebaseStorage.getInstance()
                     .getReferenceFromUrl(posterUrl)
@@ -821,6 +827,9 @@ public class EventRepository {
         private final String documentPath;
         private final String userId;
 
+        /**
+         * Documents user Cleanup Target.
+         */
         UserCleanupTarget(String documentPath, String userId) {
             this.documentPath = documentPath;
             this.userId = userId;

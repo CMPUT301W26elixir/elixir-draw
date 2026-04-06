@@ -37,9 +37,15 @@ public class SearchEventController {
                     String lower = keyword.toLowerCase().trim();
                     for (var doc : querySnapshot) {
                         Event event = doc.toObject(Event.class);
+                        /**
+                         * Returns whether contains.
+                         */
                         if (event.getTitle() != null &&
                                 event.getTitle().toLowerCase().contains(lower)) {
                             results.add(event);
+                        /**
+                         * Returns whether contains.
+                         */
                         } else if (event.getDescription() != null &&
                                 event.getDescription().toLowerCase().contains(lower)) {
                             results.add(event);

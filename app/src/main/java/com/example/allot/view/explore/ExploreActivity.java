@@ -135,6 +135,9 @@ public class ExploreActivity extends AppCompatActivity {
         currentHomeTab = resolveInitialTab(getIntent());
         setupBottomNavigation();
 
+        /**
+         * Handles on Event Click Listener.
+         */
         eventListAdapter = new EventListAdapter(new ArrayList<>(), new EventListAdapter.OnEventClickListener() {
             /**
              * Handles on Event Click.
@@ -197,6 +200,9 @@ public class ExploreActivity extends AppCompatActivity {
         searchInput.setFocusable(true);
         searchInput.setFocusableInTouchMode(true);
         searchInput.setOnClickListener(null);
+        /**
+         * Documents text Watcher.
+         */
         searchInput.addTextChangedListener(new TextWatcher() {
             /**
              * Handles before Text Changed.
@@ -477,6 +483,9 @@ public class ExploreActivity extends AppCompatActivity {
                     location.getLatitude(),
                     location.getLongitude()
             );
+            /**
+             * Returns whether is Blank.
+             */
             runOnUiThread(() -> {
                 if (!isFinishing()
                         && !isDestroyed()
@@ -954,6 +963,9 @@ public class ExploreActivity extends AppCompatActivity {
             if (item == null) {
                 continue;
             }
+            /**
+             * Returns whether contains.
+             */
             if (normalizedSearch.isEmpty()
                     || item.getTitle().toLowerCase(Locale.getDefault()).contains(normalizedSearch)
                     || item.getStreet().toLowerCase(Locale.getDefault()).contains(normalizedSearch)

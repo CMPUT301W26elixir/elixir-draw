@@ -84,6 +84,9 @@ public class EventListModeFragment extends Fragment {
         recyclerView = view.findViewById(R.id.recyclerView);
         emptyStateText = view.findViewById(R.id.emptyStateText);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        /**
+         * Handles on Event Click Listener.
+         */
         adapter = new EventListAdapter(new ArrayList<>(), new EventListAdapter.OnEventClickListener() {
             /**
              * Handles on Event Click.

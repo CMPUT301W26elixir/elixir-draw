@@ -25,6 +25,9 @@ public class EventEntrantsCsvSaveService {
         private final String mimeType;
         private final String relativePath;
 
+        /**
+         * Documents csv Download Spec.
+         */
         CsvDownloadSpec(String displayName, String mimeType, String relativePath) {
             this.displayName = displayName;
             this.mimeType = mimeType;

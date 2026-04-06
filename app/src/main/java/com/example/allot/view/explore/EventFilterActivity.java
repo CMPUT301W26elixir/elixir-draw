@@ -230,6 +230,9 @@ public class EventFilterActivity extends AppCompatActivity {
                     location.getLatitude(),
                     location.getLongitude()
             );
+            /**
+             * Returns whether is Empty.
+             */
             runOnUiThread(() -> {
                 if (!isFinishing() && !isDestroyed() && safeString(addressInput.getText()).isEmpty()
                         && !TextUtils.isEmpty(resolvedAddress)) {

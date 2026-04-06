@@ -283,6 +283,9 @@ public class EditEventActivity extends AppCompatActivity {
             });
         }
 
+        /**
+         * Handles on Item Selected Listener.
+         */
         AdapterView.OnItemSelectedListener dateSelectionListener = new AdapterView.OnItemSelectedListener() {
             /**
              * Handles on Item Selected.

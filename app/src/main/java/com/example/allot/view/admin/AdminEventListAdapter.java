@@ -80,6 +80,9 @@ public class AdminEventListAdapter extends RecyclerView.Adapter<AdminEventListAd
         private final TextView eventDateText;
         private final Button deleteButton;
 
+        /**
+         * Documents view Holder.
+         */
         ViewHolder(@NonNull View itemView) {
             super(itemView);
             eventTitleText = itemView.findViewById(R.id.eventTitleText);

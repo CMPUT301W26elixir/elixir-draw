@@ -58,6 +58,9 @@ public class AdminProfilePictureListAdapter extends RecyclerView.Adapter<AdminPr
         private final TextView userNameText;
         private final TextView userDeviceIdText;
 
+        /**
+         * Documents view Holder.
+         */
         ViewHolder(@NonNull View itemView) {
             super(itemView);
             profilePictureImage = itemView.findViewById(R.id.profilePictureImage);

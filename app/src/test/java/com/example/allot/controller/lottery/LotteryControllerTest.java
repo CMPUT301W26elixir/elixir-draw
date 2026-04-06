@@ -123,7 +123,13 @@ public class LotteryControllerTest {
         }
     }
 
+    /**
+     * Documents fake Notification Controller.
+     */
     private static class FakeNotificationController extends NotificationController {
+        /**
+         * Documents fake Notification Controller.
+         */
         FakeNotificationController() {
             super((NotificationRepository) null);
         }
@@ -155,6 +161,9 @@ public class LotteryControllerTest {
             this.deviceId = deviceId;
         }
 
+        /**
+         * Returns whether get Device Id.
+         */
         @Override
         public String getDeviceId() { return deviceId; }
 

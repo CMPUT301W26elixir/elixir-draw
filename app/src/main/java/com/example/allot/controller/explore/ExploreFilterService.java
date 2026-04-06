@@ -52,6 +52,9 @@ public class ExploreFilterService {
                 continue;
             }
 
+            /**
+             * Returns whether get Distance Km.
+             */
             if (!matchesDistance(event,
                     filter == null ? null : filter.getLatitude(),
                     filter == null ? null : filter.getLongitude(),
@@ -109,6 +112,9 @@ public class ExploreFilterService {
             return true;
         }
 
+        /**
+         * Returns whether get Description.
+         */
         // Let the chip match the category or other event text
         if (normalize(event.getCategory()).equals(normalizedCategory)
                 || containsNormalized(event.getTitle(), normalizedCategory)
@@ -116,6 +122,9 @@ public class ExploreFilterService {
             return true;
         }
 
+        /**
+         * Returns whether get Category.
+         */
         for (String keyword : categoryKeywords(normalizedCategory)) {
             if (containsNormalized(event.getTitle(), keyword)
                     || containsNormalized(event.getDescription(), keyword)
@@ -170,6 +179,9 @@ public class ExploreFilterService {
             return true;
         }
 
+        /**
+         * Returns whether get Description.
+         */
         for (String token : tokens) {
             if (!containsNormalized(event.getTitle(), token)
                     && !containsNormalized(event.getDescription(), token)) {

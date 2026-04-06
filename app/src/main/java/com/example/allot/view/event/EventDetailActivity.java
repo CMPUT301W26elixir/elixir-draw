@@ -197,6 +197,9 @@ public class EventDetailActivity extends AppCompatActivity {
         joinWaitingListButton.setOnClickListener(view -> onWaitlistButtonPressed());
         commentSubmitButton.setOnClickListener(view -> postComment(null, null));
 
+        /**
+         * Handles on Item Selected Listener.
+         */
         if (commentSortSpinner != null) {
             commentSortSpinner.setOnItemSelectedListener(new android.widget.AdapterView.OnItemSelectedListener() {
                 /**
@@ -1004,6 +1007,9 @@ public class EventDetailActivity extends AppCompatActivity {
         }
 
         EventDetailData.NextAction nextAction = eventDetailController.resolveNextAction(currentScreenState);
+        /**
+         * Documents if.
+         */
         if (nextAction != EventDetailData.NextAction.SHOW_JOIN_DIALOG
                 && nextAction != EventDetailData.NextAction.SHOW_INVITE_DIALOG) {
             return;
@@ -1165,6 +1171,9 @@ public class EventDetailActivity extends AppCompatActivity {
             if (parentComment == null) {
                 return;
             }
+            /**
+             * Documents comment Post Callback.
+             */
             postComment(parentComment.getCommentId(), new CommentPostCallback() {
                 /**
                  * Handles on Success.

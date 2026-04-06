@@ -156,10 +156,16 @@ public class InviteCoOrganizerActivity extends AppCompatActivity {
                 if (user.getDeviceId().equals(currentEvent.getOrganizerId())) {
                     continue;
                 }
+                /**
+                 * Returns whether get Device Id.
+                 */
                 if (currentEvent.getCoOrganizers() != null
                         && currentEvent.getCoOrganizers().contains(user.getDeviceId())) {
                     continue;
                 }
+                /**
+                 * Returns whether get Device Id.
+                 */
                 if (currentEvent.getCoOrganizerInvites() != null
                         && currentEvent.getCoOrganizerInvites().contains(user.getDeviceId())) {
                     continue;

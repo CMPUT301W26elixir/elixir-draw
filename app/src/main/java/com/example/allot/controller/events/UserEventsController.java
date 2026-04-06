@@ -21,6 +21,9 @@ public class UserEventsController {
         private final List<EventListItem> pastItems;
         private final List<EventListItem> coOrganizerInviteItems;
 
+        /**
+         * Documents registered Event Groups.
+         */
         RegisteredEventGroups(List<EventListItem> invitedItems,
                               List<EventListItem> selectedItems,
                               List<EventListItem> waitingItems,
@@ -35,11 +38,29 @@ public class UserEventsController {
             this.coOrganizerInviteItems = copyItems(coOrganizerInviteItems);
         }
 
+        /**
+         * Documents copy Items.
+         */
         public List<EventListItem> getInvitedItems() { return copyItems(invitedItems); }
+        /**
+         * Documents copy Items.
+         */
         public List<EventListItem> getSelectedItems() { return copyItems(selectedItems); }
+        /**
+         * Documents copy Items.
+         */
         public List<EventListItem> getWaitingItems() { return copyItems(waitingItems); }
+        /**
+         * Documents copy Items.
+         */
         public List<EventListItem> getNotSelectedItems() { return copyItems(notSelectedItems); }
+        /**
+         * Documents copy Items.
+         */
         public List<EventListItem> getPastItems() { return copyItems(pastItems); }
+        /**
+         * Documents copy Items.
+         */
         public List<EventListItem> getCoOrganizerInviteItems() { return copyItems(coOrganizerInviteItems); }
     }
 
@@ -47,12 +68,21 @@ public class UserEventsController {
         private final List<EventListItem> ongoingItems;
         private final List<EventListItem> completedItems;
 
+        /**
+         * Documents hosted Event Groups.
+         */
         HostedEventGroups(List<EventListItem> ongoingItems, List<EventListItem> completedItems) {
             this.ongoingItems = copyItems(ongoingItems);
             this.completedItems = copyItems(completedItems);
         }
 
+        /**
+         * Documents copy Items.
+         */
         public List<EventListItem> getOngoingItems() { return copyItems(ongoingItems); }
+        /**
+         * Documents copy Items.
+         */
         public List<EventListItem> getCompletedItems() { return copyItems(completedItems); }
     }
 
@@ -243,12 +273,18 @@ public class UserEventsController {
                 continue;
             }
 
+            /**
+             * Returns whether get Co Organizer Invites.
+             */
             if (containsUser(event.getWaitingList() == null ? null : event.getWaitingList().list, deviceId)
                     || containsUser(event.getWaitingList() == null ? null : event.getWaitingList().chosen, deviceId)
                     || containsUser(event.getChosen(), deviceId)
                     || containsUser(event.getEnrolled(), deviceId)
                     || containsUser(event.getNotEnrolled(), deviceId)
                     || event.isInvited(deviceId)
+                    /**
+                     * Returns whether get Co Organizer Invites.
+                     */
                     || containsUser(event.getCoOrganizerInvites(), deviceId)) {
                 registeredEvents.add(event);
             }

@@ -201,6 +201,9 @@ public class EventFormService {
             return ValidationResult.failure(ERROR_REQUIRED);
         }
 
+        /**
+         * Returns whether get Registration End Year.
+         */
         if (isBlank(formData.getTitle())
                 || isBlank(formData.getLocation())
                 || isBlank(formData.getPrice())

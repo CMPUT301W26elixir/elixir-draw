@@ -69,6 +69,9 @@ public class AdminPosterListAdapter extends RecyclerView.Adapter<AdminPosterList
         private final TextView eventOrganizerText;
         private final Button deleteButton;
 
+        /**
+         * Documents view Holder.
+         */
         ViewHolder(@NonNull View itemView) {
             super(itemView);
             posterImageView = itemView.findViewById(R.id.posterImageView);
