@@ -3,23 +3,46 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginBottom="12dp"
-    android:orientation="vertical">
+    android:orientation="horizontal">
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/entrantNameText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/varela_round_regular"
+            android:textColor="@color/text_primary"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/entrantTimeText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:fontFamily="@font/varela_round_regular"
+            android:textColor="@color/text_secondary"
+            android:textSize="14sp" />
+    </LinearLayout>
 
     <TextView
-        android:id="@+id/entrantNameText"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:id="@+id/cancelEntrantButton"
+        android:layout_width="wrap_content"
+        android:layout_height="32dp"
+        android:layout_gravity="center_vertical"
+        android:layout_marginStart="12dp"
+        android:background="@drawable/bg_waitlist_button"
         android:fontFamily="@font/varela_round_regular"
-        android:textColor="@color/text_primary"
-        android:textSize="16sp" />
-
-    <TextView
-        android:id="@+id/entrantTimeText"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="2dp"
-        android:fontFamily="@font/varela_round_regular"
-        android:textColor="@color/text_secondary"
-        android:textSize="14sp" />
+        android:gravity="center"
+        android:paddingStart="14dp"
+        android:paddingEnd="14dp"
+        android:text="@string/manage_entrants_cancel_action"
+        android:textColor="#FF9E4141"
+        android:textSize="14sp"
+        android:visibility="gone" />
 
 </LinearLayout>
