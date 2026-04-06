@@ -42,7 +42,7 @@ public class UserRepository {
      * @param database the Firestore instance to use
      */
     public UserRepository(FirebaseFirestore database) {
-        this.usersCollection = database == null ? null : database.collection("users");
+        this.usersCollection = database != null ? database.collection("users") : null;
     }
 
     /**
@@ -52,8 +52,12 @@ public class UserRepository {
      * @param listener the listener that receives the user
      */
     public void getUserByDeviceId(String deviceId, OnCompleteListener<User> listener) {
-        DocumentReference userRef = usersCollection.document(deviceId);
+        if (usersCollection == null) {
+            listener.onComplete(null, false);
+            return;
+        }
 
+        DocumentReference userRef = usersCollection.document(deviceId);
         userRef.get().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 DocumentSnapshot document = task.getResult();
@@ -74,42 +78,17 @@ public class UserRepository {
     }
 
     /**
-     * Loads a user by device ID without treating a missing document as an error.
-     *
-     * @param deviceId the device ID to look up
-     * @param listener the listener that receives the user or null when none exists
-     */
-    public void findUserByDeviceId(String deviceId, OnCompleteListener<User> listener) {
-        DocumentReference userRef = usersCollection.document(deviceId);
-
-        userRef.get().addOnCompleteListener(task -> {
-            if (!task.isSuccessful()) {
-                Log.d(TAG, "Failed to find user", task.getException());
-                listener.onComplete(null, false);
-                return;
-            }
-
-            DocumentSnapshot document = task.getResult();
-            if (document == null || !document.exists()) {
-                listener.onComplete(null, true);
-                return;
-            }
-
-            User user = document.toObject(User.class);
-            if (user != null && isBlank(user.getDeviceId())) {
-                user.setDeviceId(deviceId);
-            }
-            listener.onComplete(user, user != null);
-        });
-    }
-
-    /**
      * Creates a new user with the provided device ID.
      *
      * @param deviceId the device ID to assign
      * @param listener the listener that receives the result
      */
     public void createNewUser(String deviceId, OnCompleteListener<User> listener) {
+        if (usersCollection == null) {
+            if (listener != null) listener.onComplete(null, false);
+            return;
+        }
+
         User user = new User();
         user.setDeviceId(deviceId);
         DocumentReference userRef = usersCollection.document(deviceId);
@@ -146,15 +125,19 @@ public class UserRepository {
                                   String phone,
                                   boolean notiEnabled,
                                   OnCompleteListener<User> listener) {
+        if (usersCollection == null) {
+            listener.onComplete(null, false);
+            return;
+        }
+
         DocumentReference userRef = usersCollection.document(deviceId);
-        Map<String, Object> updates = new HashMap<>();
-        updates.put("deviceId", deviceId);
-        updates.put("firstName", firstName.trim());
-        updates.put("lastName", lastName.trim());
-        updates.put("email", email.trim());
-        updates.put("phone", normalizePhone(phone));
-        updates.put("notiEnabled", notiEnabled);
-        userRef.set(updates, SetOptions.merge()).addOnCompleteListener(task -> {
+        userRef.update(
+                "firstName", firstName.trim(),
+                "lastName", lastName.trim(),
+                "email", email.trim(),
+                "phone", normalizePhone(phone),
+                "notiEnabled", notiEnabled
+        ).addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 getUserByDeviceId(deviceId, listener);
             } else {
@@ -172,6 +155,11 @@ public class UserRepository {
      * @param listener called with true on success, false on failure
      */
     public void updateUserFields(String deviceId, Map<String, Object> updates, OnCompleteListener<Boolean> listener) {
+        if (usersCollection == null) {
+            listener.onComplete(false, false);
+            return;
+        }
+
         usersCollection.document(deviceId)
                 .update(updates)
                 .addOnSuccessListener(aVoid -> listener.onComplete(true, true))
@@ -189,11 +177,11 @@ public class UserRepository {
      * @param fcmToken the FCM registration token
      */
     public void updateFcmToken(String deviceId, String fcmToken) {
-        if (deviceId == null || fcmToken == null) return;
+        if (deviceId == null || fcmToken == null || usersCollection == null) return;
         Map<String, Object> data = new HashMap<>();
         data.put("fcmToken", fcmToken);
         data.put("deviceId", deviceId);
-
+        
         usersCollection.document(deviceId)
                 .set(data, SetOptions.merge())
                 .addOnSuccessListener(aVoid -> Log.d(TAG, "FCM Token updated successfully"))
@@ -209,6 +197,11 @@ public class UserRepository {
      * @param listener the listener that receives the result
      */
     public void toggleSavedEvent(String deviceId, String eventId, boolean isSaving, OnCompleteListener<Boolean> listener) {
+        if (usersCollection == null) {
+            listener.onComplete(false, false);
+            return;
+        }
+
         DocumentReference userRef = usersCollection.document(deviceId);
         FieldValue updateAction = isSaving ?
                 FieldValue.arrayUnion(eventId) :
@@ -232,6 +225,11 @@ public class UserRepository {
      * @param listener the listener that receives the result
      */
     public void deleteCurrentUser(String deviceId, OnCompleteListener<Boolean> listener) {
+        if (usersCollection == null) {
+            listener.onComplete(false, false);
+            return;
+        }
+
         FirebaseFirestore database = usersCollection.getFirestore();
         database.collection("events")
                 .get()
@@ -379,6 +377,7 @@ public class UserRepository {
      * @param deviceId the device ID to backfill
      */
     public void backfillDeviceId(String deviceId) {
+        if (usersCollection == null) return;
         usersCollection.document(deviceId)
                 .update("deviceId", deviceId)
                 .addOnFailureListener(e -> Log.d(TAG, "Failed to backfill device ID", e));
@@ -391,6 +390,11 @@ public class UserRepository {
      * @param listener the listener that receives matching users
      */
     public void searchUsers(String query, OnCompleteListener<List<User>> listener) {
+        if (usersCollection == null) {
+            listener.onComplete(new ArrayList<>(), false);
+            return;
+        }
+
         String safeQuery = query == null ? "" : query.trim().toLowerCase();
         if (safeQuery.isEmpty()) {
             listener.onComplete(new ArrayList<>(), true);
@@ -417,6 +421,16 @@ public class UserRepository {
         });
     }
 
+    /**
+     * Finds a user by device ID.
+     *
+     * @param deviceId the device ID to lookup
+     * @param listener the listener that receives the user
+     */
+    public void findUserByDeviceId(String deviceId, OnCompleteListener<User> listener) {
+        getUserByDeviceId(deviceId, listener);
+    }
+
     private boolean isBlank(String value) { return TextHelper.isBlank(value); }
     private String safeString(String value) { return value == null ? "" : value.trim().toLowerCase(); }
     private String normalizePhone(String phone) { return phone == null ? "" : phone.trim(); }
@@ -427,6 +441,11 @@ public class UserRepository {
      * @param listener the listener that receives the users list
      */
     public void getAllUsers(OnCompleteListener<List<User>> listener) {
+        if (usersCollection == null) {
+            listener.onComplete(null, false);
+            return;
+        }
+
         usersCollection.get().addOnCompleteListener(task -> {
             if (!task.isSuccessful()) {
                 Log.d(TAG, "Failed to load all users", task.getException());
@@ -452,6 +471,11 @@ public class UserRepository {
      * @param listener the listener that receives the result
      */
     public void deleteUserAsAdmin(String deviceId, OnCompleteListener<Boolean> listener) {
+        if (usersCollection == null) {
+            listener.onComplete(false, false);
+            return;
+        }
+
         FirebaseFirestore database = usersCollection.getFirestore();
         database.collection("events")
                 .get()

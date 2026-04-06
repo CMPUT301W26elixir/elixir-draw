@@ -3,7 +3,8 @@ package com.example.allot.view.explore;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.location.Location;import android.os.Bundle;
+import android.location.Location;
+import android.os.Bundle;
 import android.os.Handler;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -343,9 +344,6 @@ public class ExploreActivity extends AppCompatActivity {
                 : BottomNavBarView.Tab.EXPLORE;
     }
 
-    /**
-     * Attempts to find the user's location to apply a default location filter if none exists.
-     */
     private void maybeInitializeDefaultLocationFilter() {
         if (hasInitializedDefaultLocationFilter || isInitializingDefaultLocationFilter) {
             return;

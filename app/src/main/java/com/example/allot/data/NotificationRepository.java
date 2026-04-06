@@ -34,7 +34,7 @@ public class NotificationRepository {
      */
     public NotificationRepository(FirebaseFirestore database) {
         this.db = database;
-        this.usersCollection = database.collection("users");
+        this.usersCollection = database != null ? database.collection("users") : null;
     }
 
     /**
@@ -46,7 +46,7 @@ public class NotificationRepository {
      * @param listener     the listener that receives the result
      */
     public void sendNotification(String userId, Notification notification, OnCompleteListener<Void> listener) {
-        if (userId == null || notification == null) {
+        if (userId == null || notification == null || usersCollection == null) {
             if (listener != null) listener.onComplete(null, false);
             return;
         }
@@ -73,6 +73,11 @@ public class NotificationRepository {
      * @param listener the listener that receives the list of notifications
      */
     public void getNotifications(String userId, OnCompleteListener<List<Notification>> listener) {
+        if (usersCollection == null) {
+            if (listener != null) listener.onComplete(null, false);
+            return;
+        }
+
         usersCollection.document(userId)
                 .collection("notifications")
                 .orderBy("timestamp", Query.Direction.DESCENDING)
@@ -101,6 +106,11 @@ public class NotificationRepository {
      * @param listener     called with true on success, false on failure
      */
     public void saveNotification(NotificationItem notification, OnCompleteListener<Boolean> listener) {
+        if (db == null) {
+            if (listener != null) listener.onComplete(false, false);
+            return;
+        }
+
         db.collection(COLLECTION)
                 .add(notification)
                 .addOnSuccessListener(docRef -> {
@@ -118,6 +128,11 @@ public class NotificationRepository {
      * @param listener called with the list of notifications on success
      */
     public void getNotificationsForUser(String userId, OnCompleteListener<List<NotificationItem>> listener) {
+        if (db == null) {
+            if (listener != null) listener.onComplete(null, false);
+            return;
+        }
+
         db.collection(COLLECTION)
                 .whereEqualTo("userId", userId)
                 .orderBy("createdAt", Query.Direction.DESCENDING)
@@ -142,6 +157,11 @@ public class NotificationRepository {
      * @param listener called with the list of notifications on success
      */
     public void getAllNotifications(OnCompleteListener<List<NotificationItem>> listener) {
+        if (db == null) {
+            if (listener != null) listener.onComplete(null, false);
+            return;
+        }
+
         db.collection(COLLECTION)
                 .orderBy("createdAt", Query.Direction.DESCENDING)
                 .get()
