@@ -103,12 +103,15 @@ public final class AppNavigator {
                                             boolean finishCurrent,
                                             String destination,
                                             Bundle extras) {
+        if (shouldForceDeferredOnboarding(activity)) {
+            navigate(activity, buildOnboardingIntent(activity, destination, extras), finishCurrent);
+            return;
+        }
+
         UserController userController = new UserController(activity);
         userController.loadCurrentUser((user, success) -> {
             Intent intent;
-            if (shouldForceDeferredOnboarding(activity)) {
-                intent = buildOnboardingIntent(activity, destination, extras);
-            } else if (success && userController.hasCompletedProfile(user)) {
+            if (success && userController.hasCompletedProfile(user)) {
                 intent = buildDestinationIntent(activity, destination, extras);
             } else {
                 intent = buildOnboardingIntent(activity, destination, extras);
