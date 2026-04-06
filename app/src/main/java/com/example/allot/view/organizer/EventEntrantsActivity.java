@@ -180,7 +180,7 @@ public class EventEntrantsActivity extends AppCompatActivity {
             }
 
             currentEvent = event;
-            viewEntrantMapButton.setVisibility(View.VISIBLE);
+            updateMapButtonVisibility(event);
             drawDateValueText.setText(buildDrawDateText(event));
             attendeesValueText.setText(buildAttendeesText(event));
 
@@ -300,8 +300,9 @@ public class EventEntrantsActivity extends AppCompatActivity {
         currentEvent = new Event();
         currentEvent.setEventId(currentEventId);
         currentEvent.setTitle(safeString(getIntent().getStringExtra(EXTRA_UI_TEST_EVENT_TITLE), "UI Test Event"));
+        currentEvent.setGeoloc(getIntent().getBooleanExtra("ui_test_geolocation_enabled", false));
 
-        viewEntrantMapButton.setVisibility(View.VISIBLE);
+        updateMapButtonVisibility(currentEvent);
         drawDateValueText.setText("April 12, 2026");
         attendeesValueText.setText("20");
 
@@ -468,6 +469,10 @@ public class EventEntrantsActivity extends AppCompatActivity {
         startActivity(new android.content.Intent(this, MapViewActivity.class)
                 .putExtra(MapViewActivity.EXTRA_EVENT_ID, currentEventId));
         overridePendingTransition(0, 0);
+    }
+
+    private void updateMapButtonVisibility(Event event) {
+        viewEntrantMapButton.setVisibility(event == null ? View.GONE : View.VISIBLE);
     }
 
     private void exportFinalList() {

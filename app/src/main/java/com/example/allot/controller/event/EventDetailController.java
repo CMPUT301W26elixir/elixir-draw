@@ -197,6 +197,30 @@ public class EventDetailController {
     }
 
     /**
+     * Saves the current user's location for an event they have already joined.
+     */
+    public void syncWaitlistLocation(String eventId,
+                                     Double latitude,
+                                     Double longitude,
+                                     Date joinedAt,
+                                     OnCompleteListener<AppResult<Void>> listener) {
+        if (isBlank(eventId) || latitude == null || longitude == null) {
+            listener.onComplete(AppResult.failure(R.string.event_detail_join_location_unavailable), false);
+            return;
+        }
+
+        String deviceId = userController.getCurrentDeviceId();
+        eventRepository.updateWaitlistLocation(eventId, deviceId, latitude, longitude, joinedAt, (result, success) -> {
+            if (!success || result == null || !result) {
+                listener.onComplete(AppResult.failure(R.string.event_detail_join_location_unavailable), false);
+                return;
+            }
+
+            listener.onComplete(AppResult.success(null, R.string.event_detail_join_success), true);
+        });
+    }
+
+    /**
      * Adds a comment or reply to the event.
      *
      * @param eventId the event ID

@@ -495,8 +495,8 @@
                 android:fontFamily="@font/varela_round_regular"
                 android:gravity="center"
                 android:text="@string/manage_event_delete_button"
-                android:textColor="#FF9E4141"
-                android:textSize="18sp"
+                android:textColor="#1D1D1D"
+                android:textSize="20sp"
                 android:visibility="gone" />
         </LinearLayout>
     </ScrollView>

@@ -98,6 +98,38 @@ public class EventRepository {
                 .addOnFailureListener(exception -> listener.onComplete(false, false));
     }
 
+    /**
+     * Saves or refreshes the stored join location for a user already on the waiting list.
+     *
+     * @param eventId the event ID
+     * @param deviceId the user device ID
+     * @param latitude the captured latitude
+     * @param longitude the captured longitude
+     * @param joinedAt the timestamp recorded with the saved location
+     * @param listener the listener that receives the result
+     */
+    public void updateWaitlistLocation(String eventId,
+                                       String deviceId,
+                                       Double latitude,
+                                       Double longitude,
+                                       Date joinedAt,
+                                       OnCompleteListener<Boolean> listener) {
+        if (isBlank(eventId) || isBlank(deviceId) || latitude == null || longitude == null) {
+            listener.onComplete(false, false);
+            return;
+        }
+
+        Map<String, Object> updates = new HashMap<>();
+        updates.put("waitingList.joinLocations." + deviceId,
+                new WaitlistJoinLocation(latitude, longitude, joinedAt == null ? new Date() : joinedAt));
+
+        database.collection("events")
+                .document(eventId)
+                .update(updates)
+                .addOnSuccessListener(unused -> listener.onComplete(true, true))
+                .addOnFailureListener(exception -> listener.onComplete(false, false));
+    }
+
     Map<String, Object> buildJoinWaitingListUpdates(String deviceId,
                                                     Double latitude,
                                                     Double longitude,

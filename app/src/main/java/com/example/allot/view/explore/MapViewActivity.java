@@ -137,7 +137,9 @@ public class MapViewActivity extends AppCompatActivity implements OnMapReadyCall
         LatLngBounds.Builder boundsBuilder = new LatLngBounds.Builder();
         int markerCount = 0;
         markerCount += addEventMarker(boundsBuilder);
-        markerCount += addEntrantMarkers(boundsBuilder);
+        if (isEntrantLocationEnabled()) {
+            markerCount += addEntrantMarkers(boundsBuilder);
+        }
 
         if (markerCount == 0) {
             googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(DEFAULT_CENTER, DEFAULT_ZOOM));
@@ -189,6 +191,10 @@ public class MapViewActivity extends AppCompatActivity implements OnMapReadyCall
             markerCount++;
         }
         return markerCount;
+    }
+
+    private boolean isEntrantLocationEnabled() {
+        return currentEvent != null && Boolean.TRUE.equals(currentEvent.getGeoloc());
     }
 
     private String getEntrantMarkerTitle(String deviceId) {

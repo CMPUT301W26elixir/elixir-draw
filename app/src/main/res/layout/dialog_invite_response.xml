@@ -50,7 +50,6 @@
         android:layout_width="193dp"
         android:layout_height="40dp"
         android:layout_marginTop="18dp"
-        android:background="@drawable/bg_waitlist_button"
         android:fontFamily="@font/varela_round_regular"
         android:insetTop="0dp"
         android:insetBottom="0dp"
@@ -60,7 +59,7 @@
         android:textAllCaps="false"
         android:textColor="#1D1D1D"
         android:textSize="16sp"
-        app:backgroundTint="@android:color/transparent"
+        app:backgroundTint="#FFFFFFFF"
         app:cornerRadius="20dp" />
 
     <com.google.android.material.button.MaterialButton
@@ -68,7 +67,6 @@
         android:layout_width="193dp"
         android:layout_height="40dp"
         android:layout_marginTop="10dp"
-        android:background="@drawable/bg_waitlist_button"
         android:fontFamily="@font/varela_round_regular"
         android:insetTop="0dp"
         android:insetBottom="0dp"
@@ -78,6 +76,6 @@
         android:textAllCaps="false"
         android:textColor="#1D1D1D"
         android:textSize="16sp"
-        app:backgroundTint="@android:color/transparent"
+        app:backgroundTint="#FFFFFFFF"
         app:cornerRadius="20dp" />
 </LinearLayout>

@@ -255,9 +255,8 @@ This action cannot be undone.</string>
     <string name="event_detail_not_found">This event is no longer available.</string>
     <string name="event_detail_join_success">You joined the waiting list.</string>
     <string name="event_detail_join_failure">Could not join the waiting list. Please try again.</string>
-    <string name="event_detail_join_location_required">Location permission is required to join this event.</string>
-    <string name="event_detail_join_location_unavailable">Could not get your location. Please try again.</string>
-    <string name="event_detail_join_too_far">You must be within 50 km of the event to join.</string>
+    <string name="event_detail_join_location_required">Location access is needed to save your location for this event map.</string>
+    <string name="event_detail_join_location_unavailable">Could not get your location for this event map right now.</string>
     <string name="event_detail_leave_success">You left the waiting list.</string>
     <string name="event_detail_leave_failure">Could not leave the waiting list. Please try again.</string>
     <string name="event_detail_save_success">Event saved.</string>
@@ -360,8 +359,8 @@ This action cannot be undone.</string>
     <string name="create_event_private_option">Private event (invite only)</string>
     <string name="create_event_places_unavailable">Google Places autocomplete is unavailable right now.</string>
     <string name="create_event_places_error">Could not load place suggestions.</string>
-    <string name="create_event_geolocation_preferences">Geolocation</string>
-    <string name="create_event_enable_geolocation">Require geolocation for this event</string>
+    <string name="create_event_geolocation_preferences">Event Map</string>
+    <string name="create_event_enable_geolocation">Collect entrant locations for the event map</string>
     <string name="create_event_start_date_label">Start Date *</string>
     <string name="create_event_start_date_hint"></string>
     <string name="create_event_price_label">Price *</string>
