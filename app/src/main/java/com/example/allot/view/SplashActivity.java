@@ -20,6 +20,7 @@ import com.example.allot.common.TextHelper;
 import com.example.allot.controller.shared.UserController;
 import com.example.allot.data.UserRepository;
 import com.example.allot.model.profile.User;
+import com.example.allot.view.event.EventDetailActivity;
 import com.example.allot.view.event.OfferResponseActivity;
 import com.example.allot.view.explore.ExploreActivity;
 import com.google.firebase.messaging.FirebaseMessaging;
@@ -114,6 +115,13 @@ public class SplashActivity extends AppCompatActivity {
         handler.postDelayed(() -> openNextScreen(requiresProfileSetup), remainingMs);
     }
 
+    /**
+     * Opens the next screen after the splash screen.
+     * Handles redirection from push notifications if present.
+     *
+     * @param requiresProfileSetup true if the user should be sent to the
+     *                             welcome/profile setup screen; false otherwise
+     */
     private void openNextScreen(boolean requiresProfileSetup) {
         if (navigated || isFinishing()) {
             return;
@@ -123,11 +131,17 @@ public class SplashActivity extends AppCompatActivity {
         
         Intent nextIntent;
         String redirectTo = getIntent().getStringExtra("redirect_to");
+        String eventId = getIntent().getStringExtra("event_id");
+        String eventTitle = getIntent().getStringExtra("event_title");
         
-        if ("offer".equals(redirectTo) && !requiresProfileSetup) {
+        if ("offer".equals(redirectTo) && !requiresProfileSetup && eventId != null) {
             nextIntent = new Intent(this, OfferResponseActivity.class);
-            nextIntent.putExtra(OfferResponseActivity.EXTRA_EVENT_ID, getIntent().getStringExtra("event_id"));
-            nextIntent.putExtra(OfferResponseActivity.EXTRA_EVENT_TITLE, getIntent().getStringExtra("event_title"));
+            nextIntent.putExtra(OfferResponseActivity.EXTRA_EVENT_ID, eventId);
+            nextIntent.putExtra(OfferResponseActivity.EXTRA_EVENT_TITLE, eventTitle);
+        } else if ("event_detail".equals(redirectTo) && !requiresProfileSetup && eventId != null) {
+            nextIntent = new Intent(this, EventDetailActivity.class);
+            nextIntent.putExtra(EventDetailActivity.EXTRA_EVENT_ID, eventId);
+            nextIntent.putExtra(EventDetailActivity.EXTRA_EVENT_TITLE, eventTitle);
         } else {
             nextIntent = new Intent(
                 this,

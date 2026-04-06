@@ -32,7 +32,7 @@ public class NotificationController {
                                        String eventName,
                                        OnCompleteListener<Boolean> listener) {
         if (entrantIds == null || entrantIds.isEmpty()) {
-            listener.onComplete(false, false);
+            if (listener != null) listener.onComplete(false, false);
             return;
         }
 
@@ -52,7 +52,7 @@ public class NotificationController {
                                           String eventName,
                                           OnCompleteListener<Boolean> listener) {
         if (entrantIds == null || entrantIds.isEmpty()) {
-            listener.onComplete(false, false);
+            if (listener != null) listener.onComplete(false, false);
             return;
         }
 
@@ -76,7 +76,7 @@ public class NotificationController {
                                    String eventName,
                                    OnCompleteListener<Boolean> listener) {
         if (index >= entrantIds.size()) {
-            listener.onComplete(true, true);
+            if (listener != null) listener.onComplete(true, true);
             return;
         }
 
@@ -85,7 +85,8 @@ public class NotificationController {
                 userId,
                 eventId,
                 "You've been selected!",
-                "Congratulations! You were chosen from the waiting list for " + eventName + ". Open the app to accept or decline."
+                "Congratulations! You were chosen from the waiting list for " + eventName + ". Open the app to accept or decline.",
+                NotificationItem.TYPE_SELECTED
         );
 
         notificationRepository.saveNotification(notification, (result, success) ->
@@ -98,7 +99,7 @@ public class NotificationController {
                                               String eventName,
                                               OnCompleteListener<Boolean> listener) {
         if (index >= entrantIds.size()) {
-            listener.onComplete(true, true);
+            if (listener != null) listener.onComplete(true, true);
             return;
         }
 
@@ -107,7 +108,8 @@ public class NotificationController {
                 userId,
                 eventId,
                 "Better luck next time",
-                "Unfortunately, you were not selected in the lottery draw for " + eventName + ". You remain on the waiting list."
+                "Unfortunately, you were not selected in the lottery draw for " + eventName + ". You remain on the waiting list.",
+                NotificationItem.TYPE_NOT_SELECTED
         );
 
         notificationRepository.saveNotification(notification, (result, success) ->
