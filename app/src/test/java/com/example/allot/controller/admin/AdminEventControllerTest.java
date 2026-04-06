@@ -47,6 +47,28 @@ public class AdminEventControllerTest {
     }
 
     @Test
+    public void loadAllEvents_returnsFailureWhenAdminLookupFails() {
+        userController.adminLookupSuccess = false;
+        eventRepository.allEvents = Arrays.asList(new Event(), new Event());
+
+        controller.loadAllEvents((events, success) -> {
+            assertFalse(success);
+            assertTrue(events == null);
+        });
+    }
+
+    @Test
+    public void loadAllEvents_propagatesRepositoryFailure() {
+        userController.isAdmin = true;
+        eventRepository.getAllEventsSuccess = false;
+
+        controller.loadAllEvents((events, success) -> {
+            assertFalse(success);
+            assertTrue(events == null);
+        });
+    }
+
+    @Test
     public void deleteEvent_failsWithoutAdminOrWhenPosterDeleteFails() {
         userController.isAdmin = false;
 
@@ -69,6 +91,83 @@ public class AdminEventControllerTest {
     }
 
     @Test
+    public void deleteEvent_failsWhenAdminLookupFails() {
+        userController.adminLookupSuccess = false;
+
+        controller.deleteEvent("event-1", (result, success) -> {
+            assertFalse(success);
+            assertFalse(result);
+        });
+    }
+
+    @Test
+    public void deleteEvent_failsWhenEventLookupFails() {
+        userController.isAdmin = true;
+        eventRepository.getEventSuccess = false;
+
+        controller.deleteEvent("event-1", (result, success) -> {
+            assertFalse(success);
+            assertFalse(result);
+        });
+    }
+
+    @Test
+    public void deleteEvent_propagatesRepositoryDeleteFailureAfterPosterDelete() {
+        userController.isAdmin = true;
+        Event event = new Event();
+        event.setPosterUrl("https://example.com/poster.png");
+        eventRepository.event = event;
+        posterController.deleteResult = true;
+        posterController.deleteSuccess = true;
+        eventRepository.deleteEventResult = false;
+        eventRepository.deleteEventSuccess = false;
+
+        controller.deleteEvent("event-1", (result, success) -> {
+            assertFalse(success);
+            assertFalse(result);
+            assertEquals("https://example.com/poster.png", posterController.lastPosterUrl);
+            assertEquals("event-1", eventRepository.deletedEventId);
+        });
+    }
+
+    @Test
+    public void deleteEvent_usesCurrentPosterBehaviorForBlankPosterUrl() {
+        userController.isAdmin = true;
+        Event event = new Event();
+        event.setPosterUrl("");
+        eventRepository.event = event;
+        posterController.deleteResult = true;
+        posterController.deleteSuccess = true;
+        eventRepository.deleteEventResult = true;
+        eventRepository.deleteEventSuccess = true;
+
+        controller.deleteEvent("event-1", (result, success) -> {
+            assertTrue(success);
+            assertTrue(result);
+            assertEquals("", posterController.lastPosterUrl);
+            assertEquals("event-1", eventRepository.deletedEventId);
+        });
+    }
+
+    @Test
+    public void deleteEvent_usesCurrentPosterBehaviorForNullPosterUrl() {
+        userController.isAdmin = true;
+        Event event = new Event();
+        eventRepository.event = event;
+        posterController.deleteResult = true;
+        posterController.deleteSuccess = true;
+        eventRepository.deleteEventResult = true;
+        eventRepository.deleteEventSuccess = true;
+
+        controller.deleteEvent("event-1", (result, success) -> {
+            assertTrue(success);
+            assertTrue(result);
+            assertTrue(posterController.lastPosterUrl == null);
+            assertEquals("event-1", eventRepository.deletedEventId);
+        });
+    }
+
+    @Test
     public void deleteEvent_deletesPosterThenEventWhenAuthorized() {
         userController.isAdmin = true;
         Event event = new Event();
@@ -77,6 +176,7 @@ public class AdminEventControllerTest {
         posterController.deleteResult = true;
         posterController.deleteSuccess = true;
         eventRepository.deleteEventResult = true;
+        eventRepository.deleteEventSuccess = true;
 
         controller.deleteEvent("event-1", (result, success) -> {
             assertTrue(success);
@@ -91,6 +191,9 @@ public class AdminEventControllerTest {
         private Event event;
         private String deletedEventId;
         private boolean deleteEventResult;
+        private boolean getAllEventsSuccess = true;
+        private boolean getEventSuccess = true;
+        private boolean deleteEventSuccess;
 
         private FakeEventRepository() {
             super((com.google.firebase.firestore.FirebaseFirestore) null);
@@ -98,18 +201,18 @@ public class AdminEventControllerTest {
 
         @Override
         public void getAllEvents(com.example.allot.common.OnCompleteListener<List<Event>> listener) {
-            listener.onComplete(allEvents, true);
+            listener.onComplete(allEvents, getAllEventsSuccess);
         }
 
         @Override
         public void getEventById(String eventId, com.example.allot.common.OnCompleteListener<Event> listener) {
-            listener.onComplete(event, event != null);
+            listener.onComplete(event, getEventSuccess && event != null);
         }
 
         @Override
         public void deleteEventAsAdmin(String eventId, com.example.allot.common.OnCompleteListener<Boolean> listener) {
             deletedEventId = eventId;
-            listener.onComplete(deleteEventResult, deleteEventResult);
+            listener.onComplete(deleteEventResult, deleteEventSuccess);
         }
     }
 
@@ -131,6 +234,7 @@ public class AdminEventControllerTest {
 
     private static class FakeUserController extends UserController {
         private boolean isAdmin;
+        private boolean adminLookupSuccess = true;
 
         private FakeUserController() {
             super(null, new DeviceSessionManager(new FakeDeviceSessionStore("device-1")));
@@ -138,7 +242,7 @@ public class AdminEventControllerTest {
 
         @Override
         public void isCurrentUserAdmin(com.example.allot.common.OnCompleteListener<Boolean> listener) {
-            listener.onComplete(isAdmin, true);
+            listener.onComplete(isAdmin, adminLookupSuccess);
         }
     }
 

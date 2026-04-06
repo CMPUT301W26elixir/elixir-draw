@@ -44,6 +44,28 @@ public class AdminProfileControllerTest {
     }
 
     @Test
+    public void loadAllProfiles_returnsFailureWhenAdminLookupFails() {
+        userController.adminLookupSuccess = false;
+        userRepository.allUsers = Arrays.asList(new User(), new User());
+
+        controller.loadAllProfiles((profiles, success) -> {
+            assertFalse(success);
+            assertTrue(profiles == null);
+        });
+    }
+
+    @Test
+    public void loadAllProfiles_propagatesRepositoryFailure() {
+        userController.isAdmin = true;
+        userRepository.getAllUsersSuccess = false;
+
+        controller.loadAllProfiles((profiles, success) -> {
+            assertFalse(success);
+            assertTrue(profiles == null);
+        });
+    }
+
+    @Test
     public void deleteProfile_requiresAdminAndDelegatesWhenAuthorized() {
         userController.isAdmin = false;
 
@@ -54,6 +76,7 @@ public class AdminProfileControllerTest {
 
         userController.isAdmin = true;
         userRepository.deleteResult = true;
+        userRepository.deleteSuccess = true;
 
         controller.deleteProfile("device-9", (result, success) -> {
             assertTrue(success);
@@ -62,10 +85,35 @@ public class AdminProfileControllerTest {
         });
     }
 
+    @Test
+    public void deleteProfile_returnsFailureWhenAdminLookupFails() {
+        userController.adminLookupSuccess = false;
+
+        controller.deleteProfile("device-9", (result, success) -> {
+            assertFalse(success);
+            assertFalse(result);
+        });
+    }
+
+    @Test
+    public void deleteProfile_propagatesRepositoryDeleteFailure() {
+        userController.isAdmin = true;
+        userRepository.deleteResult = false;
+        userRepository.deleteSuccess = false;
+
+        controller.deleteProfile("device-9", (result, success) -> {
+            assertFalse(success);
+            assertFalse(result);
+            assertEquals("device-9", userRepository.deletedDeviceId);
+        });
+    }
+
     private static class FakeUserRepository extends UserRepository {
         private List<User> allUsers;
         private String deletedDeviceId;
         private boolean deleteResult;
+        private boolean getAllUsersSuccess = true;
+        private boolean deleteSuccess;
 
         private FakeUserRepository() {
             super((com.google.firebase.firestore.FirebaseFirestore) null);
@@ -73,18 +121,19 @@ public class AdminProfileControllerTest {
 
         @Override
         public void getAllUsers(com.example.allot.common.OnCompleteListener<List<User>> listener) {
-            listener.onComplete(allUsers, true);
+            listener.onComplete(allUsers, getAllUsersSuccess);
         }
 
         @Override
         public void deleteUserAsAdmin(String deviceId, com.example.allot.common.OnCompleteListener<Boolean> listener) {
             deletedDeviceId = deviceId;
-            listener.onComplete(deleteResult, deleteResult);
+            listener.onComplete(deleteResult, deleteSuccess);
         }
     }
 
     private static class FakeUserController extends UserController {
         private boolean isAdmin;
+        private boolean adminLookupSuccess = true;
 
         private FakeUserController() {
             super(null, new DeviceSessionManager(new FakeDeviceSessionStore("device-1")));
@@ -92,7 +141,7 @@ public class AdminProfileControllerTest {
 
         @Override
         public void isCurrentUserAdmin(com.example.allot.common.OnCompleteListener<Boolean> listener) {
-            listener.onComplete(isAdmin, true);
+            listener.onComplete(isAdmin, adminLookupSuccess);
         }
     }
 
