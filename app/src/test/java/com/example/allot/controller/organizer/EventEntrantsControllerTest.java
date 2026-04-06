@@ -4,9 +4,11 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import com.example.allot.controller.event.EventOfferService;
 import com.example.allot.controller.shared.UserController;
 import com.example.allot.data.DeviceSessionManager;
 import com.example.allot.data.EventRepository;
+import com.example.allot.data.NotificationRepository;
 import com.example.allot.model.event.Event;
 import com.example.allot.model.event.WaitingList;
 import com.example.allot.model.organizer.EntrantExportRow;
@@ -22,7 +24,7 @@ public class EventEntrantsControllerTest {
     public void setUp() {
         eventRepository = new FakeEventRepository();
         userController = new FakeUserController();
-        controller = new EventEntrantsController(eventRepository, userController);
+        controller = new EventEntrantsController(eventRepository, userController, new NotificationRepository(null), new EventOfferService());
     }
 
     @Test
@@ -201,12 +203,3 @@ public class EventEntrantsControllerTest {
     }
 
 }
-
-
-
-
-
-
-
-
-
