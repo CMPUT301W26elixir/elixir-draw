@@ -59,6 +59,14 @@ public class ExploreFilterService {
                 continue;
             }
 
+            if (!matchesOpenSpots(event, filter == null ? null : filter.getOnlyOpenSpots())) {
+                continue;
+            }
+
+            if (!matchesMinimumCapacity(event, filter == null ? null : filter.getMinimumCapacity())) {
+                continue;
+            }
+
             openEvents.add(event);
         }
 
@@ -215,6 +223,46 @@ public class ExploreFilterService {
         );
         float distanceMeters = results[0];
         return distanceMeters <= (distanceKm * 1000.0);
+    }
+
+    private boolean matchesOpenSpots(Event event, Boolean onlyOpenSpots) {
+        if (!Boolean.TRUE.equals(onlyOpenSpots)) {
+            return true;
+        }
+
+        Integer effectiveCapacity = getEffectiveCapacity(event);
+        if (effectiveCapacity == null) {
+            return true;
+        }
+
+        int currentEntrantCount = event != null
+                && event.getWaitingList() != null
+                && event.getWaitingList().list != null
+                ? event.getWaitingList().list.size()
+                : 0;
+        return currentEntrantCount < effectiveCapacity;
+    }
+
+    private boolean matchesMinimumCapacity(Event event, Integer minimumCapacity) {
+        if (minimumCapacity == null || minimumCapacity <= 0) {
+            return true;
+        }
+
+        Integer effectiveCapacity = getEffectiveCapacity(event);
+        return effectiveCapacity != null && effectiveCapacity >= minimumCapacity;
+    }
+
+    private Integer getEffectiveCapacity(Event event) {
+        if (event == null) {
+            return null;
+        }
+        if (event.getLimit() > 0) {
+            return event.getLimit();
+        }
+        if (event.getCapacity() > 0) {
+            return event.getCapacity();
+        }
+        return null;
     }
 
     private List<String> categoryKeywords(String normalizedCategory) {

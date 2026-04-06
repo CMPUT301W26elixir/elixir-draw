@@ -27,7 +27,7 @@ public class ProfileController {
      * @param listener the listener that receives the profile state
      */
     public void loadProfile(OnCompleteListener<ProfileFormSnapshot> listener) {
-        userController.loadOrCreateUser((User user, boolean success) -> {
+        userController.loadCurrentUser((User user, boolean success) -> {
             if (!success || user == null) {
                 listener.onComplete(null, false);
                 return;

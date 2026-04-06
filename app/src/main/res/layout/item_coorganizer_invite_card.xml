@@ -64,13 +64,13 @@
             android:layout_height="38dp"
             android:layout_marginStart="10dp"
             android:layout_weight="1"
-            android:background="@drawable/bg_waitlist_button_inactive"
+            android:background="@drawable/bg_waitlist_button"
             android:clickable="true"
             android:focusable="true"
             android:fontFamily="@font/varela_round_regular"
             android:gravity="center"
             android:text="@string/my_events_decline_invite"
-            android:textColor="@color/text_primary"
+            android:textColor="#1D1D1D"
             android:textSize="14sp" />
     </LinearLayout>
 </LinearLayout>

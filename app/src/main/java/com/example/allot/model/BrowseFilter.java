@@ -10,6 +10,8 @@ public class BrowseFilter {
     private final Double latitude;
     private final Double longitude;
     private final Double distanceKm;
+    private final Boolean onlyOpenSpots;
+    private final Integer minimumCapacity;
 
     /**
      * Creates a browse filter with the provided search term and category.
@@ -18,7 +20,7 @@ public class BrowseFilter {
      * @param selectedCategory the selected category filter
      */
     public BrowseFilter(String searchTerm, String selectedCategory) {
-        this(searchTerm, selectedCategory, null, null, null, null, null);
+        this(searchTerm, selectedCategory, null, null, null, null, null, null, null);
     }
 
     /**
@@ -31,6 +33,8 @@ public class BrowseFilter {
      * @param latitude optional filter latitude
      * @param longitude optional filter longitude
      * @param distanceKm optional filter distance in kilometers
+     * @param onlyOpenSpots optional open-spots requirement
+     * @param minimumCapacity optional minimum effective capacity
      */
     public BrowseFilter(String searchTerm,
                         String selectedCategory,
@@ -38,7 +42,9 @@ public class BrowseFilter {
                         java.util.Date startDate,
                         Double latitude,
                         Double longitude,
-                        Double distanceKm) {
+                        Double distanceKm,
+                        Boolean onlyOpenSpots,
+                        Integer minimumCapacity) {
         this.searchTerm = searchTerm;
         this.selectedCategory = selectedCategory;
         this.keywords = keywords;
@@ -46,6 +52,8 @@ public class BrowseFilter {
         this.latitude = latitude;
         this.longitude = longitude;
         this.distanceKm = distanceKm;
+        this.onlyOpenSpots = onlyOpenSpots;
+        this.minimumCapacity = minimumCapacity;
     }
 
     /**
@@ -84,6 +92,14 @@ public class BrowseFilter {
 
     public Double getDistanceKm() {
         return distanceKm;
+    }
+
+    public Boolean getOnlyOpenSpots() {
+        return onlyOpenSpots;
+    }
+
+    public Integer getMinimumCapacity() {
+        return minimumCapacity;
     }
 }
 

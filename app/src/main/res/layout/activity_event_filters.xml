@@ -142,6 +142,50 @@
                 android:textColorHint="@color/text_secondary"
                 android:textSize="16sp" />
 
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:fontFamily="@font/varela_round_regular"
+                android:text="@string/filter_capacity"
+                android:textColor="@color/white"
+                android:textSize="16sp" />
+
+            <CheckBox
+                android:id="@+id/filterOpenSpotsCheckbox"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:buttonTint="@color/white"
+                android:fontFamily="@font/varela_round_regular"
+                android:text="@string/filter_open_spots"
+                android:textColor="@color/white"
+                android:textSize="16sp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:fontFamily="@font/varela_round_regular"
+                android:text="@string/filter_minimum_capacity"
+                android:textColor="@color/white"
+                android:textSize="16sp" />
+
+            <EditText
+                android:id="@+id/filterMinimumCapacityInput"
+                android:layout_width="match_parent"
+                android:layout_height="44dp"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/bg_profile_input"
+                android:fontFamily="@font/varela_round_regular"
+                android:hint="@string/filter_minimum_capacity_hint"
+                android:inputType="number"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"
+                android:textColor="@color/white"
+                android:textColorHint="@color/text_secondary"
+                android:textSize="16sp" />
+
             <ProgressBar
                 android:id="@+id/filterLoadingIndicator"
                 android:layout_width="wrap_content"

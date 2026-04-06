@@ -4,9 +4,11 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import androidx.appcompat.app.AppCompatActivity;
 import com.example.allot.R;
 import com.example.allot.view.events.NotificationsActivity;
+import com.example.allot.view.shared.DeferredOnboardingNavigator;
 /**
  * Collects the user's phone number during profile setup.
  */
@@ -26,6 +28,9 @@ public class PhoneActivity extends AppCompatActivity {
         EditText phoneInput = findViewById(R.id.phoneInput);
         Button notNowButton = findViewById(R.id.notNowButton);
         Button phoneNextButton = findViewById(R.id.phoneNextButton);
+        ImageButton backButton = findViewById(R.id.backButton);
+
+        backButton.setOnClickListener(view -> getOnBackPressedDispatcher().onBackPressed());
 
         notNowButton.setOnClickListener(view -> openNotificationsScreen(""));
         phoneNextButton.setOnClickListener(view ->
@@ -44,6 +49,7 @@ public class PhoneActivity extends AppCompatActivity {
         intent.putExtra(NameActivity.EXTRA_LAST_NAME, getIntent().getStringExtra(NameActivity.EXTRA_LAST_NAME));
         intent.putExtra(NameActivity.EXTRA_EMAIL, getIntent().getStringExtra(NameActivity.EXTRA_EMAIL));
         intent.putExtra(NameActivity.EXTRA_PHONE, phone);
+        DeferredOnboardingNavigator.copyDeferredExtras(getIntent(), intent);
         startActivity(intent);
     }
 }
