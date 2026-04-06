@@ -17,9 +17,9 @@ public class UserController {
     private User cachedCurrentUser;
 
     /**
-     * Creates an UserController and sets up Firestore and the device ID.
+     * Creates a new UserController instance.
      *
-     * @param context the context used to access shared preferences
+     * @param context the context
      */
     public UserController(Context context) {
         this(new UserRepository(), new DeviceSessionManager(context));
@@ -27,6 +27,9 @@ public class UserController {
 
     /**
      * Creates a new UserController instance.
+     *
+     * @param userRepository the user repository
+     * @param deviceSessionManager the device session manager
      */
     public UserController(UserRepository userRepository, DeviceSessionManager deviceSessionManager) {
         this.userRepository = userRepository;
@@ -34,19 +37,19 @@ public class UserController {
     }
 
     /**
-     * Gets an user from Firestore using the given device ID.
+     * Performs get user by device id.
      *
-     * @param deviceId the device ID of the user
-     * @param listener the listener that receives the userand success result
+     * @param deviceId the device id
+     * @param listener the listener
      */
     public void getUserByDeviceId(String deviceId, OnCompleteListener<User> listener) {
         userRepository.getUserByDeviceId(deviceId, listener);
     }
 
     /**
-     * Loads the current user without creating a new Firestore document when one does not exist.
+     * Performs load current user.
      *
-     * @param listener the listener that receives the current user or null
+     * @param listener the listener
      */
     public void loadCurrentUser(OnCompleteListener<User> listener) {
         String deviceId = getCurrentDeviceId();
@@ -64,19 +67,19 @@ public class UserController {
     }
 
     /**
-     * Searches users by name, phone, or email.
+     * Performs search users.
      *
-     * @param query the search query
-     * @param listener the listener that receives matching users
+     * @param query the query
+     * @param listener the listener
      */
     public void searchUsers(String query, OnCompleteListener<java.util.List<User>> listener) {
         userRepository.searchUsers(query, listener);
     }
 
     /**
-     * Loads the current userfor this device, or creates one if none exists.
+     * Performs load or create user.
      *
-     * @param listener the listener that receives the userand success result
+     * @param listener the listener
      */
     public void loadOrCreateUser(OnCompleteListener<User> listener) {
         String deviceId = getCurrentDeviceId();
@@ -95,10 +98,10 @@ public class UserController {
     }
 
     /**
-     * Creates a new user with default values and saves it to Firestore.
+     * Performs create new user.
      *
-     * @param deviceId the device ID for the created user
-     * @param listener the listener that receives the created user and success result
+     * @param deviceId the device id
+     * @param listener the listener
      */
     private void createNewUser(String deviceId, OnCompleteListener<User> listener) {
         userRepository.createNewUser(deviceId, listener);
@@ -106,14 +109,14 @@ public class UserController {
 
 
     /**
-     * Updates the current user's profile information in Firestore.
+     * Performs update user profile.
      *
-     * @param firstName the user's first name
-     * @param lastName the user's last name
-     * @param email the user's email address
-     * @param phone the user's phone number
-     * @param notiEnabled whether notifications are enabled
-     * @param listener the listener that receives the updated userand success result
+     * @param firstName the first name
+     * @param lastName the last name
+     * @param email the email
+     * @param phone the phone
+     * @param notiEnabled the noti enabled
+     * @param listener the listener
      */
     public void updateUserProfile(String firstName, String lastName, String email,
                                   String phone, boolean notiEnabled, OnCompleteListener<User> listener) {
@@ -127,10 +130,10 @@ public class UserController {
     }
 
     /**
-     * Returns whether the provided user has completed the required profile fields.
+     * Returns whether this instance has completed profile.
      *
-     * @param user the user to evaluate
-     * @return true when the profile is complete enough for account-gated flows
+     * @param user the user
+     * @return whether this instance has completed profile
      */
     public boolean hasCompletedProfile(User user) {
         if (user == null) {
@@ -143,36 +146,36 @@ public class UserController {
     }
 
     /**
-     * Saves the current user's FCM token.
+     * Performs update current fcm token.
      *
-     * @param token the token to persist
+     * @param token the token
      */
     public void updateCurrentFcmToken(String token) {
         userRepository.updateFcmToken(getCurrentDeviceId(), token);
     }
     /**
-     * Adds or removes an event ID from the user's savedEvents array.
+     * Performs toggle saved event.
      *
-     * @param eventId The ID of the event to save/unsave
-     * @param isSaving True to save, false to remove
-     * @param listener Callback with success result
+     * @param eventId the event id
+     * @param isSaving whether saving
+     * @param listener the listener
      */
     public void toggleSavedEvent(String eventId, boolean isSaving, OnCompleteListener<Boolean> listener) {
         userRepository.toggleSavedEvent(getCurrentDeviceId(), eventId, isSaving, listener);
     }
     /**
-     * Deletes the current user's profile and removes related event references.
+     * Performs delete current user.
      *
-     * @param listener the listener that receives the deletion success result
+     * @param listener the listener
      */
     public void deleteCurrentUser(OnCompleteListener<Boolean> listener) {
         userRepository.deleteCurrentUser(getCurrentDeviceId(), listener);
     }
 
     /**
-     * Checks if the current user has admin role.
+     * Performs is current user admin.
      *
-     * @param listener the listener that receives true if user is admin, false otherwise
+     * @param listener the listener
      */
     public void isCurrentUserAdmin(OnCompleteListener<Boolean> listener) {
         String deviceId = getCurrentDeviceId();
@@ -188,25 +191,29 @@ public class UserController {
 
 
     /**
-     * Returns whether g.et Current Device Id
+     * Returns the current device id.
+     *
+     * @return the current device id
      */
     public String getCurrentDeviceId() {
         return deviceSessionManager.getCurrentDeviceId();
     }
     /**
-     * Returns whether i.s New Device Id
+     * Returns whether new device id.
+     *
+     * @return whether new device id
      */
     public boolean isNewDeviceId() {
         return deviceSessionManager.isNewDeviceId();
     }
 
     /**
-     * Checks if the required profile fields are valid.
+     * Returns the result of validate profile fields.
      *
-     * @param firstName the user's first name
-     * @param lastName the user's last name
-     * @param email the user's email address
-     * @return true if the required fields are valid, otherwise false
+     * @param firstName the first name
+     * @param lastName the last name
+     * @param email the email
+     * @return the result of this call
      */
     private boolean validateProfileFields(String firstName, String lastName, String email) {
         // First name cannot be empty
@@ -229,10 +236,10 @@ public class UserController {
     }
 
     /**
-     * Checks if a string is null or empty after trimming spaces.
+     * Returns whether blank.
      *
-     * @param value the string to check
-     * @return true if the string is blank, otherwise false
+     * @param value the value
+     * @return whether blank
      */
     private boolean isBlank(String value) {
         return TextHelper.isBlank(value);

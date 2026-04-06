@@ -18,10 +18,10 @@ public class UserRole {
     public static final String USER = "user";
 
     /**
-     * Checks if a user has admin role.
+     * Returns whether admin.
      *
-     * @param user the user to check
-     * @return true if user is an admin, false otherwise
+     * @param user the user
+     * @return whether admin
      */
     public static boolean isAdmin(User user) {
         if (user == null) {
@@ -31,7 +31,7 @@ public class UserRole {
     }
 
     /**
-     * Private constructor to prevent instantiation.
+     * Creates a new UserRole instance.
      */
     private UserRole() {
         throw new UnsupportedOperationException("Utility class cannot be instantiated");

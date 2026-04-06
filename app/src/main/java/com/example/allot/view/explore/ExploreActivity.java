@@ -112,10 +112,12 @@ public class ExploreActivity extends AppCompatActivity {
     private List<EventListItem> uiTestInjectedEvents = new ArrayList<>();
 
     /**
-     * Initializes the explore screen, its listeners, and the first event-loading path.
+     * Handles the create callback.
      *
      * <p>AI usage note: This Javadoc was drafted with AI assistance and then reviewed
      * against the implementation by the development team.
+     *
+     * @param savedInstanceState the saved instance state
      */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -140,7 +142,9 @@ public class ExploreActivity extends AppCompatActivity {
          */
         eventListAdapter = new EventListAdapter(new ArrayList<>(), new EventListAdapter.OnEventClickListener() {
             /**
-             * Handles on Event Click.
+             * Handles the event click callback.
+             *
+             * @param event the event
              */
             @Override
             public void onEventClick(EventListItem event) {
@@ -148,7 +152,10 @@ public class ExploreActivity extends AppCompatActivity {
             }
 
             /**
-             * Handles on Heart Click.
+             * Handles the heart click callback.
+             *
+             * @param event the event
+             * @param position the position
              */
             @Override
             public void onHeartClick(EventListItem event, int position) {
@@ -175,7 +182,7 @@ public class ExploreActivity extends AppCompatActivity {
     }
 
     /**
-     * Binds the layout views used by the explore screen.
+     * Performs bind views.
      */
     private void bindViews() {
         recyclerView = findViewById(R.id.eventsRecyclerView);
@@ -191,7 +198,7 @@ public class ExploreActivity extends AppCompatActivity {
     }
 
     /**
-     * Sets up the debounced search box so filtering happens on the current screen.
+     * Updates the up search input.
      *
      * <p>AI usage note: This Javadoc was drafted with AI assistance and then reviewed
      * against the implementation by the development team.
@@ -205,14 +212,24 @@ public class ExploreActivity extends AppCompatActivity {
          */
         searchInput.addTextChangedListener(new TextWatcher() {
             /**
-             * Handles before Text Changed.
+             * Performs before text changed.
+             *
+             * @param s the s
+             * @param start the start
+             * @param count the count
+             * @param after the after
              */
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
             }
 
             /**
-             * Handles on Text Changed.
+             * Handles the text changed callback.
+             *
+             * @param s the s
+             * @param start the start
+             * @param before the before
+             * @param count the count
              */
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
@@ -225,7 +242,9 @@ public class ExploreActivity extends AppCompatActivity {
             }
 
             /**
-             * Handles after Text Changed.
+             * Performs after text changed.
+             *
+             * @param s the s
              */
             @Override
             public void afterTextChanged(Editable s) {
@@ -234,7 +253,7 @@ public class ExploreActivity extends AppCompatActivity {
     }
 
     /**
-     * Updates up filter menu.
+     * Updates the up filter menu.
      */
     private void setupFilterMenu() {
         if (filterMenuButton == null) {
@@ -262,7 +281,9 @@ public class ExploreActivity extends AppCompatActivity {
     }
 
     /**
-     * Handles on New Intent.
+     * Handles the new intent callback.
+     *
+     * @param intent the intent
      */
     @Override
     protected void onNewIntent(@NonNull Intent intent) {
@@ -280,7 +301,7 @@ public class ExploreActivity extends AppCompatActivity {
     }
 
     /**
-     * Handles on Resume.
+     * Handles the resume callback.
      */
     @Override
     protected void onResume() {
@@ -293,7 +314,7 @@ public class ExploreActivity extends AppCompatActivity {
     }
 
     /**
-     * Handles on Destroy.
+     * Handles the destroy callback.
      */
     @Override
     protected void onDestroy() {
@@ -307,7 +328,7 @@ public class ExploreActivity extends AppCompatActivity {
     }
 
     /**
-     * Updates up bottom navigation.
+     * Updates the up bottom navigation.
      */
     private void setupBottomNavigation() {
         bottomNavBar.setSelectedTab(currentHomeTab);
@@ -319,7 +340,10 @@ public class ExploreActivity extends AppCompatActivity {
     }
 
     /**
-     * Returns whether h.as Injected Ui Test Event
+     * Returns whether this instance has injected ui test event.
+     *
+     * @param intent the intent
+     * @return whether this instance has injected ui test event
      */
     private boolean hasInjectedUiTestEvent(Intent intent) {
         return intent != null
@@ -328,7 +352,7 @@ public class ExploreActivity extends AppCompatActivity {
     }
 
     /**
-     * Shows the injected UI-test event list instead of loading live explore data.
+     * Performs show injected ui test event.
      *
      * <p>AI usage note: This Javadoc was drafted with AI assistance and then reviewed
      * against the implementation by the development team.
@@ -356,7 +380,7 @@ public class ExploreActivity extends AppCompatActivity {
     }
 
     /**
-     * Shows explore tab.
+     * Performs show explore tab.
      */
     private void showExploreTab() {
         currentHomeTab = BottomNavBarView.Tab.EXPLORE;
@@ -372,7 +396,7 @@ public class ExploreActivity extends AppCompatActivity {
     }
 
     /**
-     * Opens saved tab.
+     * Performs open saved tab.
      */
     private void openSavedTab() {
         currentHomeTab = BottomNavBarView.Tab.SAVED;
@@ -391,7 +415,7 @@ public class ExploreActivity extends AppCompatActivity {
     }
 
     /**
-     * Refreshes the saved-event state and then reloads whichever explore content is visible.
+     * Performs refresh saved events and visible content.
      *
      * <p>AI usage note: This Javadoc was drafted with AI assistance and then reviewed
      * against the implementation by the development team.
@@ -415,7 +439,10 @@ public class ExploreActivity extends AppCompatActivity {
     }
 
     /**
-     * Handles resolve Initial Tab.
+     * Returns the result of resolve initial tab.
+     *
+     * @param intent the intent
+     * @return the result of this call
      */
     private BottomNavBarView.Tab resolveInitialTab(Intent intent) {
         return intent != null && "saved".equals(intent.getStringExtra("navigate_to"))
@@ -424,7 +451,7 @@ public class ExploreActivity extends AppCompatActivity {
     }
 
     /**
-     * Handles maybe Initialize Default Location Filter.
+     * Performs maybe initialize default location filter.
      */
     private void maybeInitializeDefaultLocationFilter() {
         if (hasInitializedDefaultLocationFilter || isInitializingDefaultLocationFilter) {
@@ -448,7 +475,9 @@ public class ExploreActivity extends AppCompatActivity {
     }
 
     /**
-     * Returns whether h.as Location Permission
+     * Returns whether this instance has location permission.
+     *
+     * @return whether this instance has location permission
      */
     private boolean hasLocationPermission() {
         return ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
@@ -456,7 +485,7 @@ public class ExploreActivity extends AppCompatActivity {
     }
 
     /**
-     * Handles initialize Default Location Filter.
+     * Performs initialize default location filter.
      */
     private void initializeDefaultLocationFilter() {
         isInitializingDefaultLocationFilter = true;
@@ -474,7 +503,9 @@ public class ExploreActivity extends AppCompatActivity {
     }
 
     /**
-     * Handles reverse Geocode Default Location.
+     * Performs reverse geocode default location.
+     *
+     * @param location the location
      */
     private void reverseGeocodeDefaultLocation(Location location) {
         new Thread(() -> {
@@ -504,7 +535,7 @@ public class ExploreActivity extends AppCompatActivity {
     }
 
     /**
-     * Handles finish Default Location Initialization.
+     * Performs finish default location initialization.
      */
     private void finishDefaultLocationInitialization() {
         isInitializingDefaultLocationFilter = false;
@@ -518,7 +549,9 @@ public class ExploreActivity extends AppCompatActivity {
     }
 
     /**
-     * Handles refresh Browse Events.
+     * Performs refresh browse events.
+     *
+     * @param showLoadingState the show loading state
      */
     private void refreshBrowseEvents(boolean showLoadingState) {
         if (showLoadingState) {
@@ -539,7 +572,9 @@ public class ExploreActivity extends AppCompatActivity {
     }
 
     /**
-     * Handles apply Browse Filters.
+     * Performs apply browse filters.
+     *
+     * @param searchTerm the search term
      */
     private void applyBrowseFilters(String searchTerm) {
         if (isUiTestInjectedExploreMode) {
@@ -581,7 +616,7 @@ public class ExploreActivity extends AppCompatActivity {
     }
 
     /**
-     * Shows browse loading state.
+     * Performs show browse loading state.
      */
     private void showBrowseLoadingState() {
         recyclerView.setVisibility(View.GONE);
@@ -591,7 +626,9 @@ public class ExploreActivity extends AppCompatActivity {
     }
 
     /**
-     * Shows browse message state.
+     * Performs show browse message state.
+     *
+     * @param message the message
      */
     private void showBrowseMessageState(String message) {
         eventListAdapter.updateEvents(new ArrayList<>());
@@ -602,7 +639,10 @@ public class ExploreActivity extends AppCompatActivity {
     }
 
     /**
-     * Builds empty state message.
+     * Returns the result of build empty state message.
+     *
+     * @param searchTerm the search term
+     * @return the result of this call
      */
     private String buildEmptyStateMessage(String searchTerm) {
         String trimmedSearch = normalize(searchTerm);
@@ -613,7 +653,11 @@ public class ExploreActivity extends AppCompatActivity {
     }
 
     /**
-     * Handles on Activity Result.
+     * Handles the activity result callback.
+     *
+     * @param requestCode the request code
+     * @param resultCode the result code
+     * @param data the data
      */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -647,7 +691,11 @@ public class ExploreActivity extends AppCompatActivity {
     }
 
     /**
-     * Handles on Request Permissions Result.
+     * Handles the request permissions result callback.
+     *
+     * @param requestCode the request code
+     * @param permissions the permissions
+     * @param grantResults the grant results
      */
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -667,7 +715,7 @@ public class ExploreActivity extends AppCompatActivity {
     }
 
     /**
-     * Handles rebuild Filter Pills.
+     * Performs rebuild filter pills.
      */
     private void rebuildFilterPills() {
         if (filterPillsContainer == null || filterPillsScrollView == null) {
@@ -687,7 +735,10 @@ public class ExploreActivity extends AppCompatActivity {
     }
 
     /**
-     * Handles add Filter Pill.
+     * Performs add filter pill.
+     *
+     * @param label the label
+     * @param onClick the on click
      */
     private void addFilterPill(String label, Runnable onClick) {
         if (UiHelper.isBlank(label) || filterPillsContainer == null) {
@@ -720,7 +771,7 @@ public class ExploreActivity extends AppCompatActivity {
     }
 
     /**
-     * Clears date filter.
+     * Performs clear date filter.
      */
     private void clearDateFilter() {
         filterDateText = "";
@@ -729,7 +780,7 @@ public class ExploreActivity extends AppCompatActivity {
     }
 
     /**
-     * Clears distance filter.
+     * Performs clear distance filter.
      */
     private void clearDistanceFilter() {
         filterDistanceKm = null;
@@ -738,7 +789,9 @@ public class ExploreActivity extends AppCompatActivity {
     }
 
     /**
-     * Handles remove Keyword Filter.
+     * Performs remove keyword filter.
+     *
+     * @param keywordToRemove the keyword to remove
      */
     private void removeKeywordFilter(String keywordToRemove) {
         List<String> remainingKeywords = new ArrayList<>();
@@ -753,7 +806,7 @@ public class ExploreActivity extends AppCompatActivity {
     }
 
     /**
-     * Clears open spots filter.
+     * Performs clear open spots filter.
      */
     private void clearOpenSpotsFilter() {
         filterOnlyOpenSpots = false;
@@ -762,7 +815,7 @@ public class ExploreActivity extends AppCompatActivity {
     }
 
     /**
-     * Clears minimum capacity filter.
+     * Performs clear minimum capacity filter.
      */
     private void clearMinimumCapacityFilter() {
         filterMinimumCapacity = null;
@@ -771,7 +824,9 @@ public class ExploreActivity extends AppCompatActivity {
     }
 
     /**
-     * Builds date pill label.
+     * Returns the result of build date pill label.
+     *
+     * @return the result of this call
      */
     private String buildDatePillLabel() {
         if (UiHelper.isBlank(filterDateText)) {
@@ -785,7 +840,9 @@ public class ExploreActivity extends AppCompatActivity {
     }
 
     /**
-     * Builds distance pill label.
+     * Returns the result of build distance pill label.
+     *
+     * @return the result of this call
      */
     private String buildDistancePillLabel() {
         if (filterDistanceKm == null || filterDistanceKm <= 0) {
@@ -798,14 +855,18 @@ public class ExploreActivity extends AppCompatActivity {
     }
 
     /**
-     * Builds open spots pill label.
+     * Returns the result of build open spots pill label.
+     *
+     * @return the result of this call
      */
     private String buildOpenSpotsPillLabel() {
         return filterOnlyOpenSpots ? getString(R.string.filter_open_spots_pill) : "";
     }
 
     /**
-     * Builds minimum capacity pill label.
+     * Returns the result of build minimum capacity pill label.
+     *
+     * @return the result of this call
      */
     private String buildMinimumCapacityPillLabel() {
         if (filterMinimumCapacity == null || filterMinimumCapacity <= 0) {
@@ -815,7 +876,10 @@ public class ExploreActivity extends AppCompatActivity {
     }
 
     /**
-     * Handles split Keywords.
+     * Returns the result of split keywords.
+     *
+     * @param rawKeywords the raw keywords
+     * @return the result of this call
      */
     private List<String> splitKeywords(String rawKeywords) {
         String normalizedKeywords = normalize(rawKeywords);
@@ -834,7 +898,10 @@ public class ExploreActivity extends AppCompatActivity {
     }
 
     /**
-     * Handles parse Filter Date.
+     * Returns the result of parse filter date.
+     *
+     * @param rawDate the raw date
+     * @return the result of this call
      */
     private java.util.Date parseFilterDate(String rawDate) {
         if (UiHelper.isBlank(rawDate)) {
@@ -850,21 +917,29 @@ public class ExploreActivity extends AppCompatActivity {
     }
 
     /**
-     * Handles normalize.
+     * Returns the result of normalize.
+     *
+     * @param value the value
+     * @return the result of this call
      */
     private String normalize(String value) {
         return value == null ? "" : value.trim();
     }
 
     /**
-     * Handles safe String.
+     * Returns the result of safe string.
+     *
+     * @param value the value
+     * @return the result of this call
      */
     private String safeString(String value) {
         return value == null ? "" : value.trim();
     }
 
     /**
-     * Opens event detail screen.
+     * Performs open event detail screen.
+     *
+     * @param eventItem the event item
      */
     private void openEventDetailScreen(EventListItem eventItem) {
         if (eventItem == null || UiHelper.isBlank(eventItem.getEventId())) {
@@ -892,7 +967,10 @@ public class ExploreActivity extends AppCompatActivity {
     }
 
     /**
-     * Handles toggle Saved Event.
+     * Performs toggle saved event.
+     *
+     * @param event the event
+     * @param position the position
      */
     private void toggleSavedEvent(EventListItem event, int position) {
         boolean nextSavedState = event.isSaved;
@@ -904,7 +982,10 @@ public class ExploreActivity extends AppCompatActivity {
     }
 
     /**
-     * Returns whether h.as Injected Ui Test Event List
+     * Returns whether this instance has injected ui test event list.
+     *
+     * @param intent the intent
+     * @return whether this instance has injected ui test event list
      */
     private boolean hasInjectedUiTestEventList(Intent intent) {
         ArrayList<String> eventIds = intent.getStringArrayListExtra(EXTRA_UI_TEST_EVENT_IDS);
@@ -912,7 +993,10 @@ public class ExploreActivity extends AppCompatActivity {
     }
 
     /**
-     * Builds injected ui test events.
+     * Returns the result of build injected ui test events.
+     *
+     * @param intent the intent
+     * @return the result of this call
      */
     private List<EventListItem> buildInjectedUiTestEvents(Intent intent) {
         List<EventListItem> injectedItems = new ArrayList<>();
@@ -954,7 +1038,10 @@ public class ExploreActivity extends AppCompatActivity {
     }
 
     /**
-     * Handles render Injected Ui Test Items.
+     * Performs render injected ui test items.
+     *
+     * @param sourceItems the source items
+     * @param searchTerm the search term
      */
     private void renderInjectedUiTestItems(List<EventListItem> sourceItems, String searchTerm) {
         List<EventListItem> filteredItems = new ArrayList<>();
@@ -986,7 +1073,11 @@ public class ExploreActivity extends AppCompatActivity {
     }
 
     /**
-     * Handles value At.
+     * Returns the result of value at.
+     *
+     * @param values the values
+     * @param index the index
+     * @return the result of this call
      */
     private String valueAt(ArrayList<String> values, int index) {
         if (values == null || index < 0 || index >= values.size()) {
@@ -996,7 +1087,10 @@ public class ExploreActivity extends AppCompatActivity {
     }
 
     /**
-     * Handles require Completed Profile.
+     * Performs require completed profile.
+     *
+     * @param onReady the on ready
+     * @param onboardingIntent the onboarding intent
      */
     private void requireCompletedProfile(Runnable onReady, Intent onboardingIntent) {
         if (getIntent().getBooleanExtra(EXTRA_UI_TEST_BYPASS_PROFILE_GATE, false)) {
@@ -1015,7 +1109,10 @@ public class ExploreActivity extends AppCompatActivity {
     }
 
     /**
-     * Builds deferred save intent.
+     * Returns the result of build deferred save intent.
+     *
+     * @param eventItem the event item
+     * @return the result of this call
      */
     private Intent buildDeferredSaveIntent(EventListItem eventItem) {
         return DeferredOnboardingNavigator.createEventActionIntent(

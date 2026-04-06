@@ -16,16 +16,16 @@ public class AdminProfileController {
     private final UserController userController;
 
     /**
-     * Creates an AdminProfileController with default dependencies.
+     * Creates a new AdminProfileController instance.
      *
-     * @param context the context used to access shared preferences
+     * @param context the context
      */
     public AdminProfileController(Context context) {
         this(new UserRepository(), new UserController(context));
     }
 
     /**
-     * Creates an AdminProfileController with provided dependencies.
+     * Creates a new AdminProfileController instance.
      *
      * @param userRepository the user repository
      * @param userController the user controller
@@ -36,10 +36,9 @@ public class AdminProfileController {
     }
 
     /**
-     * Loads all profiles for admin browsing.
-     * Only admin users can access this operation.
+     * Performs load all profiles.
      *
-     * @param listener the listener that receives the profiles list and success result
+     * @param listener the listener
      */
     public void loadAllProfiles(OnCompleteListener<List<User>> listener) {
         userController.isCurrentUserAdmin((isAdmin, success) -> {
@@ -52,12 +51,10 @@ public class AdminProfileController {
     }
 
     /**
-     * Deletes a profile with admin privileges.
-     * Removes the user document and all references from event documents.
-     * Only admin users can access this operation.
+     * Performs delete profile.
      *
-     * @param deviceId the device ID of the user to delete
-     * @param listener the listener that receives the deletion success result
+     * @param deviceId the device id
+     * @param listener the listener
      */
     public void deleteProfile(String deviceId, OnCompleteListener<Boolean> listener) {
         userController.isCurrentUserAdmin((isAdmin, success) -> {

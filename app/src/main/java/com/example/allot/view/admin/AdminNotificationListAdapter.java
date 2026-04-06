@@ -24,13 +24,17 @@ public class AdminNotificationListAdapter extends RecyclerView.Adapter<AdminNoti
 
     /**
      * Creates a new AdminNotificationListAdapter instance.
+     *
+     * @param notifications the notifications
      */
     public AdminNotificationListAdapter(List<NotificationItem> notifications) {
         this.notifications = notifications;
     }
 
     /**
-     * Replaces the user ID to display-name mapping used by this adapter.
+     * Updates the user names by id.
+     *
+     * @param namesById the names by id
      */
     public void setUserNamesById(Map<String, String> namesById) {
         userNamesById.clear();
@@ -40,7 +44,11 @@ public class AdminNotificationListAdapter extends RecyclerView.Adapter<AdminNoti
     }
 
     /**
-     * Handles on Create View Holder.
+     * Returns the result of on create view holder.
+     *
+     * @param parent the parent
+     * @param viewType the view type
+     * @return the result of this call
      */
     @NonNull
     @Override
@@ -51,7 +59,10 @@ public class AdminNotificationListAdapter extends RecyclerView.Adapter<AdminNoti
     }
 
     /**
-     * Handles on Bind View Holder.
+     * Handles the bind view holder callback.
+     *
+     * @param holder the holder
+     * @param position the position
      */
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
@@ -59,7 +70,9 @@ public class AdminNotificationListAdapter extends RecyclerView.Adapter<AdminNoti
     }
 
     /**
-     * Returns whether g.et Item Count
+     * Returns the item count.
+     *
+     * @return the item count
      */
     @Override
     public int getItemCount() {
@@ -74,7 +87,9 @@ public class AdminNotificationListAdapter extends RecyclerView.Adapter<AdminNoti
         private final TextView sentAtText;
 
         /**
-         * Documents view Holder.
+         * Creates a new ViewHolder instance.
+         *
+         * @param itemView the item view
          */
         ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -86,7 +101,10 @@ public class AdminNotificationListAdapter extends RecyclerView.Adapter<AdminNoti
         }
 
         /**
-         * Binds .
+         * Performs bind.
+         *
+         * @param item the item
+         * @param userNamesById the user names by id
          */
         void bind(NotificationItem item, Map<String, String> userNamesById) {
             String safeTitle = item == null || isBlank(item.getTitle()) ? "Notification" : item.getTitle();
@@ -106,7 +124,10 @@ public class AdminNotificationListAdapter extends RecyclerView.Adapter<AdminNoti
         }
 
         /**
-         * Handles format Timestamp.
+         * Returns the result of format timestamp.
+         *
+         * @param item the item
+         * @return the result of this call
          */
         private String formatTimestamp(NotificationItem item) {
             if (item == null || item.getCreatedAt() == null || item.getCreatedAt().toDate() == null) {
@@ -117,7 +138,10 @@ public class AdminNotificationListAdapter extends RecyclerView.Adapter<AdminNoti
         }
 
         /**
-         * Returns whether i.s Blank
+         * Returns whether blank.
+         *
+         * @param value the value
+         * @return whether blank
          */
         private boolean isBlank(String value) {
             return value == null || value.trim().isEmpty();

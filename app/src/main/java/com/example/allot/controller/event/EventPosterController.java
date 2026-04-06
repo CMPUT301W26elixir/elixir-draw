@@ -32,6 +32,9 @@ public class EventPosterController {
 
     /**
      * Creates a new EventPosterController instance.
+     *
+     * @param eventRepository the event repository
+     * @param storage the storage
      */
     public EventPosterController(EventRepository eventRepository, FirebaseStorage storage) {
         this.eventRepository = eventRepository;
@@ -39,7 +42,11 @@ public class EventPosterController {
     }
 
     /**
-     * Uploads a poster image and persists its URL on the event.
+     * Performs upload poster.
+     *
+     * @param eventId the event id
+     * @param posterUri the poster uri
+     * @param listener the listener
      */
     public void uploadPoster(String eventId, Uri posterUri, OnCompleteListener<String> listener) {
         lastErrorMessage = null;
@@ -77,7 +84,13 @@ public class EventPosterController {
     }
 
     /**
-     * Handles fetch Download Url With Retry.
+     * Performs fetch download url with retry.
+     *
+     * @param posterRef the poster ref
+     * @param eventId the event id
+     * @param previousPosterUrl the previous poster url
+     * @param listener the listener
+     * @param attempt the attempt
      */
     private void fetchDownloadUrlWithRetry(StorageReference posterRef,
                                            String eventId,
@@ -130,7 +143,10 @@ public class EventPosterController {
     }
 
     /**
-     * Deletes previous poster if needed.
+     * Performs delete previous poster if needed.
+     *
+     * @param previousPosterUrl the previous poster url
+     * @param currentPosterRef the current poster ref
      */
     private void deletePreviousPosterIfNeeded(String previousPosterUrl, StorageReference currentPosterRef) {
         if (isBlank(previousPosterUrl)) {
@@ -153,10 +169,10 @@ public class EventPosterController {
     }
 
     /**
-     * Deletes a poster file from Cloud Storage without changing Firestore state.
+     * Performs delete poster file.
      *
-     * @param posterUrl the poster download URL
-     * @param listener the listener that receives the delete result
+     * @param posterUrl the poster url
+     * @param listener the listener
      */
     public void deletePosterFile(String posterUrl, OnCompleteListener<Boolean> listener) {
         lastErrorMessage = null;
@@ -194,7 +210,10 @@ public class EventPosterController {
     }
 
     /**
-     * Returns whether i.s Object Not Found
+     * Returns whether object not found.
+     *
+     * @param exception the exception
+     * @return whether object not found
      */
     private boolean isObjectNotFound(Exception exception) {
         if (!(exception instanceof StorageException)) {
@@ -205,7 +224,11 @@ public class EventPosterController {
     }
 
     /**
-     * Deletes poster metadata from Firestore and attempts to delete the file from Storage.
+     * Performs delete poster.
+     *
+     * @param eventId the event id
+     * @param posterUrl the poster url
+     * @param listener the listener
      */
     public void deletePoster(String eventId, String posterUrl, OnCompleteListener<Boolean> listener) {
         lastErrorMessage = null;
@@ -253,14 +276,19 @@ public class EventPosterController {
     }
 
     /**
-     * Returns whether g.et Last Error Message
+     * Returns the last error message.
+     *
+     * @return the last error message
      */
     public String getLastErrorMessage() {
         return lastErrorMessage;
     }
 
     /**
-     * Returns whether i.s Blank
+     * Returns whether blank.
+     *
+     * @param value the value
+     * @return whether blank
      */
     private boolean isBlank(String value) {
         return value == null || value.trim().isEmpty();

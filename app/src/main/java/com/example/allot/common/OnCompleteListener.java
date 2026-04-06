@@ -7,10 +7,10 @@ package com.example.allot.common;
  */
 public interface OnCompleteListener<T> {
     /**
-     * Delivers the finished result back to the caller.
+     * Handles the complete callback.
      *
-     * @param result the value produced by the operation
-     * @param success true when the operation finished successfully
+     * @param result the result
+     * @param success the success
      */
     void onComplete(T result, boolean success);
 }

@@ -21,10 +21,9 @@ public class NotificationsActivity extends AppCompatActivity {
     private TextView notificationsNotNow;
 
     /**
-     * Initializes the activity, binds views, creates the user controller,
-     * and sets click listeners for the notification preference options.
+     * Handles the create callback.
      *
-     * @param savedInstanceState the previously saved activity state, if one exists
+     * @param savedInstanceState the saved instance state
      */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,13 +42,9 @@ public class NotificationsActivity extends AppCompatActivity {
     }
 
     /**
-     * Saves the user's profile information along with their notification preference,
-     * then opens the main activity if the save succeeds.
+     * Performs save profile and open explore.
      *
-     * <p>If the save fails, the buttons are re-enabled and an error message is shown.
-     *
-     * @param notificationsEnabled true if notifications should be enabled;
-     *                             false otherwise
+     * @param notificationsEnabled the notifications enabled
      */
     private void saveProfileAndOpenExplore(boolean notificationsEnabled) {
         setButtonsEnabled(false);
@@ -87,7 +82,7 @@ public class NotificationsActivity extends AppCompatActivity {
     }
 
     /**
-     * Opens deferred destination.
+     * Performs open deferred destination.
      */
     private void openDeferredDestination() {
         Intent intent = DeferredOnboardingNavigator.buildPostOnboardingIntent(
@@ -99,11 +94,9 @@ public class NotificationsActivity extends AppCompatActivity {
     }
 
     /**
-     * Enables or disables the notification choice controls.
+     * Updates the buttons enabled.
      *
-     * <p>When disabled, the "Not now" text is also visually dimmed.
-     *
-     * @param enabled true to enable the controls; false to disable them
+     * @param enabled the enabled
      */
     private void setButtonsEnabled(boolean enabled) {
         turnOnNotificationsButton.setEnabled(enabled);

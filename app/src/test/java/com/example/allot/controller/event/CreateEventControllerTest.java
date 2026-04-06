@@ -18,7 +18,7 @@ public class CreateEventControllerTest {
     private CreateEventController controller;
 
     /**
-     * Updates up.
+     * Updates the up.
      */
     @Before
     public void setUp() {
@@ -34,7 +34,7 @@ public class CreateEventControllerTest {
     }
 
     /**
-     * Handles submit Event_saves Coordinates When Geocoding Succeeds.
+     * Performs submit event saves coordinates when geocoding succeeds.
      */
     @Test
     public void submitEvent_savesCoordinatesWhenGeocodingSucceeds() {
@@ -50,7 +50,7 @@ public class CreateEventControllerTest {
     }
 
     /**
-     * Handles submit Event_leaves Coordinates Null When Geocoding Fails.
+     * Performs submit event leaves coordinates null when geocoding fails.
      */
     @Test
     public void submitEvent_leavesCoordinatesNullWhenGeocodingFails() {
@@ -66,7 +66,9 @@ public class CreateEventControllerTest {
     }
 
     /**
-     * Builds form data.
+     * Returns the result of build form data.
+     *
+     * @return the result of this call
      */
     private EventFormData buildFormData() {
         return new EventFormData(
@@ -94,14 +96,18 @@ public class CreateEventControllerTest {
         private boolean createSuccess;
 
         /**
-         * Handles fake Event Repository.
+         * Creates a new FakeEventRepository instance.
          */
         private FakeEventRepository() {
             super((com.google.firebase.firestore.FirebaseFirestore) null);
         }
 
         /**
-         * Creates new event for user.
+         * Performs create new event for user.
+         *
+         * @param event the event
+         * @param organizerId the organizer id
+         * @param listener the listener
          */
         @Override
         public void createNewEventForUser(Event event, String organizerId, com.example.allot.common.OnCompleteListener<Boolean> listener) {
@@ -114,7 +120,10 @@ public class CreateEventControllerTest {
         private EventLocationCoordinates coordinates;
 
         /**
-         * Handles geocode.
+         * Returns the result of geocode.
+         *
+         * @param location the location
+         * @return the result of this call
          */
         @Override
         public EventLocationCoordinates geocode(String location) {
@@ -126,14 +135,18 @@ public class CreateEventControllerTest {
         private final String deviceId;
 
         /**
-         * Handles fake Device Session Store.
+         * Creates a new FakeDeviceSessionStore instance.
+         *
+         * @param deviceId the device id
          */
         private FakeDeviceSessionStore(String deviceId) {
             this.deviceId = deviceId;
         }
 
         /**
-         * Returns whether g.et Device Id
+         * Returns the device id.
+         *
+         * @return the device id
          */
         @Override
         public String getDeviceId() {
@@ -141,7 +154,9 @@ public class CreateEventControllerTest {
         }
 
         /**
-         * Saves device id.
+         * Performs save device id.
+         *
+         * @param deviceId the device id
          */
         @Override
         public void saveDeviceId(String deviceId) {

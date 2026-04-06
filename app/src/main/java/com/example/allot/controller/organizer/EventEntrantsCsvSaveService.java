@@ -26,7 +26,11 @@ public class EventEntrantsCsvSaveService {
         private final String relativePath;
 
         /**
-         * Documents csv Download Spec.
+         * Creates a new CsvDownloadSpec instance.
+         *
+         * @param displayName the display name
+         * @param mimeType the mime type
+         * @param relativePath the relative path
          */
         CsvDownloadSpec(String displayName, String mimeType, String relativePath) {
             this.displayName = displayName;
@@ -35,21 +39,27 @@ public class EventEntrantsCsvSaveService {
         }
 
         /**
-         * Returns whether g.et Display Name
+         * Returns the display name.
+         *
+         * @return the display name
          */
         String getDisplayName() {
             return displayName;
         }
 
         /**
-         * Returns whether g.et Mime Type
+         * Returns the mime type.
+         *
+         * @return the mime type
          */
         String getMimeType() {
             return mimeType;
         }
 
         /**
-         * Returns whether g.et Relative Path
+         * Returns the relative path.
+         *
+         * @return the relative path
          */
         String getRelativePath() {
             return relativePath;
@@ -57,15 +67,13 @@ public class EventEntrantsCsvSaveService {
     }
 
     /**
-     * Saves CSV text into the device downloads collection and returns the saved URI.
+     * Returns the result of save to downloads.
      *
-     * @param context the Android context used to access MediaStore
-     * @param csvContent the generated CSV text to save
-     * @param eventTitle the event title used in the filename when available
-     * @param eventId the event ID used as a fallback filename
-     * @return the URI of the saved CSV file
-     * @throws IOException if the file cannot be created or written
-     * @throws SecurityException if the media store cannot be accessed
+     * @param context the context
+     * @param csvContent the csv content
+     * @param eventTitle the event title
+     * @param eventId the event id
+     * @return the result of this call
      */
     public Uri saveToDownloads(Context context,
                                String csvContent,
@@ -95,7 +103,10 @@ public class EventEntrantsCsvSaveService {
     }
 
     /**
-     * Handles validate Inputs.
+     * Performs validate inputs.
+     *
+     * @param context the context
+     * @param csvContent the csv content
      */
     void validateInputs(Context context, String csvContent) {
         if (context == null) {
@@ -105,7 +116,9 @@ public class EventEntrantsCsvSaveService {
     }
 
     /**
-     * Handles validate Csv Content.
+     * Performs validate csv content.
+     *
+     * @param csvContent the csv content
      */
     void validateCsvContent(String csvContent) {
         if (isBlank(csvContent)) {
@@ -114,7 +127,12 @@ public class EventEntrantsCsvSaveService {
     }
 
     /**
-     * Creates download values.
+     * Returns the result of create download values.
+     *
+     * @param eventTitle the event title
+     * @param eventId the event id
+     * @param sdkInt the sdk int
+     * @return the result of this call
      */
     ContentValues createDownloadValues(String eventTitle, String eventId, int sdkInt) {
         CsvDownloadSpec spec = buildDownloadSpec(eventTitle, eventId, sdkInt);
@@ -128,7 +146,11 @@ public class EventEntrantsCsvSaveService {
     }
 
     /**
-     * Builds file name.
+     * Returns the result of build file name.
+     *
+     * @param eventTitle the event title
+     * @param eventId the event id
+     * @return the result of this call
      */
     String buildFileName(String eventTitle, String eventId) {
         String baseName = !isBlank(eventTitle) ? eventTitle : eventId;
@@ -142,7 +164,12 @@ public class EventEntrantsCsvSaveService {
     }
 
     /**
-     * Builds download spec.
+     * Returns the result of build download spec.
+     *
+     * @param eventTitle the event title
+     * @param eventId the event id
+     * @param sdkInt the sdk int
+     * @return the result of this call
      */
     CsvDownloadSpec buildDownloadSpec(String eventTitle, String eventId, int sdkInt) {
         String relativePath = sdkInt >= Build.VERSION_CODES.Q ? RELATIVE_PATH : null;
@@ -150,7 +177,10 @@ public class EventEntrantsCsvSaveService {
     }
 
     /**
-     * Returns whether i.s Blank
+     * Returns whether blank.
+     *
+     * @param value the value
+     * @return whether blank
      */
     private boolean isBlank(String value) {
         return value == null || value.trim().isEmpty();

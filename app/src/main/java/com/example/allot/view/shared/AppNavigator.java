@@ -22,20 +22,20 @@ public final class AppNavigator {
     }
 
     /**
-     * Opens the explore screen.
+     * Performs open explore.
      *
-     * @param activity the current activity
-     * @param finishCurrent true when the current activity should be finished
+     * @param activity the activity
+     * @param finishCurrent the finish current
      */
     public static void openExplore(Activity activity, boolean finishCurrent) {
         navigate(activity, new Intent(activity, ExploreActivity.class), finishCurrent);
     }
 
     /**
-     * Opens the saved-events tab inside the explore screen.
+     * Performs open saved.
      *
-     * @param activity the current activity
-     * @param finishCurrent true when the current activity should be finished
+     * @param activity the activity
+     * @param finishCurrent the finish current
      */
     public static void openSaved(Activity activity, boolean finishCurrent) {
         Intent intent = new Intent(activity, ExploreActivity.class);
@@ -44,20 +44,20 @@ public final class AppNavigator {
     }
 
     /**
-     * Opens the My Events screen.
+     * Performs open my events.
      *
-     * @param activity the current activity
-     * @param finishCurrent true when the current activity should be finished
+     * @param activity the activity
+     * @param finishCurrent the finish current
      */
     public static void openMyEvents(Activity activity, boolean finishCurrent) {
         openAccountRequired(activity, finishCurrent, DeferredOnboardingNavigator.DESTINATION_MY_EVENTS, null);
     }
 
     /**
-     * Opens the My Events screen on the hosting tab.
+     * Performs open my events hosting.
      *
-     * @param activity the current activity
-     * @param finishCurrent true when the current activity should be finished
+     * @param activity the activity
+     * @param finishCurrent the finish current
      */
     public static void openMyEventsHosting(Activity activity, boolean finishCurrent) {
         Bundle extras = new Bundle();
@@ -67,31 +67,31 @@ public final class AppNavigator {
     }
 
     /**
-     * Opens the profile screen.
+     * Performs open profile.
      *
-     * @param activity the current activity
-     * @param finishCurrent true when the current activity should be finished
+     * @param activity the activity
+     * @param finishCurrent the finish current
      */
     public static void openProfile(Activity activity, boolean finishCurrent) {
         openAccountRequired(activity, finishCurrent, DeferredOnboardingNavigator.DESTINATION_PROFILE, null);
     }
 
     /**
-     * Opens the scan screen.
+     * Performs open scan.
      *
-     * @param activity the current activity
-     * @param finishCurrent true when the current activity should be finished
+     * @param activity the activity
+     * @param finishCurrent the finish current
      */
     public static void openScan(Activity activity, boolean finishCurrent) {
         navigate(activity, new Intent(activity, ScanActivity.class), finishCurrent);
     }
 
     /**
-     * Applies shared navigation flags and transitions before opening a new screen.
+     * Performs navigate.
      *
-     * @param activity the current activity
-     * @param intent the intent used to open the next screen
-     * @param finishCurrent true when the current activity should be finished
+     * @param activity the activity
+     * @param intent the intent
+     * @param finishCurrent the finish current
      */
     private static void navigate(Activity activity, Intent intent, boolean finishCurrent) {
         intent.addFlags(NAV_FLAGS);
@@ -103,11 +103,15 @@ public final class AppNavigator {
     }
 
     /**
-     * Opens the requested account-gated destination after checking whether the current
-     * device has a completed profile or should enter deferred onboarding first.
+     * Performs open account required.
      *
      * <p>AI usage note: This Javadoc was drafted with AI assistance and then reviewed
      * against the implementation by the development team.
+     *
+     * @param activity the activity
+     * @param finishCurrent the finish current
+     * @param destination the destination
+     * @param extras the extras
      */
     private static void openAccountRequired(Activity activity,
                                             boolean finishCurrent,
@@ -131,10 +135,15 @@ public final class AppNavigator {
     }
 
     /**
-     * Builds the direct destination intent for users who have already completed onboarding.
+     * Returns the result of build destination intent.
      *
      * <p>AI usage note: This Javadoc was drafted with AI assistance and then reviewed
      * against the implementation by the development team.
+     *
+     * @param activity the activity
+     * @param destination the destination
+     * @param extras the extras
+     * @return the result of this call
      */
     private static Intent buildDestinationIntent(Activity activity, String destination, Bundle extras) {
         if (DeferredOnboardingNavigator.DESTINATION_PROFILE.equals(destination)) {
@@ -152,10 +161,15 @@ public final class AppNavigator {
     }
 
     /**
-     * Builds the deferred-onboarding intent that preserves the eventual destination.
+     * Returns the result of build onboarding intent.
      *
      * <p>AI usage note: This Javadoc was drafted with AI assistance and then reviewed
      * against the implementation by the development team.
+     *
+     * @param activity the activity
+     * @param destination the destination
+     * @param extras the extras
+     * @return the result of this call
      */
     private static Intent buildOnboardingIntent(Activity activity, String destination, Bundle extras) {
         Intent intent;
@@ -175,10 +189,13 @@ public final class AppNavigator {
     }
 
     /**
-     * Returns whether the current navigation request should force deferred onboarding.
+     * Returns whether this instance should force deferred onboarding.
      *
      * <p>AI usage note: This Javadoc was drafted with AI assistance and then reviewed
      * against the implementation by the development team.
+     *
+     * @param activity the activity
+     * @return whether this instance should force deferred onboarding
      */
     private static boolean shouldForceDeferredOnboarding(Activity activity) {
         return activity != null

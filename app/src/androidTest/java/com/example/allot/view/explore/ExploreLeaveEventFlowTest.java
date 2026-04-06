@@ -23,7 +23,7 @@ import org.junit.runner.RunWith;
 public class ExploreLeaveEventFlowTest {
 
     /**
-     * Handles disable Animations.
+     * Performs disable animations.
      */
     @Before
     public void disableAnimations() {
@@ -31,7 +31,9 @@ public class ExploreLeaveEventFlowTest {
     }
 
     /**
-     * Builds intent.
+     * Returns the result of build intent.
+     *
+     * @return the result of this call
      */
     private Intent buildIntent() {
         Intent intent = new Intent(ApplicationProvider.getApplicationContext(), ExploreActivity.class);
@@ -49,7 +51,7 @@ public class ExploreLeaveEventFlowTest {
     }
 
     /**
-     * Handles explore To Event Detail To Leave Waitlist_flow Works.
+     * Performs explore to event detail to leave waitlist flow works.
      */
     @Test
     public void exploreToEventDetailToLeaveWaitlist_flowWorks() {

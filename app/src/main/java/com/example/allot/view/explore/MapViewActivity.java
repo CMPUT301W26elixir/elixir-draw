@@ -45,7 +45,9 @@ public class MapViewActivity extends AppCompatActivity implements OnMapReadyCall
     private boolean emptyStateShown;
 
     /**
-     * Handles on Create.
+     * Handles the create callback.
+     *
+     * @param savedInstanceState the saved instance state
      */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,7 +64,7 @@ public class MapViewActivity extends AppCompatActivity implements OnMapReadyCall
     }
 
     /**
-     * Handles finish.
+     * Performs finish.
      */
     @Override
     public void finish() {
@@ -71,13 +73,13 @@ public class MapViewActivity extends AppCompatActivity implements OnMapReadyCall
     }
 
     /**
-     * Binds views.
+     * Performs bind views.
      */
     private void bindViews() {
     }
 
     /**
-     * Updates up header.
+     * Updates the up header.
      */
     private void setupHeader() {
         ImageButton backButton = findViewById(R.id.backButton);
@@ -85,7 +87,9 @@ public class MapViewActivity extends AppCompatActivity implements OnMapReadyCall
     }
 
     /**
-     * Handles attach Map Fragment.
+     * Performs attach map fragment.
+     *
+     * @param savedInstanceState the saved instance state
      */
     private void attachMapFragment(Bundle savedInstanceState) {
         SupportMapFragment mapFragment =
@@ -109,7 +113,9 @@ public class MapViewActivity extends AppCompatActivity implements OnMapReadyCall
     }
 
     /**
-     * Handles on Map Ready.
+     * Handles the map ready callback.
+     *
+     * @param googleMap the google map
      */
     @Override
     public void onMapReady(GoogleMap googleMap) {
@@ -121,7 +127,7 @@ public class MapViewActivity extends AppCompatActivity implements OnMapReadyCall
     }
 
     /**
-     * Loads event if needed.
+     * Performs load event if needed.
      */
     private void loadEventIfNeeded() {
         if (TextUtils.isEmpty(currentEventId)) {
@@ -144,7 +150,7 @@ public class MapViewActivity extends AppCompatActivity implements OnMapReadyCall
     }
 
     /**
-     * Handles render Map Content.
+     * Performs render map content.
      */
     private void renderMapContent() {
         if (googleMap == null || !eventLoadFinished) {
@@ -181,7 +187,10 @@ public class MapViewActivity extends AppCompatActivity implements OnMapReadyCall
     }
 
     /**
-     * Handles add Event Marker.
+     * Returns the result of add event marker.
+     *
+     * @param boundsBuilder the bounds builder
+     * @return the result of this call
      */
     private int addEventMarker(LatLngBounds.Builder boundsBuilder) {
         if (currentEvent.getEventLatitude() == null || currentEvent.getEventLongitude() == null) {
@@ -198,7 +207,10 @@ public class MapViewActivity extends AppCompatActivity implements OnMapReadyCall
     }
 
     /**
-     * Handles add Entrant Markers.
+     * Returns the result of add entrant markers.
+     *
+     * @param boundsBuilder the bounds builder
+     * @return the result of this call
      */
     private int addEntrantMarkers(LatLngBounds.Builder boundsBuilder) {
         if (currentEvent.getWaitingList() == null || currentEvent.getWaitingList().getJoinLocations().isEmpty()) {
@@ -224,14 +236,19 @@ public class MapViewActivity extends AppCompatActivity implements OnMapReadyCall
     }
 
     /**
-     * Returns whether i.s Entrant Location Enabled
+     * Returns whether entrant location enabled.
+     *
+     * @return whether entrant location enabled
      */
     private boolean isEntrantLocationEnabled() {
         return currentEvent != null && Boolean.TRUE.equals(currentEvent.getGeoloc());
     }
 
     /**
-     * Returns whether g.et Entrant Marker Title
+     * Returns the entrant marker title.
+     *
+     * @param deviceId the device id
+     * @return the entrant marker title
      */
     private String getEntrantMarkerTitle(String deviceId) {
         String cachedName = userNameCache.get(deviceId);
@@ -244,7 +261,9 @@ public class MapViewActivity extends AppCompatActivity implements OnMapReadyCall
     }
 
     /**
-     * Loads entrant name.
+     * Performs load entrant name.
+     *
+     * @param deviceId the device id
      */
     private void loadEntrantName(String deviceId) {
         if (TextUtils.isEmpty(deviceId) || pendingUserIds.contains(deviceId) || userNameCache.containsKey(deviceId)) {
@@ -265,7 +284,9 @@ public class MapViewActivity extends AppCompatActivity implements OnMapReadyCall
     }
 
     /**
-     * Returns whether g.et Single Marker Target
+     * Returns the single marker target.
+     *
+     * @return the single marker target
      */
     private LatLng getSingleMarkerTarget() {
         if (currentEvent.getWaitingList() != null) {
@@ -284,7 +305,7 @@ public class MapViewActivity extends AppCompatActivity implements OnMapReadyCall
     }
 
     /**
-     * Shows empty state once.
+     * Performs show empty state once.
      */
     private void showEmptyStateOnce() {
         if (emptyStateShown) {

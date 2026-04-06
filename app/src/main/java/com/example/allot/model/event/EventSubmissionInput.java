@@ -19,19 +19,19 @@ public class EventSubmissionInput {
     private final String visibility;
 
     /**
-     * Creates a parsed event submission model.
+     * Creates a new EventSubmissionInput instance.
      *
-     * @param title the event title
-     * @param location the event location
-     * @param geolocationEnabled whether geolocation is enabled
-     * @param eventDate the parsed event date
-     * @param price the parsed price value
-     * @param description the event description
-     * @param participants the parsed participant limit
-     * @param registrationStart the parsed registration start date
-     * @param registrationEnd the parsed registration end date
-     * @param category the selected event category
-     * @param visibility the event visibility
+     * @param title the title
+     * @param location the location
+     * @param geolocationEnabled the geolocation enabled
+     * @param eventDate the event date
+     * @param price the price
+     * @param description the description
+     * @param participants the participants
+     * @param registrationStart the registration start
+     * @param registrationEnd the registration end
+     * @param category the category
+     * @param visibility the visibility
      */
     public EventSubmissionInput(String title,
                                 String location,
@@ -58,77 +58,99 @@ public class EventSubmissionInput {
     }
 
     /**
-     * @return the event title
+     * Returns the title.
+     *
+     * @return the title
      */
     public String getTitle() {
         return title;
     }
 
     /**
-     * @return the event location
+     * Returns the location.
+     *
+     * @return the location
      */
     public String getLocation() {
         return location;
     }
 
     /**
-     * @return true when geolocation is enabled
+     * Returns whether geolocation enabled.
+     *
+     * @return whether geolocation enabled
      */
     public boolean isGeolocationEnabled() {
         return geolocationEnabled;
     }
 
     /**
-     * @return the parsed event date
+     * Returns the event date.
+     *
+     * @return the event date
      */
     public Date getEventDate() {
         return eventDate;
     }
 
     /**
-     * @return the parsed price
+     * Returns the price.
+     *
+     * @return the price
      */
     public Double getPrice() {
         return price;
     }
 
     /**
-     * @return the event description
+     * Returns the description.
+     *
+     * @return the description
      */
     public String getDescription() {
         return description;
     }
 
     /**
-     * @return the participant limit
+     * Returns the participants.
+     *
+     * @return the participants
      */
     public Integer getParticipants() {
         return participants;
     }
 
     /**
-     * @return the parsed registration start date
+     * Returns the registration start.
+     *
+     * @return the registration start
      */
     public Date getRegistrationStart() {
         return registrationStart;
     }
 
     /**
-     * @return the parsed registration end date
+     * Returns the registration end.
+     *
+     * @return the registration end
      */
     public Date getRegistrationEnd() {
         return registrationEnd;
     }
 
     /**
-     * @return the selected event category
+     * Returns the category.
+     *
+     * @return the category
      */
     public String getCategory() {
         return category;
     }
 
     /**
-     * @return the event visibility
+     * Returns the visibility.
+     *
+     * @return the visibility
      */
     public String getVisibility() {
         return visibility;

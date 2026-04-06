@@ -21,7 +21,7 @@ public class ExampleInstrumentedTest {
     private final ScanDecoderService scanDecoderService = new ScanDecoderService();
 
     /**
-     * Handles use App Context.
+     * Performs use app context.
      */
     @Test
     public void useAppContext() {
@@ -30,7 +30,7 @@ public class ExampleInstrumentedTest {
     }
 
     /**
-     * Handles generate Qr_returns Square Bitmap.
+     * Performs generate qr returns square bitmap.
      */
     @Test
     public void generateQr_returnsSquareBitmap() {
@@ -42,7 +42,7 @@ public class ExampleInstrumentedTest {
     }
 
     /**
-     * Handles generate Qr_rejects Blank Payload.
+     * Performs generate qr rejects blank payload.
      */
     @Test(expected = IllegalArgumentException.class)
     public void generateQr_rejectsBlankPayload() {
@@ -50,7 +50,7 @@ public class ExampleInstrumentedTest {
     }
 
     /**
-     * Handles generate Qr_rejects Invalid Size.
+     * Performs generate qr rejects invalid size.
      */
     @Test(expected = IllegalArgumentException.class)
     public void generateQr_rejectsInvalidSize() {
@@ -58,7 +58,7 @@ public class ExampleInstrumentedTest {
     }
 
     /**
-     * Handles decode Bitmap_returns Event Id From Generated Qr.
+     * Performs decode bitmap returns event id from generated qr.
      */
     @Test
     public void decodeBitmap_returnsEventIdFromGeneratedQr() {
@@ -68,7 +68,7 @@ public class ExampleInstrumentedTest {
     }
 
     /**
-     * Handles decode Bitmap_returns Null When No Qr Is Present.
+     * Performs decode bitmap returns null when no qr is present.
      */
     @Test
     public void decodeBitmap_returnsNullWhenNoQrIsPresent() {

@@ -13,7 +13,7 @@ public class ExploreFilterServiceTest {
     private ExploreFilterService service;
 
     /**
-     * Updates up.
+     * Updates the up.
      */
     @Before
     public void setUp() {
@@ -21,7 +21,7 @@ public class ExploreFilterServiceTest {
     }
 
     /**
-     * Builds browsable event list_filters by search term.
+     * Performs build browsable event list filters by search term.
      */
     @Test
     public void buildBrowsableEventList_filtersBySearchTerm() {
@@ -39,7 +39,7 @@ public class ExploreFilterServiceTest {
     }
 
     /**
-     * Builds browsable event list_filters by category chip.
+     * Performs build browsable event list filters by category chip.
      */
     @Test
     public void buildBrowsableEventList_filtersByCategoryChip() {
@@ -57,7 +57,7 @@ public class ExploreFilterServiceTest {
     }
 
     /**
-     * Builds browsable event list_excludes non open events.
+     * Performs build browsable event list excludes non open events.
      */
     @Test
     public void buildBrowsableEventList_excludesNonOpenEvents() {
@@ -75,7 +75,7 @@ public class ExploreFilterServiceTest {
     }
 
     /**
-     * Builds browsable event list_sorts by deadline date and title.
+     * Performs build browsable event list sorts by deadline date and title.
      */
     @Test
     public void buildBrowsableEventList_sortsByDeadlineDateAndTitle() {
@@ -94,7 +94,16 @@ public class ExploreFilterServiceTest {
     }
 
     /**
-     * Builds event.
+     * Returns the result of build event.
+     *
+     * @param id the id
+     * @param title the title
+     * @param category the category
+     * @param description the description
+     * @param eventTime the event time
+     * @param deadlineTime the deadline time
+     * @param status the status
+     * @return the result of this call
      */
     private Event buildEvent(String id, String title, String category, String description, long eventTime, long deadlineTime, String status) {
         Event event = new Event();

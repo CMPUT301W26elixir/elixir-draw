@@ -65,7 +65,9 @@ public class ScanActivity extends AppCompatActivity {
             registerForActivityResult(new ActivityResultContracts.PickVisualMedia(), this::handlePickedImage);
 
     /**
-     * Handles on Create.
+     * Handles the create callback.
+     *
+     * @param savedInstanceState the saved instance state
      */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,7 +88,7 @@ public class ScanActivity extends AppCompatActivity {
     }
 
     /**
-     * Handles on Start.
+     * Handles the start callback.
      */
     @Override
     protected void onStart() {
@@ -105,7 +107,7 @@ public class ScanActivity extends AppCompatActivity {
     }
 
     /**
-     * Handles on Stop.
+     * Handles the stop callback.
      */
     @Override
     protected void onStop() {
@@ -114,7 +116,7 @@ public class ScanActivity extends AppCompatActivity {
     }
 
     /**
-     * Handles finish.
+     * Performs finish.
      */
     @Override
     public void finish() {
@@ -127,7 +129,7 @@ public class ScanActivity extends AppCompatActivity {
     }
 
     /**
-     * Updates up bottom nav.
+     * Updates the up bottom nav.
      */
     private void setupBottomNav() {
         bottomNavBar.setSelectedTab(BottomNavBarView.Tab.SCAN);
@@ -138,7 +140,7 @@ public class ScanActivity extends AppCompatActivity {
     }
 
     /**
-     * Opens image picker.
+     * Performs open image picker.
      */
     private void openImagePicker() {
         clearInlineError();
@@ -150,7 +152,9 @@ public class ScanActivity extends AppCompatActivity {
     }
 
     /**
-     * Handles picked image.
+     * Performs handle picked image.
+     *
+     * @param imageUri the image uri
      */
     private void handlePickedImage(Uri imageUri) {
         if (imageUri == null) {
@@ -185,7 +189,10 @@ public class ScanActivity extends AppCompatActivity {
     }
 
     /**
-     * Loads bitmap.
+     * Returns the result of load bitmap.
+     *
+     * @param imageUri the image uri
+     * @return the result of this call
      */
     private Bitmap loadBitmap(Uri imageUri) throws IOException {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
@@ -197,7 +204,7 @@ public class ScanActivity extends AppCompatActivity {
     }
 
     /**
-     * Handles start Camera Preview.
+     * Performs start camera preview.
      */
     private void startCameraPreview() {
         if (cameraBound || scanHandlingInProgress) {
@@ -218,7 +225,7 @@ public class ScanActivity extends AppCompatActivity {
     }
 
     /**
-     * Binds camera use cases.
+     * Performs bind camera use cases.
      */
     private void bindCameraUseCases() {
         if (cameraProvider == null) {
@@ -252,7 +259,7 @@ public class ScanActivity extends AppCompatActivity {
     }
 
     /**
-     * Handles stop Camera Preview.
+     * Performs stop camera preview.
      */
     private void stopCameraPreview() {
         if (cameraProvider != null) {
@@ -262,7 +269,9 @@ public class ScanActivity extends AppCompatActivity {
     }
 
     /**
-     * Handles resolve Scanned Payload.
+     * Performs resolve scanned payload.
+     *
+     * @param payload the payload
      */
     private void resolveScannedPayload(String payload) {
         if (scanHandlingInProgress) {
@@ -292,7 +301,9 @@ public class ScanActivity extends AppCompatActivity {
     }
 
     /**
-     * Opens event detail.
+     * Performs open event detail.
+     *
+     * @param event the event
      */
     private void openEventDetail(Event event) {
         if (event == null) {
@@ -318,7 +329,9 @@ public class ScanActivity extends AppCompatActivity {
     }
 
     /**
-     * Returns whether h.as Camera Permission
+     * Returns whether this instance has camera permission.
+     *
+     * @return whether this instance has camera permission
      */
     private boolean hasCameraPermission() {
         return ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
@@ -326,7 +339,9 @@ public class ScanActivity extends AppCompatActivity {
     }
 
     /**
-     * Shows inline error.
+     * Performs show inline error.
+     *
+     * @param messageResId the message res id
      */
     private void showInlineError(int messageResId) {
         scanErrorText.setVisibility(android.view.View.VISIBLE);
@@ -334,7 +349,7 @@ public class ScanActivity extends AppCompatActivity {
     }
 
     /**
-     * Clears inline error.
+     * Performs clear inline error.
      */
     private void clearInlineError() {
         scanErrorText.setText("");

@@ -24,19 +24,19 @@ public class AdminEventListAdapter extends RecyclerView.Adapter<AdminEventListAd
      */
     public interface OnDeleteClickListener {
         /**
-         * Called when the delete button is clicked for an event.
+         * Handles the delete click callback.
          *
-         * @param event the event to delete
-         * @param position the position in the list
+         * @param event the event
+         * @param position the position
          */
         void onDeleteClick(Event event, int position);
     }
 
     /**
-     * Creates an AdminEventListAdapter with the given events and click listener.
+     * Creates a new AdminEventListAdapter instance.
      *
-     * @param events the list of events to display
-     * @param onDeleteClickListener the listener for delete button clicks
+     * @param events the events
+     * @param onDeleteClickListener the on delete click listener
      */
     public AdminEventListAdapter(List<Event> events, OnDeleteClickListener onDeleteClickListener) {
         this.events = events;
@@ -44,7 +44,11 @@ public class AdminEventListAdapter extends RecyclerView.Adapter<AdminEventListAd
     }
 
     /**
-     * Handles on Create View Holder.
+     * Returns the result of on create view holder.
+     *
+     * @param parent the parent
+     * @param viewType the view type
+     * @return the result of this call
      */
     @NonNull
     @Override
@@ -55,7 +59,10 @@ public class AdminEventListAdapter extends RecyclerView.Adapter<AdminEventListAd
     }
 
     /**
-     * Handles on Bind View Holder.
+     * Handles the bind view holder callback.
+     *
+     * @param holder the holder
+     * @param position the position
      */
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
@@ -64,7 +71,9 @@ public class AdminEventListAdapter extends RecyclerView.Adapter<AdminEventListAd
     }
 
     /**
-     * Returns whether g.et Item Count
+     * Returns the item count.
+     *
+     * @return the item count
      */
     @Override
     public int getItemCount() {
@@ -81,7 +90,9 @@ public class AdminEventListAdapter extends RecyclerView.Adapter<AdminEventListAd
         private final Button deleteButton;
 
         /**
-         * Documents view Holder.
+         * Creates a new ViewHolder instance.
+         *
+         * @param itemView the item view
          */
         ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -92,11 +103,11 @@ public class AdminEventListAdapter extends RecyclerView.Adapter<AdminEventListAd
         }
 
         /**
-         * Binds an event to the view holder.
+         * Performs bind.
          *
-         * @param event the event to bind
-         * @param position the position in the list
-         * @param listener the delete click listener
+         * @param event the event
+         * @param position the position
+         * @param listener the listener
          */
         void bind(Event event, int position, OnDeleteClickListener listener) {
             eventTitleText.setText(event.getTitle());

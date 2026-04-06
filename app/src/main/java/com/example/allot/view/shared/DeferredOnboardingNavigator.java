@@ -42,7 +42,11 @@ public final class DeferredOnboardingNavigator {
     }
 
     /**
-     * Creates intent.
+     * Returns the result of create intent.
+     *
+     * @param context the context
+     * @param destination the destination
+     * @return the result of this call
      */
     public static Intent createIntent(Context context, String destination) {
         Intent intent = new Intent(context, NameActivity.class);
@@ -51,7 +55,11 @@ public final class DeferredOnboardingNavigator {
     }
 
     /**
-     * Creates my events intent.
+     * Returns the result of create my events intent.
+     *
+     * @param context the context
+     * @param initialTab the initial tab
+     * @return the result of this call
      */
     public static Intent createMyEventsIntent(Context context, String initialTab) {
         Intent intent = createIntent(context, DESTINATION_MY_EVENTS);
@@ -62,7 +70,18 @@ public final class DeferredOnboardingNavigator {
     }
 
     /**
-     * Creates event action intent.
+     * Returns the result of create event action intent.
+     *
+     * @param context the context
+     * @param eventId the event id
+     * @param title the title
+     * @param location the location
+     * @param date the date
+     * @param price the price
+     * @param deadline the deadline
+     * @param category the category
+     * @param action the action
+     * @return the result of this call
      */
     public static Intent createEventActionIntent(Context context,
                                                  String eventId,
@@ -86,7 +105,10 @@ public final class DeferredOnboardingNavigator {
     }
 
     /**
-     * Handles copy Deferred Extras.
+     * Performs copy deferred extras.
+     *
+     * @param source the source
+     * @param target the target
      */
     public static void copyDeferredExtras(Intent source, Intent target) {
         if (source == null || target == null) {
@@ -107,7 +129,11 @@ public final class DeferredOnboardingNavigator {
     }
 
     /**
-     * Builds post onboarding intent.
+     * Returns the result of build post onboarding intent.
+     *
+     * @param context the context
+     * @param sourceIntent the source intent
+     * @return the result of this call
      */
     public static Intent buildPostOnboardingIntent(Context context, Intent sourceIntent) {
         String destination = sourceIntent == null
@@ -146,7 +172,11 @@ public final class DeferredOnboardingNavigator {
     }
 
     /**
-     * Opens onboarding.
+     * Performs open onboarding.
+     *
+     * @param activity the activity
+     * @param intent the intent
+     * @param finishCurrent the finish current
      */
     public static void openOnboarding(Activity activity, Intent intent, boolean finishCurrent) {
         if (activity == null || intent == null) {
@@ -161,7 +191,11 @@ public final class DeferredOnboardingNavigator {
     }
 
     /**
-     * Handles copy String Extra.
+     * Performs copy string extra.
+     *
+     * @param source the source
+     * @param target the target
+     * @param key the key
      */
     private static void copyStringExtra(Intent source, Intent target, String key) {
         if (source.hasExtra(key)) {
@@ -170,7 +204,11 @@ public final class DeferredOnboardingNavigator {
     }
 
     /**
-     * Handles copy Boolean Extra.
+     * Performs copy boolean extra.
+     *
+     * @param source the source
+     * @param target the target
+     * @param key the key
      */
     private static void copyBooleanExtra(Intent source, Intent target, String key) {
         if (source.hasExtra(key)) {

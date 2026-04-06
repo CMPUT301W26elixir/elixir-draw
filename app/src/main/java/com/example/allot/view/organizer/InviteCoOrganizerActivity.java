@@ -36,7 +36,9 @@ public class InviteCoOrganizerActivity extends AppCompatActivity {
     private ProgressBar loadingIndicator;
 
     /**
-     * Handles on Create.
+     * Handles the create callback.
+     *
+     * @param savedInstanceState the saved instance state
      */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,7 +55,7 @@ public class InviteCoOrganizerActivity extends AppCompatActivity {
     }
 
     /**
-     * Binds views.
+     * Performs bind views.
      */
     private void bindViews() {
         searchInput = findViewById(R.id.searchInput);
@@ -64,7 +66,7 @@ public class InviteCoOrganizerActivity extends AppCompatActivity {
     }
 
     /**
-     * Updates up header.
+     * Updates the up header.
      */
     private void setupHeader() {
         ImageButton backButton = findViewById(R.id.backButton);
@@ -72,14 +74,14 @@ public class InviteCoOrganizerActivity extends AppCompatActivity {
     }
 
     /**
-     * Updates up listeners.
+     * Updates the up listeners.
      */
     private void setupListeners() {
         searchButton.setOnClickListener(view -> performSearch());
     }
 
     /**
-     * Loads event.
+     * Performs load event.
      */
     private void loadEvent() {
         if (getIntent().getBooleanExtra(EXTRA_UI_TEST_MODE, false)) {
@@ -114,7 +116,7 @@ public class InviteCoOrganizerActivity extends AppCompatActivity {
     }
 
     /**
-     * Handles perform Search.
+     * Performs perform search.
      */
     private void performSearch() {
         String query = searchInput.getText().toString().trim();
@@ -136,7 +138,10 @@ public class InviteCoOrganizerActivity extends AppCompatActivity {
     }
 
     /**
-     * Filters candidates.
+     * Returns the result of filter candidates.
+     *
+     * @param users the users
+     * @return the result of this call
      */
     private List<User> filterCandidates(List<User> users) {
         List<User> filtered = new ArrayList<>();
@@ -177,7 +182,9 @@ public class InviteCoOrganizerActivity extends AppCompatActivity {
     }
 
     /**
-     * Binds results.
+     * Performs bind results.
+     *
+     * @param users the users
      */
     private void bindResults(List<User> users) {
         resultsContainer.removeAllViews();
@@ -203,7 +210,10 @@ public class InviteCoOrganizerActivity extends AppCompatActivity {
     }
 
     /**
-     * Handles invite User.
+     * Performs invite user.
+     *
+     * @param user the user
+     * @param inviteButton the invite button
      */
     private void inviteUser(User user, TextView inviteButton) {
         if (user == null || TextUtils.isEmpty(currentEventId)) {
@@ -226,7 +236,10 @@ public class InviteCoOrganizerActivity extends AppCompatActivity {
     }
 
     /**
-     * Handles resolve Contact.
+     * Returns the result of resolve contact.
+     *
+     * @param user the user
+     * @return the result of this call
      */
     private String resolveContact(User user) {
         if (user == null) {
@@ -242,14 +255,18 @@ public class InviteCoOrganizerActivity extends AppCompatActivity {
     }
 
     /**
-     * Updates loading.
+     * Updates the loading.
+     *
+     * @param isLoading whether loading
      */
     private void setLoading(boolean isLoading) {
         loadingIndicator.setVisibility(isLoading ? View.VISIBLE : View.GONE);
     }
 
     /**
-     * Shows empty state.
+     * Performs show empty state.
+     *
+     * @param show the show
      */
     private void showEmptyState(boolean show) {
         emptyText.setVisibility(show ? View.VISIBLE : View.GONE);

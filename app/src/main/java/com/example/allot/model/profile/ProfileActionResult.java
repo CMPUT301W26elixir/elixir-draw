@@ -9,11 +9,11 @@ public class ProfileActionResult {
     private final ProfileFormSnapshot formSnapshot;
 
     /**
-     * Creates a profile action result for the view layer.
+     * Creates a new ProfileActionResult instance.
      *
-     * @param success true when the action succeeded
-     * @param message the message shown to the user
-     * @param formSnapshot the latest form snapshot after the action
+     * @param success the success
+     * @param message the message
+     * @param formSnapshot the form snapshot
      */
     public ProfileActionResult(boolean success, String message, ProfileFormSnapshot formSnapshot) {
         this.success = success;
@@ -22,21 +22,27 @@ public class ProfileActionResult {
     }
 
     /**
-     * @return true when the profile action succeeded
+     * Returns whether success.
+     *
+     * @return whether success
      */
     public boolean isSuccess() {
         return success;
     }
 
     /**
-     * @return the user-facing result message
+     * Returns the message.
+     *
+     * @return the message
      */
     public String getMessage() {
         return message;
     }
 
     /**
-     * @return the latest profile form snapshot
+     * Returns the form snapshot.
+     *
+     * @return the form snapshot
      */
     public ProfileFormSnapshot getFormSnapshot() {
         return formSnapshot;

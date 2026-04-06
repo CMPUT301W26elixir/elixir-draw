@@ -22,13 +22,19 @@ public class AdminPosterListAdapter extends RecyclerView.Adapter<AdminPosterList
 
     public interface OnDeleteClickListener {
         /**
-         * Handles on Delete Click.
+         * Handles the delete click callback.
+         *
+         * @param event the event
+         * @param position the position
          */
         void onDeleteClick(Event event, int position);
     }
 
     /**
      * Creates a new AdminPosterListAdapter instance.
+     *
+     * @param posterEvents the poster events
+     * @param onDeleteClickListener the on delete click listener
      */
     public AdminPosterListAdapter(List<Event> posterEvents, OnDeleteClickListener onDeleteClickListener) {
         this.posterEvents = posterEvents;
@@ -36,7 +42,11 @@ public class AdminPosterListAdapter extends RecyclerView.Adapter<AdminPosterList
     }
 
     /**
-     * Handles on Create View Holder.
+     * Returns the result of on create view holder.
+     *
+     * @param parent the parent
+     * @param viewType the view type
+     * @return the result of this call
      */
     @NonNull
     @Override
@@ -47,7 +57,10 @@ public class AdminPosterListAdapter extends RecyclerView.Adapter<AdminPosterList
     }
 
     /**
-     * Handles on Bind View Holder.
+     * Handles the bind view holder callback.
+     *
+     * @param holder the holder
+     * @param position the position
      */
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
@@ -56,7 +69,9 @@ public class AdminPosterListAdapter extends RecyclerView.Adapter<AdminPosterList
     }
 
     /**
-     * Returns whether g.et Item Count
+     * Returns the item count.
+     *
+     * @return the item count
      */
     @Override
     public int getItemCount() {
@@ -70,7 +85,9 @@ public class AdminPosterListAdapter extends RecyclerView.Adapter<AdminPosterList
         private final Button deleteButton;
 
         /**
-         * Documents view Holder.
+         * Creates a new ViewHolder instance.
+         *
+         * @param itemView the item view
          */
         ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -81,7 +98,11 @@ public class AdminPosterListAdapter extends RecyclerView.Adapter<AdminPosterList
         }
 
         /**
-         * Binds .
+         * Performs bind.
+         *
+         * @param event the event
+         * @param position the position
+         * @param listener the listener
          */
         void bind(Event event, int position, OnDeleteClickListener listener) {
             eventTitleText.setText(event.getTitle());

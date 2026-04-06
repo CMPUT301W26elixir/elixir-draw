@@ -38,6 +38,8 @@ public class ProfilePhotoCropView extends AppCompatImageView {
 
     /**
      * Creates a new ProfilePhotoCropView instance.
+     *
+     * @param context the context
      */
     public ProfilePhotoCropView(@NonNull Context context) {
         this(context, null);
@@ -45,6 +47,9 @@ public class ProfilePhotoCropView extends AppCompatImageView {
 
     /**
      * Creates a new ProfilePhotoCropView instance.
+     *
+     * @param context the context
+     * @param attrs the attrs
      */
     public ProfilePhotoCropView(@NonNull Context context, @Nullable AttributeSet attrs) {
         this(context, attrs, 0);
@@ -52,6 +57,10 @@ public class ProfilePhotoCropView extends AppCompatImageView {
 
     /**
      * Creates a new ProfilePhotoCropView instance.
+     *
+     * @param context the context
+     * @param attrs the attrs
+     * @param defStyleAttr the def style attr
      */
     public ProfilePhotoCropView(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
@@ -65,7 +74,9 @@ public class ProfilePhotoCropView extends AppCompatImageView {
     }
 
     /**
-     * Updates crop bitmap.
+     * Updates the crop bitmap.
+     *
+     * @param bitmap the bitmap
      */
     public void setCropBitmap(@Nullable Bitmap bitmap) {
         this.bitmap = bitmap;
@@ -80,7 +91,10 @@ public class ProfilePhotoCropView extends AppCompatImageView {
     }
 
     /**
-     * Builds cropped bitmap.
+     * Returns the result of build cropped bitmap.
+     *
+     * @param outputSizePx the output size px
+     * @return the result of this call
      */
     @Nullable
     public Bitmap buildCroppedBitmap(int outputSizePx) {
@@ -117,7 +131,12 @@ public class ProfilePhotoCropView extends AppCompatImageView {
     }
 
     /**
-     * Handles on Size Changed.
+     * Handles the size changed callback.
+     *
+     * @param w the w
+     * @param h the h
+     * @param oldw the oldw
+     * @param oldh the oldh
      */
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
@@ -127,7 +146,10 @@ public class ProfilePhotoCropView extends AppCompatImageView {
     }
 
     /**
-     * Handles on Touch Event.
+     * Returns the result of on touch event.
+     *
+     * @param event the event
+     * @return the result of this call
      */
     @Override
     public boolean onTouchEvent(MotionEvent event) {
@@ -169,7 +191,9 @@ public class ProfilePhotoCropView extends AppCompatImageView {
     }
 
     /**
-     * Handles on Draw.
+     * Handles the draw callback.
+     *
+     * @param canvas the canvas
      */
     @Override
     protected void onDraw(Canvas canvas) {
@@ -186,7 +210,10 @@ public class ProfilePhotoCropView extends AppCompatImageView {
     }
 
     /**
-     * Updates crop rect.
+     * Performs update crop rect.
+     *
+     * @param width the width
+     * @param height the height
      */
     private void updateCropRect(int width, int height) {
         float margin = dpToPx(24);
@@ -197,7 +224,7 @@ public class ProfilePhotoCropView extends AppCompatImageView {
     }
 
     /**
-     * Handles reset Image Position.
+     * Performs reset image position.
      */
     private void resetImagePosition() {
         if (bitmap == null || getWidth() == 0 || getHeight() == 0 || cropRect.width() <= 0f) {
@@ -220,7 +247,7 @@ public class ProfilePhotoCropView extends AppCompatImageView {
     }
 
     /**
-     * Handles constrain Image.
+     * Performs constrain image.
      */
     private void constrainImage() {
         if (bitmap == null) {
@@ -247,7 +274,10 @@ public class ProfilePhotoCropView extends AppCompatImageView {
     }
 
     /**
-     * Handles dp To Px.
+     * Returns the result of dp to px.
+     *
+     * @param dp the dp
+     * @return the result of this call
      */
     private float dpToPx(int dp) {
         return dp * getResources().getDisplayMetrics().density;
@@ -255,7 +285,10 @@ public class ProfilePhotoCropView extends AppCompatImageView {
 
     private class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {
         /**
-         * Handles on Scale.
+         * Returns the result of on scale.
+         *
+         * @param detector the detector
+         * @return the result of this call
          */
         @Override
         public boolean onScale(ScaleGestureDetector detector) {

@@ -18,6 +18,11 @@ public class EventScanResult {
 
     /**
      * Creates a new EventScanResult instance.
+     *
+     * @param status the status
+     * @param event the event
+     * @param eventId the event id
+     * @param messageResId the message res id
      */
     private EventScanResult(Status status, Event event, String eventId, Integer messageResId) {
         this.status = status;
@@ -27,7 +32,10 @@ public class EventScanResult {
     }
 
     /**
-     * Opens event.
+     * Returns the result of open event.
+     *
+     * @param event the event
+     * @return the result of this call
      */
     public static EventScanResult openEvent(Event event) {
         String eventId = event == null ? "" : event.getEventId();
@@ -35,56 +43,78 @@ public class EventScanResult {
     }
 
     /**
-     * Handles invalid Payload.
+     * Returns the result of invalid payload.
+     *
+     * @param eventId the event id
+     * @param messageResId the message res id
+     * @return the result of this call
      */
     public static EventScanResult invalidPayload(String eventId, int messageResId) {
         return new EventScanResult(Status.INVALID_PAYLOAD, null, eventId, messageResId);
     }
 
     /**
-     * Handles event Not Found.
+     * Returns the result of event not found.
+     *
+     * @param eventId the event id
+     * @param messageResId the message res id
+     * @return the result of this call
      */
     public static EventScanResult eventNotFound(String eventId, int messageResId) {
         return new EventScanResult(Status.EVENT_NOT_FOUND, null, eventId, messageResId);
     }
 
     /**
-     * Loads error.
+     * Returns the result of load error.
+     *
+     * @param eventId the event id
+     * @param messageResId the message res id
+     * @return the result of this call
      */
     public static EventScanResult loadError(String eventId, int messageResId) {
         return new EventScanResult(Status.LOAD_ERROR, null, eventId, messageResId);
     }
 
     /**
-     * Returns whether g.et Status
+     * Returns the status.
+     *
+     * @return the status
      */
     public Status getStatus() {
         return status;
     }
 
     /**
-     * Returns whether g.et Event
+     * Returns the event.
+     *
+     * @return the event
      */
     public Event getEvent() {
         return event;
     }
 
     /**
-     * Returns whether g.et Event Id
+     * Returns the event id.
+     *
+     * @return the event id
      */
     public String getEventId() {
         return eventId;
     }
 
     /**
-     * Returns whether g.et Message Res Id
+     * Returns the message res id.
+     *
+     * @return the message res id
      */
     public Integer getMessageResId() {
         return messageResId;
     }
 
     /**
-     * Returns whether s.hould Open Event
+     * Returns whether this instance should open event.
+     *
+     * @return whether this instance should open event
      */
     public boolean shouldOpenEvent() {
         return status == Status.OPEN_EVENT && event != null;

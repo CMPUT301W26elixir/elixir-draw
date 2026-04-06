@@ -14,7 +14,7 @@ public class EventFormServiceTest {
     private EventFormService service;
 
     /**
-     * Updates up.
+     * Updates the up.
      */
     @Before
     public void setUp() {
@@ -22,7 +22,7 @@ public class EventFormServiceTest {
     }
 
     /**
-     * Builds create event input_returns valid input for good form.
+     * Performs build create event input returns valid input for good form.
      */
     @Test
     public void buildCreateEventInput_returnsValidInputForGoodForm() {
@@ -35,7 +35,7 @@ public class EventFormServiceTest {
     }
 
     /**
-     * Builds update event input_fails when required fields missing.
+     * Performs build update event input fails when required fields missing.
      */
     @Test
     public void buildUpdateEventInput_failsWhenRequiredFieldsMissing() {
@@ -64,7 +64,7 @@ public class EventFormServiceTest {
     }
 
     /**
-     * Builds update event input_fails for invalid date.
+     * Performs build update event input fails for invalid date.
      */
     @Test
     public void buildUpdateEventInput_failsForInvalidDate() {
@@ -93,7 +93,7 @@ public class EventFormServiceTest {
     }
 
     /**
-     * Builds update event input_fails for invalid price.
+     * Performs build update event input fails for invalid price.
      */
     @Test
     public void buildUpdateEventInput_failsForInvalidPrice() {
@@ -122,7 +122,7 @@ public class EventFormServiceTest {
     }
 
     /**
-     * Builds update event input_fails for invalid participants.
+     * Performs build update event input fails for invalid participants.
      */
     @Test
     public void buildUpdateEventInput_failsForInvalidParticipants() {
@@ -151,7 +151,7 @@ public class EventFormServiceTest {
     }
 
     /**
-     * Builds update event input_fails for invalid date ordering.
+     * Performs build update event input fails for invalid date ordering.
      */
     @Test
     public void buildUpdateEventInput_failsForInvalidDateOrdering() {
@@ -180,7 +180,9 @@ public class EventFormServiceTest {
     }
 
     /**
-     * Builds valid form data.
+     * Returns the result of build valid form data.
+     *
+     * @return the result of this call
      */
     private EventFormData buildValidFormData() {
         return new EventFormData(

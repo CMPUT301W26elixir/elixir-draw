@@ -23,7 +23,7 @@ import org.junit.runner.RunWith;
 public class ExploreJoinEventFlowTest {
 
     /**
-     * Handles disable Animations.
+     * Performs disable animations.
      */
     @Before
     public void disableAnimations() {
@@ -31,7 +31,9 @@ public class ExploreJoinEventFlowTest {
     }
 
     /**
-     * Builds intent.
+     * Returns the result of build intent.
+     *
+     * @return the result of this call
      */
     private Intent buildIntent() {
         Intent intent = new Intent(ApplicationProvider.getApplicationContext(), ExploreActivity.class);
@@ -48,7 +50,7 @@ public class ExploreJoinEventFlowTest {
     }
 
     /**
-     * Handles explore To Event Detail To Join Dialog_flow Works.
+     * Performs explore to event detail to join dialog flow works.
      */
     @Test
     public void exploreToEventDetailToJoinDialog_flowWorks() {

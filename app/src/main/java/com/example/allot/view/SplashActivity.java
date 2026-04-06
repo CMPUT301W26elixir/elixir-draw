@@ -34,7 +34,9 @@ public class SplashActivity extends AppCompatActivity {
             });
 
     /**
-     * Handles on Create.
+     * Handles the create callback.
+     *
+     * @param savedInstanceState the saved instance state
      */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,7 +47,7 @@ public class SplashActivity extends AppCompatActivity {
     }
 
     /**
-     * Handles ask Notification Permission.
+     * Performs ask notification permission.
      */
     private void askNotificationPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -61,7 +63,7 @@ public class SplashActivity extends AppCompatActivity {
     }
 
     /**
-     * Handles proceed To App.
+     * Performs proceed to app.
      */
     private void proceedToApp() {
         new Handler().postDelayed(() -> {

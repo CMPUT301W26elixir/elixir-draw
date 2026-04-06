@@ -39,7 +39,9 @@ public class InviteEntrantActivity extends AppCompatActivity {
     private final Set<String> excludedUserIds = new HashSet<>();
 
     /**
-     * Handles on Create.
+     * Handles the create callback.
+     *
+     * @param savedInstanceState the saved instance state
      */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,7 +57,7 @@ public class InviteEntrantActivity extends AppCompatActivity {
     }
 
     /**
-     * Handles finish.
+     * Performs finish.
      */
     @Override
     public void finish() {
@@ -64,7 +66,7 @@ public class InviteEntrantActivity extends AppCompatActivity {
     }
 
     /**
-     * Binds views.
+     * Performs bind views.
      */
     private void bindViews() {
         ImageButton backButton = findViewById(R.id.backButton);
@@ -79,7 +81,7 @@ public class InviteEntrantActivity extends AppCompatActivity {
     }
 
     /**
-     * Loads event.
+     * Performs load event.
      */
     private void loadEvent() {
         if (TextUtils.isEmpty(eventId)) {
@@ -107,7 +109,9 @@ public class InviteEntrantActivity extends AppCompatActivity {
     }
 
     /**
-     * Builds excluded users.
+     * Performs build excluded users.
+     *
+     * @param event the event
      */
     private void buildExcludedUsers(Event event) {
         excludedUserIds.clear();
@@ -133,7 +137,7 @@ public class InviteEntrantActivity extends AppCompatActivity {
     }
 
     /**
-     * Handles run Search.
+     * Performs run search.
      */
     private void runSearch() {
         String query = searchInput.getText() == null ? "" : searchInput.getText().toString().trim();
@@ -153,7 +157,10 @@ public class InviteEntrantActivity extends AppCompatActivity {
     }
 
     /**
-     * Filters users.
+     * Returns the result of filter users.
+     *
+     * @param users the users
+     * @return the result of this call
      */
     private List<User> filterUsers(List<User> users) {
         List<User> filtered = new ArrayList<>();
@@ -174,7 +181,9 @@ public class InviteEntrantActivity extends AppCompatActivity {
     }
 
     /**
-     * Handles render Results.
+     * Performs render results.
+     *
+     * @param users the users
      */
     private void renderResults(List<User> users) {
         resultsContainer.removeAllViews();
@@ -193,7 +202,10 @@ public class InviteEntrantActivity extends AppCompatActivity {
     }
 
     /**
-     * Binds row.
+     * Performs bind row.
+     *
+     * @param row the row
+     * @param user the user
      */
     private void bindRow(View row, User user) {
         TextView userNameText = row.findViewById(R.id.userNameText);
@@ -207,7 +219,10 @@ public class InviteEntrantActivity extends AppCompatActivity {
     }
 
     /**
-     * Handles invite User.
+     * Performs invite user.
+     *
+     * @param user the user
+     * @param inviteButton the invite button
      */
     private void inviteUser(User user, TextView inviteButton) {
         if (user == null || TextUtils.isEmpty(user.getDeviceId())) {
@@ -229,7 +244,10 @@ public class InviteEntrantActivity extends AppCompatActivity {
     }
 
     /**
-     * Builds user detail.
+     * Returns the result of build user detail.
+     *
+     * @param user the user
+     * @return the result of this call
      */
     private String buildUserDetail(User user) {
         String email = user.getEmail();

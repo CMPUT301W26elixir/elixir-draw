@@ -18,7 +18,11 @@ public class FcmNotificationSender {
     private static final String SERVER_KEY = "YOUR_SERVER_KEY_HERE";
 
     /**
-     * Handles send Push Notification.
+     * Performs send push notification.
+     *
+     * @param userId the user id
+     * @param title the title
+     * @param body the body
      */
     public void sendPushNotification(String userId, String title, String body) {
         if (userId == null || userId.isEmpty()) return;
@@ -37,7 +41,11 @@ public class FcmNotificationSender {
     }
 
     /**
-     * Handles trigger Fcm Request.
+     * Performs trigger fcm request.
+     *
+     * @param token the token
+     * @param title the title
+     * @param body the body
      */
     private void triggerFcmRequest(String token, String title, String body) {
         new Thread(() -> {

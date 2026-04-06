@@ -32,10 +32,9 @@ public class OfferResponseActivity extends AppCompatActivity {
     private MaterialButton declineButton;
 
     /**
-     * Initializes the activity, reads event data from the intent,
-     * binds views, sets static content, and registers button listeners.
+     * Handles the create callback.
      *
-     * @param savedInstanceState the saved activity state
+     * @param savedInstanceState the saved instance state
      */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,7 +52,7 @@ public class OfferResponseActivity extends AppCompatActivity {
     }
 
     /**
-     * Finishes the activity without transition animation.
+     * Performs finish.
      */
     @Override
     public void finish() {
@@ -62,7 +61,7 @@ public class OfferResponseActivity extends AppCompatActivity {
     }
 
     /**
-     * Binds all view references used by the activity.
+     * Performs bind views.
      */
     private void bindViews() {
         eventTitleText = findViewById(R.id.offerEventTitleText);
@@ -73,7 +72,7 @@ public class OfferResponseActivity extends AppCompatActivity {
     }
 
     /**
-     * Sets up the header back button behavior.
+     * Updates the up header.
      */
     private void setupHeader() {
         ImageButton backButton = findViewById(R.id.backButton);
@@ -81,14 +80,14 @@ public class OfferResponseActivity extends AppCompatActivity {
     }
 
     /**
-     * Displays the event title or a fallback value if no title was provided.
+     * Performs bind static content.
      */
     private void bindStaticContent() {
         eventTitleText.setText(UiHelper.defaultText(currentEventTitle, getString(R.string.default_event_name)));
     }
 
     /**
-     * Registers click listeners for the accept and decline actions.
+     * Updates the up listeners.
      */
     private void setupListeners() {
         acceptButton.setOnClickListener(view -> acceptOffer());
@@ -96,8 +95,7 @@ public class OfferResponseActivity extends AppCompatActivity {
     }
 
     /**
-     * Accepts the current offer and updates the event state in Firestore.
-     * Marks the current user as enrolled and updates their waiting list status.
+     * Performs accept offer.
      */
     private void acceptOffer() {
         if (isSubmitting || TextUtils.isEmpty(currentEventId)) {
@@ -119,7 +117,7 @@ public class OfferResponseActivity extends AppCompatActivity {
     }
 
     /**
-     * Starts the decline flow by loading the current event state from Firestore.
+     * Performs decline offer.
      */
     private void declineOffer() {
         if (isSubmitting || TextUtils.isEmpty(currentEventId)) {
@@ -141,10 +139,9 @@ public class OfferResponseActivity extends AppCompatActivity {
     }
 
     /**
-     * Updates the submitting state of the screen, including loading visibility
-     * and button enabled states.
+     * Updates the submitting.
      *
-     * @param submitting true if an action is currently being submitted, false otherwise
+     * @param submitting the submitting
      */
     private void setSubmitting(boolean submitting) {
         isSubmitting = submitting;

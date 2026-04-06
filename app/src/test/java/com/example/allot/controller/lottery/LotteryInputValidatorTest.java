@@ -11,7 +11,7 @@ public class LotteryInputValidatorTest {
     private LotteryInputValidator validator;
 
     /**
-     * Updates up.
+     * Updates the up.
      */
     @Before
     public void setUp() {
@@ -19,7 +19,7 @@ public class LotteryInputValidatorTest {
     }
 
     /**
-     * Returns whether i.s Valid_returns True For Valid Date And Attendee Count
+     * Performs is valid returns true for valid date and attendee count.
      */
     @Test
     public void isValid_returnsTrueForValidDateAndAttendeeCount() {
@@ -27,7 +27,7 @@ public class LotteryInputValidatorTest {
     }
 
     /**
-     * Handles parse Draw Date_returns Null For Invalid Date.
+     * Performs parse draw date returns null for invalid date.
      */
     @Test
     public void parseDrawDate_returnsNullForInvalidDate() {
@@ -35,7 +35,7 @@ public class LotteryInputValidatorTest {
     }
 
     /**
-     * Handles parse Positive Int_returns Null For Non Positive Or Invalid Input.
+     * Performs parse positive int returns null for non positive or invalid input.
      */
     @Test
     public void parsePositiveInt_returnsNullForNonPositiveOrInvalidInput() {

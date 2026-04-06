@@ -19,7 +19,7 @@ public class ProfileControllerTest {
     private ProfileController controller;
 
     /**
-     * Updates up.
+     * Updates the up.
      */
     @Before
     public void setUp() {
@@ -28,7 +28,7 @@ public class ProfileControllerTest {
     }
 
     /**
-     * Loads profile_returns snapshot from loaded user.
+     * Performs load profile returns snapshot from loaded user.
      */
     @Test
     public void loadProfile_returnsSnapshotFromLoadedUser() {
@@ -51,7 +51,7 @@ public class ProfileControllerTest {
     }
 
     /**
-     * Loads profile_returns failure when user missing.
+     * Performs load profile returns failure when user missing.
      */
     @Test
     public void loadProfile_returnsFailureWhenUserMissing() {
@@ -65,7 +65,7 @@ public class ProfileControllerTest {
     }
 
     /**
-     * Returns whether i.s Save Available_only When Changed And Idle
+     * Performs is save available only when changed and idle.
      */
     @Test
     public void isSaveAvailable_onlyWhenChangedAndIdle() {
@@ -79,7 +79,7 @@ public class ProfileControllerTest {
     }
 
     /**
-     * Saves profile_returns saved snapshot on success.
+     * Performs save profile returns saved snapshot on success.
      */
     @Test
     public void saveProfile_returnsSavedSnapshotOnSuccess() {
@@ -100,7 +100,7 @@ public class ProfileControllerTest {
     }
 
     /**
-     * Saves profile_returns failure message when update fails.
+     * Performs save profile returns failure message when update fails.
      */
     @Test
     public void saveProfile_returnsFailureMessageWhenUpdateFails() {
@@ -116,7 +116,7 @@ public class ProfileControllerTest {
     }
 
     /**
-     * Deletes profile_returns success and failure messages.
+     * Performs delete profile returns success and failure messages.
      */
     @Test
     public void deleteProfile_returnsSuccessAndFailureMessages() {
@@ -148,14 +148,16 @@ public class ProfileControllerTest {
         private boolean deleteSuccess;
 
         /**
-         * Handles fake User Controller.
+         * Creates a new FakeUserController instance.
          */
         private FakeUserController() {
             super(null, new DeviceSessionManager(new FakeDeviceSessionStore("device-1")));
         }
 
         /**
-         * Loads current user.
+         * Performs load current user.
+         *
+         * @param listener the listener
          */
         @Override
         public void loadCurrentUser(com.example.allot.common.OnCompleteListener<User> listener) {
@@ -163,7 +165,14 @@ public class ProfileControllerTest {
         }
 
         /**
-         * Updates user profile.
+         * Performs update user profile.
+         *
+         * @param firstName the first name
+         * @param lastName the last name
+         * @param email the email
+         * @param phone the phone
+         * @param notiEnabled the noti enabled
+         * @param listener the listener
          */
         @Override
         public void updateUserProfile(String firstName, String lastName, String email, String phone,
@@ -172,7 +181,9 @@ public class ProfileControllerTest {
         }
 
         /**
-         * Deletes current user.
+         * Performs delete current user.
+         *
+         * @param listener the listener
          */
         @Override
         public void deleteCurrentUser(com.example.allot.common.OnCompleteListener<Boolean> listener) {
@@ -184,14 +195,18 @@ public class ProfileControllerTest {
         private final String deviceId;
 
         /**
-         * Handles fake Device Session Store.
+         * Creates a new FakeDeviceSessionStore instance.
+         *
+         * @param deviceId the device id
          */
         private FakeDeviceSessionStore(String deviceId) {
             this.deviceId = deviceId;
         }
 
         /**
-         * Returns whether g.et Device Id
+         * Returns the device id.
+         *
+         * @return the device id
          */
         @Override
         public String getDeviceId() {
@@ -199,7 +214,9 @@ public class ProfileControllerTest {
         }
 
         /**
-         * Saves device id.
+         * Performs save device id.
+         *
+         * @param deviceId the device id
          */
         @Override
         public void saveDeviceId(String deviceId) {

@@ -84,7 +84,9 @@ public class CreateEventActivity extends AppCompatActivity {
             });
 
     /**
-     * Handles on Create.
+     * Handles the create callback.
+     *
+     * @param savedInstanceState the saved instance state
      */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -101,7 +103,7 @@ public class CreateEventActivity extends AppCompatActivity {
     }
 
     /**
-     * Handles finish.
+     * Performs finish.
      */
     @Override
     public void finish() {
@@ -110,7 +112,7 @@ public class CreateEventActivity extends AppCompatActivity {
     }
 
     /**
-     * Binds views.
+     * Performs bind views.
      */
     private void bindViews() {
         EditText eventNameInput = findViewById(R.id.eventNameInput);
@@ -146,7 +148,7 @@ public class CreateEventActivity extends AppCompatActivity {
     }
 
     /**
-     * Updates up header.
+     * Updates the up header.
      */
     private void setupHeader() {
         ImageButton backButton = findViewById(R.id.backButton);
@@ -154,7 +156,7 @@ public class CreateEventActivity extends AppCompatActivity {
     }
 
     /**
-     * Updates up listeners.
+     * Updates the up listeners.
      */
     private void setupListeners() {
         configureLocationPicker();
@@ -168,7 +170,7 @@ public class CreateEventActivity extends AppCompatActivity {
     }
 
     /**
-     * Handles configure Location Picker.
+     * Performs configure location picker.
      */
     private void configureLocationPicker() {
         locationInput.setKeyListener(null);
@@ -178,7 +180,7 @@ public class CreateEventActivity extends AppCompatActivity {
     }
 
     /**
-     * Opens place autocomplete.
+     * Performs open place autocomplete.
      */
     private void openPlaceAutocomplete() {
         if (!ensurePlacesInitialized()) {
@@ -191,7 +193,9 @@ public class CreateEventActivity extends AppCompatActivity {
     }
 
     /**
-     * Handles ensure Places Initialized.
+     * Returns the result of ensure places initialized.
+     *
+     * @return the result of this call
      */
     private boolean ensurePlacesInitialized() {
         if (TextUtils.isEmpty(BuildConfig.PLACES_API_KEY)) {
@@ -205,7 +209,7 @@ public class CreateEventActivity extends AppCompatActivity {
     }
 
     /**
-     * Handles submit Event.
+     * Performs submit event.
      */
     private void submitEvent() {
         if (isSaving) {
@@ -257,7 +261,7 @@ public class CreateEventActivity extends AppCompatActivity {
     }
 
     /**
-     * Handles render Poster Selection.
+     * Performs render poster selection.
      */
     private void renderPosterSelection() {
         boolean hasPoster = selectedPosterUri != null;
@@ -276,7 +280,9 @@ public class CreateEventActivity extends AppCompatActivity {
     }
 
     /**
-     * Opens event created screen.
+     * Performs open event created screen.
+     *
+     * @param event the event
      */
     private void openEventCreatedScreen(Event event) {
         if (event == null) {
@@ -297,7 +303,9 @@ public class CreateEventActivity extends AppCompatActivity {
     }
 
     /**
-     * Handles read Form Data.
+     * Returns the result of read form data.
+     *
+     * @return the result of this call
      */
     private EventFormData readFormData() {
         return formUiHelper.readFormData();

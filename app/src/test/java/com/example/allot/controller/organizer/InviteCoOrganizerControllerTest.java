@@ -21,7 +21,7 @@ public class InviteCoOrganizerControllerTest {
     private InviteCoOrganizerController controller;
 
     /**
-     * Updates up.
+     * Updates the up.
      */
     @Before
     public void setUp() {
@@ -31,7 +31,7 @@ public class InviteCoOrganizerControllerTest {
     }
 
     /**
-     * Handles methods_delegate To Dependencies.
+     * Performs methods delegate to dependencies.
      */
     @Test
     public void methods_delegateToDependencies() {
@@ -60,7 +60,7 @@ public class InviteCoOrganizerControllerTest {
     }
 
     /**
-     * Returns whether i.s Organizer Or Co Organizer_checks Organizer And Co Organizer Membership
+     * Performs is organizer or co organizer checks organizer and co organizer membership.
      */
     @Test
     public void isOrganizerOrCoOrganizer_checksOrganizerAndCoOrganizerMembership() {
@@ -87,14 +87,17 @@ public class InviteCoOrganizerControllerTest {
         private String inviteDeviceId;
 
         /**
-         * Handles fake Event Repository.
+         * Creates a new FakeEventRepository instance.
          */
         private FakeEventRepository() {
             super((com.google.firebase.firestore.FirebaseFirestore) null);
         }
 
         /**
-         * Returns whether g.et Event By Id
+         * Performs get event by id.
+         *
+         * @param eventId the event id
+         * @param listener the listener
          */
         @Override
         public void getEventById(String eventId, com.example.allot.common.OnCompleteListener<Event> listener) {
@@ -102,7 +105,11 @@ public class InviteCoOrganizerControllerTest {
         }
 
         /**
-         * Handles invite Co Organizer.
+         * Performs invite co organizer.
+         *
+         * @param eventId the event id
+         * @param deviceId the device id
+         * @param listener the listener
          */
         @Override
         public void inviteCoOrganizer(String eventId, String deviceId,
@@ -117,14 +124,17 @@ public class InviteCoOrganizerControllerTest {
         private List<User> searchResults;
 
         /**
-         * Handles fake User Controller.
+         * Creates a new FakeUserController instance.
          */
         private FakeUserController() {
             super(null, new DeviceSessionManager(new FakeDeviceSessionStore("device-1")));
         }
 
         /**
-         * Handles search Users.
+         * Performs search users.
+         *
+         * @param query the query
+         * @param listener the listener
          */
         @Override
         public void searchUsers(String query, com.example.allot.common.OnCompleteListener<List<User>> listener) {
@@ -136,14 +146,18 @@ public class InviteCoOrganizerControllerTest {
         private final String deviceId;
 
         /**
-         * Handles fake Device Session Store.
+         * Creates a new FakeDeviceSessionStore instance.
+         *
+         * @param deviceId the device id
          */
         private FakeDeviceSessionStore(String deviceId) {
             this.deviceId = deviceId;
         }
 
         /**
-         * Returns whether g.et Device Id
+         * Returns the device id.
+         *
+         * @return the device id
          */
         @Override
         public String getDeviceId() {
@@ -151,7 +165,9 @@ public class InviteCoOrganizerControllerTest {
         }
 
         /**
-         * Saves device id.
+         * Performs save device id.
+         *
+         * @param deviceId the device id
          */
         @Override
         public void saveDeviceId(String deviceId) {

@@ -31,7 +31,9 @@ public class ProfilePhotoCropActivity extends AppCompatActivity {
     private Uri inputUri;
 
     /**
-     * Handles on Create.
+     * Handles the create callback.
+     *
+     * @param savedInstanceState the saved instance state
      */
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -61,7 +63,7 @@ public class ProfilePhotoCropActivity extends AppCompatActivity {
     }
 
     /**
-     * Loads crop image.
+     * Performs load crop image.
      */
     private void loadCropImage() {
         usePhotoButton.setEnabled(false);
@@ -91,7 +93,7 @@ public class ProfilePhotoCropActivity extends AppCompatActivity {
     }
 
     /**
-     * Handles export Cropped Photo.
+     * Performs export cropped photo.
      */
     private void exportCroppedPhoto() {
         usePhotoButton.setEnabled(false);
@@ -119,7 +121,10 @@ public class ProfilePhotoCropActivity extends AppCompatActivity {
     }
 
     /**
-     * Handles write Bitmap To Cache.
+     * Returns the result of write bitmap to cache.
+     *
+     * @param bitmap the bitmap
+     * @return the result of this call
      */
     @Nullable
     private Uri writeBitmapToCache(Bitmap bitmap) {
@@ -135,7 +140,10 @@ public class ProfilePhotoCropActivity extends AppCompatActivity {
     }
 
     /**
-     * Loads bitmap.
+     * Returns the result of load bitmap.
+     *
+     * @param imageUri the image uri
+     * @return the result of this call
      */
     @Nullable
     private Bitmap loadBitmap(Uri imageUri) throws IOException {
@@ -166,7 +174,11 @@ public class ProfilePhotoCropActivity extends AppCompatActivity {
     }
 
     /**
-     * Handles calculate Sample Size.
+     * Returns the result of calculate sample size.
+     *
+     * @param width the width
+     * @param height the height
+     * @return the result of this call
      */
     private int calculateSampleSize(int width, int height) {
         int largestDimension = Math.max(width, height);

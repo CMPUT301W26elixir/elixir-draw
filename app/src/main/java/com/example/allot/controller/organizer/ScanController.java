@@ -21,16 +21,18 @@ public class ScanController {
 
     /**
      * Creates a new ScanController instance.
+     *
+     * @param eventRepository the event repository
      */
     ScanController(EventRepository eventRepository) {
         this.eventRepository = eventRepository;
     }
 
     /**
-     * Validates a raw scanned payload and returns the parsed event ID result.
+     * Returns the result of validate payload.
      *
-     * @param rawPayload the raw scanned QR contents
-     * @return a scan result representing whether the payload is usable
+     * @param rawPayload the raw payload
+     * @return the result of this call
      */
     public EventScanResult validatePayload(String rawPayload) {
         String eventId = rawPayload == null ? "" : rawPayload.trim();
@@ -41,10 +43,10 @@ public class ScanController {
     }
 
     /**
-     * Loads an event for a scanned payload.
+     * Performs load scanned event.
      *
-     * @param rawPayload the raw scanned QR contents
-     * @param listener callback for the resulting state
+     * @param rawPayload the raw payload
+     * @param listener the listener
      */
     public void loadScannedEvent(String rawPayload, OnCompleteListener<EventScanResult> listener) {
         EventScanResult validation = validatePayload(rawPayload);
@@ -68,7 +70,10 @@ public class ScanController {
     }
 
     /**
-     * Builds event stub.
+     * Returns the result of build event stub.
+     *
+     * @param eventId the event id
+     * @return the result of this call
      */
     private Event buildEventStub(String eventId) {
         Event event = new Event();

@@ -6,7 +6,7 @@ import com.example.allot.model.event.EventQrCodePayloadBuilder;
 import org.junit.Test;
 public class ExampleUnitTest {
     /**
-     * Builds event payload_returns trimmed event id.
+     * Performs build event payload returns trimmed event id.
      */
     @Test
     public void buildEventPayload_returnsTrimmedEventId() {
@@ -14,7 +14,7 @@ public class ExampleUnitTest {
     }
 
     /**
-     * Builds event payload_rejects blank event id.
+     * Performs build event payload rejects blank event id.
      */
     @Test(expected = IllegalArgumentException.class)
     public void buildEventPayload_rejectsBlankEventId() {

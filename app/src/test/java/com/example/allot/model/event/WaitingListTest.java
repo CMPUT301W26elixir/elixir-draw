@@ -8,7 +8,7 @@ import org.junit.Test;
 
 public class WaitingListTest {
     /**
-     * Handles join Locations_defaults To Empty Map.
+     * Performs join locations defaults to empty map.
      */
     @Test
     public void joinLocations_defaultsToEmptyMap() {
@@ -18,7 +18,7 @@ public class WaitingListTest {
     }
 
     /**
-     * Handles join Locations_can Store And Read Entries By Device Id.
+     * Performs join locations can store and read entries by device id.
      */
     @Test
     public void joinLocations_canStoreAndReadEntriesByDeviceId() {

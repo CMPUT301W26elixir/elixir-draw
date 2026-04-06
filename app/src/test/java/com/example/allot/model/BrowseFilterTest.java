@@ -8,7 +8,7 @@ import org.junit.Test;
 
 public class BrowseFilterTest {
     /**
-     * Handles two Argument Constructor_sets Only Search And Category.
+     * Performs two argument constructor sets only search and category.
      */
     @Test
     public void twoArgumentConstructor_setsOnlySearchAndCategory() {
@@ -21,7 +21,7 @@ public class BrowseFilterTest {
     }
 
     /**
-     * Handles full Constructor_exposes Advanced Filter Values.
+     * Performs full constructor exposes advanced filter values.
      */
     @Test
     public void fullConstructor_exposesAdvancedFilterValues() {

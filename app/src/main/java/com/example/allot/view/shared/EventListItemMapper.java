@@ -9,12 +9,11 @@ import java.util.List;
 public class EventListItemMapper {
 
     /**
-     * Converts the provided events into displayable list items and marks
-     * events as saved when their IDs appear in the saved list.
+     * Returns the result of map events.
      *
-     * @param events the events to convert into list items
-     * @param savedEventIds the IDs of events currently saved by the user
-     * @return the mapped list items ready for display
+     * @param events the events
+     * @param savedEventIds the saved event ids
+     * @return the result of this call
      */
     public List<EventListItem> mapEvents(List<Event> events, List<String> savedEventIds) {
         List<EventListItem> listItems = new ArrayList<>();

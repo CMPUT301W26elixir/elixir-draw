@@ -16,7 +16,7 @@ public class UserControllerTest {
     private UserController controller;
 
     /**
-     * Updates up.
+     * Updates the up.
      */
     @Before
     public void setUp() {
@@ -25,7 +25,7 @@ public class UserControllerTest {
     }
 
     /**
-     * Loads current user_backfills missing device id on loaded user.
+     * Performs load current user backfills missing device id on loaded user.
      */
     @Test
     public void loadCurrentUser_backfillsMissingDeviceIdOnLoadedUser() {
@@ -41,7 +41,7 @@ public class UserControllerTest {
     }
 
     /**
-     * Loads current user_returns null when missing but successful.
+     * Performs load current user returns null when missing but successful.
      */
     @Test
     public void loadCurrentUser_returnsNullWhenMissingButSuccessful() {
@@ -55,7 +55,7 @@ public class UserControllerTest {
     }
 
     /**
-     * Loads or create user_returns existing user and backfills device id.
+     * Performs load or create user returns existing user and backfills device id.
      */
     @Test
     public void loadOrCreateUser_returnsExistingUserAndBackfillsDeviceId() {
@@ -71,7 +71,7 @@ public class UserControllerTest {
     }
 
     /**
-     * Loads or create user_creates new user when missing.
+     * Performs load or create user creates new user when missing.
      */
     @Test
     public void loadOrCreateUser_createsNewUserWhenMissing() {
@@ -89,7 +89,7 @@ public class UserControllerTest {
     }
 
     /**
-     * Updates user profile_rejects invalid fields.
+     * Performs update user profile rejects invalid fields.
      */
     @Test
     public void updateUserProfile_rejectsInvalidFields() {
@@ -101,7 +101,7 @@ public class UserControllerTest {
     }
 
     /**
-     * Returns whether h.as Completed Profile_requires Name And Email
+     * Performs has completed profile requires name and email.
      */
     @Test
     public void hasCompletedProfile_requiresNameAndEmail() {
@@ -120,7 +120,7 @@ public class UserControllerTest {
     }
 
     /**
-     * Handles toggle Saved Event_and Admin Check_delegate To Repository.
+     * Performs toggle saved event and admin check delegate to repository.
      */
     @Test
     public void toggleSavedEvent_andAdminCheck_delegateToRepository() {
@@ -162,14 +162,17 @@ public class UserControllerTest {
         private Boolean toggleSavedResult;
 
         /**
-         * Handles fake User Repository.
+         * Creates a new FakeUserRepository instance.
          */
         private FakeUserRepository() {
             super((com.google.firebase.firestore.FirebaseFirestore) null);
         }
 
         /**
-         * Handles find User By Device Id.
+         * Performs find user by device id.
+         *
+         * @param deviceId the device id
+         * @param listener the listener
          */
         @Override
         public void findUserByDeviceId(String deviceId, com.example.allot.common.OnCompleteListener<User> listener) {
@@ -177,7 +180,10 @@ public class UserControllerTest {
         }
 
         /**
-         * Returns whether g.et User By Device Id
+         * Performs get user by device id.
+         *
+         * @param deviceId the device id
+         * @param listener the listener
          */
         @Override
         public void getUserByDeviceId(String deviceId, com.example.allot.common.OnCompleteListener<User> listener) {
@@ -185,7 +191,9 @@ public class UserControllerTest {
         }
 
         /**
-         * Handles backfill Device Id.
+         * Performs backfill device id.
+         *
+         * @param deviceId the device id
          */
         @Override
         public void backfillDeviceId(String deviceId) {
@@ -193,7 +201,10 @@ public class UserControllerTest {
         }
 
         /**
-         * Creates new user.
+         * Performs create new user.
+         *
+         * @param deviceId the device id
+         * @param listener the listener
          */
         @Override
         public void createNewUser(String deviceId, com.example.allot.common.OnCompleteListener<User> listener) {
@@ -202,7 +213,15 @@ public class UserControllerTest {
         }
 
         /**
-         * Updates user profile.
+         * Performs update user profile.
+         *
+         * @param deviceId the device id
+         * @param firstName the first name
+         * @param lastName the last name
+         * @param email the email
+         * @param phone the phone
+         * @param notiEnabled the noti enabled
+         * @param listener the listener
          */
         @Override
         public void updateUserProfile(String deviceId, String firstName, String lastName, String email,
@@ -216,7 +235,12 @@ public class UserControllerTest {
         }
 
         /**
-         * Handles toggle Saved Event.
+         * Performs toggle saved event.
+         *
+         * @param deviceId the device id
+         * @param eventId the event id
+         * @param isSaving whether saving
+         * @param listener the listener
          */
         @Override
         public void toggleSavedEvent(String deviceId, String eventId, boolean isSaving,
@@ -231,14 +255,18 @@ public class UserControllerTest {
         private final String deviceId;
 
         /**
-         * Handles fake Device Session Store.
+         * Creates a new FakeDeviceSessionStore instance.
+         *
+         * @param deviceId the device id
          */
         private FakeDeviceSessionStore(String deviceId) {
             this.deviceId = deviceId;
         }
 
         /**
-         * Returns whether g.et Device Id
+         * Returns the device id.
+         *
+         * @return the device id
          */
         @Override
         public String getDeviceId() {
@@ -246,7 +274,9 @@ public class UserControllerTest {
         }
 
         /**
-         * Saves device id.
+         * Performs save device id.
+         *
+         * @param deviceId the device id
          */
         @Override
         public void saveDeviceId(String deviceId) {

@@ -15,7 +15,7 @@ public class ScanControllerTest {
     private ScanController controller;
 
     /**
-     * Updates up.
+     * Updates the up.
      */
     @Before
     public void setUp() {
@@ -24,7 +24,7 @@ public class ScanControllerTest {
     }
 
     /**
-     * Handles validate Payload_accepts Trimmed Event Id.
+     * Performs validate payload accepts trimmed event id.
      */
     @Test
     public void validatePayload_acceptsTrimmedEventId() {
@@ -35,7 +35,7 @@ public class ScanControllerTest {
     }
 
     /**
-     * Handles validate Payload_rejects Blank Payload.
+     * Performs validate payload rejects blank payload.
      */
     @Test
     public void validatePayload_rejectsBlankPayload() {
@@ -46,7 +46,7 @@ public class ScanControllerTest {
     }
 
     /**
-     * Loads scanned event_returns open event when repository finds match.
+     * Performs load scanned event returns open event when repository finds match.
      */
     @Test
     public void loadScannedEvent_returnsOpenEventWhenRepositoryFindsMatch() {
@@ -63,7 +63,7 @@ public class ScanControllerTest {
     }
 
     /**
-     * Loads scanned event_returns not found when event missing.
+     * Performs load scanned event returns not found when event missing.
      */
     @Test
     public void loadScannedEvent_returnsNotFoundWhenEventMissing() {
@@ -78,7 +78,7 @@ public class ScanControllerTest {
     }
 
     /**
-     * Loads scanned event_returns load error when repository fails.
+     * Performs load scanned event returns load error when repository fails.
      */
     @Test
     public void loadScannedEvent_returnsLoadErrorWhenRepositoryFails() {
@@ -96,14 +96,17 @@ public class ScanControllerTest {
         private boolean success = true;
 
         /**
-         * Handles fake Event Repository.
+         * Creates a new FakeEventRepository instance.
          */
         private FakeEventRepository() {
             super((com.google.firebase.firestore.FirebaseFirestore) null);
         }
 
         /**
-         * Returns whether g.et Event By Id
+         * Performs get event by id.
+         *
+         * @param eventId the event id
+         * @param listener the listener
          */
         @Override
         public void getEventById(String eventId, com.example.allot.common.OnCompleteListener<Event> listener) {

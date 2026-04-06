@@ -13,7 +13,7 @@ public class ProfilePhotoControllerTest {
     private ProfilePhotoController controller;
 
     /**
-     * Updates up.
+     * Updates the up.
      */
     @Before
     public void setUp() {
@@ -22,7 +22,7 @@ public class ProfilePhotoControllerTest {
     }
 
     /**
-     * Handles upload Photo_rejects Blank Device Id Or Null Photo.
+     * Performs upload photo rejects blank device id or null photo.
      */
     @Test
     public void uploadPhoto_rejectsBlankDeviceIdOrNullPhoto() {
@@ -38,7 +38,7 @@ public class ProfilePhotoControllerTest {
     }
 
     /**
-     * Deletes photo_rejects blank device id.
+     * Performs delete photo rejects blank device id.
      */
     @Test
     public void deletePhoto_rejectsBlankDeviceId() {
@@ -49,7 +49,7 @@ public class ProfilePhotoControllerTest {
     }
 
     /**
-     * Deletes photo_succeeds without storage delete when url blank.
+     * Performs delete photo succeeds without storage delete when url blank.
      */
     @Test
     public void deletePhoto_succeedsWithoutStorageDeleteWhenUrlBlank() {
@@ -67,14 +67,18 @@ public class ProfilePhotoControllerTest {
         private boolean updatedFieldsCalled;
 
         /**
-         * Handles fake User Repository.
+         * Creates a new FakeUserRepository instance.
          */
         private FakeUserRepository() {
             super((com.google.firebase.firestore.FirebaseFirestore) null);
         }
 
         /**
-         * Updates user fields.
+         * Performs update user fields.
+         *
+         * @param deviceId the device id
+         * @param updates the updates
+         * @param listener the listener
          */
         @Override
         public void updateUserFields(String deviceId, java.util.Map<String, Object> updates,

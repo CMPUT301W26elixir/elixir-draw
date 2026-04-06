@@ -10,10 +10,10 @@ public class EventEntrantsCsvFormatter {
     private static final String HEADER = "Name,Email,Phone";
 
     /**
-     * Converts entrant export rows into CSV text.
+     * Returns the result of format.
      *
-     * @param rows the rows to include after the header
-     * @return CSV text with a header and one line per row
+     * @param rows the rows
+     * @return the result of this call
      */
     public String format(List<EntrantExportRow> rows) {
         StringBuilder builder = new StringBuilder();
@@ -36,7 +36,10 @@ public class EventEntrantsCsvFormatter {
     }
 
     /**
-     * Handles escape Cell.
+     * Returns the result of escape cell.
+     *
+     * @param value the value
+     * @return the result of this call
      */
     private String escapeCell(String value) {
         String safeValue = value == null ? "" : value;

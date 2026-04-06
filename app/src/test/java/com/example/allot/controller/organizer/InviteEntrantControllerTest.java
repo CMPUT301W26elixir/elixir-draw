@@ -19,7 +19,7 @@ public class InviteEntrantControllerTest {
     private InviteEntrantController controller;
 
     /**
-     * Updates up.
+     * Updates the up.
      */
     @Before
     public void setUp() {
@@ -29,7 +29,7 @@ public class InviteEntrantControllerTest {
     }
 
     /**
-     * Handles methods_delegate To Dependencies.
+     * Performs methods delegate to dependencies.
      */
     @Test
     public void methods_delegateToDependencies() {
@@ -65,14 +65,17 @@ public class InviteEntrantControllerTest {
         private String inviteDeviceId;
 
         /**
-         * Handles fake Event Repository.
+         * Creates a new FakeEventRepository instance.
          */
         private FakeEventRepository() {
             super((com.google.firebase.firestore.FirebaseFirestore) null);
         }
 
         /**
-         * Returns whether g.et Event By Id
+         * Performs get event by id.
+         *
+         * @param eventId the event id
+         * @param listener the listener
          */
         @Override
         public void getEventById(String eventId, com.example.allot.common.OnCompleteListener<Event> listener) {
@@ -80,7 +83,11 @@ public class InviteEntrantControllerTest {
         }
 
         /**
-         * Handles invite User To Event.
+         * Performs invite user to event.
+         *
+         * @param eventId the event id
+         * @param deviceId the device id
+         * @param listener the listener
          */
         @Override
         public void inviteUserToEvent(String eventId, String deviceId,
@@ -95,14 +102,17 @@ public class InviteEntrantControllerTest {
         private List<User> searchResults;
 
         /**
-         * Handles fake User Controller.
+         * Creates a new FakeUserController instance.
          */
         private FakeUserController() {
             super(null, new DeviceSessionManager(new FakeDeviceSessionStore("device-1")));
         }
 
         /**
-         * Handles search Users.
+         * Performs search users.
+         *
+         * @param query the query
+         * @param listener the listener
          */
         @Override
         public void searchUsers(String query, com.example.allot.common.OnCompleteListener<List<User>> listener) {
@@ -114,14 +124,18 @@ public class InviteEntrantControllerTest {
         private final String deviceId;
 
         /**
-         * Handles fake Device Session Store.
+         * Creates a new FakeDeviceSessionStore instance.
+         *
+         * @param deviceId the device id
          */
         private FakeDeviceSessionStore(String deviceId) {
             this.deviceId = deviceId;
         }
 
         /**
-         * Returns whether g.et Device Id
+         * Returns the device id.
+         *
+         * @return the device id
          */
         @Override
         public String getDeviceId() {
@@ -129,7 +143,9 @@ public class InviteEntrantControllerTest {
         }
 
         /**
-         * Saves device id.
+         * Performs save device id.
+         *
+         * @param deviceId the device id
          */
         @Override
         public void saveDeviceId(String deviceId) {

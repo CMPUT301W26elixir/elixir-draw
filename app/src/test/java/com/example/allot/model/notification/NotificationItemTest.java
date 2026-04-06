@@ -9,7 +9,7 @@ import org.junit.Test;
 
 public class NotificationItemTest {
     /**
-     * Handles constructor_sets Default Unread State And Timestamp.
+     * Performs constructor sets default unread state and timestamp.
      */
     @Test
     public void constructor_setsDefaultUnreadStateAndTimestamp() {
@@ -24,7 +24,7 @@ public class NotificationItemTest {
     }
 
     /**
-     * Updates ters_update fields.
+     * Updates the ters update fields.
      */
     @Test
     public void setters_updateFields() {

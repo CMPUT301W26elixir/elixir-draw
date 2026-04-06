@@ -14,9 +14,9 @@ public class DeviceSessionManager {
     private final boolean newDeviceId;
 
     /**
-     * Creates a DeviceSessionManager and loads or creates the current device ID.
+     * Creates a new DeviceSessionManager instance.
      *
-     * @param context the context used to access shared preferences
+     * @param context the context
      */
     public DeviceSessionManager(Context context) {
         this(new SharedPreferencesDeviceSessionStore(
@@ -26,6 +26,8 @@ public class DeviceSessionManager {
 
     /**
      * Creates a new DeviceSessionManager instance.
+     *
+     * @param deviceSessionStore the device session store
      */
     public DeviceSessionManager(DeviceSessionStore deviceSessionStore) {
         // Get the saved device ID, or create one if it does not exist yet
@@ -35,10 +37,10 @@ public class DeviceSessionManager {
     }
 
     /**
-     * Gets the saved device ID or creates a new one if needed.
+     * Returns the or create device id.
      *
-     * @param deviceSessionStore the store used to access saved device session values
-     * @return the existing or newly created device ID
+     * @param deviceSessionStore the device session store
+     * @return the or create device id
      */
     private DeviceIdResult getOrCreateDeviceId(DeviceSessionStore deviceSessionStore) {
         // Get the Device ID
@@ -56,14 +58,18 @@ public class DeviceSessionManager {
     }
 
     /**
-     * Returns whether g.et Current Device Id
+     * Returns the current device id.
+     *
+     * @return the current device id
      */
     public String getCurrentDeviceId() {
         return deviceId;
     }
 
     /**
-     * Returns whether i.s New Device Id
+     * Returns whether new device id.
+     *
+     * @return whether new device id
      */
     public boolean isNewDeviceId() {
         return newDeviceId;
@@ -71,11 +77,15 @@ public class DeviceSessionManager {
 
     public interface DeviceSessionStore {
         /**
-         * Returns whether g.et Device Id
+         * Returns the device id.
+         *
+         * @return the device id
          */
         String getDeviceId();
         /**
-         * Saves device id.
+         * Performs save device id.
+         *
+         * @param deviceId the device id
          */
         void saveDeviceId(String deviceId);
     }
@@ -84,14 +94,18 @@ public class DeviceSessionManager {
         private final SharedPreferences prefs;
 
         /**
-         * Handles shared Preferences Device Session Store.
+         * Creates a new SharedPreferencesDeviceSessionStore instance.
+         *
+         * @param prefs the prefs
          */
         private SharedPreferencesDeviceSessionStore(SharedPreferences prefs) {
             this.prefs = prefs;
         }
 
         /**
-         * Returns whether g.et Device Id
+         * Returns the device id.
+         *
+         * @return the device id
          */
         @Override
         public String getDeviceId() {
@@ -99,7 +113,9 @@ public class DeviceSessionManager {
         }
 
         /**
-         * Saves device id.
+         * Performs save device id.
+         *
+         * @param deviceId the device id
          */
         @Override
         public void saveDeviceId(String deviceId) {
@@ -112,7 +128,10 @@ public class DeviceSessionManager {
         private final boolean wasCreated;
 
         /**
-         * Handles device Id Result.
+         * Creates a new DeviceIdResult instance.
+         *
+         * @param deviceId the device id
+         * @param wasCreated the was created
          */
         private DeviceIdResult(String deviceId, boolean wasCreated) {
             this.deviceId = deviceId;

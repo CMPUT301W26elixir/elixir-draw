@@ -8,7 +8,7 @@ import org.junit.Test;
 public class TextHelperTest {
 
     /**
-     * Handles clean Text_trims Whitespace And Handles Null.
+     * Performs clean text trims whitespace and handles null.
      */
     @Test
     public void cleanText_trimsWhitespaceAndHandlesNull() {
@@ -17,7 +17,7 @@ public class TextHelperTest {
     }
 
     /**
-     * Returns whether i.s Blank_returns True For Null And Whitespace Only Values
+     * Performs is blank returns true for null and whitespace only values.
      */
     @Test
     public void isBlank_returnsTrueForNullAndWhitespaceOnlyValues() {
@@ -27,7 +27,7 @@ public class TextHelperTest {
     }
 
     /**
-     * Handles default Text_returns Fallback When Value Is Blank.
+     * Performs default text returns fallback when value is blank.
      */
     @Test
     public void defaultText_returnsFallbackWhenValueIsBlank() {

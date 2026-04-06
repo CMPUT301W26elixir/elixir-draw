@@ -6,7 +6,7 @@ import org.junit.Test;
 
 public class EventQrCodePayloadBuilderTest {
     /**
-     * Builds event payload_trims event id.
+     * Performs build event payload trims event id.
      */
     @Test
     public void buildEventPayload_trimsEventId() {
@@ -14,7 +14,7 @@ public class EventQrCodePayloadBuilderTest {
     }
 
     /**
-     * Builds event payload_rejects blank event id.
+     * Performs build event payload rejects blank event id.
      */
     @Test(expected = IllegalArgumentException.class)
     public void buildEventPayload_rejectsBlankEventId() {

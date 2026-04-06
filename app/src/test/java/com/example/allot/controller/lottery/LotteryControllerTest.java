@@ -26,7 +26,7 @@ public class LotteryControllerTest {
     private FakeNotificationController notificationController;
 
     /**
-     * Updates up.
+     * Updates the up.
      */
     @Before
     public void setUp() {
@@ -43,7 +43,7 @@ public class LotteryControllerTest {
     }
 
     /**
-     * Loads lottery state_redirects when draw already exists.
+     * Performs load lottery state redirects when draw already exists.
      */
     @Test
     public void loadLotteryState_redirectsWhenDrawAlreadyExists() {
@@ -58,7 +58,7 @@ public class LotteryControllerTest {
     }
 
     /**
-     * Handles start Lottery Draw_returns Validation Date Message For Invalid Date.
+     * Performs start lottery draw returns validation date message for invalid date.
      */
     @Test
     public void startLotteryDraw_returnsValidationDateMessageForInvalidDate() {
@@ -69,7 +69,9 @@ public class LotteryControllerTest {
     }
 
     /**
-     * Builds event.
+     * Returns the result of build event.
+     *
+     * @return the result of this call
      */
     private Event buildEvent() {
         Event event = new Event();
@@ -87,7 +89,7 @@ public class LotteryControllerTest {
 
     private static class FakeEventRepository extends EventRepository {
         /**
-         * Handles fake Event Repository.
+         * Creates a new FakeEventRepository instance.
          */
         private FakeEventRepository() {
             super((com.google.firebase.firestore.FirebaseFirestore) null);
@@ -96,7 +98,10 @@ public class LotteryControllerTest {
         private Event event;
 
         /**
-         * Returns whether g.et Event By Id
+         * Performs get event by id.
+         *
+         * @param eventId the event id
+         * @param listener the listener
          */
         @Override
         public void getEventById(String eventId, OnCompleteListener<Event> listener) {
@@ -106,14 +111,17 @@ public class LotteryControllerTest {
 
     private static class FakeUserController extends UserController {
         /**
-         * Handles fake User Controller.
+         * Creates a new FakeUserController instance.
          */
         private FakeUserController() {
             super(null, new DeviceSessionManager(new FakeDeviceSessionStore("device-1")));
         }
 
         /**
-         * Returns whether g.et User By Device Id
+         * Performs get user by device id.
+         *
+         * @param deviceId the device id
+         * @param listener the listener
          */
         @Override
         public void getUserByDeviceId(String deviceId, OnCompleteListener<com.example.allot.model.profile.User> listener) {
@@ -128,14 +136,19 @@ public class LotteryControllerTest {
      */
     private static class FakeNotificationController extends NotificationController {
         /**
-         * Documents fake Notification Controller.
+         * Creates a new FakeNotificationController instance.
          */
         FakeNotificationController() {
             super((NotificationRepository) null);
         }
 
         /**
-         * Handles notify Selected Entrants.
+         * Performs notify selected entrants.
+         *
+         * @param entrantIds the entrant ids
+         * @param eventId the event id
+         * @param eventName the event name
+         * @param listener the listener
          */
         @Override
         public void notifySelectedEntrants(List<String> entrantIds, String eventId, String eventName, OnCompleteListener<Boolean> listener) {
@@ -143,7 +156,12 @@ public class LotteryControllerTest {
         }
 
         /**
-         * Handles notify Not Selected Entrants.
+         * Performs notify not selected entrants.
+         *
+         * @param entrantIds the entrant ids
+         * @param eventId the event id
+         * @param eventName the event name
+         * @param listener the listener
          */
         @Override
         public void notifyNotSelectedEntrants(List<String> entrantIds, String eventId, String eventName, OnCompleteListener<Boolean> listener) {
@@ -155,20 +173,26 @@ public class LotteryControllerTest {
         private final String deviceId;
 
         /**
-         * Handles fake Device Session Store.
+         * Creates a new FakeDeviceSessionStore instance.
+         *
+         * @param deviceId the device id
          */
         private FakeDeviceSessionStore(String deviceId) {
             this.deviceId = deviceId;
         }
 
         /**
-         * Returns whether get Device Id.
+         * Returns the device id.
+         *
+         * @return the device id
          */
         @Override
         public String getDeviceId() { return deviceId; }
 
         /**
-         * Saves device id.
+         * Performs save device id.
+         *
+         * @param deviceId the device id
          */
         @Override
         public void saveDeviceId(String deviceId) { }

@@ -22,6 +22,8 @@ public class CreateEventController {
 
     /**
      * Creates a new CreateEventController instance.
+     *
+     * @param context the context
      */
     public CreateEventController(Context context) {
         this(
@@ -35,6 +37,12 @@ public class CreateEventController {
 
     /**
      * Creates a new CreateEventController instance.
+     *
+     * @param eventRepository the event repository
+     * @param eventFormService the event form service
+     * @param eventInputValidator the event input validator
+     * @param deviceSessionManager the device session manager
+     * @param geocodingService the geocoding service
      */
     CreateEventController(EventRepository eventRepository,
                           EventFormService eventFormService,
@@ -49,10 +57,10 @@ public class CreateEventController {
     }
 
     /**
-     * Validates and submits the current create-event form.
+     * Performs submit event.
      *
-     * @param formData the form values collected by the view
-     * @param listener the listener that receives the result
+     * @param formData the form data
+     * @param listener the listener
      */
     public void submitEvent(EventFormData formData, OnCompleteListener<AppResult<Event>> listener) {
         AppResult<EventSubmissionInput> result = eventFormService.buildCreateEventInput(formData);
@@ -94,14 +102,20 @@ public class CreateEventController {
     }
 
     /**
-     * Handles normalize Nullable.
+     * Returns the result of normalize nullable.
+     *
+     * @param value the value
+     * @return the result of this call
      */
     private String normalizeNullable(String value) {
         return value == null ? null : value.trim();
     }
 
     /**
-     * Handles apply Resolved Coordinates.
+     * Performs apply resolved coordinates.
+     *
+     * @param event the event
+     * @param location the location
      */
     private void applyResolvedCoordinates(Event event, String location) {
         EventLocationCoordinates coordinates = geocodingService == null ? null : geocodingService.geocode(location);

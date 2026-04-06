@@ -12,10 +12,9 @@ import com.example.allot.view.profile.NameActivity;
 public class WelcomeActivity extends AppCompatActivity {
 
     /**
-     * Initializes the welcome screen and sets up the get started button
-     * to open the name entry screen.
+     * Handles the create callback.
      *
-     * @param savedInstanceState the previously saved activity state, if one exists
+     * @param savedInstanceState the saved instance state
      */
     @Override
     protected void onCreate(Bundle savedInstanceState) {

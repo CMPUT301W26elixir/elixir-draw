@@ -39,10 +39,9 @@ public class EventCreatedActivity extends AppCompatActivity {
     private String currentEventCategory;
 
     /**
-     * Initializes the activity, reads event data from the intent,
-     * binds views, displays the event card, and configures the bottom navigation bar.
+     * Handles the create callback.
      *
-     * @param savedInstanceState the saved activity state
+     * @param savedInstanceState the saved instance state
      */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,7 +55,7 @@ public class EventCreatedActivity extends AppCompatActivity {
     }
 
     /**
-     * Finishes the activity without transition animation.
+     * Performs finish.
      */
     @Override
     public void finish() {
@@ -65,7 +64,7 @@ public class EventCreatedActivity extends AppCompatActivity {
     }
 
     /**
-     * Reads the event details passed into the activity through intent extras.
+     * Performs read extras.
      */
     private void readExtras() {
         Intent intent = getIntent();
@@ -77,7 +76,7 @@ public class EventCreatedActivity extends AppCompatActivity {
     }
 
     /**
-     * Binds all view references used by the activity and sets button listeners.
+     * Performs bind views.
      */
     private void bindViews() {
         bottomNavBar = findViewById(R.id.bottomNavBar);
@@ -97,7 +96,7 @@ public class EventCreatedActivity extends AppCompatActivity {
     }
 
     /**
-     * Displays the event information on the summary card and selects the background image.
+     * Performs bind event card.
      */
     private void bindEventCard() {
         titleText.setText(UiHelper.defaultText(currentEventTitle, getString(R.string.default_event_name)));
@@ -107,7 +106,7 @@ public class EventCreatedActivity extends AppCompatActivity {
     }
 
     /**
-     * Configures the bottom navigation bar and assigns click actions for each tab.
+     * Updates the up bottom nav.
      */
     private void setupBottomNav() {
         bottomNavBar.setSelectedTab(BottomNavBarView.Tab.MY_EVENTS);
@@ -119,8 +118,7 @@ public class EventCreatedActivity extends AppCompatActivity {
     }
 
     /**
-     * Opens the QR code screen for the created event.
-     * Shows an error message if the event ID is missing.
+     * Performs open qr code screen.
      */
     private void openQrCodeScreen() {
         if (TextUtils.isEmpty(currentEventId)) {
@@ -141,8 +139,7 @@ public class EventCreatedActivity extends AppCompatActivity {
     }
 
     /**
-     * Opens the event detail page for the created event.
-     * Shows an error message if the event ID is missing.
+     * Performs open event page.
      */
     private void openEventPage() {
         if (TextUtils.isEmpty(currentEventId)) {
@@ -163,7 +160,7 @@ public class EventCreatedActivity extends AppCompatActivity {
     }
 
     /**
-     * Opens hosting screen.
+     * Performs open hosting screen.
      */
     private void openHostingScreen() {
         AppNavigator.openMyEventsHosting(this, true);

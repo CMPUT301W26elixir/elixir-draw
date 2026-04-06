@@ -24,7 +24,7 @@ import org.junit.runner.RunWith;
 public class EventQrCodeActivityTest {
 
     /**
-     * Handles disable Animations.
+     * Performs disable animations.
      */
     @Before
     public void disableAnimations() {
@@ -32,7 +32,9 @@ public class EventQrCodeActivityTest {
     }
 
     /**
-     * Builds intent.
+     * Returns the result of build intent.
+     *
+     * @return the result of this call
      */
     private Intent buildIntent() {
         Intent intent = new Intent(ApplicationProvider.getApplicationContext(), EventQrCodeActivity.class);
@@ -47,7 +49,7 @@ public class EventQrCodeActivityTest {
     }
 
     /**
-     * Handles event Qr Screen_renders Generated Qr Code.
+     * Performs event qr screen renders generated qr code.
      */
     @Test
     public void eventQrScreen_rendersGeneratedQrCode() {

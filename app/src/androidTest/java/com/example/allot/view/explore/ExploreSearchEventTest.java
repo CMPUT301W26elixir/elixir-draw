@@ -31,7 +31,7 @@ import org.junit.runner.RunWith;
 public class ExploreSearchEventTest {
 
     /**
-     * Handles disable Animations.
+     * Performs disable animations.
      */
     @Before
     public void disableAnimations() {
@@ -39,7 +39,9 @@ public class ExploreSearchEventTest {
     }
 
     /**
-     * Builds intent.
+     * Returns the result of build intent.
+     *
+     * @return the result of this call
      */
     private Intent buildIntent() {
         Intent intent = new Intent(ApplicationProvider.getApplicationContext(), ExploreActivity.class);
@@ -75,7 +77,7 @@ public class ExploreSearchEventTest {
     }
 
     /**
-     * Handles search Filters Visible Events And Shows Empty State.
+     * Performs search filters visible events and shows empty state.
      */
     @Test
     public void searchFiltersVisibleEventsAndShowsEmptyState() {
@@ -96,12 +98,17 @@ public class ExploreSearchEventTest {
     }
 
     /**
-     * Handles wait For.
+     * Returns the result of wait for.
+     *
+     * @param delayMs the delay ms
+     * @return the result of this call
      */
     private ViewAction waitFor(long delayMs) {
         return new ViewAction() {
             /**
-             * Returns whether g.et Constraints
+             * Returns the constraints.
+             *
+             * @return the constraints
              */
             @Override
             public Matcher<View> getConstraints() {
@@ -109,7 +116,9 @@ public class ExploreSearchEventTest {
             }
 
             /**
-             * Returns whether g.et Description
+             * Returns the description.
+             *
+             * @return the description
              */
             @Override
             public String getDescription() {
@@ -117,7 +126,10 @@ public class ExploreSearchEventTest {
             }
 
             /**
-             * Handles perform.
+             * Performs perform.
+             *
+             * @param uiController the ui controller
+             * @param view the view
              */
             @Override
             public void perform(UiController uiController, View view) {

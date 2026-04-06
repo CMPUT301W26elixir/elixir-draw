@@ -16,11 +16,9 @@ import com.example.allot.view.shared.DeferredOnboardingNavigator;
 public class EmailActivity extends AppCompatActivity {
 
     /**
-     * Initializes the activity, binds the input field and button,
-     * validates the entered email, and opens the phone input screen
-     * when the email is valid.
+     * Handles the create callback.
      *
-     * @param savedInstanceState the saved activity state
+     * @param savedInstanceState the saved instance state
      */
     @Override
     protected void onCreate(Bundle savedInstanceState) {

@@ -23,6 +23,8 @@ public class EditEventController {
 
     /**
      * Creates a new EditEventController instance.
+     *
+     * @param context the context
      */
     public EditEventController(android.content.Context context) {
         this(
@@ -36,6 +38,12 @@ public class EditEventController {
 
     /**
      * Creates a new EditEventController instance.
+     *
+     * @param eventRepository the event repository
+     * @param eventFormService the event form service
+     * @param eventInputValidator the event input validator
+     * @param lotteryDrawService the lottery draw service
+     * @param geocodingService the geocoding service
      */
     EditEventController(EventRepository eventRepository,
                         EventFormService eventFormService,
@@ -50,17 +58,17 @@ public class EditEventController {
     }
 
     /**
-     * Builds the fallback form values shown before Firestore finishes loading.
+     * Returns the result of build fallback view model.
      *
-     * @param title the fallback title
-     * @param location the fallback location
-     * @param eventDate the fallback event date
-     * @param price the fallback price
-     * @param description the fallback description
-     * @param participants the fallback participant count
-     * @param registrationStart the fallback registration start
-     * @param registrationEnd the fallback registration end
-     * @return the fallback form values
+     * @param title the title
+     * @param location the location
+     * @param eventDate the event date
+     * @param price the price
+     * @param description the description
+     * @param participants the participants
+     * @param registrationStart the registration start
+     * @param registrationEnd the registration end
+     * @return the result of this call
      */
     public EventFormData buildFallbackViewModel(String title,
                                                 String location,
@@ -83,10 +91,10 @@ public class EditEventController {
     }
 
     /**
-     * Loads the latest event from Firestore.
+     * Performs load event.
      *
-     * @param eventId the event being edited
-     * @param listener the listener that receives the loaded event
+     * @param eventId the event id
+     * @param listener the listener
      */
     public void loadEvent(String eventId, OnCompleteListener<Event> listener) {
         eventRepository.getEventById(eventId, (event, success) -> {
@@ -100,13 +108,13 @@ public class EditEventController {
     }
 
     /**
-     * Returns whether save should be enabled for the current form.
+     * Returns whether save enabled.
      *
-     * @param currentFormData the form values shown in the view
-     * @param originalSnapshot the original loaded snapshot
-     * @param isSaving whether a save is in progress
-     * @param isLoading whether a load is in progress
-     * @return true when save should be enabled
+     * @param currentFormData the current form data
+     * @param originalSnapshot the original snapshot
+     * @param isSaving whether saving
+     * @param isLoading whether loading
+     * @return whether save enabled
      */
     public boolean isSaveEnabled(EventFormData currentFormData,
                                  EventFormSnapshot originalSnapshot,
@@ -120,10 +128,10 @@ public class EditEventController {
     }
 
     /**
-     * Builds a snapshot from the current form values.
+     * Returns the result of build snapshot.
      *
-     * @param formData the current form values
-     * @return the form snapshot used for dirty-state tracking
+     * @param formData the form data
+     * @return the result of this call
      */
     public EventFormSnapshot buildSnapshot(EventFormData formData) {
         if (formData == null) {
@@ -153,11 +161,11 @@ public class EditEventController {
     }
 
     /**
-     * Validates and saves the current event form.
+     * Performs save changes.
      *
-     * @param eventId the event being edited
-     * @param formData the current form values
-     * @param listener the listener that receives the save result
+     * @param eventId the event id
+     * @param formData the form data
+     * @param listener the listener
      */
     public void saveChanges(String eventId,
                             EventFormData formData,
@@ -211,11 +219,11 @@ public class EditEventController {
     }
 
     /**
-     * Deletes an event owned by the current organizer.
+     * Performs delete event.
      *
-     * @param eventId the event ID to delete
-     * @param organizerId the organizer device ID requesting deletion
-     * @param listener the listener that receives the delete result
+     * @param eventId the event id
+     * @param organizerId the organizer id
+     * @param listener the listener
      */
     public void deleteEvent(String eventId,
                             String organizerId,
@@ -236,20 +244,20 @@ public class EditEventController {
     }
 
     /**
-     * Determines whether the entrants screen should open instead of the draw screen.
+     * Returns whether this instance should open entrants screen.
      *
-     * @param event the current event
-     * @return true when draw results already exist
+     * @param event the event
+     * @return whether this instance should open entrants screen
      */
     public boolean shouldOpenEntrantsScreen(Event event) {
         return event != null && lotteryDrawService.hasDrawResults(event);
     }
 
     /**
-     * Turns a saved event into form values for the edit screen.
+     * Returns the result of build view model.
      *
-     * @param event the event being edited
-     * @return form data ready to bind into the UI
+     * @param event the event
+     * @return the result of this call
      */
     public EventFormData buildViewModel(Event event) {
         if (event == null) {
@@ -279,7 +287,17 @@ public class EditEventController {
     }
 
     /**
-     * Builds view model.
+     * Returns the result of build view model.
+     *
+     * @param title the title
+     * @param location the location
+     * @param eventDate the event date
+     * @param price the price
+     * @param description the description
+     * @param participants the participants
+     * @param registrationStart the registration start
+     * @param registrationEnd the registration end
+     * @return the result of this call
      */
     private EventFormData buildViewModel(String title,
                                          String location,
@@ -310,10 +328,10 @@ public class EditEventController {
     }
 
     /**
-     * Builds the short date text shown while the user edits an event.
+     * Returns the result of build summary date.
      *
-     * @param formData the current form values
-     * @return a readable summary date, or an empty string when the date is incomplete
+     * @param formData the form data
+     * @return the result of this call
      */
     public String buildSummaryDate(EventFormData formData) {
         if (formData == null) {
@@ -324,7 +342,12 @@ public class EditEventController {
     }
 
     /**
-     * Handles formatted Date Value.
+     * Returns the result of formatted date value.
+     *
+     * @param month the month
+     * @param day the day
+     * @param year the year
+     * @return the result of this call
      */
     private String formattedDateValue(String month, String day, String year) {
         Date date = eventFormService.parseDate(month, day, year);
@@ -332,28 +355,41 @@ public class EditEventController {
     }
 
     /**
-     * Handles month Value.
+     * Returns the result of month value.
+     *
+     * @param date the date
+     * @return the result of this call
      */
     private String monthValue(Date date) {
         return formatDatePart(date, "MMM");
     }
 
     /**
-     * Handles day Value.
+     * Returns the result of day value.
+     *
+     * @param date the date
+     * @return the result of this call
      */
     private String dayValue(Date date) {
         return formatDatePart(date, "d");
     }
 
     /**
-     * Handles year Value.
+     * Returns the result of year value.
+     *
+     * @param date the date
+     * @return the result of this call
      */
     private String yearValue(Date date) {
         return formatDatePart(date, "yyyy");
     }
 
     /**
-     * Handles format Date Part.
+     * Returns the result of format date part.
+     *
+     * @param date the date
+     * @param pattern the pattern
+     * @return the result of this call
      */
     private String formatDatePart(Date date, String pattern) {
         if (date == null) {
@@ -363,7 +399,10 @@ public class EditEventController {
     }
 
     /**
-     * Handles month From Formatted Date.
+     * Returns the result of month from formatted date.
+     *
+     * @param value the value
+     * @return the result of this call
      */
     private String monthFromFormattedDate(String value) {
         if (safeValue(value).length() < 3) {
@@ -373,7 +412,10 @@ public class EditEventController {
     }
 
     /**
-     * Handles day From Formatted Date.
+     * Returns the result of day from formatted date.
+     *
+     * @param value the value
+     * @return the result of this call
      */
     private String dayFromFormattedDate(String value) {
         String[] parts = safeValue(value).split(" ");
@@ -384,7 +426,10 @@ public class EditEventController {
     }
 
     /**
-     * Handles year From Formatted Date.
+     * Returns the result of year from formatted date.
+     *
+     * @param value the value
+     * @return the result of this call
      */
     private String yearFromFormattedDate(String value) {
         String[] parts = safeValue(value).split(" ");
@@ -395,21 +440,30 @@ public class EditEventController {
     }
 
     /**
-     * Handles safe Value.
+     * Returns the result of safe value.
+     *
+     * @param value the value
+     * @return the result of this call
      */
     private String safeValue(String value) {
         return value == null ? "" : value.trim();
     }
 
     /**
-     * Returns whether i.s Blank
+     * Returns whether blank.
+     *
+     * @param value the value
+     * @return whether blank
      */
     private boolean isBlank(String value) {
         return value == null || value.trim().isEmpty();
     }
 
     /**
-     * Handles apply Resolved Coordinates.
+     * Performs apply resolved coordinates.
+     *
+     * @param updates the updates
+     * @param location the location
      */
     private void applyResolvedCoordinates(java.util.Map<String, Object> updates, String location) {
         EventLocationCoordinates coordinates = geocodingService == null ? null : geocodingService.geocode(location);

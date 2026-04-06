@@ -22,7 +22,14 @@ public class UserEventsController {
         private final List<EventListItem> coOrganizerInviteItems;
 
         /**
-         * Documents registered Event Groups.
+         * Creates a new RegisteredEventGroups instance.
+         *
+         * @param invitedItems the invited items
+         * @param selectedItems the selected items
+         * @param waitingItems the waiting items
+         * @param notSelectedItems the not selected items
+         * @param pastItems the past items
+         * @param coOrganizerInviteItems the co organizer invite items
          */
         RegisteredEventGroups(List<EventListItem> invitedItems,
                               List<EventListItem> selectedItems,
@@ -39,27 +46,39 @@ public class UserEventsController {
         }
 
         /**
-         * Documents copy Items.
+         * Returns the invited items.
+         *
+         * @return the invited items
          */
         public List<EventListItem> getInvitedItems() { return copyItems(invitedItems); }
         /**
-         * Documents copy Items.
+         * Returns the selected items.
+         *
+         * @return the selected items
          */
         public List<EventListItem> getSelectedItems() { return copyItems(selectedItems); }
         /**
-         * Documents copy Items.
+         * Returns the waiting items.
+         *
+         * @return the waiting items
          */
         public List<EventListItem> getWaitingItems() { return copyItems(waitingItems); }
         /**
-         * Documents copy Items.
+         * Returns the not selected items.
+         *
+         * @return the not selected items
          */
         public List<EventListItem> getNotSelectedItems() { return copyItems(notSelectedItems); }
         /**
-         * Documents copy Items.
+         * Returns the past items.
+         *
+         * @return the past items
          */
         public List<EventListItem> getPastItems() { return copyItems(pastItems); }
         /**
-         * Documents copy Items.
+         * Returns the co organizer invite items.
+         *
+         * @return the co organizer invite items
          */
         public List<EventListItem> getCoOrganizerInviteItems() { return copyItems(coOrganizerInviteItems); }
     }
@@ -69,7 +88,10 @@ public class UserEventsController {
         private final List<EventListItem> completedItems;
 
         /**
-         * Documents hosted Event Groups.
+         * Creates a new HostedEventGroups instance.
+         *
+         * @param ongoingItems the ongoing items
+         * @param completedItems the completed items
          */
         HostedEventGroups(List<EventListItem> ongoingItems, List<EventListItem> completedItems) {
             this.ongoingItems = copyItems(ongoingItems);
@@ -77,11 +99,15 @@ public class UserEventsController {
         }
 
         /**
-         * Documents copy Items.
+         * Returns the ongoing items.
+         *
+         * @return the ongoing items
          */
         public List<EventListItem> getOngoingItems() { return copyItems(ongoingItems); }
         /**
-         * Documents copy Items.
+         * Returns the completed items.
+         *
+         * @return the completed items
          */
         public List<EventListItem> getCompletedItems() { return copyItems(completedItems); }
     }
@@ -93,6 +119,8 @@ public class UserEventsController {
 
     /**
      * Creates a new UserEventsController instance.
+     *
+     * @param context the context
      */
     public UserEventsController(Context context) {
         this(new UserController(context), new EventRepository(), new UserEventsSectionService(), new EventListItemMapper());
@@ -100,6 +128,11 @@ public class UserEventsController {
 
     /**
      * Creates a new UserEventsController instance.
+     *
+     * @param userController the user controller
+     * @param eventRepository the event repository
+     * @param myEventsSectionService the my events section service
+     * @param eventListItemMapper the event list item mapper
      */
     UserEventsController(UserController userController,
                          EventRepository eventRepository,
@@ -112,7 +145,9 @@ public class UserEventsController {
     }
 
     /**
-     * Loads the registered tab groups.
+     * Performs load registered groups.
+     *
+     * @param listener the listener
      */
     public void loadRegisteredGroups(OnCompleteListener<RegisteredEventGroups> listener) {
         eventRepository.getAllEvents((events, success) -> {
@@ -138,7 +173,9 @@ public class UserEventsController {
     }
 
     /**
-     * Loads the hosting tab groups.
+     * Performs load hosted groups.
+     *
+     * @param listener the listener
      */
     public void loadHostedGroups(OnCompleteListener<HostedEventGroups> listener) {
         eventRepository.getManagedEvents(userController.getCurrentDeviceId(), (events, success) -> {
@@ -156,7 +193,9 @@ public class UserEventsController {
     }
 
     /**
-     * Loads the simple My Events fragment list.
+     * Performs load my events list.
+     *
+     * @param listener the listener
      */
     public void loadMyEventsList(OnCompleteListener<List<EventListItem>> listener) {
         userController.loadOrCreateUser((user, success) -> {
@@ -174,7 +213,10 @@ public class UserEventsController {
     }
 
     /**
-     * Loads the simple Saved Events fragment list.
+     * Performs load saved events.
+     *
+     * @param savedIds the saved ids
+     * @param listener the listener
      */
     public void loadSavedEvents(List<String> savedIds, OnCompleteListener<List<EventListItem>> listener) {
         if (savedIds != null && !savedIds.isEmpty()) {
@@ -189,35 +231,50 @@ public class UserEventsController {
     }
 
     /**
-     * Accepts a co-organizer invitation for the current user.
+     * Performs accept co organizer invite.
+     *
+     * @param eventId the event id
+     * @param listener the listener
      */
     public void acceptCoOrganizerInvite(String eventId, OnCompleteListener<Boolean> listener) {
         eventRepository.acceptCoOrganizerInvite(eventId, userController.getCurrentDeviceId(), listener);
     }
 
     /**
-     * Declines a co-organizer invitation for the current user.
+     * Performs decline co organizer invite.
+     *
+     * @param eventId the event id
+     * @param listener the listener
      */
     public void declineCoOrganizerInvite(String eventId, OnCompleteListener<Boolean> listener) {
         eventRepository.declineCoOrganizerInvite(eventId, userController.getCurrentDeviceId(), listener);
     }
 
     /**
-     * Maps items.
+     * Returns the result of map items.
+     *
+     * @param events the events
+     * @return the result of this call
      */
     private List<EventListItem> mapItems(List<Event> events) {
         return eventListItemMapper.mapEvents(events, new ArrayList<>());
     }
 
     /**
-     * Handles copy Items.
+     * Returns the result of copy items.
+     *
+     * @param items the items
+     * @return the result of this call
      */
     private static List<EventListItem> copyItems(List<EventListItem> items) {
         return items == null ? new ArrayList<>() : new ArrayList<>(items);
     }
 
     /**
-     * Builds saved ids.
+     * Returns the result of build saved ids.
+     *
+     * @param events the events
+     * @return the result of this call
      */
     private List<String> buildSavedIds(List<Event> events) {
         List<String> savedIds = new ArrayList<>();
@@ -235,7 +292,10 @@ public class UserEventsController {
     }
 
     /**
-     * Loads events by ids.
+     * Performs load events by ids.
+     *
+     * @param eventIds the event ids
+     * @param listener the listener
      */
     private void loadEventsByIds(List<String> eventIds, OnCompleteListener<List<Event>> listener) {
         if (eventIds == null || eventIds.isEmpty()) {
@@ -260,7 +320,11 @@ public class UserEventsController {
     }
 
     /**
-     * Builds registered event list.
+     * Returns the result of build registered event list.
+     *
+     * @param events the events
+     * @param deviceId the device id
+     * @return the result of this call
      */
     private List<Event> buildRegisteredEventList(List<Event> events, String deviceId) {
         List<Event> registeredEvents = new ArrayList<>();
@@ -293,7 +357,11 @@ public class UserEventsController {
     }
 
     /**
-     * Returns whether c.ontains User
+     * Returns the result of contains user.
+     *
+     * @param users the users
+     * @param deviceId the device id
+     * @return the result of this call
      */
     private boolean containsUser(List<String> users, String deviceId) {
         return users != null && users.contains(deviceId);

@@ -18,7 +18,7 @@ public class UserEventsControllerTest {
     private UserEventsController controller;
 
     /**
-     * Updates up.
+     * Updates the up.
      */
     @Before
     public void setUp() {
@@ -28,7 +28,7 @@ public class UserEventsControllerTest {
     }
 
     /**
-     * Loads registered groups_groups registered sections.
+     * Performs load registered groups groups registered sections.
      */
     @Test
     public void loadRegisteredGroups_groupsRegisteredSections() {
@@ -43,7 +43,7 @@ public class UserEventsControllerTest {
     }
 
     /**
-     * Loads hosted groups_groups hosted sections.
+     * Performs load hosted groups groups hosted sections.
      */
     @Test
     public void loadHostedGroups_groupsHostedSections() {
@@ -57,7 +57,11 @@ public class UserEventsControllerTest {
     }
 
     /**
-     * Builds event.
+     * Returns the result of build event.
+     *
+     * @param eventTime the event time
+     * @param deadlineTime the deadline time
+     * @return the result of this call
      */
     private Event buildEvent(long eventTime, long deadlineTime) {
         Event event = new Event();
@@ -77,7 +81,7 @@ public class UserEventsControllerTest {
 
     private static class FakeEventRepository extends EventRepository {
         /**
-         * Handles fake Event Repository.
+         * Creates a new FakeEventRepository instance.
          */
         private FakeEventRepository() {
             super((com.google.firebase.firestore.FirebaseFirestore) null);
@@ -87,7 +91,9 @@ public class UserEventsControllerTest {
         private java.util.List<Event> hostedEvents;
 
         /**
-         * Returns whether g.et All Events
+         * Performs get all events.
+         *
+         * @param listener the listener
          */
         @Override
         public void getAllEvents(com.example.allot.common.OnCompleteListener<java.util.List<Event>> listener) {
@@ -95,7 +101,10 @@ public class UserEventsControllerTest {
         }
 
         /**
-         * Returns whether g.et Hosted Events
+         * Performs get hosted events.
+         *
+         * @param organizerId the organizer id
+         * @param listener the listener
          */
         @Override
         public void getHostedEvents(String organizerId, com.example.allot.common.OnCompleteListener<java.util.List<Event>> listener) {
@@ -103,7 +112,10 @@ public class UserEventsControllerTest {
         }
 
         /**
-         * Returns whether g.et Managed Events
+         * Performs get managed events.
+         *
+         * @param organizerId the organizer id
+         * @param listener the listener
          */
         @Override
         public void getManagedEvents(String organizerId, com.example.allot.common.OnCompleteListener<java.util.List<Event>> listener) {
@@ -113,14 +125,16 @@ public class UserEventsControllerTest {
 
     private static class FakeUserController extends UserController {
         /**
-         * Handles fake User Controller.
+         * Creates a new FakeUserController instance.
          */
         private FakeUserController() {
             super(null, new DeviceSessionManager(new FakeDeviceSessionStore("device-1")));
         }
 
         /**
-         * Returns whether g.et Current Device Id
+         * Returns the current device id.
+         *
+         * @return the current device id
          */
         @Override
         public String getCurrentDeviceId() {
@@ -132,20 +146,26 @@ public class UserEventsControllerTest {
         private final String deviceId;
 
         /**
-         * Handles fake Device Session Store.
+         * Creates a new FakeDeviceSessionStore instance.
+         *
+         * @param deviceId the device id
          */
         private FakeDeviceSessionStore(String deviceId) {
             this.deviceId = deviceId;
         }
 
         /**
-         * Returns whether get Device Id.
+         * Returns the device id.
+         *
+         * @return the device id
          */
         @Override
         public String getDeviceId() { return deviceId; }
 
         /**
-         * Saves device id.
+         * Performs save device id.
+         *
+         * @param deviceId the device id
          */
         @Override
         public void saveDeviceId(String deviceId) { }

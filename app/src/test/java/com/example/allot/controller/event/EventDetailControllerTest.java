@@ -20,7 +20,7 @@ public class EventDetailControllerTest {
     private EventDetailController controller;
 
     /**
-     * Updates up.
+     * Updates the up.
      */
     @Before
     public void setUp() {
@@ -35,7 +35,7 @@ public class EventDetailControllerTest {
     }
 
     /**
-     * Loads event action state_returns manage action for organizer.
+     * Performs load event action state returns manage action for organizer.
      */
     @Test
     public void loadEventActionState_returnsManageActionForOrganizer() {
@@ -51,7 +51,7 @@ public class EventDetailControllerTest {
     }
 
     /**
-     * Handles join Waiting List_forwards Location And Returns Success Message When Repository Succeeds.
+     * Performs join waiting list forwards location and returns success message when repository succeeds.
      */
     @Test
     public void joinWaitingList_forwardsLocationAndReturnsSuccessMessageWhenRepositorySucceeds() {
@@ -72,7 +72,7 @@ public class EventDetailControllerTest {
     }
 
     /**
-     * Handles leave Waiting List_returns Success Message When Repository Succeeds.
+     * Performs leave waiting list returns success message when repository succeeds.
      */
     @Test
     public void leaveWaitingList_returnsSuccessMessageWhenRepositorySucceeds() {
@@ -86,7 +86,7 @@ public class EventDetailControllerTest {
     }
 
     /**
-     * Handles decline Offer_returns Success Message When Repository Succeeds.
+     * Performs decline offer returns success message when repository succeeds.
      */
     @Test
     public void declineOffer_returnsSuccessMessageWhenRepositorySucceeds() {
@@ -100,7 +100,7 @@ public class EventDetailControllerTest {
     }
 
     /**
-     * Handles decline Offer_returns Failure Message When Repository Fails.
+     * Performs decline offer returns failure message when repository fails.
      */
     @Test
     public void declineOffer_returnsFailureMessageWhenRepositoryFails() {
@@ -114,7 +114,9 @@ public class EventDetailControllerTest {
     }
 
     /**
-     * Builds event.
+     * Returns the result of build event.
+     *
+     * @return the result of this call
      */
     private Event buildEvent() {
         Event event = new Event();
@@ -136,7 +138,7 @@ public class EventDetailControllerTest {
 
     private static class FakeEventRepository extends EventRepository {
         /**
-         * Handles fake Event Repository.
+         * Creates a new FakeEventRepository instance.
          */
         private FakeEventRepository() {
             super((com.google.firebase.firestore.FirebaseFirestore) null);
@@ -153,7 +155,10 @@ public class EventDetailControllerTest {
         private Date joinedAt;
 
         /**
-         * Returns whether g.et Event By Id
+         * Performs get event by id.
+         *
+         * @param eventId the event id
+         * @param listener the listener
          */
         @Override
         public void getEventById(String eventId, com.example.allot.common.OnCompleteListener<Event> listener) {
@@ -161,7 +166,14 @@ public class EventDetailControllerTest {
         }
 
         /**
-         * Handles join Waiting List.
+         * Performs join waiting list.
+         *
+         * @param eventId the event id
+         * @param deviceId the device id
+         * @param latitude the latitude
+         * @param longitude the longitude
+         * @param joinedAt the joined at
+         * @param listener the listener
          */
         @Override
         public void joinWaitingList(String eventId,
@@ -179,7 +191,11 @@ public class EventDetailControllerTest {
         }
 
         /**
-         * Handles leave Waiting List.
+         * Performs leave waiting list.
+         *
+         * @param eventId the event id
+         * @param deviceId the device id
+         * @param listener the listener
          */
         @Override
         public void leaveWaitingList(String eventId, String deviceId, com.example.allot.common.OnCompleteListener<Boolean> listener) {
@@ -187,7 +203,11 @@ public class EventDetailControllerTest {
         }
 
         /**
-         * Handles decline Offer.
+         * Performs decline offer.
+         *
+         * @param eventId the event id
+         * @param deviceId the device id
+         * @param listener the listener
          */
         @Override
         public void declineOffer(String eventId, String deviceId, com.example.allot.common.OnCompleteListener<Boolean> listener) {
@@ -197,14 +217,16 @@ public class EventDetailControllerTest {
 
     private static class FakeUserController extends UserController {
         /**
-         * Handles fake User Controller.
+         * Creates a new FakeUserController instance.
          */
         private FakeUserController() {
             super(null, new DeviceSessionManager(new FakeDeviceSessionStore("device-1")));
         }
 
         /**
-         * Returns whether g.et Current Device Id
+         * Returns the current device id.
+         *
+         * @return the current device id
          */
         @Override
         public String getCurrentDeviceId() {
@@ -212,7 +234,10 @@ public class EventDetailControllerTest {
         }
 
         /**
-         * Returns whether g.et User By Device Id
+         * Performs get user by device id.
+         *
+         * @param deviceId the device id
+         * @param listener the listener
          */
         @Override
         public void getUserByDeviceId(String deviceId, com.example.allot.common.OnCompleteListener<com.example.allot.model.profile.User> listener) {
@@ -227,14 +252,18 @@ public class EventDetailControllerTest {
         private final String deviceId;
 
         /**
-         * Handles fake Device Session Store.
+         * Creates a new FakeDeviceSessionStore instance.
+         *
+         * @param deviceId the device id
          */
         private FakeDeviceSessionStore(String deviceId) {
             this.deviceId = deviceId;
         }
 
         /**
-         * Returns whether g.et Device Id
+         * Returns the device id.
+         *
+         * @return the device id
          */
         @Override
         public String getDeviceId() {
@@ -242,7 +271,9 @@ public class EventDetailControllerTest {
         }
 
         /**
-         * Saves device id.
+         * Performs save device id.
+         *
+         * @param deviceId the device id
          */
         @Override
         public void saveDeviceId(String deviceId) {

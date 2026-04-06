@@ -35,10 +35,9 @@ public class NameActivity extends AppCompatActivity {
     public static final String EXTRA_PHONE = "com.example.allot.EXTRA_PHONE";
 
     /**
-     * Initializes the activity, binds the input fields and button, and handles
-     * validation before moving to the next screen.
+     * Handles the create callback.
      *
-     * @param savedInstanceState the previously saved activity state, if one exists
+     * @param savedInstanceState the saved instance state
      */
     @Override
     protected void onCreate(Bundle savedInstanceState) {

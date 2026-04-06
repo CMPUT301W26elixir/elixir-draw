@@ -21,7 +21,7 @@ public class EditEventControllerTest {
     private EditEventController controller;
 
     /**
-     * Updates up.
+     * Updates the up.
      */
     @Before
     public void setUp() {
@@ -37,7 +37,7 @@ public class EditEventControllerTest {
     }
 
     /**
-     * Returns whether i.s Save Enabled_disables Save When Snapshot Matches
+     * Performs is save enabled disables save when snapshot matches.
      */
     @Test
     public void isSaveEnabled_disablesSaveWhenSnapshotMatches() {
@@ -48,7 +48,7 @@ public class EditEventControllerTest {
     }
 
     /**
-     * Returns whether i.s Save Enabled_enables Save When Form Changes
+     * Performs is save enabled enables save when form changes.
      */
     @Test
     public void isSaveEnabled_enablesSaveWhenFormChanges() {
@@ -60,7 +60,7 @@ public class EditEventControllerTest {
     }
 
     /**
-     * Saves changes_updates coordinates when geocoding succeeds.
+     * Performs save changes updates coordinates when geocoding succeeds.
      */
     @Test
     public void saveChanges_updatesCoordinatesWhenGeocodingSucceeds() {
@@ -76,7 +76,7 @@ public class EditEventControllerTest {
     }
 
     /**
-     * Saves changes_clears coordinates when geocoding fails.
+     * Performs save changes clears coordinates when geocoding fails.
      */
     @Test
     public void saveChanges_clearsCoordinatesWhenGeocodingFails() {
@@ -92,7 +92,10 @@ public class EditEventControllerTest {
     }
 
     /**
-     * Builds form data.
+     * Returns the result of build form data.
+     *
+     * @param title the title
+     * @return the result of this call
      */
     private EventFormData buildFormData(String title) {
         return new EventFormData(
@@ -121,14 +124,18 @@ public class EditEventControllerTest {
         private Map<String, Object> lastUpdates = new HashMap<>();
 
         /**
-         * Handles fake Event Repository.
+         * Creates a new FakeEventRepository instance.
          */
         private FakeEventRepository() {
             super((com.google.firebase.firestore.FirebaseFirestore) null);
         }
 
         /**
-         * Updates event.
+         * Performs update event.
+         *
+         * @param eventId the event id
+         * @param updates the updates
+         * @param listener the listener
          */
         @Override
         public void updateEvent(String eventId, Map<String, Object> updates, com.example.allot.common.OnCompleteListener<Boolean> listener) {
@@ -137,7 +144,10 @@ public class EditEventControllerTest {
         }
 
         /**
-         * Returns whether g.et Event By Id
+         * Performs get event by id.
+         *
+         * @param eventId the event id
+         * @param listener the listener
          */
         @Override
         public void getEventById(String eventId, com.example.allot.common.OnCompleteListener<Event> listener) {
@@ -149,7 +159,10 @@ public class EditEventControllerTest {
         private EventLocationCoordinates coordinates;
 
         /**
-         * Handles geocode.
+         * Returns the result of geocode.
+         *
+         * @param location the location
+         * @return the result of this call
          */
         @Override
         public EventLocationCoordinates geocode(String location) {

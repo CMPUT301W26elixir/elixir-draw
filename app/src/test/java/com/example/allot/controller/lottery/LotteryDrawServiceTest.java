@@ -14,7 +14,7 @@ public class LotteryDrawServiceTest {
     private LotteryDrawService service;
 
     /**
-     * Updates up.
+     * Updates the up.
      */
     @Before
     public void setUp() {
@@ -22,7 +22,7 @@ public class LotteryDrawServiceTest {
     }
 
     /**
-     * Returns whether h.as Draw Results_detects Existing Chosen Entrants
+     * Performs has draw results detects existing chosen entrants.
      */
     @Test
     public void hasDrawResults_detectsExistingChosenEntrants() {
@@ -33,7 +33,7 @@ public class LotteryDrawServiceTest {
     }
 
     /**
-     * Builds draw result_builds chosen lists and resets processed state.
+     * Performs build draw result builds chosen lists and resets processed state.
      */
     @Test
     public void buildDrawResult_buildsChosenListsAndResetsProcessedState() {
@@ -57,7 +57,7 @@ public class LotteryDrawServiceTest {
     }
 
     /**
-     * Builds draw result_returns null when no entrants exist.
+     * Performs build draw result returns null when no entrants exist.
      */
     @Test
     public void buildDrawResult_returnsNullWhenNoEntrantsExist() {
@@ -71,7 +71,10 @@ public class LotteryDrawServiceTest {
     }
 
     /**
-     * Builds event with entrants.
+     * Returns the result of build event with entrants.
+     *
+     * @param entrants the entrants
+     * @return the result of this call
      */
     private Event buildEventWithEntrants(String... entrants) {
         Event event = new Event();

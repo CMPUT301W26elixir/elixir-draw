@@ -16,16 +16,16 @@ public class AdminNotificationController {
     private final UserController userController;
 
     /**
-     * Creates an AdminNotificationController with default dependencies.
+     * Creates a new AdminNotificationController instance.
      *
-     * @param context the context used to access shared preferences
+     * @param context the context
      */
     public AdminNotificationController(Context context) {
         this(new NotificationRepository(), new UserController(context));
     }
 
     /**
-     * Creates an AdminNotificationController with provided dependencies.
+     * Creates a new AdminNotificationController instance.
      *
      * @param notificationRepository the notification repository
      * @param userController the user controller
@@ -37,10 +37,9 @@ public class AdminNotificationController {
     }
 
     /**
-     * Loads all notifications for admin browsing.
-     * Only admin users can access this operation.
+     * Performs load all notifications.
      *
-     * @param listener the listener that receives notifications and success result
+     * @param listener the listener
      */
     public void loadAllNotifications(OnCompleteListener<List<NotificationItem>> listener) {
         userController.isCurrentUserAdmin((isAdmin, success) -> {

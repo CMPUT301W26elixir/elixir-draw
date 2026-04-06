@@ -14,7 +14,7 @@ public class EventOfferServiceTest {
     private EventOfferService service;
 
     /**
-     * Updates up.
+     * Updates the up.
      */
     @Before
     public void setUp() {
@@ -22,7 +22,7 @@ public class EventOfferServiceTest {
     }
 
     /**
-     * Builds declined offer state_removes declining user from chosen and enrolled.
+     * Performs build declined offer state removes declining user from chosen and enrolled.
      */
     @Test
     public void buildDeclinedOfferState_removesDecliningUserFromChosenAndEnrolled() {
@@ -43,7 +43,7 @@ public class EventOfferServiceTest {
     }
 
     /**
-     * Builds declined offer state_adds replacement only from eligible users.
+     * Performs build declined offer state adds replacement only from eligible users.
      */
     @Test
     public void buildDeclinedOfferState_addsReplacementOnlyFromEligibleUsers() {
@@ -62,7 +62,7 @@ public class EventOfferServiceTest {
     }
 
     /**
-     * Builds declined offer state_does not add replacement when no candidates exist.
+     * Performs build declined offer state does not add replacement when no candidates exist.
      */
     @Test
     public void buildDeclinedOfferState_doesNotAddReplacementWhenNoCandidatesExist() {
@@ -79,7 +79,9 @@ public class EventOfferServiceTest {
     }
 
     /**
-     * Builds open event.
+     * Returns the result of build open event.
+     *
+     * @return the result of this call
      */
     private Event buildOpenEvent() {
         Event event = new Event();

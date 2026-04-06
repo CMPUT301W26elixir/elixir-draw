@@ -18,17 +18,24 @@ public class SearchEventController {
 
     public interface SearchCallback {
         /**
-         * Handles on Results.
+         * Handles the results callback.
+         *
+         * @param results the results
          */
         void onResults(List<Event> results);
         /**
-         * Handles on Error.
+         * Handles the error callback.
+         *
+         * @param e the e
          */
         void onError(Exception e);
     }
 
     /**
-     * Handles search Events.
+     * Performs search events.
+     *
+     * @param keyword the keyword
+     * @param callback the callback
      */
     public void searchEvents(String keyword, SearchCallback callback) {
         db.collection("events").get()

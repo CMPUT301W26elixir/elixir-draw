@@ -30,7 +30,7 @@ import org.junit.runner.RunWith;
 public class OrganizerUiTest {
 
     /**
-     * Handles disable Animations.
+     * Performs disable animations.
      */
     @Before
     public void disableAnimations() {
@@ -38,7 +38,10 @@ public class OrganizerUiTest {
     }
 
     /**
-     * Builds edit event intent.
+     * Returns the result of build edit event intent.
+     *
+     * @param isPrivate whether private
+     * @return the result of this call
      */
     private Intent buildEditEventIntent(boolean isPrivate) {
         Intent intent = new Intent(ApplicationProvider.getApplicationContext(), EditEventActivity.class);
@@ -56,7 +59,9 @@ public class OrganizerUiTest {
     }
 
     /**
-     * Builds entrants intent.
+     * Returns the result of build entrants intent.
+     *
+     * @return the result of this call
      */
     private Intent buildEntrantsIntent() {
         Intent intent = new Intent(ApplicationProvider.getApplicationContext(), EventEntrantsActivity.class);
@@ -75,7 +80,7 @@ public class OrganizerUiTest {
     }
 
     /**
-     * Handles edit Event_shows Organizer Controls.
+     * Performs edit event shows organizer controls.
      */
     @Test
     public void editEvent_showsOrganizerControls() {
@@ -89,7 +94,7 @@ public class OrganizerUiTest {
     }
 
     /**
-     * Handles edit Event_public Event Hides Invite Entrants.
+     * Performs edit event public event hides invite entrants.
      */
     @Test
     public void editEvent_publicEventHidesInviteEntrants() {
@@ -101,7 +106,7 @@ public class OrganizerUiTest {
     }
 
     /**
-     * Handles edit Event_allows Editing Fields.
+     * Performs edit event allows editing fields.
      */
     @Test
     public void editEvent_allowsEditingFields() {
@@ -114,7 +119,7 @@ public class OrganizerUiTest {
     }
 
     /**
-     * Handles edit Event_delete Button Is Clickable.
+     * Performs edit event delete button is clickable.
      */
     @Test
     public void editEvent_deleteButtonIsClickable() {
@@ -125,7 +130,7 @@ public class OrganizerUiTest {
     }
 
     /**
-     * Handles entrants_selected Tab Shows Cancel.
+     * Performs entrants selected tab shows cancel.
      */
     @Test
     public void entrants_selectedTabShowsCancel() {
@@ -136,12 +141,16 @@ public class OrganizerUiTest {
     }
 
     /**
-     * Handles assert Cancel For Entrant.
+     * Returns the result of assert cancel for entrant.
+     *
+     * @return the result of this call
      */
     private static androidx.test.espresso.ViewAction assertCancelForEntrant() {
         return new androidx.test.espresso.ViewAction() {
             /**
-             * Returns whether g.et Constraints
+             * Returns the constraints.
+             *
+             * @return the constraints
              */
             @Override
             public org.hamcrest.Matcher<android.view.View> getConstraints() {
@@ -149,7 +158,9 @@ public class OrganizerUiTest {
             }
 
             /**
-             * Returns whether g.et Description
+             * Returns the description.
+             *
+             * @return the description
              */
             @Override
             public String getDescription() {
@@ -157,7 +168,10 @@ public class OrganizerUiTest {
             }
 
             /**
-             * Handles perform.
+             * Performs perform.
+             *
+             * @param uiController the ui controller
+             * @param view the view
              */
             @Override
             public void perform(androidx.test.espresso.UiController uiController, android.view.View view) {
@@ -178,7 +192,7 @@ public class OrganizerUiTest {
     }
 
     /**
-     * Handles entrants_cancel Moves To Cancelled Tab.
+     * Performs entrants cancel moves to cancelled tab.
      */
     @Test
     public void entrants_cancelMovesToCancelledTab() {
@@ -191,12 +205,16 @@ public class OrganizerUiTest {
     }
 
     /**
-     * Handles click Cancel For Entrant.
+     * Returns the result of click cancel for entrant.
+     *
+     * @return the result of this call
      */
     private static androidx.test.espresso.ViewAction clickCancelForEntrant() {
         return new androidx.test.espresso.ViewAction() {
             /**
-             * Returns whether g.et Constraints
+             * Returns the constraints.
+             *
+             * @return the constraints
              */
             @Override
             public org.hamcrest.Matcher<android.view.View> getConstraints() {
@@ -204,7 +222,9 @@ public class OrganizerUiTest {
             }
 
             /**
-             * Returns whether g.et Description
+             * Returns the description.
+             *
+             * @return the description
              */
             @Override
             public String getDescription() {
@@ -212,7 +232,10 @@ public class OrganizerUiTest {
             }
 
             /**
-             * Handles perform.
+             * Performs perform.
+             *
+             * @param uiController the ui controller
+             * @param view the view
              */
             @Override
             public void perform(androidx.test.espresso.UiController uiController, android.view.View view) {
@@ -235,7 +258,7 @@ public class OrganizerUiTest {
     }
 
     /**
-     * Handles entrants_enrolled Tab Shows Export Button.
+     * Performs entrants enrolled tab shows export button.
      */
     @Test
     public void entrants_enrolledTabShowsExportButton() {
@@ -246,7 +269,7 @@ public class OrganizerUiTest {
     }
 
     /**
-     * Handles invite Co Organizer_screen Loads.
+     * Performs invite co organizer screen loads.
      */
     @Test
     public void inviteCoOrganizer_screenLoads() {
@@ -259,7 +282,7 @@ public class OrganizerUiTest {
     }
 
     /**
-     * Creates event_screen loads for organizer.
+     * Performs create event screen loads for organizer.
      */
     @Test
     public void createEvent_screenLoadsForOrganizer() {

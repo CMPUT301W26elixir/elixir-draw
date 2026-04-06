@@ -39,6 +39,8 @@ public class EventEntrantsController {
 
     /**
      * Creates a new EventEntrantsController instance.
+     *
+     * @param context the context
      */
     public EventEntrantsController(android.content.Context context) {
         this(new EventRepository(), new UserController(context), new NotificationRepository(), new EventOfferService());
@@ -46,6 +48,11 @@ public class EventEntrantsController {
 
     /**
      * Creates a new EventEntrantsController instance.
+     *
+     * @param eventRepository the event repository
+     * @param userController the user controller
+     * @param notificationRepository the notification repository
+     * @param eventOfferService the event offer service
      */
     EventEntrantsController(EventRepository eventRepository,
                             UserController userController,
@@ -58,7 +65,10 @@ public class EventEntrantsController {
     }
 
     /**
-     * Loads the event used by the entrants screen.
+     * Performs load event.
+     *
+     * @param eventId the event id
+     * @param listener the listener
      */
     public void loadEvent(String eventId, OnCompleteListener<Event> listener) {
         if (isBlank(eventId)) {
@@ -77,7 +87,11 @@ public class EventEntrantsController {
     }
 
     /**
-     * Loads the entrant items shown for one tab.
+     * Performs load entrant items.
+     *
+     * @param event the event
+     * @param selectedTab the selected tab
+     * @param listener the listener
      */
     public void loadEntrantItems(Event event, Tab selectedTab, OnCompleteListener<List<LotteryEntrantItem>> listener) {
         if (event == null) {
@@ -89,7 +103,10 @@ public class EventEntrantsController {
     }
 
     /**
-     * Loads export-ready rows for enrolled entrants only.
+     * Performs load enrolled export rows.
+     *
+     * @param event the event
+     * @param listener the listener
      */
     public void loadEnrolledExportRows(Event event, OnCompleteListener<List<EntrantExportRow>> listener) {
         if (event == null) {
@@ -107,7 +124,11 @@ public class EventEntrantsController {
     }
 
     /**
-     * Cancels a selected entrant, moves them to the cancelled list, and notifies them via Firestore.
+     * Performs cancel selected entrant.
+     *
+     * @param eventId the event id
+     * @param entrantId the entrant id
+     * @param listener the listener
      */
     public void cancelSelectedEntrant(String eventId, String entrantId, OnCompleteListener<Boolean> listener) {
         if (isBlank(eventId) || isBlank(entrantId)) {
@@ -133,7 +154,10 @@ public class EventEntrantsController {
     }
 
     /**
-     * Draws a replacement entrant from the waitlist and notifies them via Firestore.
+     * Performs draw replacement entrant.
+     *
+     * @param eventId the event id
+     * @param listener the listener
      */
     public void drawReplacementEntrant(String eventId, OnCompleteListener<Boolean> listener) {
         if (isBlank(eventId)) {
@@ -175,7 +199,11 @@ public class EventEntrantsController {
     }
 
     /**
-     * Handles send Cancellation Notification.
+     * Performs send cancellation notification.
+     *
+     * @param userId the user id
+     * @param eventId the event id
+     * @param eventTitle the event title
      */
     private void sendCancellationNotification(String userId, String eventId, String eventTitle) {
         String title = "Selection Cancelled";
@@ -186,7 +214,11 @@ public class EventEntrantsController {
     }
 
     /**
-     * Handles send Selection Notification.
+     * Performs send selection notification.
+     *
+     * @param userId the user id
+     * @param eventId the event id
+     * @param eventTitle the event title
      */
     private void sendSelectionNotification(String userId, String eventId, String eventTitle) {
         String title = "You've been selected!";
@@ -197,7 +229,11 @@ public class EventEntrantsController {
     }
 
     /**
-     * Builds tab items.
+     * Performs build tab items.
+     *
+     * @param event the event
+     * @param selectedTab the selected tab
+     * @param consumer the consumer
      */
     private void buildTabItems(Event event, Tab selectedTab, java.util.function.Consumer<List<LotteryEntrantItem>> consumer) {
         List<String> entrantIds = getEntrantIds(event, selectedTab);
@@ -209,7 +245,11 @@ public class EventEntrantsController {
     }
 
     /**
-     * Returns whether g.et Entrant Ids
+     * Returns the entrant ids.
+     *
+     * @param event the event
+     * @param selectedTab the selected tab
+     * @return the entrant ids
      */
     private List<String> getEntrantIds(Event event, Tab selectedTab) {
         switch (selectedTab) {
@@ -228,7 +268,10 @@ public class EventEntrantsController {
     }
 
     /**
-     * Returns whether g.et Subtitle Res
+     * Returns the subtitle res.
+     *
+     * @param selectedTab the selected tab
+     * @return the subtitle res
      */
     private int getSubtitleRes(Tab selectedTab) {
         switch (selectedTab) {
@@ -247,7 +290,10 @@ public class EventEntrantsController {
     }
 
     /**
-     * Returns whether g.et Selected Entrants
+     * Returns the selected entrants.
+     *
+     * @param event the event
+     * @return the selected entrants
      */
     private List<String> getSelectedEntrants(Event event) {
         if (event == null) {
@@ -264,7 +310,10 @@ public class EventEntrantsController {
     }
 
     /**
-     * Returns whether g.et Cancelled Entrants
+     * Returns the cancelled entrants.
+     *
+     * @param event the event
+     * @return the cancelled entrants
      */
     private List<String> getCancelledEntrants(Event event) {
         if (event != null) {
@@ -274,7 +323,10 @@ public class EventEntrantsController {
     }
 
     /**
-     * Returns whether g.et Not Enrolled Entrants
+     * Returns the not enrolled entrants.
+     *
+     * @param event the event
+     * @return the not enrolled entrants
      */
     private List<String> getNotEnrolledEntrants(Event event) {
         if (event != null) {
@@ -284,7 +336,10 @@ public class EventEntrantsController {
     }
 
     /**
-     * Returns whether g.et Enrolled Entrants
+     * Returns the enrolled entrants.
+     *
+     * @param event the event
+     * @return the enrolled entrants
      */
     private List<String> getEnrolledEntrants(Event event) {
         if (event == null) {
@@ -307,7 +362,10 @@ public class EventEntrantsController {
     }
 
     /**
-     * Returns whether g.et All Entrants
+     * Returns the all entrants.
+     *
+     * @param event the event
+     * @return the all entrants
      */
     private List<String> getAllEntrants(Event event) {
         if (event != null && event.getWaitingList() != null && event.getWaitingList().list != null) {
@@ -317,7 +375,13 @@ public class EventEntrantsController {
     }
 
     /**
-     * Loads entrant items.
+     * Performs load entrant items.
+     *
+     * @param entrantIds the entrant ids
+     * @param index the index
+     * @param items the items
+     * @param subtitleRes the subtitle res
+     * @param consumer the consumer
      */
     private void loadEntrantItems(List<String> entrantIds,
                                   int index,
@@ -349,7 +413,12 @@ public class EventEntrantsController {
     }
 
     /**
-     * Loads export rows.
+     * Performs load export rows.
+     *
+     * @param entrantIds the entrant ids
+     * @param index the index
+     * @param rows the rows
+     * @param listener the listener
      */
     private void loadExportRows(List<String> entrantIds,
                                 int index,
@@ -368,7 +437,11 @@ public class EventEntrantsController {
     }
 
     /**
-     * Builds export row.
+     * Returns the result of build export row.
+     *
+     * @param entrantId the entrant id
+     * @param user the user
+     * @return the result of this call
      */
     private EntrantExportRow buildExportRow(String entrantId, User user) {
         String fallbackName = isBlank(entrantId) ? "" : entrantId;
@@ -392,7 +465,10 @@ public class EventEntrantsController {
     }
 
     /**
-     * Returns whether i.s Blank
+     * Returns whether blank.
+     *
+     * @param value the value
+     * @return whether blank
      */
     private boolean isBlank(String value) {
         return TextHelper.isBlank(value);

@@ -9,7 +9,7 @@ import org.junit.Test;
 
 public class EventScanResultTest {
     /**
-     * Opens event_should open when event present.
+     * Performs open event should open when event present.
      */
     @Test
     public void openEvent_shouldOpenWhenEventPresent() {
@@ -25,7 +25,7 @@ public class EventScanResultTest {
     }
 
     /**
-     * Handles invalid And Error Results_do Not Open Event.
+     * Performs invalid and error results do not open event.
      */
     @Test
     public void invalidAndErrorResults_doNotOpenEvent() {

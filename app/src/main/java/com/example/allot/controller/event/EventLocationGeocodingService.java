@@ -5,7 +5,10 @@ package com.example.allot.controller.event;
  */
 public interface EventLocationGeocodingService {
     /**
-     * Handles geocode.
+     * Returns the result of geocode.
+     *
+     * @param location the location
+     * @return the result of this call
      */
     EventLocationCoordinates geocode(String location);
 }

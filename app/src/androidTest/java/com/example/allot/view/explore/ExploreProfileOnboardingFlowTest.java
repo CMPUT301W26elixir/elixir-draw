@@ -23,7 +23,7 @@ import org.junit.runner.RunWith;
 public class ExploreProfileOnboardingFlowTest {
 
     /**
-     * Handles disable Animations.
+     * Performs disable animations.
      */
     @Before
     public void disableAnimations() {
@@ -31,7 +31,9 @@ public class ExploreProfileOnboardingFlowTest {
     }
 
     /**
-     * Builds intent.
+     * Returns the result of build intent.
+     *
+     * @return the result of this call
      */
     private Intent buildIntent() {
         Intent intent = new Intent(ApplicationProvider.getApplicationContext(), ExploreActivity.class);
@@ -47,7 +49,7 @@ public class ExploreProfileOnboardingFlowTest {
     }
 
     /**
-     * Handles explore Profile Tab_launches Deferred Onboarding And Returns To Profile.
+     * Performs explore profile tab launches deferred onboarding and returns to profile.
      */
     @Test
     public void exploreProfileTab_launchesDeferredOnboardingAndReturnsToProfile() {

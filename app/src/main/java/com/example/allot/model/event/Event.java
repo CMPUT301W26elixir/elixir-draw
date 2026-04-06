@@ -44,7 +44,7 @@ public class Event {
     private Boolean geoloc;
 
     /**
-     * Creates an empty Event object for Firestore document deserialization.
+     * Creates a new Event instance.
      */
     public Event() {
         this.galleryUrls = new ArrayList<>();
@@ -60,12 +60,12 @@ public class Event {
     }
 
     /**
-     * Creates a new event with the basic organizer and waiting list information.
+     * Creates a new Event instance.
      *
-     * @param eventId the unique ID of the event
-     * @param organizerId the device ID of the organizer
-     * @param title the title of the event
-     * @param limit the maximum number of entrants to select
+     * @param eventId the event id
+     * @param organizerId the organizer id
+     * @param title the title
+     * @param limit the limit
      */
     public Event(String eventId, String organizerId, String title, int limit) {
         this.eventId = eventId;
@@ -87,9 +87,9 @@ public class Event {
     }
 
     /**
-     * Adds a photo URL to the event gallery.
+     * Performs add photo to gallery.
      *
-     * @param newPhotoUrl the URL of the photo to add
+     * @param newPhotoUrl the new photo url
      */
     public void addPhotoToGallery(String newPhotoUrl) {
         if (galleryUrls == null) {
@@ -99,7 +99,7 @@ public class Event {
     }
 
     /**
-     * Runs the lottery selection for the event and stores the chosen entrants.
+     * Performs lottery.
      */
     public void lottery() {
         getWaitingList().selectedList();
@@ -107,23 +107,23 @@ public class Event {
     }
 
     /**
-     * Updates the enrolled entrant list from the waiting list status.
+     * Performs enrolled.
      */
     public void enrolled() {
         enrolled = getWaitingList().enrolled();
     }
 
     /**
-     * Updates the not-enrolled entrant list from the waiting list status.
+     * Performs notenrolled.
      */
     public void notenrolled() {
         notEnrolled = getWaitingList().notEnrolled();
     }
 
     /**
-     * Returns the waiting list for the event, creating one if it does not exist.
+     * Returns the waiting list.
      *
-     * @return the waiting list for the event
+     * @return the waiting list
      */
     public WaitingList getWaitingList() {
         if (waitingList == null) {
@@ -133,212 +133,270 @@ public class Event {
     }
 
     /**
-     * Returns the enrollment status map for selected entrants.
+     * Returns the result of status.
      *
-     * @return a map of entrant IDs to enrollment status values
+     * @return the result of this call
      */
     public HashMap<String, Boolean> status() {
         return getWaitingList().status;
     }
 
     /**
-     * Returns whether g.et Event Id
+     * Returns the event id.
+     *
+     * @return the event id
      */
     public String getEventId() {
         return eventId;
     }
 
     /**
-     * Updates event id.
+     * Updates the event id.
+     *
+     * @param eventId the event id
      */
     public void setEventId(String eventId) {
         this.eventId = eventId;
     }
 
     /**
-     * Returns whether g.et Organizer Id
+     * Returns the organizer id.
+     *
+     * @return the organizer id
      */
     public String getOrganizerId() {
         return organizerId;
     }
 
     /**
-     * Updates organizer id.
+     * Updates the organizer id.
+     *
+     * @param organizerId the organizer id
      */
     public void setOrganizerId(String organizerId) {
         this.organizerId = organizerId;
     }
 
     /**
-     * Returns whether g.et Title
+     * Returns the title.
+     *
+     * @return the title
      */
     public String getTitle() {
         return title;
     }
 
     /**
-     * Updates title.
+     * Updates the title.
+     *
+     * @param title the title
      */
     public void setTitle(String title) {
         this.title = title;
     }
 
     /**
-     * Returns whether g.et Description
+     * Returns the description.
+     *
+     * @return the description
      */
     public String getDescription() {
         return description;
     }
 
     /**
-     * Updates description.
+     * Updates the description.
+     *
+     * @param description the description
      */
     public void setDescription(String description) {
         this.description = description;
     }
 
     /**
-     * Returns whether g.et Location
+     * Returns the location.
+     *
+     * @return the location
      */
     public String getLocation() {
         return location;
     }
 
     /**
-     * Updates location.
+     * Updates the location.
+     *
+     * @param location the location
      */
     public void setLocation(String location) {
         this.location = location;
     }
 
     /**
-     * Returns whether g.et Category
+     * Returns the category.
+     *
+     * @return the category
      */
     public String getCategory() {
         return category;
     }
 
     /**
-     * Updates category.
+     * Updates the category.
+     *
+     * @param category the category
      */
     public void setCategory(String category) {
         this.category = category;
     }
 
     /**
-     * Returns whether g.et Capacity
+     * Returns the capacity.
+     *
+     * @return the capacity
      */
     public int getCapacity() {
         return capacity;
     }
 
     /**
-     * Updates capacity.
+     * Updates the capacity.
+     *
+     * @param capacity the capacity
      */
     public void setCapacity(int capacity) {
         this.capacity = capacity;
     }
 
     /**
-     * Returns whether g.et Price
+     * Returns the price.
+     *
+     * @return the price
      */
     public Double getPrice() {
         return price;
     }
 
     /**
-     * Updates price.
+     * Updates the price.
+     *
+     * @param price the price
      */
     public void setPrice(Double price) {
         this.price = price;
     }
 
     /**
-     * Returns whether g.et Event Date
+     * Returns the event date.
+     *
+     * @return the event date
      */
     public Date getEventDate() {
         return eventDate;
     }
 
     /**
-     * Updates event date.
+     * Updates the event date.
+     *
+     * @param eventDate the event date
      */
     public void setEventDate(Date eventDate) {
         this.eventDate = eventDate;
     }
 
     /**
-     * Returns whether g.et Draw Date
+     * Returns the draw date.
+     *
+     * @return the draw date
      */
     public Date getDrawDate() {
         return drawDate;
     }
 
     /**
-     * Updates draw date.
+     * Updates the draw date.
+     *
+     * @param drawDate the draw date
      */
     public void setDrawDate(Date drawDate) {
         this.drawDate = drawDate;
     }
 
     /**
-     * Returns whether g.et Registration Open
+     * Returns the registration open.
+     *
+     * @return the registration open
      */
     public Date getRegistrationOpen() {
         return registrationOpen;
     }
 
     /**
-     * Updates registration open.
+     * Updates the registration open.
+     *
+     * @param registrationOpen the registration open
      */
     public void setRegistrationOpen(Date registrationOpen) {
         this.registrationOpen = registrationOpen;
     }
 
     /**
-     * Returns whether g.et Registration Deadline
+     * Returns the registration deadline.
+     *
+     * @return the registration deadline
      */
     public Date getRegistrationDeadline() {
         return registrationDeadline;
     }
 
     /**
-     * Updates registration deadline.
+     * Updates the registration deadline.
+     *
+     * @param registrationDeadline the registration deadline
      */
     public void setRegistrationDeadline(Date registrationDeadline) {
         this.registrationDeadline = registrationDeadline;
     }
 
     /**
-     * Returns whether g.et Status
+     * Returns the status.
+     *
+     * @return the status
      */
     public String getStatus() {
         return status;
     }
 
     /**
-     * Updates status.
+     * Updates the status.
+     *
+     * @param status the status
      */
     public void setStatus(String status) {
         this.status = status;
     }
 
     /**
-     * Returns whether g.et Poster Url
+     * Returns the poster url.
+     *
+     * @return the poster url
      */
     public String getPosterUrl() {
         return posterUrl;
     }
 
     /**
-     * Updates poster url.
+     * Updates the poster url.
+     *
+     * @param posterUrl the poster url
      */
     public void setPosterUrl(String posterUrl) {
         this.posterUrl = posterUrl;
     }
 
     /**
-     * Returns whether g.et Visibility
+     * Returns the visibility.
+     *
+     * @return the visibility
      */
     public String getVisibility() {
         String normalized = normalizeVisibility(visibility);
@@ -346,77 +404,99 @@ public class Event {
     }
 
     /**
-     * Updates visibility.
+     * Updates the visibility.
+     *
+     * @param visibility the visibility
      */
     public void setVisibility(String visibility) {
         this.visibility = normalizeVisibility(visibility);
     }
 
     /**
-     * Returns whether i.s Public
+     * Returns whether public.
+     *
+     * @return whether public
      */
     public boolean isPublic() {
         return VISIBILITY_PUBLIC.equalsIgnoreCase(getVisibility());
     }
 
     /**
-     * Returns whether i.s Private
+     * Returns whether private.
+     *
+     * @return whether private
      */
     public boolean isPrivate() {
         return VISIBILITY_PRIVATE.equalsIgnoreCase(getVisibility());
     }
 
     /**
-     * Returns whether g.et Event Latitude
+     * Returns the event latitude.
+     *
+     * @return the event latitude
      */
     public Double getEventLatitude() {
         return eventLatitude;
     }
 
     /**
-     * Updates event latitude.
+     * Updates the event latitude.
+     *
+     * @param eventLatitude the event latitude
      */
     public void setEventLatitude(Double eventLatitude) {
         this.eventLatitude = eventLatitude;
     }
 
     /**
-     * Returns whether g.et Event Longitude
+     * Returns the event longitude.
+     *
+     * @return the event longitude
      */
     public Double getEventLongitude() {
         return eventLongitude;
     }
 
     /**
-     * Updates event longitude.
+     * Updates the event longitude.
+     *
+     * @param eventLongitude the event longitude
      */
     public void setEventLongitude(Double eventLongitude) {
         this.eventLongitude = eventLongitude;
     }
 
     /**
-     * Returns whether g.et Limit
+     * Returns the limit.
+     *
+     * @return the limit
      */
     public int getLimit() {
         return limit;
     }
 
     /**
-     * Updates limit.
+     * Updates the limit.
+     *
+     * @param limit the limit
      */
     public void setLimit(int limit) {
         this.limit = limit;
     }
 
     /**
-     * Updates waiting list.
+     * Updates the waiting list.
+     *
+     * @param waitingList the waiting list
      */
     public void setWaitingList(WaitingList waitingList) {
         this.waitingList = waitingList;
     }
 
     /**
-     * Returns whether g.et Chosen
+     * Returns the chosen.
+     *
+     * @return the chosen
      */
     public ArrayList<String> getChosen() {
         if (chosen == null) {
@@ -426,14 +506,18 @@ public class Event {
     }
 
     /**
-     * Updates chosen.
+     * Updates the chosen.
+     *
+     * @param chosen the chosen
      */
     public void setChosen(ArrayList<String> chosen) {
         this.chosen = chosen;
     }
 
     /**
-     * Returns whether g.et Enrolled
+     * Returns the enrolled.
+     *
+     * @return the enrolled
      */
     public ArrayList<String> getEnrolled() {
         if (enrolled == null) {
@@ -443,14 +527,18 @@ public class Event {
     }
 
     /**
-     * Updates enrolled.
+     * Updates the enrolled.
+     *
+     * @param enrolled the enrolled
      */
     public void setEnrolled(ArrayList<String> enrolled) {
         this.enrolled = enrolled;
     }
 
     /**
-     * Returns whether g.et Cancelled
+     * Returns the cancelled.
+     *
+     * @return the cancelled
      */
     public ArrayList<String> getCancelled() {
         if (cancelled == null) {
@@ -460,14 +548,18 @@ public class Event {
     }
 
     /**
-     * Updates cancelled.
+     * Updates the cancelled.
+     *
+     * @param cancelled the cancelled
      */
     public void setCancelled(ArrayList<String> cancelled) {
         this.cancelled = cancelled;
     }
 
     /**
-     * Returns whether g.et Not Enrolled
+     * Returns the not enrolled.
+     *
+     * @return the not enrolled
      */
     public ArrayList<String> getNotEnrolled() {
         if (notEnrolled == null) {
@@ -477,14 +569,18 @@ public class Event {
     }
 
     /**
-     * Updates not enrolled.
+     * Updates the not enrolled.
+     *
+     * @param notEnrolled the not enrolled
      */
     public void setNotEnrolled(ArrayList<String> notEnrolled) {
         this.notEnrolled = notEnrolled;
     }
 
     /**
-     * Returns whether g.et Co Organizers
+     * Returns the co organizers.
+     *
+     * @return the co organizers
      */
     public ArrayList<String> getCoOrganizers() {
         if (coOrganizers == null) {
@@ -494,14 +590,18 @@ public class Event {
     }
 
     /**
-     * Updates co organizers.
+     * Updates the co organizers.
+     *
+     * @param coOrganizers the co organizers
      */
     public void setCoOrganizers(ArrayList<String> coOrganizers) {
         this.coOrganizers = coOrganizers;
     }
 
     /**
-     * Returns whether g.et Co Organizer Invites
+     * Returns the co organizer invites.
+     *
+     * @return the co organizer invites
      */
     public ArrayList<String> getCoOrganizerInvites() {
         if (coOrganizerInvites == null) {
@@ -511,14 +611,18 @@ public class Event {
     }
 
     /**
-     * Updates co organizer invites.
+     * Updates the co organizer invites.
+     *
+     * @param coOrganizerInvites the co organizer invites
      */
     public void setCoOrganizerInvites(ArrayList<String> coOrganizerInvites) {
         this.coOrganizerInvites = coOrganizerInvites;
     }
 
     /**
-     * Returns whether g.et Gallery Urls
+     * Returns the gallery urls.
+     *
+     * @return the gallery urls
      */
     public ArrayList<String> getGalleryUrls() {
         if (galleryUrls == null) {
@@ -528,14 +632,18 @@ public class Event {
     }
 
     /**
-     * Updates gallery urls.
+     * Updates the gallery urls.
+     *
+     * @param galleryUrls the gallery urls
      */
     public void setGalleryUrls(ArrayList<String> galleryUrls) {
         this.galleryUrls = galleryUrls;
     }
 
     /**
-     * Returns whether g.et Invited
+     * Returns the invited.
+     *
+     * @return the invited
      */
     public ArrayList<String> getInvited() {
         if (invited == null) {
@@ -545,21 +653,28 @@ public class Event {
     }
 
     /**
-     * Updates invited.
+     * Updates the invited.
+     *
+     * @param invited the invited
      */
     public void setInvited(ArrayList<String> invited) {
         this.invited = invited;
     }
 
     /**
-     * Returns whether i.s Invited
+     * Returns whether invited.
+     *
+     * @param deviceId the device id
+     * @return whether invited
      */
     public boolean isInvited(String deviceId) {
         return deviceId != null && getInvited().contains(deviceId);
     }
 
     /**
-     * Returns whether g.et Comments
+     * Returns the comments.
+     *
+     * @return the comments
      */
     public ArrayList<EventComment> getComments() {
         if (comments == null) {
@@ -569,28 +684,37 @@ public class Event {
     }
 
     /**
-     * Updates comments.
+     * Updates the comments.
+     *
+     * @param comments the comments
      */
     public void setComments(ArrayList<EventComment> comments) {
         this.comments = comments;
     }
 
     /**
-     * Returns whether g.et Geoloc
+     * Returns the geoloc.
+     *
+     * @return the geoloc
      */
     public Boolean getGeoloc() {
         return geoloc;
     }
 
     /**
-     * Updates geoloc.
+     * Updates the geoloc.
+     *
+     * @param geoloc the geoloc
      */
     public void setGeoloc(Boolean geoloc) {
         this.geoloc = geoloc;
     }
 
     /**
-     * Handles normalize Visibility.
+     * Returns the result of normalize visibility.
+     *
+     * @param value the value
+     * @return the result of this call
      */
     private String normalizeVisibility(String value) {
         if (value == null) {

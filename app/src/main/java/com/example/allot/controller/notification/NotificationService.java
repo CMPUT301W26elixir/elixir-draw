@@ -34,6 +34,8 @@ public class NotificationService {
 
     /**
      * Creates a new NotificationService instance.
+     *
+     * @param context the context
      */
     public NotificationService(Context context) {
         this.context = context;
@@ -41,7 +43,7 @@ public class NotificationService {
     }
 
     /**
-     * Starts listening for new notifications in Firestore.
+     * Performs start listening.
      */
     public void startListening() {
         if (listenerRegistration != null) {
@@ -91,7 +93,7 @@ public class NotificationService {
     }
 
     /**
-     * Stops the Firestore listener.
+     * Performs stop listening.
      */
     public void stopListening() {
         if (listenerRegistration != null) {
@@ -102,7 +104,9 @@ public class NotificationService {
     }
 
     /**
-     * Shows local notification.
+     * Performs show local notification.
+     *
+     * @param item the item
      */
     private void showLocalNotification(NotificationItem item) {
         NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);

@@ -25,7 +25,7 @@ import org.junit.runner.RunWith;
 public class EditProfileFlowTest {
 
     /**
-     * Handles disable Animations.
+     * Performs disable animations.
      */
     @Before
     public void disableAnimations() {
@@ -33,7 +33,9 @@ public class EditProfileFlowTest {
     }
 
     /**
-     * Builds intent.
+     * Returns the result of build intent.
+     *
+     * @return the result of this call
      */
     private Intent buildIntent() {
         Intent intent = new Intent(ApplicationProvider.getApplicationContext(), ProfileActivity.class);
@@ -47,7 +49,7 @@ public class EditProfileFlowTest {
     }
 
     /**
-     * Handles edit Profile_updates Form And Clears Dirty State After Save.
+     * Performs edit profile updates form and clears dirty state after save.
      */
     @Test
     public void editProfile_updatesFormAndClearsDirtyStateAfterSave() {

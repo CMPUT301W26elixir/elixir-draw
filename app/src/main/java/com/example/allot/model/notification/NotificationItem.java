@@ -19,6 +19,11 @@ public class NotificationItem {
 
     /**
      * Creates a new NotificationItem instance.
+     *
+     * @param userId the user id
+     * @param eventId the event id
+     * @param title the title
+     * @param message the message
      */
     public NotificationItem(String userId, String eventId, String title, String message) {
         this.userId = userId;
@@ -30,59 +35,87 @@ public class NotificationItem {
     }
 
     /**
-     * Returns whether get Id.
+     * Returns the id.
+     *
+     * @return the id
      */
     public String getId() { return id; }
     /**
-     * Updates id.
+     * Updates the id.
+     *
+     * @param id the id
      */
     public void setId(String id) { this.id = id; }
     /**
-     * Returns whether get User Id.
+     * Returns the user id.
+     *
+     * @return the user id
      */
     public String getUserId() { return userId; }
     /**
-     * Updates user id.
+     * Updates the user id.
+     *
+     * @param userId the user id
      */
     public void setUserId(String userId) { this.userId = userId; }
     /**
-     * Returns whether get Event Id.
+     * Returns the event id.
+     *
+     * @return the event id
      */
     public String getEventId() { return eventId; }
     /**
-     * Updates event id.
+     * Updates the event id.
+     *
+     * @param eventId the event id
      */
     public void setEventId(String eventId) { this.eventId = eventId; }
     /**
-     * Returns whether get Title.
+     * Returns the title.
+     *
+     * @return the title
      */
     public String getTitle() { return title; }
     /**
-     * Updates title.
+     * Updates the title.
+     *
+     * @param title the title
      */
     public void setTitle(String title) { this.title = title; }
     /**
-     * Returns whether get Message.
+     * Returns the message.
+     *
+     * @return the message
      */
     public String getMessage() { return message; }
     /**
-     * Updates message.
+     * Updates the message.
+     *
+     * @param message the message
      */
     public void setMessage(String message) { this.message = message; }
     /**
-     * Returns whether is Read.
+     * Returns whether read.
+     *
+     * @return whether read
      */
     public boolean isRead() { return read; }
     /**
-     * Updates read.
+     * Updates the read.
+     *
+     * @param read the read
      */
     public void setRead(boolean read) { this.read = read; }
     /**
-     * Returns whether get Created At.
+     * Returns the created at.
+     *
+     * @return the created at
      */
     public com.google.firebase.Timestamp getCreatedAt() { return createdAt; }
     /**
-     * Updates created at.
+     * Updates the created at.
+     *
+     * @param createdAt the created at
      */
     public void setCreatedAt(com.google.firebase.Timestamp createdAt) { this.createdAt = createdAt; }
 }

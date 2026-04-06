@@ -9,6 +9,9 @@ public class EventLocationCoordinates {
 
     /**
      * Creates a new EventLocationCoordinates instance.
+     *
+     * @param latitude the latitude
+     * @param longitude the longitude
      */
     public EventLocationCoordinates(double latitude, double longitude) {
         this.latitude = latitude;
@@ -16,14 +19,18 @@ public class EventLocationCoordinates {
     }
 
     /**
-     * Returns whether g.et Latitude
+     * Returns the latitude.
+     *
+     * @return the latitude
      */
     public double getLatitude() {
         return latitude;
     }
 
     /**
-     * Returns whether g.et Longitude
+     * Returns the longitude.
+     *
+     * @return the longitude
      */
     public double getLongitude() {
         return longitude;

@@ -9,7 +9,7 @@ import org.junit.Test;
 
 public class UserTest {
     /**
-     * Handles default Constructor_initializes Event Lists.
+     * Performs default constructor initializes event lists.
      */
     @Test
     public void defaultConstructor_initializesEventLists() {
@@ -22,7 +22,7 @@ public class UserTest {
     }
 
     /**
-     * Returns whether g.et Name_handles Missing And Trimmed Parts
+     * Performs get name handles missing and trimmed parts.
      */
     @Test
     public void getName_handlesMissingAndTrimmedParts() {
@@ -40,7 +40,7 @@ public class UserTest {
     }
 
     /**
-     * Returns whether g.etters_reinitialize Null Lists
+     * Performs getters reinitialize null lists.
      */
     @Test
     public void getters_reinitializeNullLists() {

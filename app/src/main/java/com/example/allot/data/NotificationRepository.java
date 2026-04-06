@@ -20,16 +20,18 @@ public class NotificationRepository {
 
     /**
      * Creates a new NotificationRepository instance.
+     *
+     * @param db the db
      */
     public NotificationRepository(FirebaseFirestore db) {
         this.db = db;
     }
 
     /**
-     * Saves a notification to Firestore for a specific user.
+     * Performs save notification.
      *
-     * @param notification the notification to save
-     * @param listener     called with true on success, false on failure
+     * @param notification the notification
+     * @param listener the listener
      */
     public void saveNotification(NotificationItem notification, OnCompleteListener<Boolean> listener) {
         db.collection(COLLECTION)
@@ -42,10 +44,10 @@ public class NotificationRepository {
     }
 
     /**
-     * Fetches all notifications for a given user.
+     * Performs get notifications for user.
      *
-     * @param userId   the device ID of the user
-     * @param listener called with the list of notifications on success
+     * @param userId the user id
+     * @param listener the listener
      */
     public void getNotificationsForUser(String userId, OnCompleteListener<java.util.List<NotificationItem>> listener) {
         db.collection(COLLECTION)
@@ -67,9 +69,9 @@ public class NotificationRepository {
     }
 
     /**
-     * Fetches all notifications for admin browsing.
+     * Performs get all notifications.
      *
-     * @param listener called with the list of notifications on success
+     * @param listener the listener
      */
     public void getAllNotifications(OnCompleteListener<java.util.List<NotificationItem>> listener) {
         db.collection(COLLECTION)

@@ -15,7 +15,7 @@ public class EventInputValidatorTest {
     private Date eventDate;
 
     /**
-     * Updates up.
+     * Updates the up.
      */
     @Before
     public void setUp() {
@@ -26,7 +26,7 @@ public class EventInputValidatorTest {
     }
 
     /**
-     * Returns whether i.s Valid Create Event Input_accepts Valid Input
+     * Performs is valid create event input accepts valid input.
      */
     @Test
     public void isValidCreateEventInput_acceptsValidInput() {
@@ -48,7 +48,7 @@ public class EventInputValidatorTest {
     }
 
     /**
-     * Returns whether i.s Valid Create Event Input_rejects Missing Required Fields
+     * Performs is valid create event input rejects missing required fields.
      */
     @Test
     public void isValidCreateEventInput_rejectsMissingRequiredFields() {
@@ -70,7 +70,7 @@ public class EventInputValidatorTest {
     }
 
     /**
-     * Returns whether i.s Valid Update Event Input_rejects Negative Price
+     * Performs is valid update event input rejects negative price.
      */
     @Test
     public void isValidUpdateEventInput_rejectsNegativePrice() {
@@ -92,7 +92,7 @@ public class EventInputValidatorTest {
     }
 
     /**
-     * Returns whether i.s Valid Update Event Input_rejects Invalid Participant Count
+     * Performs is valid update event input rejects invalid participant count.
      */
     @Test
     public void isValidUpdateEventInput_rejectsInvalidParticipantCount() {
@@ -114,7 +114,7 @@ public class EventInputValidatorTest {
     }
 
     /**
-     * Returns whether i.s Valid Update Event Input_rejects Invalid Date Ordering
+     * Performs is valid update event input rejects invalid date ordering.
      */
     @Test
     public void isValidUpdateEventInput_rejectsInvalidDateOrdering() {

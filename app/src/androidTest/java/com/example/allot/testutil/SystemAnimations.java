@@ -17,7 +17,7 @@ public final class SystemAnimations {
     }
 
     /**
-     * Handles disable All.
+     * Performs disable all.
      */
     public static void disableAll() {
         setAnimationScale("window_animation_scale", 0f);
@@ -26,7 +26,10 @@ public final class SystemAnimations {
     }
 
     /**
-     * Updates animation scale.
+     * Updates the animation scale.
+     *
+     * @param setting the setting
+     * @param value the value
      */
     private static void setAnimationScale(String setting, float value) {
         UiAutomation automation = InstrumentationRegistry.getInstrumentation().getUiAutomation();

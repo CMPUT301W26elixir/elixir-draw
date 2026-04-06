@@ -19,7 +19,7 @@ public class NotificationControllerTest {
     private NotificationController controller;
 
     /**
-     * Updates up.
+     * Updates the up.
      */
     @Before
     public void setUp() {
@@ -28,7 +28,7 @@ public class NotificationControllerTest {
     }
 
     /**
-     * Handles notify Selected Entrants_returns Failure For Empty List.
+     * Performs notify selected entrants returns failure for empty list.
      */
     @Test
     public void notifySelectedEntrants_returnsFailureForEmptyList() {
@@ -40,7 +40,7 @@ public class NotificationControllerTest {
     }
 
     /**
-     * Handles notify Selected Entrants_saves Notification For Each Entrant.
+     * Performs notify selected entrants saves notification for each entrant.
      */
     @Test
     public void notifySelectedEntrants_savesNotificationForEachEntrant() {
@@ -56,7 +56,7 @@ public class NotificationControllerTest {
     }
 
     /**
-     * Handles notify Not Selected Entrants_saves Expected Content.
+     * Performs notify not selected entrants saves expected content.
      */
     @Test
     public void notifyNotSelectedEntrants_savesExpectedContent() {
@@ -71,7 +71,7 @@ public class NotificationControllerTest {
     }
 
     /**
-     * Returns whether g.et Notifications For User_delegates To Repository
+     * Performs get notifications for user delegates to repository.
      */
     @Test
     public void getNotificationsForUser_delegatesToRepository() {
@@ -93,14 +93,17 @@ public class NotificationControllerTest {
         private String lastRequestedUserId;
 
         /**
-         * Handles fake Notification Repository.
+         * Creates a new FakeNotificationRepository instance.
          */
         private FakeNotificationRepository() {
             super((FirebaseFirestore) null);
         }
 
         /**
-         * Saves notification.
+         * Performs save notification.
+         *
+         * @param notification the notification
+         * @param listener the listener
          */
         @Override
         public void saveNotification(NotificationItem notification, OnCompleteListener<Boolean> listener) {
@@ -109,7 +112,10 @@ public class NotificationControllerTest {
         }
 
         /**
-         * Returns whether g.et Notifications For User
+         * Performs get notifications for user.
+         *
+         * @param userId the user id
+         * @param listener the listener
          */
         @Override
         public void getNotificationsForUser(String userId, OnCompleteListener<List<NotificationItem>> listener) {

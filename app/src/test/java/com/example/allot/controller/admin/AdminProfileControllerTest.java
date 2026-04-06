@@ -19,7 +19,7 @@ public class AdminProfileControllerTest {
     private AdminProfileController controller;
 
     /**
-     * Updates up.
+     * Updates the up.
      */
     @Before
     public void setUp() {
@@ -29,7 +29,7 @@ public class AdminProfileControllerTest {
     }
 
     /**
-     * Loads all profiles_requires admin and delegates when authorized.
+     * Performs load all profiles requires admin and delegates when authorized.
      */
     @Test
     public void loadAllProfiles_requiresAdminAndDelegatesWhenAuthorized() {
@@ -50,7 +50,7 @@ public class AdminProfileControllerTest {
     }
 
     /**
-     * Loads all profiles_returns failure when admin lookup fails.
+     * Performs load all profiles returns failure when admin lookup fails.
      */
     @Test
     public void loadAllProfiles_returnsFailureWhenAdminLookupFails() {
@@ -64,7 +64,7 @@ public class AdminProfileControllerTest {
     }
 
     /**
-     * Loads all profiles_propagates repository failure.
+     * Performs load all profiles propagates repository failure.
      */
     @Test
     public void loadAllProfiles_propagatesRepositoryFailure() {
@@ -78,7 +78,7 @@ public class AdminProfileControllerTest {
     }
 
     /**
-     * Deletes profile_requires admin and delegates when authorized.
+     * Performs delete profile requires admin and delegates when authorized.
      */
     @Test
     public void deleteProfile_requiresAdminAndDelegatesWhenAuthorized() {
@@ -101,7 +101,7 @@ public class AdminProfileControllerTest {
     }
 
     /**
-     * Deletes profile_returns failure when admin lookup fails.
+     * Performs delete profile returns failure when admin lookup fails.
      */
     @Test
     public void deleteProfile_returnsFailureWhenAdminLookupFails() {
@@ -114,7 +114,7 @@ public class AdminProfileControllerTest {
     }
 
     /**
-     * Deletes profile_propagates repository delete failure.
+     * Performs delete profile propagates repository delete failure.
      */
     @Test
     public void deleteProfile_propagatesRepositoryDeleteFailure() {
@@ -137,14 +137,16 @@ public class AdminProfileControllerTest {
         private boolean deleteSuccess;
 
         /**
-         * Handles fake User Repository.
+         * Creates a new FakeUserRepository instance.
          */
         private FakeUserRepository() {
             super((com.google.firebase.firestore.FirebaseFirestore) null);
         }
 
         /**
-         * Returns whether g.et All Users
+         * Performs get all users.
+         *
+         * @param listener the listener
          */
         @Override
         public void getAllUsers(com.example.allot.common.OnCompleteListener<List<User>> listener) {
@@ -152,7 +154,10 @@ public class AdminProfileControllerTest {
         }
 
         /**
-         * Deletes user as admin.
+         * Performs delete user as admin.
+         *
+         * @param deviceId the device id
+         * @param listener the listener
          */
         @Override
         public void deleteUserAsAdmin(String deviceId, com.example.allot.common.OnCompleteListener<Boolean> listener) {
@@ -166,14 +171,16 @@ public class AdminProfileControllerTest {
         private boolean adminLookupSuccess = true;
 
         /**
-         * Handles fake User Controller.
+         * Creates a new FakeUserController instance.
          */
         private FakeUserController() {
             super(null, new DeviceSessionManager(new FakeDeviceSessionStore("device-1")));
         }
 
         /**
-         * Returns whether i.s Current User Admin
+         * Performs is current user admin.
+         *
+         * @param listener the listener
          */
         @Override
         public void isCurrentUserAdmin(com.example.allot.common.OnCompleteListener<Boolean> listener) {
@@ -185,14 +192,18 @@ public class AdminProfileControllerTest {
         private final String deviceId;
 
         /**
-         * Handles fake Device Session Store.
+         * Creates a new FakeDeviceSessionStore instance.
+         *
+         * @param deviceId the device id
          */
         private FakeDeviceSessionStore(String deviceId) {
             this.deviceId = deviceId;
         }
 
         /**
-         * Returns whether g.et Device Id
+         * Returns the device id.
+         *
+         * @return the device id
          */
         @Override
         public String getDeviceId() {
@@ -200,7 +211,9 @@ public class AdminProfileControllerTest {
         }
 
         /**
-         * Saves device id.
+         * Performs save device id.
+         *
+         * @param deviceId the device id
          */
         @Override
         public void saveDeviceId(String deviceId) {

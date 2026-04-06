@@ -14,7 +14,7 @@ public class EventDetailViewServiceTest {
     private EventDetailViewService service;
 
     /**
-     * Updates up.
+     * Updates the up.
      */
     @Before
     public void setUp() {
@@ -22,7 +22,7 @@ public class EventDetailViewServiceTest {
     }
 
     /**
-     * Builds footer state_returns manage footer for organizer.
+     * Performs build footer state returns manage footer for organizer.
      */
     @Test
     public void buildFooterState_returnsManageFooterForOrganizer() {
@@ -44,7 +44,7 @@ public class EventDetailViewServiceTest {
     }
 
     /**
-     * Builds footer state_returns offer footer for selected user.
+     * Performs build footer state returns offer footer for selected user.
      */
     @Test
     public void buildFooterState_returnsOfferFooterForSelectedUser() {
@@ -66,7 +66,7 @@ public class EventDetailViewServiceTest {
     }
 
     /**
-     * Builds footer state_returns replacement footer state.
+     * Performs build footer state returns replacement footer state.
      */
     @Test
     public void buildFooterState_returnsReplacementFooterState() {
@@ -87,7 +87,7 @@ public class EventDetailViewServiceTest {
     }
 
     /**
-     * Builds footer state_returns leave waitlist footer state.
+     * Performs build footer state returns leave waitlist footer state.
      */
     @Test
     public void buildFooterState_returnsLeaveWaitlistFooterState() {
@@ -108,7 +108,7 @@ public class EventDetailViewServiceTest {
     }
 
     /**
-     * Returns whether g.et Entrant Count_returns Waiting List Size
+     * Performs get entrant count returns waiting list size.
      */
     @Test
     public void getEntrantCount_returnsWaitingListSize() {
@@ -120,7 +120,7 @@ public class EventDetailViewServiceTest {
     }
 
     /**
-     * Returns whether g.et Selection Criteria Count_prefers Capacity Then Limit
+     * Performs get selection criteria count prefers capacity then limit.
      */
     @Test
     public void getSelectionCriteriaCount_prefersCapacityThenLimit() {
@@ -135,7 +135,7 @@ public class EventDetailViewServiceTest {
     }
 
     /**
-     * Builds footer state_returns disabled join defaults when state missing.
+     * Performs build footer state returns disabled join defaults when state missing.
      */
     @Test
     public void buildFooterState_returnsDisabledJoinDefaultsWhenStateMissing() {
@@ -146,7 +146,9 @@ public class EventDetailViewServiceTest {
     }
 
     /**
-     * Builds event.
+     * Returns the result of build event.
+     *
+     * @return the result of this call
      */
     private Event buildEvent() {
         Event event = new Event();

@@ -21,13 +21,19 @@ public class AdminProfilePictureListAdapter extends RecyclerView.Adapter<AdminPr
 
     /**
      * Creates a new AdminProfilePictureListAdapter instance.
+     *
+     * @param users the users
      */
     public AdminProfilePictureListAdapter(List<User> users) {
         this.users = users;
     }
 
     /**
-     * Handles on Create View Holder.
+     * Returns the result of on create view holder.
+     *
+     * @param parent the parent
+     * @param viewType the view type
+     * @return the result of this call
      */
     @NonNull
     @Override
@@ -38,7 +44,10 @@ public class AdminProfilePictureListAdapter extends RecyclerView.Adapter<AdminPr
     }
 
     /**
-     * Handles on Bind View Holder.
+     * Handles the bind view holder callback.
+     *
+     * @param holder the holder
+     * @param position the position
      */
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
@@ -46,7 +55,9 @@ public class AdminProfilePictureListAdapter extends RecyclerView.Adapter<AdminPr
     }
 
     /**
-     * Returns whether g.et Item Count
+     * Returns the item count.
+     *
+     * @return the item count
      */
     @Override
     public int getItemCount() {
@@ -59,7 +70,9 @@ public class AdminProfilePictureListAdapter extends RecyclerView.Adapter<AdminPr
         private final TextView userDeviceIdText;
 
         /**
-         * Documents view Holder.
+         * Creates a new ViewHolder instance.
+         *
+         * @param itemView the item view
          */
         ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -69,7 +82,9 @@ public class AdminProfilePictureListAdapter extends RecyclerView.Adapter<AdminPr
         }
 
         /**
-         * Binds .
+         * Performs bind.
+         *
+         * @param user the user
          */
         void bind(User user) {
             String displayName = user == null ? null : user.getName();

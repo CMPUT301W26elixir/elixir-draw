@@ -15,6 +15,8 @@ public class ProfileController {
 
     /**
      * Creates a new ProfileController instance.
+     *
+     * @param context the context
      */
     public ProfileController(Context context) {
         this(new UserController(context));
@@ -22,15 +24,17 @@ public class ProfileController {
 
     /**
      * Creates a new ProfileController instance.
+     *
+     * @param userController the user controller
      */
     ProfileController(UserController userController) {
         this.userController = userController;
     }
 
     /**
-     * Loads the current profile and builds the initial screen state.
+     * Performs load profile.
      *
-     * @param listener the listener that receives the profile state
+     * @param listener the listener
      */
     public void loadProfile(OnCompleteListener<ProfileFormSnapshot> listener) {
         userController.loadCurrentUser((User user, boolean success) -> {
@@ -45,13 +49,13 @@ public class ProfileController {
     }
 
     /**
-     * Builds the current screen state from the values shown in the view.
+     * Returns whether save available.
      *
-     * @param originalSnapshot the original loaded profile values
-     * @param currentSnapshot the current form values
-     * @param isSaving whether a save is in progress
-     * @param isDeleting whether a delete is in progress
-     * @return the profile screen state
+     * @param originalSnapshot the original snapshot
+     * @param currentSnapshot the current snapshot
+     * @param isSaving whether saving
+     * @param isDeleting whether deleting
+     * @return whether save available
      */
     public boolean isSaveAvailable(ProfileFormSnapshot originalSnapshot,
                                    ProfileFormSnapshot currentSnapshot,
@@ -62,10 +66,10 @@ public class ProfileController {
     }
 
     /**
-     * Saves the current profile values.
+     * Performs save profile.
      *
-     * @param currentSnapshot the current form values
-     * @param listener the listener that receives the save result
+     * @param currentSnapshot the current snapshot
+     * @param listener the listener
      */
     public void saveProfile(ProfileFormSnapshot currentSnapshot,
                             OnCompleteListener<ProfileActionResult> listener) {
@@ -100,9 +104,9 @@ public class ProfileController {
     }
 
     /**
-     * Deletes the current profile.
+     * Performs delete profile.
      *
-     * @param listener the listener that receives the delete result
+     * @param listener the listener
      */
     public void deleteProfile(OnCompleteListener<ProfileActionResult> listener) {
         userController.deleteCurrentUser((result, success) -> {

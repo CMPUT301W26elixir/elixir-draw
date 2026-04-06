@@ -7,7 +7,7 @@ import org.junit.Test;
 
 public class EventTest {
     /**
-     * Handles event Coordinates_default To Null.
+     * Performs event coordinates default to null.
      */
     @Test
     public void eventCoordinates_defaultToNull() {
@@ -18,7 +18,7 @@ public class EventTest {
     }
 
     /**
-     * Handles event Coordinates_can Be Set And Read Back.
+     * Performs event coordinates can be set and read back.
      */
     @Test
     public void eventCoordinates_canBeSetAndReadBack() {

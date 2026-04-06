@@ -8,7 +8,7 @@ import org.junit.Test;
 
 public class WaitlistJoinLocationTest {
     /**
-     * Handles waitlist Join Location_defaults To Null.
+     * Performs waitlist join location defaults to null.
      */
     @Test
     public void waitlistJoinLocation_defaultsToNull() {
@@ -20,7 +20,7 @@ public class WaitlistJoinLocationTest {
     }
 
     /**
-     * Handles waitlist Join Location_can Be Set And Read Back.
+     * Performs waitlist join location can be set and read back.
      */
     @Test
     public void waitlistJoinLocation_canBeSetAndReadBack() {

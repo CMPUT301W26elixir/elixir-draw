@@ -11,7 +11,7 @@ public class EventEntrantsCsvSaveServiceTest {
     private EventEntrantsCsvSaveService service;
 
     /**
-     * Updates up.
+     * Updates the up.
      */
     @Before
     public void setUp() {
@@ -19,7 +19,7 @@ public class EventEntrantsCsvSaveServiceTest {
     }
 
     /**
-     * Builds file name_uses event title when present.
+     * Performs build file name uses event title when present.
      */
     @Test
     public void buildFileName_usesEventTitleWhenPresent() {
@@ -30,7 +30,7 @@ public class EventEntrantsCsvSaveServiceTest {
     }
 
     /**
-     * Builds file name_falls back to event id.
+     * Performs build file name falls back to event id.
      */
     @Test
     public void buildFileName_fallsBackToEventId() {
@@ -41,7 +41,7 @@ public class EventEntrantsCsvSaveServiceTest {
     }
 
     /**
-     * Builds file name_falls back to default when inputs are blank.
+     * Performs build file name falls back to default when inputs are blank.
      */
     @Test
     public void buildFileName_fallsBackToDefaultWhenInputsAreBlank() {
@@ -52,7 +52,7 @@ public class EventEntrantsCsvSaveServiceTest {
     }
 
     /**
-     * Builds file name_normalizes punctuation and spacing.
+     * Performs build file name normalizes punctuation and spacing.
      */
     @Test
     public void buildFileName_normalizesPunctuationAndSpacing() {
@@ -63,7 +63,7 @@ public class EventEntrantsCsvSaveServiceTest {
     }
 
     /**
-     * Builds file name_ends with csv extension.
+     * Performs build file name ends with csv extension.
      */
     @Test
     public void buildFileName_endsWithCsvExtension() {
@@ -73,7 +73,7 @@ public class EventEntrantsCsvSaveServiceTest {
     }
 
     /**
-     * Saves to downloads_rejects null context.
+     * Performs save to downloads rejects null context.
      */
     @Test
     public void saveToDownloads_rejectsNullContext() {
@@ -88,7 +88,7 @@ public class EventEntrantsCsvSaveServiceTest {
     }
 
     /**
-     * Saves to downloads_rejects blank csv content.
+     * Performs save to downloads rejects blank csv content.
      */
     @Test
     public void saveToDownloads_rejectsBlankCsvContent() {
@@ -103,7 +103,7 @@ public class EventEntrantsCsvSaveServiceTest {
     }
 
     /**
-     * Builds download spec_sets csv metadata for android qand above.
+     * Performs build download spec sets csv metadata for android q and above.
      */
     @Test
     public void buildDownloadSpec_setsCsvMetadataForAndroidQAndAbove() {
@@ -116,7 +116,7 @@ public class EventEntrantsCsvSaveServiceTest {
     }
 
     /**
-     * Builds download spec_omits relative path before android q.
+     * Performs build download spec omits relative path before android q.
      */
     @Test
     public void buildDownloadSpec_omitsRelativePathBeforeAndroidQ() {

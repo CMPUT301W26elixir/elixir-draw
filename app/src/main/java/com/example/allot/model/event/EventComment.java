@@ -18,13 +18,20 @@ public class EventComment {
     private java.util.ArrayList<String> downvoterIds;
 
     /**
-     * Creates an empty comment for Firestore deserialization.
+     * Creates a new EventComment instance.
      */
     public EventComment() {
     }
 
     /**
-     * Creates a new comment or reply.
+     * Creates a new EventComment instance.
+     *
+     * @param commentId the comment id
+     * @param authorId the author id
+     * @param authorName the author name
+     * @param text the text
+     * @param createdAt the created at
+     * @param parentId the parent id
      */
     public EventComment(String commentId, String authorId, String authorName,
                         String text, Date createdAt, String parentId) {
@@ -41,119 +48,153 @@ public class EventComment {
     }
 
     /**
-     * Returns whether g.et Comment Id
+     * Returns the comment id.
+     *
+     * @return the comment id
      */
     public String getCommentId() {
         return commentId;
     }
 
     /**
-     * Updates comment id.
+     * Updates the comment id.
+     *
+     * @param commentId the comment id
      */
     public void setCommentId(String commentId) {
         this.commentId = commentId;
     }
 
     /**
-     * Returns whether g.et Author Id
+     * Returns the author id.
+     *
+     * @return the author id
      */
     public String getAuthorId() {
         return authorId;
     }
 
     /**
-     * Updates author id.
+     * Updates the author id.
+     *
+     * @param authorId the author id
      */
     public void setAuthorId(String authorId) {
         this.authorId = authorId;
     }
 
     /**
-     * Returns whether g.et Author Name
+     * Returns the author name.
+     *
+     * @return the author name
      */
     public String getAuthorName() {
         return authorName;
     }
 
     /**
-     * Updates author name.
+     * Updates the author name.
+     *
+     * @param authorName the author name
      */
     public void setAuthorName(String authorName) {
         this.authorName = authorName;
     }
 
     /**
-     * Returns whether g.et Text
+     * Returns the text.
+     *
+     * @return the text
      */
     public String getText() {
         return text;
     }
 
     /**
-     * Updates text.
+     * Updates the text.
+     *
+     * @param text the text
      */
     public void setText(String text) {
         this.text = text;
     }
 
     /**
-     * Returns whether g.et Created At
+     * Returns the created at.
+     *
+     * @return the created at
      */
     public Date getCreatedAt() {
         return createdAt;
     }
 
     /**
-     * Updates created at.
+     * Updates the created at.
+     *
+     * @param createdAt the created at
      */
     public void setCreatedAt(Date createdAt) {
         this.createdAt = createdAt;
     }
 
     /**
-     * Returns whether g.et Parent Id
+     * Returns the parent id.
+     *
+     * @return the parent id
      */
     public String getParentId() {
         return parentId;
     }
 
     /**
-     * Updates parent id.
+     * Updates the parent id.
+     *
+     * @param parentId the parent id
      */
     public void setParentId(String parentId) {
         this.parentId = parentId;
     }
 
     /**
-     * Returns whether g.et Upvotes
+     * Returns the upvotes.
+     *
+     * @return the upvotes
      */
     public int getUpvotes() {
         return upvotes;
     }
 
     /**
-     * Updates upvotes.
+     * Updates the upvotes.
+     *
+     * @param upvotes the upvotes
      */
     public void setUpvotes(int upvotes) {
         this.upvotes = upvotes;
     }
 
     /**
-     * Returns whether g.et Downvotes
+     * Returns the downvotes.
+     *
+     * @return the downvotes
      */
     public int getDownvotes() {
         return downvotes;
     }
 
     /**
-     * Updates downvotes.
+     * Updates the downvotes.
+     *
+     * @param downvotes the downvotes
      */
     public void setDownvotes(int downvotes) {
         this.downvotes = downvotes;
     }
 
     /**
-     * Returns whether g.et Upvoter Ids
+     * Returns the upvoter ids.
+     *
+     * @return the upvoter ids
      */
     public java.util.ArrayList<String> getUpvoterIds() {
         if (upvoterIds == null) {
@@ -163,14 +204,18 @@ public class EventComment {
     }
 
     /**
-     * Updates upvoter ids.
+     * Updates the upvoter ids.
+     *
+     * @param upvoterIds the upvoter ids
      */
     public void setUpvoterIds(java.util.ArrayList<String> upvoterIds) {
         this.upvoterIds = upvoterIds;
     }
 
     /**
-     * Returns whether g.et Downvoter Ids
+     * Returns the downvoter ids.
+     *
+     * @return the downvoter ids
      */
     public java.util.ArrayList<String> getDownvoterIds() {
         if (downvoterIds == null) {
@@ -180,7 +225,9 @@ public class EventComment {
     }
 
     /**
-     * Updates downvoter ids.
+     * Updates the downvoter ids.
+     *
+     * @param downvoterIds the downvoter ids
      */
     public void setDownvoterIds(java.util.ArrayList<String> downvoterIds) {
         this.downvoterIds = downvoterIds;

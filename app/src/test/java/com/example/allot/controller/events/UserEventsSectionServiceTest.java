@@ -12,7 +12,7 @@ public class UserEventsSectionServiceTest {
     private UserEventsSectionService service;
 
     /**
-     * Updates up.
+     * Updates the up.
      */
     @Before
     public void setUp() {
@@ -20,7 +20,7 @@ public class UserEventsSectionServiceTest {
     }
 
     /**
-     * Handles classify Registered Event_returns Selected When User Was Chosen.
+     * Performs classify registered event returns selected when user was chosen.
      */
     @Test
     public void classifyRegisteredEvent_returnsSelectedWhenUserWasChosen() {
@@ -32,7 +32,7 @@ public class UserEventsSectionServiceTest {
     }
 
     /**
-     * Handles classify Registered Event_returns Invited For Private Invite.
+     * Performs classify registered event returns invited for private invite.
      */
     @Test
     public void classifyRegisteredEvent_returnsInvitedForPrivateInvite() {
@@ -45,7 +45,7 @@ public class UserEventsSectionServiceTest {
     }
 
     /**
-     * Handles classify Registered Event_returns Waiting Before Deadline.
+     * Performs classify registered event returns waiting before deadline.
      */
     @Test
     public void classifyRegisteredEvent_returnsWaitingBeforeDeadline() {
@@ -56,7 +56,7 @@ public class UserEventsSectionServiceTest {
     }
 
     /**
-     * Handles classify Registered Event_returns Waiting After Deadline Without Published Results.
+     * Performs classify registered event returns waiting after deadline without published results.
      */
     @Test
     public void classifyRegisteredEvent_returnsWaitingAfterDeadlineWithoutPublishedResults() {
@@ -67,7 +67,7 @@ public class UserEventsSectionServiceTest {
     }
 
     /**
-     * Handles classify Registered Event_returns Not Selected After Deadline With Published Results.
+     * Performs classify registered event returns not selected after deadline with published results.
      */
     @Test
     public void classifyRegisteredEvent_returnsNotSelectedAfterDeadlineWithPublishedResults() {
@@ -79,7 +79,7 @@ public class UserEventsSectionServiceTest {
     }
 
     /**
-     * Handles classify Registered Event_returns Past When Event Already Occurred.
+     * Performs classify registered event returns past when event already occurred.
      */
     @Test
     public void classifyRegisteredEvent_returnsPastWhenEventAlreadyOccurred() {
@@ -90,7 +90,7 @@ public class UserEventsSectionServiceTest {
     }
 
     /**
-     * Handles group Registered Events_splits Events Into Expected Sections.
+     * Performs group registered events splits events into expected sections.
      */
     @Test
     public void groupRegisteredEvents_splitsEventsIntoExpectedSections() {
@@ -121,7 +121,7 @@ public class UserEventsSectionServiceTest {
     }
 
     /**
-     * Handles group Hosted Events_splits Events Into Ongoing And Completed.
+     * Performs group hosted events splits events into ongoing and completed.
      */
     @Test
     public void groupHostedEvents_splitsEventsIntoOngoingAndCompleted() {
@@ -135,7 +135,11 @@ public class UserEventsSectionServiceTest {
     }
 
     /**
-     * Builds event.
+     * Returns the result of build event.
+     *
+     * @param eventTime the event time
+     * @param deadlineTime the deadline time
+     * @return the result of this call
      */
     private Event buildEvent(long eventTime, long deadlineTime) {
         Event event = new Event();

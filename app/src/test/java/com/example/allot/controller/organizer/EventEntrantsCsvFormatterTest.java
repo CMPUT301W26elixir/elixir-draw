@@ -12,7 +12,7 @@ public class EventEntrantsCsvFormatterTest {
     private EventEntrantsCsvFormatter formatter;
 
     /**
-     * Updates up.
+     * Updates the up.
      */
     @Before
     public void setUp() {
@@ -20,7 +20,7 @@ public class EventEntrantsCsvFormatterTest {
     }
 
     /**
-     * Handles format_returns Header Only When Rows Are Empty.
+     * Performs format returns header only when rows are empty.
      */
     @Test
     public void format_returnsHeaderOnlyWhenRowsAreEmpty() {
@@ -28,7 +28,7 @@ public class EventEntrantsCsvFormatterTest {
     }
 
     /**
-     * Handles format_writes Single Normal Row Without Quoting.
+     * Performs format writes single normal row without quoting.
      */
     @Test
     public void format_writesSingleNormalRowWithoutQuoting() {
@@ -40,7 +40,7 @@ public class EventEntrantsCsvFormatterTest {
     }
 
     /**
-     * Handles format_quotes Values Containing Commas.
+     * Performs format quotes values containing commas.
      */
     @Test
     public void format_quotesValuesContainingCommas() {
@@ -52,7 +52,7 @@ public class EventEntrantsCsvFormatterTest {
     }
 
     /**
-     * Handles format_escapes Embedded Quotes.
+     * Performs format escapes embedded quotes.
      */
     @Test
     public void format_escapesEmbeddedQuotes() {
@@ -64,7 +64,7 @@ public class EventEntrantsCsvFormatterTest {
     }
 
     /**
-     * Handles format_quotes Multiline Values.
+     * Performs format quotes multiline values.
      */
     @Test
     public void format_quotesMultilineValues() {
@@ -76,7 +76,7 @@ public class EventEntrantsCsvFormatterTest {
     }
 
     /**
-     * Handles format_preserves Blank Email And Phone Cells.
+     * Performs format preserves blank email and phone cells.
      */
     @Test
     public void format_preservesBlankEmailAndPhoneCells() {
@@ -88,7 +88,7 @@ public class EventEntrantsCsvFormatterTest {
     }
 
     /**
-     * Handles format_preserves Input Order.
+     * Performs format preserves input order.
      */
     @Test
     public void format_preservesInputOrder() {

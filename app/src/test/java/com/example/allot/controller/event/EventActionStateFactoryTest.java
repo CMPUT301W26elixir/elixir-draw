@@ -11,7 +11,7 @@ public class EventActionStateFactoryTest {
     private EventActionStateFactory factory;
 
     /**
-     * Updates up.
+     * Updates the up.
      */
     @Before
     public void setUp() {
@@ -19,7 +19,7 @@ public class EventActionStateFactoryTest {
     }
 
     /**
-     * Creates _returns manage state for organizer.
+     * Performs create returns manage state for organizer.
      */
     @Test
     public void create_returnsManageStateForOrganizer() {
@@ -32,7 +32,7 @@ public class EventActionStateFactoryTest {
     }
 
     /**
-     * Creates _returns enrolled state.
+     * Performs create returns enrolled state.
      */
     @Test
     public void create_returnsEnrolledState() {
@@ -45,7 +45,7 @@ public class EventActionStateFactoryTest {
     }
 
     /**
-     * Creates _returns offer state.
+     * Performs create returns offer state.
      */
     @Test
     public void create_returnsOfferState() {
@@ -58,7 +58,7 @@ public class EventActionStateFactoryTest {
     }
 
     /**
-     * Creates _returns replacement state.
+     * Performs create returns replacement state.
      */
     @Test
     public void create_returnsReplacementState() {
@@ -73,7 +73,7 @@ public class EventActionStateFactoryTest {
     }
 
     /**
-     * Creates _returns finalized not selected state.
+     * Performs create returns finalized not selected state.
      */
     @Test
     public void create_returnsFinalizedNotSelectedState() {
@@ -88,7 +88,7 @@ public class EventActionStateFactoryTest {
     }
 
     /**
-     * Creates _returns join and leave waitlist states.
+     * Performs create returns join and leave waitlist states.
      */
     @Test
     public void create_returnsJoinAndLeaveWaitlistStates() {
@@ -103,7 +103,9 @@ public class EventActionStateFactoryTest {
     }
 
     /**
-     * Builds event.
+     * Returns the result of build event.
+     *
+     * @return the result of this call
      */
     private Event buildEvent() {
         Event event = new Event();

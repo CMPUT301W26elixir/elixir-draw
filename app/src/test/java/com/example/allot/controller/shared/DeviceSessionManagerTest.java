@@ -9,7 +9,7 @@ import com.example.allot.data.DeviceSessionManager;
 import org.junit.Test;
 public class DeviceSessionManagerTest {
     /**
-     * Handles returns Existing Saved Device Id.
+     * Performs returns existing saved device id.
      */
     @Test
     public void returnsExistingSavedDeviceId() {
@@ -23,7 +23,7 @@ public class DeviceSessionManagerTest {
     }
 
     /**
-     * Creates s and stores new device id when missing.
+     * Performs creates and stores new device id when missing.
      */
     @Test
     public void createsAndStoresNewDeviceIdWhenMissing() {
@@ -38,7 +38,7 @@ public class DeviceSessionManagerTest {
     }
 
     /**
-     * Handles treats Blank Saved Value As Missing.
+     * Performs treats blank saved value as missing.
      */
     @Test
     public void treatsBlankSavedValueAsMissing() {
@@ -55,14 +55,18 @@ public class DeviceSessionManagerTest {
         private String savedDeviceId;
 
         /**
-         * Handles fake Device Session Store.
+         * Creates a new FakeDeviceSessionStore instance.
+         *
+         * @param savedDeviceId the saved device id
          */
         private FakeDeviceSessionStore(String savedDeviceId) {
             this.savedDeviceId = savedDeviceId;
         }
 
         /**
-         * Returns whether g.et Device Id
+         * Returns the device id.
+         *
+         * @return the device id
          */
         @Override
         public String getDeviceId() {
@@ -70,7 +74,9 @@ public class DeviceSessionManagerTest {
         }
 
         /**
-         * Saves device id.
+         * Performs save device id.
+         *
+         * @param deviceId the device id
          */
         @Override
         public void saveDeviceId(String deviceId) {

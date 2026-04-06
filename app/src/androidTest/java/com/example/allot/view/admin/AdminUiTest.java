@@ -24,7 +24,7 @@ import org.junit.runner.RunWith;
 public class AdminUiTest {
 
     /**
-     * Handles disable Animations.
+     * Performs disable animations.
      */
     @Before
     public void disableAnimations() {
@@ -32,7 +32,9 @@ public class AdminUiTest {
     }
 
     /**
-     * Builds intent.
+     * Returns the result of build intent.
+     *
+     * @return the result of this call
      */
     private Intent buildIntent() {
         Intent intent = new Intent(ApplicationProvider.getApplicationContext(), AdminActivity.class);
@@ -41,7 +43,7 @@ public class AdminUiTest {
     }
 
     /**
-     * Handles admin Events Tab_shows Event Row.
+     * Performs admin events tab shows event row.
      */
     @Test
     public void adminEventsTab_showsEventRow() {
@@ -51,7 +53,7 @@ public class AdminUiTest {
     }
 
     /**
-     * Handles admin Profiles Tab_shows Profile Row.
+     * Performs admin profiles tab shows profile row.
      */
     @Test
     public void adminProfilesTab_showsProfileRow() {
@@ -63,7 +65,7 @@ public class AdminUiTest {
     }
 
     /**
-     * Handles admin Profile Pics Tab_shows Profile Picture Row.
+     * Performs admin profile pics tab shows profile picture row.
      */
     @Test
     public void adminProfilePicsTab_showsProfilePictureRow() {
@@ -74,7 +76,7 @@ public class AdminUiTest {
     }
 
     /**
-     * Handles admin Notifications Tab_shows Notification Row.
+     * Performs admin notifications tab shows notification row.
      */
     @Test
     public void adminNotificationsTab_showsNotificationRow() {
@@ -86,7 +88,7 @@ public class AdminUiTest {
     }
 
     /**
-     * Handles admin Posters Tab_shows Poster Row.
+     * Performs admin posters tab shows poster row.
      */
     @Test
     public void adminPostersTab_showsPosterRow() {
@@ -97,7 +99,7 @@ public class AdminUiTest {
     }
 
     /**
-     * Handles admin Tabs_switch Visibility.
+     * Performs admin tabs switch visibility.
      */
     @Test
     public void adminTabs_switchVisibility() {
@@ -113,7 +115,7 @@ public class AdminUiTest {
     }
 
     /**
-     * Handles admin Events Tab_delete Event Shows Empty State.
+     * Performs admin events tab delete event shows empty state.
      */
     @Test
     public void adminEventsTab_deleteEventShowsEmptyState() {
@@ -125,7 +127,7 @@ public class AdminUiTest {
     }
 
     /**
-     * Handles admin Profiles Tab_delete Profile Shows Empty State.
+     * Performs admin profiles tab delete profile shows empty state.
      */
     @Test
     public void adminProfilesTab_deleteProfileShowsEmptyState() {
@@ -138,7 +140,7 @@ public class AdminUiTest {
     }
 
     /**
-     * Handles admin Posters Tab_delete Poster Shows Empty State.
+     * Performs admin posters tab delete poster shows empty state.
      */
     @Test
     public void adminPostersTab_deletePosterShowsEmptyState() {

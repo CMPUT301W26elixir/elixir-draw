@@ -32,6 +32,8 @@ public class LotteryController {
 
     /**
      * Creates a new LotteryController instance.
+     *
+     * @param context the context
      */
     public LotteryController(android.content.Context context) {
         this(new EventRepository(), new UserController(context), new LotteryDrawService(), new LotteryInputValidator());
@@ -39,6 +41,11 @@ public class LotteryController {
 
     /**
      * Creates a new LotteryController instance.
+     *
+     * @param eventRepository the event repository
+     * @param userController the user controller
+     * @param lotteryDrawService the lottery draw service
+     * @param lotteryInputValidator the lottery input validator
      */
     LotteryController(EventRepository eventRepository,
                       UserController userController,
@@ -49,6 +56,12 @@ public class LotteryController {
 
     /**
      * Creates a new LotteryController instance.
+     *
+     * @param eventRepository the event repository
+     * @param userController the user controller
+     * @param lotteryDrawService the lottery draw service
+     * @param lotteryInputValidator the lottery input validator
+     * @param notificationController the notification controller
      */
     LotteryController(EventRepository eventRepository,
                       UserController userController,
@@ -64,7 +77,10 @@ public class LotteryController {
     }
 
     /**
-     * Loads the lottery screen state.
+     * Performs load lottery state.
+     *
+     * @param eventId the event id
+     * @param listener the listener
      */
     public void loadLotteryState(String eventId, OnCompleteListener<RunLotteryData> listener) {
         if (isBlank(eventId)) {
@@ -102,7 +118,13 @@ public class LotteryController {
     }
 
     /**
-     * Starts the lottery draw with the current form values.
+     * Performs start lottery draw.
+     *
+     * @param eventId the event id
+     * @param currentEvent the current event
+     * @param drawDateValue the draw date value
+     * @param attendeesValue the attendees value
+     * @param listener the listener
      */
     public void startLotteryDraw(String eventId,
                                  Event currentEvent,
@@ -191,7 +213,11 @@ public class LotteryController {
     }
 
     /**
-     * Builds content state.
+     * Returns the result of build content state.
+     *
+     * @param event the event
+     * @param items the items
+     * @return the result of this call
      */
     private RunLotteryData buildContentState(Event event, List<LotteryEntrantItem> items) {
         Date effectiveDrawDate = event.getDrawDate() != null
@@ -213,7 +239,10 @@ public class LotteryController {
     }
 
     /**
-     * Builds entrant items.
+     * Performs build entrant items.
+     *
+     * @param entrantIds the entrant ids
+     * @param consumer the consumer
      */
     private void buildEntrantItems(List<String> entrantIds, java.util.function.Consumer<List<LotteryEntrantItem>> consumer) {
         List<LotteryEntrantItem> items = new ArrayList<>();
@@ -226,7 +255,12 @@ public class LotteryController {
     }
 
     /**
-     * Loads entrant item.
+     * Performs load entrant item.
+     *
+     * @param entrantIds the entrant ids
+     * @param index the index
+     * @param items the items
+     * @param consumer the consumer
      */
     private void loadEntrantItem(List<String> entrantIds,
                                  int index,
@@ -255,7 +289,10 @@ public class LotteryController {
     }
 
     /**
-     * Returns whether i.s Blank
+     * Returns whether blank.
+     *
+     * @param value the value
+     * @return whether blank
      */
     private boolean isBlank(String value) {
         return value == null || value.trim().isEmpty();

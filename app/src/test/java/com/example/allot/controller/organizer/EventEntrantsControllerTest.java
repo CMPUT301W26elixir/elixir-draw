@@ -21,7 +21,7 @@ public class EventEntrantsControllerTest {
     private EventEntrantsController controller;
 
     /**
-     * Updates up.
+     * Updates the up.
      */
     @Before
     public void setUp() {
@@ -31,7 +31,7 @@ public class EventEntrantsControllerTest {
     }
 
     /**
-     * Loads entrant items_returns selected entrants for selected tab.
+     * Performs load entrant items returns selected entrants for selected tab.
      */
     @Test
     public void loadEntrantItems_returnsSelectedEntrantsForSelectedTab() {
@@ -47,7 +47,7 @@ public class EventEntrantsControllerTest {
     }
 
     /**
-     * Loads enrolled export rows_returns failure when event is null.
+     * Performs load enrolled export rows returns failure when event is null.
      */
     @Test
     public void loadEnrolledExportRows_returnsFailureWhenEventIsNull() {
@@ -58,7 +58,7 @@ public class EventEntrantsControllerTest {
     }
 
     /**
-     * Loads enrolled export rows_returns empty success when no enrolled entrants exist.
+     * Performs load enrolled export rows returns empty success when no enrolled entrants exist.
      */
     @Test
     public void loadEnrolledExportRows_returnsEmptySuccessWhenNoEnrolledEntrantsExist() {
@@ -71,7 +71,7 @@ public class EventEntrantsControllerTest {
     }
 
     /**
-     * Loads enrolled export rows_exports explicit enrolled entrants in order.
+     * Performs load enrolled export rows exports explicit enrolled entrants in order.
      */
     @Test
     public void loadEnrolledExportRows_exportsExplicitEnrolledEntrantsInOrder() {
@@ -94,7 +94,7 @@ public class EventEntrantsControllerTest {
     }
 
     /**
-     * Loads enrolled export rows_falls back to waiting list chosen status when enrolled list is empty.
+     * Performs load enrolled export rows falls back to waiting list chosen status when enrolled list is empty.
      */
     @Test
     public void loadEnrolledExportRows_fallsBackToWaitingListChosenStatusWhenEnrolledListIsEmpty() {
@@ -115,7 +115,7 @@ public class EventEntrantsControllerTest {
     }
 
     /**
-     * Loads enrolled export rows_uses fallback row when user lookup fails.
+     * Performs load enrolled export rows uses fallback row when user lookup fails.
      */
     @Test
     public void loadEnrolledExportRows_usesFallbackRowWhenUserLookupFails() {
@@ -133,7 +133,7 @@ public class EventEntrantsControllerTest {
     }
 
     /**
-     * Loads enrolled export rows_keeps blank contact fields blank.
+     * Performs load enrolled export rows keeps blank contact fields blank.
      */
     @Test
     public void loadEnrolledExportRows_keepsBlankContactFieldsBlank() {
@@ -151,7 +151,9 @@ public class EventEntrantsControllerTest {
     }
 
     /**
-     * Builds event.
+     * Returns the result of build event.
+     *
+     * @return the result of this call
      */
     private Event buildEvent() {
         Event event = new Event();
@@ -167,7 +169,13 @@ public class EventEntrantsControllerTest {
     }
 
     /**
-     * Builds user.
+     * Returns the result of build user.
+     *
+     * @param firstName the first name
+     * @param lastName the last name
+     * @param email the email
+     * @param phone the phone
+     * @return the result of this call
      */
     private com.example.allot.model.profile.User buildUser(String firstName,
                                                            String lastName,
@@ -189,7 +197,7 @@ public class EventEntrantsControllerTest {
 
     private static class FakeEventRepository extends EventRepository {
         /**
-         * Handles fake Event Repository.
+         * Creates a new FakeEventRepository instance.
          */
         private FakeEventRepository() {
             super((com.google.firebase.firestore.FirebaseFirestore) null);
@@ -198,7 +206,10 @@ public class EventEntrantsControllerTest {
         private Event event;
 
         /**
-         * Returns whether g.et Event By Id
+         * Performs get event by id.
+         *
+         * @param eventId the event id
+         * @param listener the listener
          */
         @Override
         public void getEventById(String eventId, com.example.allot.common.OnCompleteListener<Event> listener) {
@@ -210,21 +221,27 @@ public class EventEntrantsControllerTest {
         private final java.util.Map<String, com.example.allot.model.profile.User> users = new java.util.HashMap<>();
 
         /**
-         * Handles fake User Controller.
+         * Creates a new FakeUserController instance.
          */
         private FakeUserController() {
             super(null, new DeviceSessionManager(new FakeDeviceSessionStore("device-1")));
         }
 
         /**
-         * Handles add User.
+         * Performs add user.
+         *
+         * @param deviceId the device id
+         * @param user the user
          */
         private void addUser(String deviceId, com.example.allot.model.profile.User user) {
             users.put(deviceId, user);
         }
 
         /**
-         * Returns whether g.et User By Device Id
+         * Performs get user by device id.
+         *
+         * @param deviceId the device id
+         * @param listener the listener
          */
         @Override
         public void getUserByDeviceId(String deviceId, com.example.allot.common.OnCompleteListener<com.example.allot.model.profile.User> listener) {
@@ -237,20 +254,26 @@ public class EventEntrantsControllerTest {
         private final String deviceId;
 
         /**
-         * Handles fake Device Session Store.
+         * Creates a new FakeDeviceSessionStore instance.
+         *
+         * @param deviceId the device id
          */
         private FakeDeviceSessionStore(String deviceId) {
             this.deviceId = deviceId;
         }
 
         /**
-         * Returns whether get Device Id.
+         * Returns the device id.
+         *
+         * @return the device id
          */
         @Override
         public String getDeviceId() { return deviceId; }
 
         /**
-         * Saves device id.
+         * Performs save device id.
+         *
+         * @param deviceId the device id
          */
         @Override
         public void saveDeviceId(String deviceId) { }

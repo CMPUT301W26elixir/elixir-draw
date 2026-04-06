@@ -20,7 +20,7 @@ public class AdminNotificationControllerTest {
     private AdminNotificationController controller;
 
     /**
-     * Updates up.
+     * Updates the up.
      */
     @Before
     public void setUp() {
@@ -30,7 +30,7 @@ public class AdminNotificationControllerTest {
     }
 
     /**
-     * Loads all notifications_requires admin and delegates when authorized.
+     * Performs load all notifications requires admin and delegates when authorized.
      */
     @Test
     public void loadAllNotifications_requiresAdminAndDelegatesWhenAuthorized() {
@@ -54,7 +54,7 @@ public class AdminNotificationControllerTest {
     }
 
     /**
-     * Loads all notifications_returns failure when admin lookup fails.
+     * Performs load all notifications returns failure when admin lookup fails.
      */
     @Test
     public void loadAllNotifications_returnsFailureWhenAdminLookupFails() {
@@ -70,7 +70,7 @@ public class AdminNotificationControllerTest {
     }
 
     /**
-     * Loads all notifications_propagates repository failure.
+     * Performs load all notifications propagates repository failure.
      */
     @Test
     public void loadAllNotifications_propagatesRepositoryFailure() {
@@ -88,14 +88,16 @@ public class AdminNotificationControllerTest {
         private boolean getAllNotificationsSuccess = true;
 
         /**
-         * Handles fake Notification Repository.
+         * Creates a new FakeNotificationRepository instance.
          */
         private FakeNotificationRepository() {
             super((FirebaseFirestore) null);
         }
 
         /**
-         * Returns whether g.et All Notifications
+         * Performs get all notifications.
+         *
+         * @param listener the listener
          */
         @Override
         public void getAllNotifications(com.example.allot.common.OnCompleteListener<List<NotificationItem>> listener) {
@@ -108,14 +110,16 @@ public class AdminNotificationControllerTest {
         private boolean adminLookupSuccess = true;
 
         /**
-         * Handles fake User Controller.
+         * Creates a new FakeUserController instance.
          */
         private FakeUserController() {
             super(null, new DeviceSessionManager(new FakeDeviceSessionStore("device-1")));
         }
 
         /**
-         * Returns whether i.s Current User Admin
+         * Performs is current user admin.
+         *
+         * @param listener the listener
          */
         @Override
         public void isCurrentUserAdmin(com.example.allot.common.OnCompleteListener<Boolean> listener) {
@@ -127,14 +131,18 @@ public class AdminNotificationControllerTest {
         private final String deviceId;
 
         /**
-         * Handles fake Device Session Store.
+         * Creates a new FakeDeviceSessionStore instance.
+         *
+         * @param deviceId the device id
          */
         private FakeDeviceSessionStore(String deviceId) {
             this.deviceId = deviceId;
         }
 
         /**
-         * Returns whether g.et Device Id
+         * Returns the device id.
+         *
+         * @return the device id
          */
         @Override
         public String getDeviceId() {
@@ -142,7 +150,9 @@ public class AdminNotificationControllerTest {
         }
 
         /**
-         * Saves device id.
+         * Performs save device id.
+         *
+         * @param deviceId the device id
          */
         @Override
         public void saveDeviceId(String deviceId) {

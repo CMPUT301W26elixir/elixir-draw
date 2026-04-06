@@ -7,7 +7,7 @@ import java.util.List;
 import org.junit.Test;
 public class UserRepositoryTest {
     /**
-     * Builds cleanup operations_deletes organizer events and removes user from others.
+     * Performs build cleanup operations deletes organizer events and removes user from others.
      */
     @Test
     public void buildCleanupOperations_deletesOrganizerEventsAndRemovesUserFromOthers() {
@@ -26,7 +26,7 @@ public class UserRepositoryTest {
     }
 
     /**
-     * Handles chunk Cleanup Operations_splits Large Operation Lists Into Firestore Sized Batches.
+     * Performs chunk cleanup operations splits large operation lists into firestore sized batches.
      */
     @Test
     public void chunkCleanupOperations_splitsLargeOperationListsIntoFirestoreSizedBatches() {

@@ -157,7 +157,9 @@ public class EditEventActivity extends AppCompatActivity {
             });
 
     /**
-     * Handles on Create.
+     * Handles the create callback.
+     *
+     * @param savedInstanceState the saved instance state
      */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -184,7 +186,7 @@ public class EditEventActivity extends AppCompatActivity {
     }
 
     /**
-     * Handles finish.
+     * Performs finish.
      */
     @Override
     public void finish() {
@@ -193,7 +195,7 @@ public class EditEventActivity extends AppCompatActivity {
     }
 
     /**
-     * Binds views.
+     * Performs bind views.
      */
     private void bindViews() {
         eventImageBackground = findViewById(R.id.eventImageBackground);
@@ -239,7 +241,7 @@ public class EditEventActivity extends AppCompatActivity {
     }
 
     /**
-     * Updates up header.
+     * Updates the up header.
      */
     private void setupHeader() {
         ImageButton backButton = findViewById(R.id.backButton);
@@ -247,12 +249,14 @@ public class EditEventActivity extends AppCompatActivity {
     }
 
     /**
-     * Updates up listeners.
+     * Updates the up listeners.
      */
     private void setupListeners() {
         SimpleTextWatcher dirtyStateWatcher = new SimpleTextWatcher() {
             /**
-             * Handles after Text Changed.
+             * Performs after text changed.
+             *
+             * @param editable the editable
              */
             @Override
             public void afterTextChanged(Editable editable) {
@@ -288,7 +292,12 @@ public class EditEventActivity extends AppCompatActivity {
          */
         AdapterView.OnItemSelectedListener dateSelectionListener = new AdapterView.OnItemSelectedListener() {
             /**
-             * Handles on Item Selected.
+             * Handles the item selected callback.
+             *
+             * @param parent the parent
+             * @param view the view
+             * @param position the position
+             * @param id the id
              */
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -298,7 +307,9 @@ public class EditEventActivity extends AppCompatActivity {
             }
 
             /**
-             * Handles on Nothing Selected.
+             * Handles the nothing selected callback.
+             *
+             * @param parent the parent
              */
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
@@ -334,7 +345,7 @@ public class EditEventActivity extends AppCompatActivity {
     }
 
     /**
-     * Handles configure Location Picker.
+     * Performs configure location picker.
      */
     private void configureLocationPicker() {
         locationInput.setKeyListener(null);
@@ -344,7 +355,7 @@ public class EditEventActivity extends AppCompatActivity {
     }
 
     /**
-     * Opens place autocomplete.
+     * Performs open place autocomplete.
      */
     private void openPlaceAutocomplete() {
         if (!ensurePlacesInitialized()) {
@@ -357,7 +368,9 @@ public class EditEventActivity extends AppCompatActivity {
     }
 
     /**
-     * Handles ensure Places Initialized.
+     * Returns the result of ensure places initialized.
+     *
+     * @return the result of this call
      */
     private boolean ensurePlacesInitialized() {
         if (TextUtils.isEmpty(BuildConfig.PLACES_API_KEY)) {
@@ -371,7 +384,7 @@ public class EditEventActivity extends AppCompatActivity {
     }
 
     /**
-     * Handles populate Ui From Intent.
+     * Performs populate ui from intent.
      */
     private void populateUiFromIntent() {
         currentCategory = UiHelper.cleanText(getIntent().getStringExtra(EXTRA_EVENT_CATEGORY));
@@ -395,14 +408,16 @@ public class EditEventActivity extends AppCompatActivity {
     }
 
     /**
-     * Returns whether i.s Ui Test Mode
+     * Returns whether ui test mode.
+     *
+     * @return whether ui test mode
      */
     private boolean isUiTestMode() {
         return getIntent().getBooleanExtra(EXTRA_UI_TEST_MODE, false);
     }
 
     /**
-     * Binds ui test event.
+     * Performs bind ui test event.
      */
     private void bindUiTestEvent() {
         String title = safeString(getIntent().getStringExtra(EXTRA_UI_TEST_EVENT_TITLE), "UI Test Event");
@@ -459,7 +474,10 @@ public class EditEventActivity extends AppCompatActivity {
     }
 
     /**
-     * Handles parse Participants.
+     * Returns the result of parse participants.
+     *
+     * @param participants the participants
+     * @return the result of this call
      */
     private int parseParticipants(String participants) {
         if (TextUtils.isEmpty(participants)) {
@@ -473,14 +491,18 @@ public class EditEventActivity extends AppCompatActivity {
     }
 
     /**
-     * Handles safe String.
+     * Returns the result of safe string.
+     *
+     * @param value the value
+     * @param fallback the fallback
+     * @return the result of this call
      */
     private String safeString(String value, String fallback) {
         return TextUtils.isEmpty(value) ? fallback : value;
     }
 
     /**
-     * Loads event from firestore.
+     * Performs load event from firestore.
      */
     private void loadEventFromFirestore() {
         if (TextUtils.isEmpty(currentEventId)) {
@@ -503,7 +525,9 @@ public class EditEventActivity extends AppCompatActivity {
     }
 
     /**
-     * Binds event.
+     * Performs bind event.
+     *
+     * @param event the event
      */
     private void bindEvent(Event event) {
         if (event == null) {
@@ -530,7 +554,7 @@ public class EditEventActivity extends AppCompatActivity {
     }
 
     /**
-     * Opens lottery screen.
+     * Performs open lottery screen.
      */
     private void openLotteryScreen() {
         if (TextUtils.isEmpty(currentEventId)) {
@@ -548,7 +572,7 @@ public class EditEventActivity extends AppCompatActivity {
     }
 
     /**
-     * Opens invite co organizer screen.
+     * Performs open invite co organizer screen.
      */
     private void openInviteCoOrganizerScreen() {
         if (TextUtils.isEmpty(currentEventId)) {
@@ -563,7 +587,7 @@ public class EditEventActivity extends AppCompatActivity {
     }
 
     /**
-     * Opens qr code screen.
+     * Performs open qr code screen.
      */
     private void openQrCodeScreen() {
         if (TextUtils.isEmpty(currentEventId)) {
@@ -589,7 +613,7 @@ public class EditEventActivity extends AppCompatActivity {
     }
 
     /**
-     * Opens entrant map screen.
+     * Performs open entrant map screen.
      */
     private void openEntrantMapScreen() {
         if (TextUtils.isEmpty(currentEventId)) {
@@ -604,7 +628,9 @@ public class EditEventActivity extends AppCompatActivity {
     }
 
     /**
-     * Updates delete button visibility.
+     * Performs update delete button visibility.
+     *
+     * @param event the event
      */
     private void updateDeleteButtonVisibility(Event event) {
         if (deleteEventButton == null || userController == null) {
@@ -619,7 +645,7 @@ public class EditEventActivity extends AppCompatActivity {
     }
 
     /**
-     * Shows delete event dialog.
+     * Performs show delete event dialog.
      */
     private void showDeleteEventDialog() {
         if (isDeletingEvent || TextUtils.isEmpty(currentEventId)) {
@@ -656,7 +682,11 @@ public class EditEventActivity extends AppCompatActivity {
     }
 
     /**
-     * Handles confirm Delete Event.
+     * Performs confirm delete event.
+     *
+     * @param dialog the dialog
+     * @param cancelButton the cancel button
+     * @param deleteButton the delete button
      */
     private void confirmDeleteEvent(Dialog dialog, Button cancelButton, Button deleteButton) {
         if (isDeletingEvent || TextUtils.isEmpty(currentEventId) || userController == null) {
@@ -694,7 +724,7 @@ public class EditEventActivity extends AppCompatActivity {
     }
 
     /**
-     * Reloads the event when returning from a related screen that may have changed it.
+     * Handles the resume callback.
      */
     @Override
     protected void onResume() {
@@ -706,7 +736,7 @@ public class EditEventActivity extends AppCompatActivity {
     }
 
     /**
-     * Saves changes.
+     * Performs save changes.
      */
     private void saveChanges() {
         if (isSaving || isLoadingEvent || !hasUnsavedChanges()) {
@@ -747,7 +777,10 @@ public class EditEventActivity extends AppCompatActivity {
     }
 
     /**
-     * Handles apply Poster Changes If Needed.
+     * Performs apply poster changes if needed.
+     *
+     * @param formResult the form result
+     * @param posterOnly the poster only
      */
     private void applyPosterChangesIfNeeded(AppResult<Event> formResult, boolean posterOnly) {
         if (selectedPosterUri == null && !removePosterRequested) {
@@ -791,7 +824,9 @@ public class EditEventActivity extends AppCompatActivity {
     }
 
     /**
-     * Handles reload Event After Save.
+     * Performs reload event after save.
+     *
+     * @param result the result
      */
     private void reloadEventAfterSave(AppResult<Event> result) {
         bindEvent(result.getData());
@@ -800,14 +835,16 @@ public class EditEventActivity extends AppCompatActivity {
     }
 
     /**
-     * Handles capture Original State.
+     * Performs capture original state.
      */
     private void captureOriginalState() {
         originalFormSnapshot = manageEventController.buildSnapshot(readFormData());
     }
 
     /**
-     * Returns whether h.as Unsaved Changes
+     * Returns whether this instance has unsaved changes.
+     *
+     * @return whether this instance has unsaved changes
      */
     private boolean hasUnsavedChanges() {
         return !manageEventController.buildSnapshot(readFormData()).equals(originalFormSnapshot)
@@ -816,7 +853,7 @@ public class EditEventActivity extends AppCompatActivity {
     }
 
     /**
-     * Updates save button state.
+     * Performs update save button state.
      */
     private void updateSaveButtonState() {
         boolean formSaveEnabled = manageEventController.isSaveEnabled(
@@ -834,7 +871,7 @@ public class EditEventActivity extends AppCompatActivity {
     }
 
     /**
-     * Handles render Poster State.
+     * Performs render poster state.
      */
     private void renderPosterState() {
         String currentPosterUrl = currentEvent == null ? null : currentEvent.getPosterUrl();
@@ -867,28 +904,39 @@ public class EditEventActivity extends AppCompatActivity {
     }
 
     /**
-     * Handles read Form Data.
+     * Returns the result of read form data.
+     *
+     * @return the result of this call
      */
     private EventFormData readFormData() {
         return formUiHelper.readFormData();
     }
 
     /**
-     * Handles apply Summary Image.
+     * Performs apply summary image.
+     *
+     * @param category the category
      */
     private void applySummaryImage(String category) {
         eventImageBackground.setBackgroundResource(UiHelper.eventImageBackgroundRes(category));
     }
 
     /**
-     * Binds form view model.
+     * Performs bind form view model.
+     *
+     * @param viewModel the view model
      */
     private void bindFormViewModel(EventFormData viewModel) {
         formUiHelper.bindForm(viewModel);
     }
 
     /**
-     * Updates summary.
+     * Performs update summary.
+     *
+     * @param title the title
+     * @param location the location
+     * @param date the date
+     * @param category the category
      */
     private void updateSummary(String title, String location, String date, String category) {
         summaryTitleText.setText(UiHelper.defaultText(title, getString(R.string.default_event_name)));
@@ -898,7 +946,9 @@ public class EditEventActivity extends AppCompatActivity {
     }
 
     /**
-     * Updates invite button visibility.
+     * Performs update invite button visibility.
+     *
+     * @param event the event
      */
     private void updateInviteButtonVisibility(Event event) {
         if (inviteEntrantsButton != null) {
@@ -910,7 +960,7 @@ public class EditEventActivity extends AppCompatActivity {
     }
 
     /**
-     * Opens invite screen.
+     * Performs open invite screen.
      */
     private void openInviteScreen() {
         if (TextUtils.isEmpty(currentEventId)) {
