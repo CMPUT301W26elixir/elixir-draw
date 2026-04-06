@@ -50,11 +50,25 @@ public class EventDetailController {
      * Builds the fallback event detail state from intent data.
      */
     public EventDetailData buildFallbackState(String title,
-                                                     String price,
-                                                     String location,
-                                                     String date,
-                                                     String deadline,
-                                                     String category) {
+                                              String price,
+                                              String location,
+                                              String date,
+                                              String deadline,
+                                              String category) {
+        return buildFallbackState(title, price, location, date, deadline, category, false);
+    }
+
+    /**
+     * Builds the fallback event detail state from intent data, optionally starting
+     * in the joined waitlist state for deterministic UI tests.
+     */
+    public EventDetailData buildFallbackState(String title,
+                                              String price,
+                                              String location,
+                                              String date,
+                                              String deadline,
+                                              String category,
+                                              boolean startOnWaitlist) {
         return new EventDetailData(
                 EventDetailData.Status.CONTENT,
                 title,
@@ -68,17 +82,23 @@ public class EventDetailController {
                 null,
                 getHeroBackgroundRes(category),
                 0,
-                false,
+                startOnWaitlist,
                 true,
-                R.string.event_detail_join_waiting_list,
-                R.drawable.bg_waitlist_button,
+                startOnWaitlist
+                        ? R.string.event_detail_leave_waiting_list
+                        : R.string.event_detail_join_waiting_list,
+                startOnWaitlist
+                        ? R.drawable.bg_waitlist_button_inactive
+                        : R.drawable.bg_waitlist_button,
                 R.color.black,
                 null,
                 true,
                 null,
                 null,
                 null,
-                EventDetailData.NextAction.SHOW_JOIN_DIALOG
+                startOnWaitlist
+                        ? EventDetailData.NextAction.LEAVE_WAITLIST
+                        : EventDetailData.NextAction.SHOW_JOIN_DIALOG
         );
     }
 
