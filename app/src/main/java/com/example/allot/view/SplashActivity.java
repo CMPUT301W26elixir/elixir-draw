@@ -15,12 +15,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import com.example.allot.R;
 import com.example.allot.controller.shared.UserController;
-<<<<<<< HEAD
 import com.example.allot.data.UserRepository;
 import com.example.allot.model.profile.User;
 import com.example.allot.view.event.EventDetailActivity;
-=======
->>>>>>> origin/main
 import com.example.allot.view.event.OfferResponseActivity;
 import com.example.allot.view.explore.ExploreActivity;
 import com.google.firebase.messaging.FirebaseMessaging;
@@ -40,7 +37,6 @@ public class SplashActivity extends AppCompatActivity {
 
     private final ActivityResultLauncher<String> requestPermissionLauncher =
             registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
-                // We proceed even if permission is denied, as notifications are optional
                 proceedToNextStep();
             });
 
@@ -69,7 +65,6 @@ public class SplashActivity extends AppCompatActivity {
 
     /**
      * Fetches the current FCM token and saves it to Firestore.
-     * This ensures the device is reachable for push notifications.
      */
     private void registerFcmToken(UserController userController) {
         FirebaseMessaging.getInstance().getToken().addOnCompleteListener(task -> {
@@ -77,11 +72,8 @@ public class SplashActivity extends AppCompatActivity {
                 Log.w(TAG, "Fetching FCM registration token failed", task.getException());
                 return;
             }
-
-            // Get new FCM registration token
             String token = task.getResult();
             Log.d(TAG, "Current FCM Token: " + token);
-
             userController.updateCurrentFcmToken(token);
         });
     }
@@ -107,51 +99,35 @@ public class SplashActivity extends AppCompatActivity {
         if (navigated) {
             return;
         }
-
         long elapsedMs = System.currentTimeMillis() - startedAtMs;
         long remainingMs = Math.max(0L, MIN_SPLASH_DURATION_MS - elapsedMs);
         handler.postDelayed(this::openNextScreen, remainingMs);
     }
 
-<<<<<<< HEAD
-    /**
-     * Opens the next screen after the splash screen.
-     * Handles redirection from push notifications if present.
-     *
-     * @param requiresProfileSetup true if the user should be sent to the
-     *                             welcome/profile setup screen; false otherwise
-     */
-    private void openNextScreen(boolean requiresProfileSetup) {
-=======
     private void openNextScreen() {
->>>>>>> origin/main
         if (navigated || isFinishing()) {
             return;
         }
 
         navigated = true;
-        
+
         Intent nextIntent;
         String redirectTo = getIntent().getStringExtra("redirect_to");
         String eventId = getIntent().getStringExtra("event_id");
         String eventTitle = getIntent().getStringExtra("event_title");
-        
-<<<<<<< HEAD
-        if ("offer".equals(redirectTo) && !requiresProfileSetup && eventId != null) {
-=======
+
         if ("offer".equals(redirectTo) && canOpenOfferRedirect) {
->>>>>>> origin/main
             nextIntent = new Intent(this, OfferResponseActivity.class);
             nextIntent.putExtra(OfferResponseActivity.EXTRA_EVENT_ID, eventId);
             nextIntent.putExtra(OfferResponseActivity.EXTRA_EVENT_TITLE, eventTitle);
-        } else if ("event_detail".equals(redirectTo) && !requiresProfileSetup && eventId != null) {
+        } else if ("event_detail".equals(redirectTo) && canOpenOfferRedirect && eventId != null) {
             nextIntent = new Intent(this, EventDetailActivity.class);
             nextIntent.putExtra(EventDetailActivity.EXTRA_EVENT_ID, eventId);
             nextIntent.putExtra(EventDetailActivity.EXTRA_EVENT_TITLE, eventTitle);
         } else {
             nextIntent = new Intent(this, ExploreActivity.class);
         }
-        
+
         startActivity(nextIntent);
         finish();
     }
