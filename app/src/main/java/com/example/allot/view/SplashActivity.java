@@ -8,18 +8,16 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.widget.Toast;
-
+import android.util.Log;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
-
 import com.example.allot.R;
-import com.example.allot.common.TextHelper;
 import com.example.allot.controller.shared.UserController;
-import com.example.allot.model.profile.User;
+import com.example.allot.view.event.OfferResponseActivity;
 import com.example.allot.view.explore.ExploreActivity;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 @SuppressLint("CustomSplashScreen")
 /**
@@ -27,11 +25,12 @@ import com.example.allot.view.explore.ExploreActivity;
  */
 public class SplashActivity extends AppCompatActivity {
 
+    private static final String TAG = "SplashActivity";
     private static final long MIN_SPLASH_DURATION_MS = 900L;
     private final Handler handler = new Handler(Looper.getMainLooper());
     private long startedAtMs;
     private boolean navigated;
-    private boolean requiresProfileSetup;
+    private boolean canOpenOfferRedirect;
 
     private final ActivityResultLauncher<String> requestPermissionLauncher =
             registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
@@ -47,15 +46,37 @@ public class SplashActivity extends AppCompatActivity {
         startedAtMs = System.currentTimeMillis();
 
         UserController userController = new UserController(this);
+
         if (userController.isNewDeviceId()) {
-            this.requiresProfileSetup = true;
             checkNotificationPermission();
             return;
         }
 
-        userController.loadOrCreateUser((user, success) -> {
-            this.requiresProfileSetup = !success || requiresProfileSetup(user);
+        userController.loadCurrentUser((user, success) -> {
+            canOpenOfferRedirect = success && user != null && userController.hasCompletedProfile(user);
+            if (success && user != null) {
+                registerFcmToken(userController);
+            }
             checkNotificationPermission();
+        });
+    }
+
+    /**
+     * Fetches the current FCM token and saves it to Firestore.
+     * This ensures the device is reachable for push notifications.
+     */
+    private void registerFcmToken(UserController userController) {
+        FirebaseMessaging.getInstance().getToken().addOnCompleteListener(task -> {
+            if (!task.isSuccessful()) {
+                Log.w(TAG, "Fetching FCM registration token failed", task.getException());
+                return;
+            }
+
+            // Get new FCM registration token
+            String token = task.getResult();
+            Log.d(TAG, "Current FCM Token: " + token);
+
+            userController.updateCurrentFcmToken(token);
         });
     }
 
@@ -73,44 +94,38 @@ public class SplashActivity extends AppCompatActivity {
     }
 
     private void proceedToNextStep() {
-        navigateAfterDelay(this.requiresProfileSetup);
+        navigateAfterDelay();
     }
 
-    private void navigateAfterDelay(boolean requiresProfileSetup) {
+    private void navigateAfterDelay() {
         if (navigated) {
             return;
         }
 
         long elapsedMs = System.currentTimeMillis() - startedAtMs;
         long remainingMs = Math.max(0L, MIN_SPLASH_DURATION_MS - elapsedMs);
-        handler.postDelayed(() -> openNextScreen(requiresProfileSetup), remainingMs);
+        handler.postDelayed(this::openNextScreen, remainingMs);
     }
 
-    private void openNextScreen(boolean requiresProfileSetup) {
+    private void openNextScreen() {
         if (navigated || isFinishing()) {
             return;
         }
 
         navigated = true;
-        Intent intent = new Intent(
-                this,
-                requiresProfileSetup ? WelcomeActivity.class : ExploreActivity.class
-        );
-        startActivity(intent);
-        finish();
-    }
-
-    private boolean requiresProfileSetup(User user) {
-        if (user == null) {
-            return true;
+        
+        Intent nextIntent;
+        String redirectTo = getIntent().getStringExtra("redirect_to");
+        
+        if ("offer".equals(redirectTo) && canOpenOfferRedirect) {
+            nextIntent = new Intent(this, OfferResponseActivity.class);
+            nextIntent.putExtra(OfferResponseActivity.EXTRA_EVENT_ID, getIntent().getStringExtra("event_id"));
+            nextIntent.putExtra(OfferResponseActivity.EXTRA_EVENT_TITLE, getIntent().getStringExtra("event_title"));
+        } else {
+            nextIntent = new Intent(this, ExploreActivity.class);
         }
-
-        return isBlank(user.getFirstName())
-                || isBlank(user.getLastName())
-                || isBlank(user.getEmail());
-    }
-
-    private boolean isBlank(String value) {
-        return TextHelper.isBlank(value);
+        
+        startActivity(nextIntent);
+        finish();
     }
 }

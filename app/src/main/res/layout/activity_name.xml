@@ -5,6 +5,19 @@
     android:layout_height="match_parent"
     android:background="@color/screen_bg">
 
+    <ImageButton
+        android:id="@+id/backButton"
+        android:layout_width="44dp"
+        android:layout_height="44dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:background="@null"
+        android:contentDescription="@string/filter_back"
+        android:padding="10dp"
+        android:src="@drawable/arrow_back"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <TextView
         android:id="@+id/nameTitle"
         android:layout_width="0dp"

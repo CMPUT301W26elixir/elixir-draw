@@ -41,6 +41,26 @@ public class UserController {
     }
 
     /**
+     * Loads the current user without creating a new Firestore document when one does not exist.
+     *
+     * @param listener the listener that receives the current user or null
+     */
+    public void loadCurrentUser(OnCompleteListener<User> listener) {
+        String deviceId = getCurrentDeviceId();
+        userRepository.findUserByDeviceId(deviceId, (user, success) -> {
+            if (!success) {
+                listener.onComplete(null, false);
+                return;
+            }
+
+            if (user != null && isBlank(user.getDeviceId())) {
+                user.setDeviceId(deviceId);
+            }
+            listener.onComplete(user, true);
+        });
+    }
+
+    /**
      * Searches users by name, phone, or email.
      *
      * @param query the search query
@@ -101,6 +121,31 @@ public class UserController {
         }
 
         userRepository.updateUserProfile(getCurrentDeviceId(), firstName, lastName, email, phone, notiEnabled, listener);
+    }
+
+    /**
+     * Returns whether the provided user has completed the required profile fields.
+     *
+     * @param user the user to evaluate
+     * @return true when the profile is complete enough for account-gated flows
+     */
+    public boolean hasCompletedProfile(User user) {
+        if (user == null) {
+            return false;
+        }
+
+        return !isBlank(user.getFirstName())
+                && !isBlank(user.getLastName())
+                && !isBlank(user.getEmail());
+    }
+
+    /**
+     * Saves the current user's FCM token.
+     *
+     * @param token the token to persist
+     */
+    public void updateCurrentFcmToken(String token) {
+        userRepository.updateFcmToken(getCurrentDeviceId(), token);
     }
     /**
      * Adds or removes an event ID from the user's savedEvents array.

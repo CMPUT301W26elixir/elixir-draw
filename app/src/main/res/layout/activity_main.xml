@@ -62,9 +62,7 @@
             android:id="@+id/filterPillsScrollView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="14dp"
-            android:clipToPadding="false"
-            android:fadeScrollbars="false"
+            android:layout_marginTop="16dp"
             android:overScrollMode="never"
             android:scrollbars="none"
             android:visibility="gone">

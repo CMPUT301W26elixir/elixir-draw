@@ -27,10 +27,13 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.allot.R;
 import com.example.allot.controller.event.AndroidEventLocationGeocodingService;
 import com.example.allot.controller.explore.ExploreController;
+import com.example.allot.controller.notification.NotificationService;
+import com.example.allot.controller.shared.UserController;
 import com.example.allot.view.event.EventDetailActivity;
 import com.example.allot.view.events.EventListModeFragment;
 import com.example.allot.view.shared.AppNavigator;
 import com.example.allot.view.shared.BottomNavBarView;
+import com.example.allot.view.shared.DeferredOnboardingNavigator;
 import com.example.allot.view.shared.EventListAdapter;
 import com.example.allot.view.shared.EventListItem;
 import com.example.allot.view.shared.UiHelper;
@@ -43,17 +46,18 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
+
 /**
  * Shows the explore screen where users can browse, search, and save events.
  */
 public class ExploreActivity extends AppCompatActivity {
-    private static final String TAG = "Allot_Logic";
+    private static final String TAG = "ExploreActivity";
     private static final int FILTER_REQUEST_CODE = 4102;
     private static final int LOCATION_PERMISSION_REQUEST = 4103;
     private static final int SEARCH_DEBOUNCE_MS = 150;
-    private static final double DEFAULT_DISTANCE_KM = 50d;
 
     private ExploreController browseController;
+    private NotificationService notificationService;
     private EventListAdapter eventListAdapter;
     private RecyclerView recyclerView;
     private EditText searchInput;
@@ -64,9 +68,10 @@ public class ExploreActivity extends AppCompatActivity {
     private BottomNavBarView.Tab currentHomeTab = BottomNavBarView.Tab.EXPLORE;
     private HorizontalScrollView filterPillsScrollView;
     private LinearLayout filterPillsContainer;
-
     private FrameLayout fragmentContainer;
     private LinearLayout exploreContainer;
+    private FusedLocationProviderClient fusedLocationProviderClient;
+    private UserController userController;
 
     private String filterDateText = "";
     private String filterAddress = "";
@@ -74,29 +79,62 @@ public class ExploreActivity extends AppCompatActivity {
     private Double filterLongitude;
     private Double filterDistanceKm;
     private String filterKeywords = "";
+    private boolean filterOnlyOpenSpots;
+    private Integer filterMinimumCapacity;
 
     private final Handler searchHandler = new Handler();
     private Runnable searchRunnable;
     private final SimpleDateFormat pillDateParser = new SimpleDateFormat("MMM d, yyyy", Locale.getDefault());
     private final SimpleDateFormat pillDateFormatter = new SimpleDateFormat("MMM d", Locale.getDefault());
-    private FusedLocationProviderClient fusedLocationProviderClient;
 
     private List<String> userSavedEvents = new ArrayList<>();
     private boolean isInitialBrowseLoadComplete;
     private boolean hasInitializedDefaultLocationFilter;
     private boolean isInitializingDefaultLocationFilter;
 
-    /**
-     * Initializes the activity, binds views, configures filters and navigation,
-     * loads the current user, and displays either the explore or saved tab.
-     *
-     * @param savedInstanceState the saved activity state
-     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        browseController = new ExploreController(this);
+        userController = new UserController(this);
+        notificationService = new NotificationService(this);
+        notificationService.startListening();
+        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
+        pillDateParser.setLenient(false);
+
+        bindViews();
+        setupSearchInput();
+        setupFilterMenu();
+        currentHomeTab = resolveInitialTab(getIntent());
+        setupBottomNavigation();
+
+        eventListAdapter = new EventListAdapter(new ArrayList<>(), new EventListAdapter.OnEventClickListener() {
+            @Override
+            public void onEventClick(EventListItem event) {
+                openEventDetailScreen(event);
+            }
+
+            @Override
+            public void onHeartClick(EventListItem event, int position) {
+                if (event == null) {
+                    return;
+                }
+
+                requireCompletedProfile(
+                        () -> toggleSavedEvent(event, position),
+                        buildDeferredSaveIntent(event)
+                );
+            }
+        });
+        recyclerView.setAdapter(eventListAdapter);
+
+        maybeInitializeDefaultLocationFilter();
+        refreshSavedEventsAndVisibleContent();
+    }
+
+    private void bindViews() {
         recyclerView = findViewById(R.id.eventsRecyclerView);
         searchInput = findViewById(R.id.searchInput);
         filterMenuButton = findViewById(R.id.filterMenuButton);
@@ -107,48 +145,16 @@ public class ExploreActivity extends AppCompatActivity {
         filterPillsContainer = findViewById(R.id.filterPillsContainer);
         fragmentContainer = findViewById(R.id.fragment_container);
         exploreContainer = findViewById(R.id.exploreContainer);
-        browseController = new ExploreController(this);
-        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
-        pillDateParser.setLenient(false);
-
-        setupSearchInput();
-        setupFilterMenu();
-        currentHomeTab = resolveInitialTab(getIntent());
-
-        eventListAdapter = new EventListAdapter(new ArrayList<>(), new EventListAdapter.OnEventClickListener() {
-            @Override
-            public void onEventClick(EventListItem event) {
-                openEventDetailScreen(event);
-            }
-
-            @Override
-            public void onHeartClick(EventListItem event, int position) {
-                boolean isSaving = event.isSaved;
-
-                browseController.toggleSavedEvent(userSavedEvents, event.getEventId(), isSaving, (savedEventIds, success) -> {
-                    userSavedEvents = new ArrayList<>(savedEventIds == null ? new ArrayList<>() : savedEventIds);
-                    // Update the heart after the save call finishes
-                    event.isSaved = success == isSaving;
-                    eventListAdapter.notifyItemChanged(position);
-                });
-            }
-        });
-
-        recyclerView.setAdapter(eventListAdapter);
-        setupBottomNavigation();
-        maybeInitializeDefaultLocationFilter();
-        refreshSavedEventsAndVisibleContent();
     }
 
-    /**
-     * Sets up the search input to filter on this screen.
-     */
     private void setupSearchInput() {
         searchInput.setFocusable(true);
         searchInput.setFocusableInTouchMode(true);
+        searchInput.setOnClickListener(null);
         searchInput.addTextChangedListener(new TextWatcher() {
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
@@ -161,7 +167,8 @@ public class ExploreActivity extends AppCompatActivity {
             }
 
             @Override
-            public void afterTextChanged(Editable s) {}
+            public void afterTextChanged(Editable s) {
+            }
         });
     }
 
@@ -182,16 +189,14 @@ public class ExploreActivity extends AppCompatActivity {
                 intent.putExtra(EventFilterActivity.EXTRA_LONGITUDE, filterLongitude);
             }
             intent.putExtra(EventFilterActivity.EXTRA_KEYWORDS, filterKeywords);
+            intent.putExtra(EventFilterActivity.EXTRA_ONLY_OPEN_SPOTS, filterOnlyOpenSpots);
+            if (filterMinimumCapacity != null) {
+                intent.putExtra(EventFilterActivity.EXTRA_MINIMUM_CAPACITY, filterMinimumCapacity);
+            }
             startActivityForResult(intent, FILTER_REQUEST_CODE);
         });
     }
 
-    /**
-     * Handles new intents delivered to the activity and switches to the saved tab
-     * when requested.
-     *
-     * @param intent the new intent delivered to the activity
-     */
     @Override
     protected void onNewIntent(@NonNull Intent intent) {
         super.onNewIntent(intent);
@@ -209,39 +214,47 @@ public class ExploreActivity extends AppCompatActivity {
         refreshSavedEventsAndVisibleContent();
     }
 
-    /**
-     * Configures the bottom navigation bar and assigns tab actions.
-     */
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (notificationService != null) {
+            notificationService.stopListening();
+        }
+        if (searchRunnable != null) {
+            searchHandler.removeCallbacks(searchRunnable);
+        }
+    }
+
     private void setupBottomNavigation() {
         bottomNavBar.setSelectedTab(currentHomeTab);
         bottomNavBar.setOnTabClickListener(BottomNavBarView.Tab.EXPLORE, v -> showExploreTab());
         bottomNavBar.setOnTabClickListener(BottomNavBarView.Tab.SAVED, v -> openSavedTab());
-        bottomNavBar.setOnTabClickListener(BottomNavBarView.Tab.MY_EVENTS, v -> openMyEventsScreen());
-        bottomNavBar.setOnTabClickListener(BottomNavBarView.Tab.PROFILE, v -> openProfileScreen());
-        bottomNavBar.setOnTabClickListener(BottomNavBarView.Tab.SCAN, view -> openScanScreen());
+        bottomNavBar.setOnTabClickListener(BottomNavBarView.Tab.MY_EVENTS, v -> AppNavigator.openMyEvents(this, false));
+        bottomNavBar.setOnTabClickListener(BottomNavBarView.Tab.PROFILE, v -> AppNavigator.openProfile(this, false));
+        bottomNavBar.setOnTabClickListener(BottomNavBarView.Tab.SCAN, view -> AppNavigator.openScan(this, false));
     }
 
-    /**
-     * Shows the explore tab and reloads the browse event list.
-     */
     private void showExploreTab() {
         currentHomeTab = BottomNavBarView.Tab.EXPLORE;
         bottomNavBar.setSelectedTab(BottomNavBarView.Tab.EXPLORE);
-        if (fragmentContainer != null) fragmentContainer.setVisibility(View.GONE);
-        if (exploreContainer != null) exploreContainer.setVisibility(View.VISIBLE);
+        if (fragmentContainer != null) {
+            fragmentContainer.setVisibility(View.GONE);
+        }
+        if (exploreContainer != null) {
+            exploreContainer.setVisibility(View.VISIBLE);
+        }
         rebuildFilterPills();
         refreshBrowseEvents(false);
     }
 
-    /**
-     * Opens the saved events tab by displaying the shared saved-events fragment.
-     */
     private void openSavedTab() {
         currentHomeTab = BottomNavBarView.Tab.SAVED;
         bottomNavBar.setSelectedTab(BottomNavBarView.Tab.SAVED);
         EventListModeFragment fragment = EventListModeFragment.newSavedEventsInstance(new ArrayList<>(userSavedEvents));
 
-        if (exploreContainer != null) exploreContainer.setVisibility(View.GONE);
+        if (exploreContainer != null) {
+            exploreContainer.setVisibility(View.GONE);
+        }
         if (fragmentContainer != null) {
             fragmentContainer.setVisibility(View.VISIBLE);
             getSupportFragmentManager().beginTransaction()
@@ -263,32 +276,25 @@ public class ExploreActivity extends AppCompatActivity {
                 return;
             }
 
-            if (shouldDeferExploreRefreshForDefaultLocation()) {
-                showBrowseLoadingState();
-                return;
-            }
-
             rebuildFilterPills();
             refreshBrowseEvents(!browseController.hasCachedOpenEvents());
         });
     }
 
-    private boolean shouldDeferExploreRefreshForDefaultLocation() {
-        return currentHomeTab == BottomNavBarView.Tab.EXPLORE
-                && !hasInitializedDefaultLocationFilter
-                && isInitializingDefaultLocationFilter;
+    private BottomNavBarView.Tab resolveInitialTab(Intent intent) {
+        return intent != null && "saved".equals(intent.getStringExtra("navigate_to"))
+                ? BottomNavBarView.Tab.SAVED
+                : BottomNavBarView.Tab.EXPLORE;
     }
 
     private void maybeInitializeDefaultLocationFilter() {
         if (hasInitializedDefaultLocationFilter || isInitializingDefaultLocationFilter) {
             return;
         }
-
         if (!UiHelper.isBlank(filterAddress) || filterLatitude != null || filterLongitude != null || filterDistanceKm != null) {
             hasInitializedDefaultLocationFilter = true;
             return;
         }
-
         if (!hasLocationPermission()) {
             isInitializingDefaultLocationFilter = true;
             ActivityCompat.requestPermissions(
@@ -317,7 +323,6 @@ public class ExploreActivity extends AppCompatActivity {
                         finishDefaultLocationInitialization();
                         return;
                     }
-
                     reverseGeocodeDefaultLocation(location);
                 })
                 .addOnFailureListener(this, exception -> finishDefaultLocationInitialization());
@@ -336,16 +341,11 @@ public class ExploreActivity extends AppCompatActivity {
                         && UiHelper.isBlank(filterAddress)
                         && filterLatitude == null
                         && filterLongitude == null
-                        && filterDistanceKm == null
                         && !UiHelper.isBlank(resolvedAddress)) {
                     filterAddress = resolvedAddress;
                     filterLatitude = location.getLatitude();
                     filterLongitude = location.getLongitude();
-                    filterDistanceKm = DEFAULT_DISTANCE_KM;
                     rebuildFilterPills();
-                    if (currentHomeTab == BottomNavBarView.Tab.EXPLORE && isInitialBrowseLoadComplete) {
-                        applyBrowseFilters(searchInput.getText() == null ? "" : searchInput.getText().toString());
-                    }
                 }
                 finishDefaultLocationInitialization();
             });
@@ -356,61 +356,13 @@ public class ExploreActivity extends AppCompatActivity {
         isInitializingDefaultLocationFilter = false;
         hasInitializedDefaultLocationFilter = true;
         if (currentHomeTab == BottomNavBarView.Tab.EXPLORE) {
-            refreshSavedEventsAndVisibleContent();
+            rebuildFilterPills();
+            if (browseController.hasCachedOpenEvents()) {
+                applyBrowseFilters(searchInput.getText() == null ? "" : searchInput.getText().toString());
+            }
         }
     }
 
-    private BottomNavBarView.Tab resolveInitialTab(Intent intent) {
-        return intent != null && "saved".equals(intent.getStringExtra("navigate_to"))
-                ? BottomNavBarView.Tab.SAVED
-                : BottomNavBarView.Tab.EXPLORE;
-    }
-
-    /**
-     * Opens the My Events screen.
-     */
-    private void openMyEventsScreen() {
-        AppNavigator.openMyEvents(this, false);
-    }
-
-    /**
-     * Opens the Profile screen.
-     */
-    private void openProfileScreen() {
-        AppNavigator.openProfile(this, false);
-    }
-
-    /**
-     * Opens the Scan screen.
-     */
-    private void openScanScreen() {
-        AppNavigator.openScan(this, false);
-    }
-
-    /**
-     * Opens the event detail screen for the selected event list item.
-     *
-     * @param eventItem the selected event item
-     */
-    private void openEventDetailScreen(EventListItem eventItem) {
-        if (eventItem == null || eventItem.eventId == null || eventItem.eventId.trim().isEmpty()) return;
-        Intent intent = new Intent(this, EventDetailActivity.class);
-        intent.putExtra(EventDetailActivity.EXTRA_EVENT_ID, eventItem.eventId);
-        intent.putExtra(EventDetailActivity.EXTRA_EVENT_TITLE, eventItem.title);
-        intent.putExtra(EventDetailActivity.EXTRA_EVENT_LOCATION, eventItem.street);
-        intent.putExtra(EventDetailActivity.EXTRA_EVENT_DATE, eventItem.date);
-        intent.putExtra(EventDetailActivity.EXTRA_EVENT_PRICE, eventItem.price);
-        intent.putExtra(EventDetailActivity.EXTRA_EVENT_DEADLINE, eventItem.daysLeft);
-        intent.putExtra(EventDetailActivity.EXTRA_EVENT_CATEGORY, eventItem.category);
-        startActivity(intent);
-    }
-
-    /**
-     * Loads browseable events using the provided search term and currently
-     * selected chip filter.
-     *
-     * @param searchTerm the text used to search events
-     */
     private void refreshBrowseEvents(boolean showLoadingState) {
         if (showLoadingState) {
             showBrowseLoadingState();
@@ -438,26 +390,29 @@ public class ExploreActivity extends AppCompatActivity {
                 filterLatitude,
                 filterLongitude,
                 filterDistanceKm,
+                filterOnlyOpenSpots,
+                filterMinimumCapacity,
                 userSavedEvents,
                 (items, success) -> {
-            List<EventListItem> safeItems = items == null ? new ArrayList<>() : items;
-            if (!success) {
-                if (!isInitialBrowseLoadComplete) {
-                    showBrowseMessageState(getString(R.string.browse_state_error));
+                    List<EventListItem> safeItems = items == null ? new ArrayList<>() : items;
+                    if (!success) {
+                        if (!isInitialBrowseLoadComplete) {
+                            showBrowseMessageState(getString(R.string.browse_state_error));
+                        }
+                        return;
+                    }
+
+                    if (safeItems.isEmpty()) {
+                        showBrowseMessageState(buildEmptyStateMessage(searchTerm));
+                        return;
+                    }
+
+                    eventListAdapter.updateEvents(safeItems);
+                    recyclerView.setVisibility(View.VISIBLE);
+                    loadingIndicator.setVisibility(View.GONE);
+                    stateText.setVisibility(View.GONE);
                 }
-                return;
-            }
-
-            if (safeItems.isEmpty()) {
-                showBrowseMessageState(buildEmptyStateMessage(searchTerm, ""));
-                return;
-            }
-
-            eventListAdapter.updateEvents(safeItems);
-            recyclerView.setVisibility(View.VISIBLE);
-            loadingIndicator.setVisibility(View.GONE);
-            stateText.setVisibility(View.GONE);
-        });
+        );
     }
 
     private void showBrowseLoadingState() {
@@ -475,22 +430,11 @@ public class ExploreActivity extends AppCompatActivity {
         stateText.setText(message);
     }
 
-    private String buildEmptyStateMessage(String searchTerm, String chipFilter) {
+    private String buildEmptyStateMessage(String searchTerm) {
         String trimmedSearch = normalize(searchTerm);
-        String trimmedFilter = normalize(chipFilter);
-
-        if (!trimmedSearch.isEmpty() && !trimmedFilter.isEmpty()) {
-            return String.format(Locale.getDefault(), "No '%s' events match \"%s\".", trimmedFilter, trimmedSearch);
-        }
-
         if (!trimmedSearch.isEmpty()) {
             return String.format(Locale.getDefault(), "No events match \"%s\".", trimmedSearch);
         }
-
-        if (!trimmedFilter.isEmpty()) {
-            return String.format(Locale.getDefault(), "No %s events found.", trimmedFilter);
-        }
-
         return getString(R.string.browse_state_empty);
     }
 
@@ -504,7 +448,6 @@ public class ExploreActivity extends AppCompatActivity {
         filterDateText = safeString(data.getStringExtra(EventFilterActivity.EXTRA_DATE_BEGIN));
         filterAddress = safeString(data.getStringExtra(EventFilterActivity.EXTRA_ADDRESS));
         filterKeywords = safeString(data.getStringExtra(EventFilterActivity.EXTRA_KEYWORDS));
-
         filterLatitude = data.hasExtra(EventFilterActivity.EXTRA_LATITUDE)
                 ? data.getDoubleExtra(EventFilterActivity.EXTRA_LATITUDE, 0)
                 : null;
@@ -514,6 +457,13 @@ public class ExploreActivity extends AppCompatActivity {
         filterDistanceKm = data.hasExtra(EventFilterActivity.EXTRA_DISTANCE_KM)
                 ? data.getDoubleExtra(EventFilterActivity.EXTRA_DISTANCE_KM, 0)
                 : null;
+        filterOnlyOpenSpots = data.getBooleanExtra(EventFilterActivity.EXTRA_ONLY_OPEN_SPOTS, false);
+        filterMinimumCapacity = data.hasExtra(EventFilterActivity.EXTRA_MINIMUM_CAPACITY)
+                ? data.getIntExtra(EventFilterActivity.EXTRA_MINIMUM_CAPACITY, 0)
+                : null;
+        if (filterMinimumCapacity != null && filterMinimumCapacity <= 0) {
+            filterMinimumCapacity = null;
+        }
 
         rebuildFilterPills();
         applyBrowseFilters(searchInput.getText() == null ? "" : searchInput.getText().toString());
@@ -544,7 +494,8 @@ public class ExploreActivity extends AppCompatActivity {
         filterPillsContainer.removeAllViews();
         addFilterPill(buildDatePillLabel(), this::clearDateFilter);
         addFilterPill(buildDistancePillLabel(), this::clearDistanceFilter);
-
+        addFilterPill(buildOpenSpotsPillLabel(), this::clearOpenSpotsFilter);
+        addFilterPill(buildMinimumCapacityPillLabel(), this::clearMinimumCapacityFilter);
         for (String keyword : splitKeywords(filterKeywords)) {
             addFilterPill(keyword, () -> removeKeywordFilter(keyword));
         }
@@ -606,6 +557,18 @@ public class ExploreActivity extends AppCompatActivity {
         applyBrowseFilters(searchInput.getText() == null ? "" : searchInput.getText().toString());
     }
 
+    private void clearOpenSpotsFilter() {
+        filterOnlyOpenSpots = false;
+        rebuildFilterPills();
+        applyBrowseFilters(searchInput.getText() == null ? "" : searchInput.getText().toString());
+    }
+
+    private void clearMinimumCapacityFilter() {
+        filterMinimumCapacity = null;
+        rebuildFilterPills();
+        applyBrowseFilters(searchInput.getText() == null ? "" : searchInput.getText().toString());
+    }
+
     private String buildDatePillLabel() {
         if (UiHelper.isBlank(filterDateText)) {
             return "";
@@ -627,6 +590,17 @@ public class ExploreActivity extends AppCompatActivity {
         return String.format(Locale.getDefault(), "%.1f km", filterDistanceKm);
     }
 
+    private String buildOpenSpotsPillLabel() {
+        return filterOnlyOpenSpots ? getString(R.string.filter_open_spots_pill) : "";
+    }
+
+    private String buildMinimumCapacityPillLabel() {
+        if (filterMinimumCapacity == null || filterMinimumCapacity <= 0) {
+            return "";
+        }
+        return getString(R.string.filter_min_capacity_pill, filterMinimumCapacity);
+    }
+
     private List<String> splitKeywords(String rawKeywords) {
         String normalizedKeywords = normalize(rawKeywords);
         if (normalizedKeywords.isEmpty()) {
@@ -644,11 +618,11 @@ public class ExploreActivity extends AppCompatActivity {
     }
 
     private java.util.Date parseFilterDate(String rawDate) {
-        if (rawDate == null || rawDate.trim().isEmpty()) {
+        if (UiHelper.isBlank(rawDate)) {
             return null;
         }
         try {
-            java.text.SimpleDateFormat formatter = new java.text.SimpleDateFormat("MMM d, yyyy", Locale.getDefault());
+            SimpleDateFormat formatter = new SimpleDateFormat("MMM d, yyyy", Locale.getDefault());
             formatter.setLenient(false);
             return formatter.parse(rawDate.trim());
         } catch (Exception e) {
@@ -664,11 +638,53 @@ public class ExploreActivity extends AppCompatActivity {
         return value == null ? "" : value.trim();
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        if (searchRunnable != null) {
-            searchHandler.removeCallbacks(searchRunnable);
+    private void openEventDetailScreen(EventListItem eventItem) {
+        if (eventItem == null || UiHelper.isBlank(eventItem.getEventId())) {
+            return;
         }
+
+        Intent intent = new Intent(this, EventDetailActivity.class);
+        intent.putExtra(EventDetailActivity.EXTRA_EVENT_ID, eventItem.getEventId());
+        intent.putExtra(EventDetailActivity.EXTRA_EVENT_TITLE, eventItem.getTitle());
+        intent.putExtra(EventDetailActivity.EXTRA_EVENT_LOCATION, eventItem.getStreet());
+        intent.putExtra(EventDetailActivity.EXTRA_EVENT_DATE, eventItem.getDate());
+        intent.putExtra(EventDetailActivity.EXTRA_EVENT_PRICE, eventItem.getPrice());
+        intent.putExtra(EventDetailActivity.EXTRA_EVENT_DEADLINE, eventItem.getDaysLeft());
+        intent.putExtra(EventDetailActivity.EXTRA_EVENT_CATEGORY, eventItem.getCategory());
+        startActivity(intent);
+    }
+
+    private void toggleSavedEvent(EventListItem event, int position) {
+        boolean nextSavedState = event.isSaved;
+        browseController.toggleSavedEvent(userSavedEvents, event.getEventId(), nextSavedState, (savedEventIds, success) -> {
+            userSavedEvents = new ArrayList<>(savedEventIds == null ? new ArrayList<>() : savedEventIds);
+            event.isSaved = success ? nextSavedState : !nextSavedState;
+            eventListAdapter.notifyItemChanged(position);
+        });
+    }
+
+    private void requireCompletedProfile(Runnable onReady, Intent onboardingIntent) {
+        userController.loadCurrentUser((user, success) -> {
+            if (success && userController.hasCompletedProfile(user)) {
+                onReady.run();
+                return;
+            }
+
+            DeferredOnboardingNavigator.openOnboarding(this, onboardingIntent, false);
+        });
+    }
+
+    private Intent buildDeferredSaveIntent(EventListItem eventItem) {
+        return DeferredOnboardingNavigator.createEventActionIntent(
+                this,
+                eventItem.getEventId(),
+                eventItem.getTitle(),
+                eventItem.getStreet(),
+                eventItem.getDate(),
+                eventItem.getPrice(),
+                eventItem.getDaysLeft(),
+                eventItem.getCategory(),
+                DeferredOnboardingNavigator.ACTION_AUTO_SAVE
+        );
     }
 }

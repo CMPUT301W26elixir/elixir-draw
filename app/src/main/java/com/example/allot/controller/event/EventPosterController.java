@@ -27,7 +27,7 @@ public class EventPosterController {
         this(new EventRepository(), FirebaseStorage.getInstance());
     }
 
-    EventPosterController(EventRepository eventRepository, FirebaseStorage storage) {
+    public EventPosterController(EventRepository eventRepository, FirebaseStorage storage) {
         this.eventRepository = eventRepository;
         this.storage = storage;
     }
@@ -137,6 +137,47 @@ public class EventPosterController {
             );
         } catch (IllegalArgumentException exception) {
             Log.w(TAG, "Skipping delete for invalid previous poster URL: " + previousPosterUrl, exception);
+        }
+    }
+
+    /**
+     * Deletes a poster file from Cloud Storage without changing Firestore state.
+     *
+     * @param posterUrl the poster download URL
+     * @param listener the listener that receives the delete result
+     */
+    public void deletePosterFile(String posterUrl, OnCompleteListener<Boolean> listener) {
+        lastErrorMessage = null;
+        if (isBlank(posterUrl)) {
+            listener.onComplete(true, true);
+            return;
+        }
+
+        try {
+            storage.getReferenceFromUrl(posterUrl)
+                    .delete()
+                    .addOnCompleteListener(task -> {
+                        if (task.isSuccessful()) {
+                            listener.onComplete(true, true);
+                            return;
+                        }
+
+                        Exception exception = task.getException();
+                        if (isObjectNotFound(exception)) {
+                            listener.onComplete(true, true);
+                            return;
+                        }
+
+                        Log.w(TAG, "Poster file delete failed for URL: " + posterUrl, exception);
+                        lastErrorMessage = exception == null
+                                ? "Failed to delete poster file from Storage"
+                                : exception.getMessage();
+                        listener.onComplete(false, false);
+                    });
+        } catch (IllegalArgumentException exception) {
+            Log.w(TAG, "Invalid poster URL during delete: " + posterUrl, exception);
+            lastErrorMessage = "Invalid poster URL in event data";
+            listener.onComplete(false, false);
         }
     }
 
