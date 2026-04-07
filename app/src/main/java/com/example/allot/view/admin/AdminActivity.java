@@ -17,6 +17,7 @@ import com.example.allot.controller.admin.AdminEventController;
 import com.example.allot.controller.admin.AdminNotificationController;
 import com.example.allot.controller.admin.AdminProfileController;
 import com.example.allot.controller.event.EventPosterController;
+import com.example.allot.controller.profile.ProfilePhotoController;
 import com.example.allot.model.event.Event;
 import com.example.allot.model.notification.NotificationItem;
 import com.example.allot.model.profile.User;
@@ -66,6 +67,7 @@ public class AdminActivity extends AppCompatActivity {
 
     // Profile management
     private AdminProfileController adminProfileController;
+    private ProfilePhotoController profilePhotoController;
     private RecyclerView profilesRecyclerView;
     private AdminProfileListAdapter profilesAdapter;
     private List<User> profilesList;
@@ -114,6 +116,7 @@ public class AdminActivity extends AppCompatActivity {
 
         adminEventController = new AdminEventController(this);
         adminProfileController = new AdminProfileController(this);
+        profilePhotoController = new ProfilePhotoController();
         adminNotificationController = new AdminNotificationController(this);
         eventPosterController = new EventPosterController();
         eventsList = new ArrayList<>();
@@ -239,7 +242,7 @@ public class AdminActivity extends AppCompatActivity {
         profilesRecyclerView.setAdapter(profilesAdapter);
 
         // Profile pictures RecyclerView
-        profilePicsAdapter = new AdminProfilePictureListAdapter(profilePicsList);
+        profilePicsAdapter = new AdminProfilePictureListAdapter(profilePicsList, this::onProfilePictureDeleteClick);
         profilePicsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         profilePicsRecyclerView.setAdapter(profilePicsAdapter);
 
@@ -752,6 +755,16 @@ public class AdminActivity extends AppCompatActivity {
     }
 
     /**
+     * Handles the profile picture delete click callback.
+     *
+     * @param user the user
+     * @param position the position
+     */
+    private void onProfilePictureDeleteClick(User user, int position) {
+        showProfilePictureDeleteConfirmationDialog(user, position);
+    }
+
+    /**
      * Handles the poster delete click callback.
      *
      * @param event the event
@@ -762,29 +775,7 @@ public class AdminActivity extends AppCompatActivity {
             return;
         }
 
-        if (isUiTestMode()) {
-            posterEventsList.remove(position);
-            postersAdapter.notifyItemRemoved(position);
-            if (posterEventsList.isEmpty()) {
-                setPostersEmptyState(getString(R.string.admin_no_posters));
-            }
-            return;
-        }
-
-        eventPosterController.deletePoster(event.getEventId(), event.getPosterUrl(), (result, success) -> {
-            if (!success || result == null || !result) {
-                Toast.makeText(this, R.string.admin_error_deleting_poster, Toast.LENGTH_SHORT).show();
-                return;
-            }
-
-            Toast.makeText(this, R.string.admin_poster_deleted, Toast.LENGTH_SHORT).show();
-            posterEventsList.remove(position);
-            postersAdapter.notifyItemRemoved(position);
-
-            if (posterEventsList.isEmpty()) {
-                setPostersEmptyState(getString(R.string.admin_no_posters));
-            }
-        });
+        showPosterDeleteConfirmationDialog(event, position);
     }
 
     /**
@@ -806,7 +797,7 @@ public class AdminActivity extends AppCompatActivity {
         cancelButton.setOnClickListener(view -> dialog.dismiss());
         deleteButton.setOnClickListener(view -> deleteEvent(event, position, dialog, cancelButton, deleteButton));
 
-        AppDialogHelper.show(dialog, UiHelper.dpToPx(this, 300), UiHelper.dpToPx(this, 200));
+        AppDialogHelper.showWrapContent(dialog, UiHelper.dpToPx(this, 300));
     }
 
     /**
@@ -823,15 +814,65 @@ public class AdminActivity extends AppCompatActivity {
         Button cancelButton = dialogView.findViewById(R.id.cancelButton);
         Button deleteButton = dialogView.findViewById(R.id.deleteProfileButton);
 
-        String displayName = (user.getFirstName() != null && !user.getFirstName().isEmpty())
-                ? user.getFirstName() + " " + (user.getLastName() != null ? user.getLastName() : "")
-                : user.getDeviceId();
-        userNameText.setText(displayName);
+        userNameText.setText(resolveUserDisplayName(user));
 
         cancelButton.setOnClickListener(view -> dialog.dismiss());
         deleteButton.setOnClickListener(view -> deleteProfile(user, position, dialog, cancelButton, deleteButton));
 
-        AppDialogHelper.show(dialog, UiHelper.dpToPx(this, 300), UiHelper.dpToPx(this, 200));
+        AppDialogHelper.showWrapContent(dialog, UiHelper.dpToPx(this, 300));
+    }
+
+    /**
+     * Performs show profile picture delete confirmation dialog.
+     *
+     * @param user the user
+     * @param position the position
+     */
+    private void showProfilePictureDeleteConfirmationDialog(User user, int position) {
+        Dialog dialog = AppDialogHelper.createDialog(this, R.layout.dialog_admin_delete_profile, true);
+        View dialogView = dialog.findViewById(android.R.id.content);
+
+        TextView dialogTitle = dialogView.findViewById(R.id.dialogTitle);
+        TextView dialogMessage = dialogView.findViewById(R.id.dialogMessage);
+        TextView userNameText = dialogView.findViewById(R.id.userNameText);
+        Button cancelButton = dialogView.findViewById(R.id.cancelButton);
+        Button deleteButton = dialogView.findViewById(R.id.deleteProfileButton);
+
+        dialogTitle.setText(R.string.admin_delete_profilepic_title);
+        dialogMessage.setText(R.string.admin_delete_profilepic_message);
+
+        userNameText.setText(resolveUserDisplayName(user));
+
+        cancelButton.setOnClickListener(view -> dialog.dismiss());
+        deleteButton.setOnClickListener(view -> deleteProfilePicture(user, position, dialog, cancelButton, deleteButton));
+
+        AppDialogHelper.showWrapContent(dialog, UiHelper.dpToPx(this, 300));
+    }
+
+    /**
+     * Performs show poster delete confirmation dialog.
+     *
+     * @param event the event
+     * @param position the position
+     */
+    private void showPosterDeleteConfirmationDialog(Event event, int position) {
+        Dialog dialog = AppDialogHelper.createDialog(this, R.layout.dialog_admin_delete_profile, true);
+        View dialogView = dialog.findViewById(android.R.id.content);
+
+        TextView dialogTitle = dialogView.findViewById(R.id.dialogTitle);
+        TextView dialogMessage = dialogView.findViewById(R.id.dialogMessage);
+        TextView userNameText = dialogView.findViewById(R.id.userNameText);
+        Button cancelButton = dialogView.findViewById(R.id.cancelButton);
+        Button deleteButton = dialogView.findViewById(R.id.deleteProfileButton);
+
+        dialogTitle.setText(R.string.admin_delete_poster_title);
+        dialogMessage.setText(R.string.admin_delete_poster_message);
+        userNameText.setText(event.getTitle());
+
+        cancelButton.setOnClickListener(view -> dialog.dismiss());
+        deleteButton.setOnClickListener(view -> deletePoster(event, position, dialog, cancelButton, deleteButton));
+
+        AppDialogHelper.showWrapContent(dialog, UiHelper.dpToPx(this, 300));
     }
 
     /**
@@ -910,6 +951,76 @@ public class AdminActivity extends AppCompatActivity {
     }
 
     /**
+     * Performs delete profile picture.
+     *
+     * @param user the user
+     * @param position the position
+     * @param dialog the dialog
+     * @param cancelButton the cancel button
+     * @param deleteButton the delete button
+     */
+    private void deleteProfilePicture(User user,
+                                      int position,
+                                      Dialog dialog,
+                                      Button cancelButton,
+                                      Button deleteButton) {
+        cancelButton.setEnabled(false);
+        deleteButton.setEnabled(false);
+
+        if (isUiTestMode()) {
+            dialog.dismiss();
+            removeProfilePictureFromList(user, position);
+            return;
+        }
+
+        profilePhotoController.deletePhoto(user.getDeviceId(), user.getProfilePhotoUrl(), (success, result) -> {
+            if (!success || !result) {
+                cancelButton.setEnabled(true);
+                deleteButton.setEnabled(true);
+                Toast.makeText(this, R.string.admin_error_deleting_profilepic, Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            dialog.dismiss();
+            Toast.makeText(this, R.string.admin_profilepic_deleted, Toast.LENGTH_SHORT).show();
+            removeProfilePictureFromList(user, position);
+        });
+    }
+
+    /**
+     * Performs delete poster.
+     *
+     * @param event the event
+     * @param position the position
+     * @param dialog the dialog
+     * @param cancelButton the cancel button
+     * @param deleteButton the delete button
+     */
+    private void deletePoster(Event event, int position, Dialog dialog, Button cancelButton, Button deleteButton) {
+        cancelButton.setEnabled(false);
+        deleteButton.setEnabled(false);
+
+        if (isUiTestMode()) {
+            dialog.dismiss();
+            removePosterFromList(position);
+            return;
+        }
+
+        eventPosterController.deletePoster(event.getEventId(), event.getPosterUrl(), (result, success) -> {
+            if (!success || result == null || !result) {
+                cancelButton.setEnabled(true);
+                deleteButton.setEnabled(true);
+                Toast.makeText(this, R.string.admin_error_deleting_poster, Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            dialog.dismiss();
+            Toast.makeText(this, R.string.admin_poster_deleted, Toast.LENGTH_SHORT).show();
+            removePosterFromList(position);
+        });
+    }
+
+    /**
      * Performs remove event from list.
      *
      * @param position the position
@@ -951,5 +1062,65 @@ public class AdminActivity extends AppCompatActivity {
         if (profilePicsList.isEmpty()) {
             setProfilePicsEmptyState(getString(R.string.admin_no_profilepic));
         }
+    }
+
+    /**
+     * Performs remove profile picture from list.
+     *
+     * @param user the user
+     * @param position the position
+     */
+    private void removeProfilePictureFromList(User user, int position) {
+        if (position >= 0 && position < profilePicsList.size()) {
+            profilePicsList.remove(position);
+            profilePicsAdapter.notifyItemRemoved(position);
+        } else {
+            profilePicsList.removeIf(profileUser -> profileUser != null
+                    && user != null
+                    && user.getDeviceId() != null
+                    && user.getDeviceId().equals(profileUser.getDeviceId()));
+            profilePicsAdapter.notifyDataSetChanged();
+        }
+
+        if (profilePicsList.isEmpty()) {
+            setProfilePicsEmptyState(getString(R.string.admin_no_profilepic));
+        }
+    }
+
+    /**
+     * Performs remove poster from list.
+     *
+     * @param position the position
+     */
+    private void removePosterFromList(int position) {
+        if (position < 0 || position >= posterEventsList.size()) {
+            return;
+        }
+
+        posterEventsList.remove(position);
+        postersAdapter.notifyItemRemoved(position);
+
+        if (posterEventsList.isEmpty()) {
+            setPostersEmptyState(getString(R.string.admin_no_posters));
+        }
+    }
+
+    /**
+     * Returns the display name for dialog confirmations without exposing device IDs.
+     *
+     * @param user the user
+     * @return the display name
+     */
+    private String resolveUserDisplayName(User user) {
+        if (user == null) {
+            return "Unknown User";
+        }
+
+        String name = user.getName();
+        if (name == null || name.trim().isEmpty()) {
+            return "Unknown User";
+        }
+
+        return name;
     }
 }

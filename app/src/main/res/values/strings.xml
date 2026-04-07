@@ -116,6 +116,12 @@
     <string name="admin_delete_profile_message">Are you sure you want to delete this profile? This action cannot be undone.</string>
     <string name="admin_profile_deleted">Profile deleted successfully</string>
     <string name="admin_error_deleting_profile">Failed to delete profile</string>
+    <string name="admin_delete_profilepic_title">Delete Profile Photo?</string>
+    <string name="admin_delete_profilepic_message">Are you sure you want to delete this profile picture? This action cannot be undone.</string>
+    <string name="admin_profilepic_deleted">Profile picture deleted successfully</string>
+    <string name="admin_error_deleting_profilepic">Failed to delete profile picture</string>
+    <string name="admin_delete_poster_title">Delete Poster?</string>
+    <string name="admin_delete_poster_message">Are you sure you want to delete this poster? This action cannot be undone.</string>
     <string name="admin_view_events">Events</string>
     <string name="admin_view_profiles">Profiles</string>
     <string name="admin_view_profilepic">Profilepic</string>
