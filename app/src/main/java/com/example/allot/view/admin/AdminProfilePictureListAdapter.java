@@ -18,14 +18,29 @@ import java.util.List;
  */
 public class AdminProfilePictureListAdapter extends RecyclerView.Adapter<AdminProfilePictureListAdapter.ViewHolder> {
     private final List<User> users;
+    private final OnProfilePictureDeleteClickListener deleteClickListener;
+
+    /**
+     * Handles profile picture delete clicks.
+     */
+    public interface OnProfilePictureDeleteClickListener {
+        /**
+         * Performs on delete click.
+         *
+         * @param user the user
+         * @param position the position
+         */
+        void onDeleteClick(User user, int position);
+    }
 
     /**
      * Creates a new AdminProfilePictureListAdapter instance.
      *
      * @param users the users
      */
-    public AdminProfilePictureListAdapter(List<User> users) {
+    public AdminProfilePictureListAdapter(List<User> users, OnProfilePictureDeleteClickListener deleteClickListener) {
         this.users = users;
+        this.deleteClickListener = deleteClickListener;
     }
 
     /**
@@ -51,7 +66,9 @@ public class AdminProfilePictureListAdapter extends RecyclerView.Adapter<AdminPr
      */
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        holder.bind(users.get(position));
+        User user = users.get(position);
+        holder.bind(user);
+        holder.bindDeleteHandler(user, position, deleteClickListener);
     }
 
     /**
@@ -71,6 +88,7 @@ public class AdminProfilePictureListAdapter extends RecyclerView.Adapter<AdminPr
         private final ImageView profilePictureImage;
         private final TextView userNameText;
         private final TextView userDeviceIdText;
+        private final View deleteButton;
 
         /**
          * Creates a new ViewHolder instance.
@@ -82,6 +100,22 @@ public class AdminProfilePictureListAdapter extends RecyclerView.Adapter<AdminPr
             profilePictureImage = itemView.findViewById(R.id.profilePictureImage);
             userNameText = itemView.findViewById(R.id.userNameText);
             userDeviceIdText = itemView.findViewById(R.id.userDeviceIdText);
+            deleteButton = itemView.findViewById(R.id.deleteButton);
+        }
+
+        /**
+         * Binds the delete handler.
+         *
+         * @param user the user
+         * @param position the position
+         * @param deleteClickListener the delete click listener
+         */
+        void bindDeleteHandler(User user, int position, OnProfilePictureDeleteClickListener deleteClickListener) {
+            deleteButton.setOnClickListener(view -> {
+                if (deleteClickListener != null) {
+                    deleteClickListener.onDeleteClick(user, position);
+                }
+            });
         }
 
         /**
